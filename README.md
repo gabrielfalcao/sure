@@ -1,9 +1,13 @@
 # sure
-> Version 0.1.0
+> Version 0.1 (unreleased)
 
 # What
 
 a assertion toolbox that works fine with [nose](http://code.google.com/p/python-nose/)
+
+# Install
+
+    user@machine:~$ [sudo] pip install sure
 
 # Usage
 
@@ -21,11 +25,28 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
 
     # and so on ...
 
+## Houston, we have a context
+
+    import sure
+
+    def setup_file(context):
+        context.file = open("foobar.xml")
+
+    def teardown_file(context):
+        context.file.close()
+
+    @sure.that_with_context(setup_file, teardown_file):
+    def file_is_a_xml(context):
+        "this the file is a xml"
+        sure.that(context.file.read()).contains("<root>")
+
+
+    # and so on ...
+
 # license
 
 sure is under MIT license, so that it can be embedded into your
-project, and ran within your sandbox. It can also be put together with
-[py-dom-xpath](http://code.google.com/p/py-dom-xpath/)
+project, and ran within your sandbox. 
 
     Copyright (C) <2010>  Gabriel Falcão <gabriel@nacaolivre.org>
 

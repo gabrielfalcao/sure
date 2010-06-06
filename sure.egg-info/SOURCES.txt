@@ -1,0 +1,7 @@
+setup.py
+sure/__init__.py
+sure.egg-info/PKG-INFO
+sure.egg-info/SOURCES.txt
+sure.egg-info/dependency_links.txt
+sure.egg-info/requires.txt
+sure.egg-info/top_level.txt

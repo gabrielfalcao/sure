@@ -24,6 +24,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 from threading import local
+version = '0.1-unreleased'
 
 def that_with_context(setup=None, teardown=None):
     def dec(func):

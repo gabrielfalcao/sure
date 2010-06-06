@@ -125,3 +125,12 @@ def test_that_has():
     assert that(name).has("jo")
     assert that(name).like("jo")
     assert "jo" in sure.that(name)
+
+def test_that_len_is():
+    "sure.that() len_is(number)"
+
+    lst = range(1000)
+
+    assert that(lst).len_is(1000)
+    assert len(lst) == 1000
+    assert that(lst).len_is(lst)

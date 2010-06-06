@@ -77,6 +77,15 @@ class that(object):
     def has(self, that):
         return that in self
 
+    @explanation('the length of %r should be %r, but have not')
+    def len_is(self, that):
+        try:
+            that = int(that)
+        except TypeError:
+            that = len(that)
+
+        return len(self._src) == that
+
     def like(self, that):
         return self.has(that)
 

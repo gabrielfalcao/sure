@@ -134,3 +134,48 @@ def test_that_len_is():
     assert that(lst).len_is(1000)
     assert len(lst) == 1000
     assert that(lst).len_is(lst)
+
+def test_that_checking_all_atributes():
+    "sure.that(iterable).the_attribute('name').equals('value')"
+    class shape(object):
+        def __init__(self, name):
+            self.kind = 'geometrical form'
+            self.name = name
+
+    shapes = [
+        shape('circle'),
+        shape('square'),
+        shape('rectangle'),
+        shape('triangle')
+    ]
+
+    assert that(shapes).the_attribute("kind").equals('geometrical form')
+
+def test_that_checking_all_atributes_of_range():
+    "sure.that(iterable).the_attribute('name', within_range=(1, 2)).equals('value')"
+    class shape(object):
+        def __init__(self, name):
+            self.kind = 'geometrical form'
+            self.name = name
+        def __repr__(self):
+            return '<%s:%s>' % (self.kind, self.name)
+
+    shapes = [
+        shape('circle'),
+        shape('square'),
+        shape('square'),
+        shape('triangle')
+    ]
+
+    assert that(shapes, within_range=(1, 2)).the_attribute("name").equals('square')
+
+def test_that_checking_all_elements():
+    "sure.that(iterable).every_one_is('value')"
+    shapes = [
+        'cube',
+        'ball',
+        'ball',
+        'piramid'
+    ]
+
+    assert that(shapes, within_range=(1, 2)).every_one_is('ball')

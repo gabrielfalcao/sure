@@ -9,7 +9,9 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
 
     user@machine:~$ [sudo] pip install sure
 
-# Usage
+# Documentation
+
+## testing behaviour of objects
 
     from sure import that
 
@@ -25,7 +27,38 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
 
     # and so on ...
 
-## Houston, we have a context
+## iterable objects
+
+
+### testing length
+
+    from sure import that
+
+    animals = ['dog', 'cat', 'chicken']
+
+    assert that(animals).len_is(3)
+    assert that(animals).len_is(['list with', 'three', 'elements'])
+
+### testing elements
+
+    from sure import that
+
+    class Animal:
+      def __init__(self, name):
+        self.kind = 'mammal'
+        self.name = name
+
+    mammals = [
+      Animal('dog'),
+      Animal('cat'),
+      Animal('cat'),
+      Animal('cow'),
+    }
+
+    assert that(mammals).the_attribute('kind').equals('mammal')
+    assert that(mammals, within_range(1, 2)).the_attribute('name').equals('cat')
+
+## contextual setup and teardown
 
     import sure
 
@@ -46,7 +79,7 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
 # license
 
 sure is under MIT license, so that it can be embedded into your
-project, and ran within your sandbox. 
+project, and ran within your sandbox.
 
     Copyright (C) <2010>  Gabriel Falcão <gabriel@nacaolivre.org>
 

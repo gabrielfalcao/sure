@@ -57,13 +57,68 @@ def explanation(msg):
 
     return dec
 
-class that(object):
-    def __init__(self, src):
-        self._src = src
+def is_iterable(obj):
+    try:
+        list(obj)
+        return True
+    except TypeError:
+        return hasattr(obj, '__iter__')
 
-    @explanation('%r should be equals to %r, but is not')
+def all_integers(obj):
+    if not is_iterable(obj):
+        return
+
+    for element in obj:
+        if not isinstance(element, int):
+            return
+
+    return True
+
+class that(object):
+    def __init__(self, src, within_range=None):
+        self._src = src
+        self._attribute = None
+        self._range = None
+        if all_integers(within_range):
+            if len(within_range) != 2:
+                raise TypeError(
+                    'within_range parameter must be a tuple with 2 objects'
+                )
+
+            self._range = within_range
+
     def equals(self, dst):
-        return self._src == dst
+        if self._attribute and is_iterable(self._src):
+            msg = '%r[%d].%s should be %r, but is %r'
+
+            for index, item in enumerate(self._src):
+                if self._range:
+                    if index < self._range[0] or index > self._range[1]:
+                        continue
+
+                attribute = getattr(item, self._attribute)
+                error = msg % (self._src, index, self._attribute, dst, attribute)
+                if attribute != dst:
+                    raise AssertionError(error)
+        else:
+            error = '%r should be equals to %r, but is not' % (self._src, dst)
+            assert self._src == dst, error
+            return self._src == dst, error
+
+        return True
+
+    def every_one_is(self, dst):
+        msg = 'all members of %r should be %r, but the %dth is %r'
+        for index, item in enumerate(self._src):
+            if self._range:
+                if index < self._range[0] or index > self._range[1]:
+                    continue
+
+            error = msg % (self._src, dst, index, item)
+            if item != dst:
+                raise AssertionError(error)
+
+        return True
 
     @explanation('%r should differ to %r, but is the same thing')
     def differs(self, dst):
@@ -88,6 +143,10 @@ class that(object):
 
     def like(self, that):
         return self.has(that)
+
+    def the_attribute(self, attr):
+        self._attribute = attr
+        return self
 
     def __contains__(self, what):
         if isinstance(self._src, dict):

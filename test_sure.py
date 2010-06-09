@@ -152,7 +152,7 @@ def test_that_checking_all_atributes():
     assert that(shapes).the_attribute("kind").equals('geometrical form')
 
 def test_that_checking_all_atributes_of_range():
-    "sure.that(iterable).the_attribute('name', within_range=(1, 2)).equals('value')"
+    "sure.that(iterable, within_range=(1, 2)).the_attribute('name').equals('value')"
     class shape(object):
         def __init__(self, name):
             self.kind = 'geometrical form'
@@ -167,6 +167,12 @@ def test_that_checking_all_atributes_of_range():
         shape('triangle')
     ]
 
+    assert shapes[0].name != 'square'
+    assert shapes[3].name != 'square'
+
+    assert shapes[1].name == 'square'
+    assert shapes[2].name == 'square'
+
     assert that(shapes, within_range=(1, 2)).the_attribute("name").equals('square')
 
 def test_that_checking_all_elements():
@@ -178,4 +184,45 @@ def test_that_checking_all_elements():
         'piramid'
     ]
 
+    assert shapes[0] != 'ball'
+    assert shapes[3] != 'ball'
+
+    assert shapes[1] == 'ball'
+    assert shapes[2] == 'ball'
+
     assert that(shapes, within_range=(1, 2)).every_one_is('ball')
+
+def test_that_checking_each_matches():
+    "sure.that(iterable).in_each('').equals('value')"
+    class animal(object):
+        def __init__(self, kind):
+            self.attributes = {
+                'class': 'mammal',
+                'kind': kind,
+            }
+
+    animals = [
+        animal('dog'),
+        animal('cat'),
+        animal('cow'),
+        animal('cow'),
+        animal('cow'),
+    ]
+
+    assert animals[0].attributes['kind'] != 'cow'
+    assert animals[1].attributes['kind'] != 'cow'
+
+    assert animals[2].attributes['kind'] == 'cow'
+    assert animals[3].attributes['kind'] == 'cow'
+    assert animals[4].attributes['kind'] == 'cow'
+
+    assert animals[0].attributes['class'] == 'mammal'
+    assert animals[1].attributes['class'] == 'mammal'
+    assert animals[2].attributes['class'] == 'mammal'
+    assert animals[3].attributes['class'] == 'mammal'
+    assert animals[4].attributes['class'] == 'mammal'
+
+    assert that(animals).in_each("attributes['class']").matches('mammal')
+    assert that(animals).in_each("attributes['class']").matches(['mammal','mammal','mammal','mammal','mammal'])
+
+    assert that(animals).in_each("attributes['kind']").matches(['dog','cat','cow','cow','cow'])

@@ -78,6 +78,7 @@ class that(object):
     def __init__(self, src, within_range=None):
         self._src = src
         self._attribute = None
+        self._eval = None
         self._range = None
         if all_integers(within_range):
             if len(within_range) != 2:
@@ -132,14 +133,23 @@ class that(object):
     def has(self, that):
         return that in self
 
-    @explanation('the length of %r should be %r, but have not')
     def len_is(self, that):
         try:
             that = int(that)
         except TypeError:
             that = len(that)
 
-        return len(self._src) == that
+        length = len(self._src)
+
+        if length != that:
+            error = 'the length of %r should be %d, but is %d' % (
+                self._src,
+                that,
+                length
+            )
+            raise AssertionError(error)
+
+        return True
 
     def like(self, that):
         return self.has(that)
@@ -147,6 +157,28 @@ class that(object):
     def the_attribute(self, attr):
         self._attribute = attr
         return self
+
+    def in_each(self, attr):
+        self._eval = attr
+        return self
+
+    def matches(self, items):
+        msg = '%r[%d].%s should be %r, but is %r'
+        if self._eval and is_iterable(self._src):
+            if isinstance(items, basestring):
+                items = [items for x in range(len(items))]
+
+            for index, (item, other) in enumerate(zip(self._src, items)):
+                if self._range:
+                    if index < self._range[0] or index > self._range[1]:
+                        continue
+
+                value = eval("%s.%s" % ('current', self._eval), {}, {'current': item})
+
+                error = msg % (self._src, index, self._eval, other, value)
+                if other != value:
+                    raise AssertionError(error)
+        return True
 
     def __contains__(self, what):
         if isinstance(self._src, dict):

@@ -58,6 +58,28 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
     assert that(mammals).the_attribute('kind').equals('mammal')
     assert that(mammals, within_range(1, 2)).the_attribute('name').equals('cat')
 
+#### further
+
+    class animal(object):
+        def __init__(self, kind):
+            self.attributes = {
+                'class': 'mammal',
+                'kind': kind,
+            }
+
+    animals = [
+        animal('dog'),
+        animal('cat'),
+        animal('cow'),
+        animal('cow'),
+        animal('cow'),
+    ]
+
+    assert that(animals).in_each("attributes['class']").matches('mammal')
+    assert that(animals).in_each("attributes['class']").matches(['mammal','mammal','mammal','mammal','mammal'])
+
+    assert that(animals).in_each("attributes['kind']").matches(['dog','cat','cow','cow','cow'])
+
 ## contextual setup and teardown
 
     import sure

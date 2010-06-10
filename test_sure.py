@@ -226,3 +226,28 @@ def test_that_checking_each_matches():
     assert that(animals).in_each("attributes['class']").matches(['mammal','mammal','mammal','mammal','mammal'])
 
     assert that(animals).in_each("attributes['kind']").matches(['dog','cat','cow','cow','cow'])
+
+def test_that_raises():
+    "sure.that(callable, with_args=[arg1], and_kwargs={'arg2': 'value'}).raises(SomeException)"
+
+    def function(arg1=None, arg2=None):
+        if arg1 and arg2:
+            raise RuntimeError('yeah, it failed')
+
+    try:
+        function(1, 2)
+        assert False, 'should not reach here'
+
+    except RuntimeError, e:
+        assert unicode(e) == 'yeah, it failed'
+
+    except Exception:
+        assert False, 'should not reach here'
+
+    assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises(RuntimeError)
+    assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises(RuntimeError, 'yeah, it failed')
+    assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises('yeah, it failed')
+
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError)
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, 'yeah, it failed')
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises('yeah, it failed')

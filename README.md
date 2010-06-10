@@ -98,6 +98,20 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
 
     # and so on ...
 
+## exceptions
+
+    def function(arg1=None, arg2=None):
+        if arg1 and arg2:
+            raise RuntimeError('yeah, it failed')
+
+    assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises(RuntimeError)
+    assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises(RuntimeError, 'yeah, it failed')
+    assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises('yeah, it failed')
+
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError)
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, 'yeah, it failed')
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises('yeah, it failed')
+
 # license
 
 sure is under MIT license, so that it can be embedded into your

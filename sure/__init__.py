@@ -24,7 +24,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 from threading import local
-version = '0.1.3-unreleased'
+version = '0.1.4-unreleased'
 
 def that_with_context(setup=None, teardown=None):
     def dec(func):
@@ -75,7 +75,7 @@ def all_integers(obj):
     return True
 
 class that(object):
-    def __init__(self, src, within_range=None):
+    def __init__(self, src, within_range=None, with_args=None, with_kwargs=None, and_kwargs=None):
         self._src = src
         self._attribute = None
         self._eval = None
@@ -87,6 +87,32 @@ class that(object):
                 )
 
             self._range = within_range
+
+        self._callable_args = []
+        self._callable_kw = {}
+        if isinstance(with_kwargs, dict):
+            self._callable_kw.update(with_kwargs)
+
+        if isinstance(and_kwargs, dict):
+            self._callable_kw.update(and_kwargs)
+
+    def raises(self, exc, msg=None):
+        if not callable(self._src):
+            raise TypeError('%r is not callable' % self._src)
+
+        try:
+            self._src(*self._callable_args, **self._callable_kw)
+        except Exception, e:
+            if isinstance(exc, type) and issubclass(exc, Exception):
+                if not isinstance(e, exc):
+                    raise AssertionError('%r should raise %r, but raised %r' % (self._src, exc, e.__class__))
+
+                if isinstance(msg, basestring) and msg != unicode(e):
+                    raise AssertionError('%r raised %s, but the exception message does not match. Expected %r, got %r' % (self._src, e, msg, e))
+            elif isinstance(msg, basestring) and msg != unicode(e):
+                raise AssertionError('When calling %r the exception message does not match. Expected %s, got %s' % (self._src, msg, e))
+
+        return True
 
     def equals(self, dst):
         if self._attribute and is_iterable(self._src):

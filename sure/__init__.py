@@ -75,7 +75,12 @@ def all_integers(obj):
     return True
 
 class that(object):
-    def __init__(self, src, within_range=None, with_args=None, with_kwargs=None, and_kwargs=None):
+    def __init__(self, src,
+                 within_range=None,
+                 with_args=None,
+                 with_kwargs=None,
+                 and_kwargs=None):
+
         self._src = src
         self._attribute = None
         self._eval = None
@@ -193,6 +198,12 @@ class that(object):
         if self._eval and is_iterable(self._src):
             if isinstance(items, basestring):
                 items = [items for x in range(len(items))]
+            else:
+                if len(items) != len(self._src):
+                    raise AssertionError(
+                        '%r has %d items, but the matching list has %d: %r'
+                        % (self._src, len(self._src), len(items), items)
+                    )
 
             for index, (item, other) in enumerate(zip(self._src, items)):
                 if self._range:

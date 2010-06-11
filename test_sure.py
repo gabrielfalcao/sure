@@ -227,6 +227,16 @@ def test_that_checking_each_matches():
 
     assert that(animals).in_each("attributes['kind']").matches(['dog','cat','cow','cow','cow'])
 
+    try:
+        assert that(animals).in_each("attributes['kind']").matches(['dog'])
+        assert False, 'should not reach here'
+    except AssertionError, e:
+        assert that(unicode(e)).equals(
+            '%r has 5 items, but the matching list has 1: %r' % (
+                animals, ['dog']
+            )
+        )
+
 def test_that_raises():
     "sure.that(callable, with_args=[arg1], and_kwargs={'arg2': 'value'}).raises(SomeException)"
 
@@ -251,3 +261,5 @@ def test_that_raises():
     assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError)
     assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, 'yeah, it failed')
     assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises('yeah, it failed')
+
+

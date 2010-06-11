@@ -233,7 +233,7 @@ def test_that_checking_each_matches():
     except AssertionError, e:
         assert that(unicode(e)).equals(
             '%r has 5 items, but the matching list has 1: %r' % (
-                animals, ['dog']
+                ['dog','cat','cow','cow','cow'], ['dog']
             )
         )
 

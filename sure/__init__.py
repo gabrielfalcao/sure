@@ -195,14 +195,22 @@ class that(object):
 
     def matches(self, items):
         msg = '%r[%d].%s should be %r, but is %r'
+        get_eval = lambda item: eval(
+            "%s.%s" % ('current', self._eval), {}, {'current': item}
+        )
+
         if self._eval and is_iterable(self._src):
             if isinstance(items, basestring):
                 items = [items for x in range(len(items))]
             else:
                 if len(items) != len(self._src):
+                    source = map(get_eval, self._src)
+                    source_len = len(source)
+                    items_len = len(items)
+
                     raise AssertionError(
                         '%r has %d items, but the matching list has %d: %r'
-                        % (self._src, len(self._src), len(items), items)
+                        % (source, source_len, items_len, items)
                     )
 
             for index, (item, other) in enumerate(zip(self._src, items)):
@@ -210,11 +218,12 @@ class that(object):
                     if index < self._range[0] or index > self._range[1]:
                         continue
 
-                value = eval("%s.%s" % ('current', self._eval), {}, {'current': item})
+                value = get_eval(item)
 
                 error = msg % (self._src, index, self._eval, other, value)
                 if other != value:
                     raise AssertionError(error)
+
         return True
 
     def __contains__(self, what):

@@ -23,6 +23,8 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
+import re
+from pprint import pformat
 from threading import local
 version = '0.1.5-unreleased'
 
@@ -133,11 +135,22 @@ class that(object):
                 if attribute != dst:
                     raise AssertionError(error)
         else:
-            error = '%r should be equals to %r, but is not' % (self._src, dst)
+            error = '%s should be equals to %s, but is not' % (
+                pformat(self._src), pformat(dst)
+            )
             assert self._src == dst, error
-            return self._src == dst, error
+            return self._src == dst
 
         return True
+
+    def looks_like(self, dst):
+        old_src = pformat(self._src)
+        old_dst = pformat(dst)
+        self._src = re.sub(r'\s', '', self._src).lower()
+        dst = re.sub(r'\s', '', dst).lower()
+        error = '%s does not look like %s' % (old_src, old_dst)
+        assert self._src == dst, error
+        return self._src == dst
 
     def every_one_is(self, dst):
         msg = 'all members of %r should be %r, but the %dth is %r'

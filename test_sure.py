@@ -262,4 +262,6 @@ def test_that_raises():
     assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, 'yeah, it failed')
     assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises('yeah, it failed')
 
-
+def test_that_looks_like():
+    "sure.that('String\\n with BREAKLINE').looks_like('string with breakline')"
+    assert that('String\n with BREAKLINE').looks_like('string with breakline')

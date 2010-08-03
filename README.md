@@ -31,7 +31,8 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
 
     from sure import that
 
-    assert that("   string \n with    lots of \n spaces and breaklines\n\n ").looks_like("string with lots of spaces and breaklines")
+    assert that("   string \n with    lots of \n spaces and breaklines\n\n ")
+        .looks_like("string with lots of spaces and breaklines")
 
 ## iterable objects
 

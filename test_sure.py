@@ -135,6 +135,86 @@ def test_that_len_is():
     assert len(lst) == 1000
     assert that(lst).len_is(lst)
 
+def test_that_len_greater_than():
+    "sure.that() len_greater_than(number)"
+
+    lst = range(1000)
+    lst2 = range(100)
+
+    assert that(lst).len_greater_than(100)
+    assert len(lst) == 1000
+    assert that(lst).len_greater_than(lst2)
+
+def test_that_len_greater_than_should_raise_assertion_error():
+    "sure.that() len_greater_than(number) raise AssertionError"
+
+    lst = range(1000)
+    try:
+        that(lst).len_greater_than(1000)
+    except AssertionError, e:
+        assert_equals(str(e), 'the length of %r should be greater then %d, but is %d' % (lst, 1000, 1000))
+
+def test_that_len_greater_than_or_equals():
+    "sure.that() len_greater_than_or_equals(number)"
+
+    lst = range(1000)
+    lst2 = range(100)
+
+    assert that(lst).len_greater_than_or_equals(100)
+    assert that(lst).len_greater_than_or_equals(1000)
+    assert len(lst) == 1000
+    assert that(lst).len_greater_than_or_equals(lst2)
+    assert that(lst).len_greater_than_or_equals(lst)
+
+def test_that_len_greater_than_or_equals_should_raise_assertion_error():
+    "sure.that() len_greater_than_or_equals(number) raise AssertionError"
+
+    lst = range(1000)
+    try:
+        that(lst).len_greater_than_or_equals(1001)
+    except AssertionError, e:
+        assert_equals(str(e), 'the length of %r should be greater then or equals %d, but is %d' % (lst, 1001, 1000))
+
+def test_that_len_lower_than():
+    "sure.that() len_lower_than(number)"
+
+    lst = range(100)
+    lst2 = range(1000)
+
+    assert that(lst).len_lower_than(101)
+    assert len(lst) == 100
+    assert that(lst).len_lower_than(lst2)
+
+def test_that_len_lower_than_should_raise_assertion_error():
+    "sure.that() len_lower_than(number) raise AssertionError"
+
+    lst = range(1000)
+    try:
+        that(lst).len_lower_than(1000)
+    except AssertionError, e:
+        assert_equals(str(e), 'the length of %r should be lower then %d, but is %d' % (lst, 1000, 1000))
+
+def test_that_len_lower_than_or_equals():
+    "sure.that() len_lower_than_or_equals(number)"
+
+    lst = range(1000)
+    lst2 = range(1001)
+
+    assert that(lst).len_lower_than_or_equals(1001)
+    assert that(lst).len_lower_than_or_equals(1000)
+    assert len(lst) == 1000
+    assert that(lst).len_lower_than_or_equals(lst2)
+    assert that(lst).len_lower_than_or_equals(lst)
+
+def test_that_len_lower_than_or_equals_should_raise_assertion_error():
+    "sure.that() len_lower_than_or_equals(number) raise AssertionError"
+
+    lst = range(1000)
+    try:
+        that(lst).len_lower_than_or_equals(100)
+    except AssertionError, e:
+        assert_equals(str(e), 'the length of %r should be lower then or equals %d, but is %d' % (lst, 100, 1000))
+
 def test_that_checking_all_atributes():
     "sure.that(iterable).the_attribute('name').equals('value')"
     class shape(object):

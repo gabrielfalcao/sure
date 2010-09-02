@@ -177,12 +177,73 @@ class that(object):
     def has(self, that):
         return that in self
 
-    def len_is(self, that):
+    def _get_that(self, that):
         try:
             that = int(that)
         except TypeError:
             that = len(that)
+        return that
 
+    def len_greater_than(self, that):
+        that = self._get_that(that)
+        length = len(self._src)
+
+        if length <= that:
+            error = 'the length of %r should be greater then %d, but is %d' % (
+                self._src,
+                that,
+                length
+            )
+            raise AssertionError(error)
+
+        return True
+
+    def len_greater_than_or_equals(self, that):
+        that = self._get_that(that)
+
+        length = len(self._src)
+
+        if length < that:
+            error = 'the length of %r should be greater then or equals %d, but is %d' % (
+                self._src,
+                that,
+                length
+            )
+            raise AssertionError(error)
+
+        return True
+
+    def len_lower_than(self, that):
+        that = self._get_that(that)
+        length = len(self._src)
+
+        if length >= that:
+            error = 'the length of %r should be lower then %d, but is %d' % (
+                self._src,
+                that,
+                length
+            )
+            raise AssertionError(error)
+
+        return True
+
+    def len_lower_than_or_equals(self, that):
+        that = self._get_that(that)
+
+        length = len(self._src)
+
+        if length > that:
+            error = 'the length of %r should be lower then or equals %d, but is %d' % (
+                self._src,
+                that,
+                length
+            )
+            raise AssertionError(error)
+
+        return True
+
+    def len_is(self, that):
+        that = self._get_that(that)
         length = len(self._src)
 
         if length != that:

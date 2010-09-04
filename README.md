@@ -42,9 +42,31 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
     from sure import that
 
     animals = ['dog', 'cat', 'chicken']
+    objects = ['television', 'refrigerator']
+    movies = ['conan', 'matrix', 'fight club', 'rocky', 'rambo']
 
     assert that(animals).len_is(3)
     assert that(animals).len_is(['list with', 'three', 'elements'])
+
+    assert that(movies).len_greater_than(3)
+    assert that(movies).len_greater_than(animals)
+    assert that(movies).len_greater_than(objects)
+
+    assert that(movies).len_greater_than(3)
+    assert that(movies).len_greater_than(animals)
+    assert that(movies).len_greater_than(objects)
+
+    assert that(movies).len_greater_than_or_equals(3)
+    assert that(movies).len_greater_than_or_equals(animals)
+    assert that(movies).len_greater_than_or_equals(objects)
+
+    assert that(objects).len_lower_than(3)
+    assert that(objects).len_lower_than(animals)
+    assert that(objects).len_lower_than(objects)
+
+    assert that(objects).len_lower_than_or_equals(3)
+    assert that(objects).len_lower_than_or_equals(animals)
+    assert that(objects).len_lower_than_or_equals(objects)
 
 ### testing elements
 

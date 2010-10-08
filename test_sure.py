@@ -350,3 +350,15 @@ def test_that_raises():
 def test_that_looks_like():
     "sure.that('String\\n with BREAKLINE').looks_like('string with breakline')"
     assert that('String\n with BREAKLINE').looks_like('string with breakline')
+
+def test_that_raises_with_args():
+    "sure.that(callable, with_args=['foo']).raises(FooError)"
+
+    class FooError(Exception):
+        pass
+
+    def my_function(string):
+        if string == 'foo':
+            raise FooError('OOps')
+
+    assert that(my_function, with_args=['foo']).raises(FooError, 'OOps')

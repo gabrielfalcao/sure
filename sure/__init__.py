@@ -96,6 +96,9 @@ class that(object):
             self._range = within_range
 
         self._callable_args = []
+        if isinstance(with_args, (list, tuple)):
+            self._callable_args = list(with_args)
+
         self._callable_kw = {}
         if isinstance(with_kwargs, dict):
             self._callable_kw.update(with_kwargs)

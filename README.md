@@ -1,5 +1,5 @@
 # sure
-> Version 0.1 (unreleased)
+> Version 0.1.6 (alpha)
 
 # What
 

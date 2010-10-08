@@ -26,7 +26,7 @@
 import re
 from pprint import pformat
 from threading import local
-version = '0.1.5-unreleased'
+version = '0.1.6-alpha'
 
 def that_with_context(setup=None, teardown=None):
     def dec(func):

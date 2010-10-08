@@ -27,7 +27,7 @@
 import sure
 from sure import that
 from threading import local
-from nose.tools import assert_equals
+from nose.tools import assert_equals, assert_raises
 
 def test_setup_with_context():
     "sure.with_context() runs setup before the function itself"
@@ -321,8 +321,10 @@ def test_that_raises():
     "sure.that(callable, with_args=[arg1], and_kwargs={'arg2': 'value'}).raises(SomeException)"
 
     def function(arg1=None, arg2=None):
-        if arg1 and arg2:
+        if arg1 == 1 and arg2 == 2:
             raise RuntimeError('yeah, it failed')
+
+        return "OK"
 
     try:
         function(1, 2)
@@ -333,6 +335,9 @@ def test_that_raises():
 
     except Exception:
         assert False, 'should not reach here'
+
+    assert_raises(RuntimeError, function, 1, 2)
+    assert_equals(function(3, 5), 'OK')
 
     assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises(RuntimeError)
     assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises(RuntimeError, 'yeah, it failed')

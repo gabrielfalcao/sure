@@ -362,3 +362,27 @@ def test_that_raises_with_args():
             raise FooError('OOps')
 
     assert that(my_function, with_args=['foo']).raises(FooError, 'OOps')
+
+def test_that_contains_string():
+    "sure.that('foobar').contains('foo')"
+
+    assert 'foo' in 'foobar'
+    assert that('foobar').contains('foo')
+
+def test_that_contains_none():
+    "sure.that('foobar').contains(None)"
+
+    try:
+        assert that('foobar').contains(None)
+        assert False, 'should not reach here'
+    except Exception, e:
+        assert_equals(unicode(e), u'None should be a string')
+
+def test_that_none_contains_string():
+    "sure.that(None).contains('bungalow')"
+
+    try:
+        assert that(None).contains('bungalow')
+        assert False, 'should not reach here'
+    except Exception, e:
+        assert_equals(unicode(e), u'None is not a string, so is is impossible to check if "bungalow" is there')

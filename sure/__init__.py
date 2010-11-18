@@ -26,7 +26,7 @@
 import re
 from pprint import pformat
 from threading import local
-version = '0.1.6-alpha'
+version = '0.1.7-alpha'
 
 def that_with_context(setup=None, teardown=None):
     def dec(func):
@@ -118,9 +118,10 @@ class that(object):
                     raise AssertionError('%r should raise %r, but raised %r' % (self._src, exc, e.__class__))
 
                 if isinstance(msg, basestring) and msg != unicode(e):
-                    raise AssertionError('%r raised %s, but the exception message does not match. Expected %r, got %r' % (self._src, e, msg, e))
+                    raise AssertionError('%r raised %s, but the exception message does not match. Expected %r, got %r' % (self._src, e, msg, unicode(e)))
+
             elif isinstance(msg, basestring) and msg != unicode(e):
-                raise AssertionError('When calling %r the exception message does not match. Expected %s, got %s' % (self._src, msg, e))
+                raise AssertionError('When calling %r the exception message does not match. Expected %s, got %s' % (self._src, msg, unicode(e)))
 
         return True
 
@@ -314,3 +315,9 @@ class that(object):
             items = dir(self._src)
 
         return what in items
+
+    def contains(self, what):
+        assert isinstance(what, basestring), '%r should be a string' % what
+        assert isinstance(self._src, basestring), '%r is not a string, so is is impossible to check if "%s" is there' % (self._src, what)
+        assert what in self._src, '"%s" should be in "%s"' % (what, self._src)
+        return True

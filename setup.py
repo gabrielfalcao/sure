@@ -39,7 +39,7 @@ def get_packages():
 
 setup(name='sure',
     version=version,
-    description='python-pure implementation of CSS Selectors',
+    description='assertion toolbox for python',
     author=u'Gabriel Falcão',
     author_email='gabriel@nacaolivre.org',
     url='http://github.com/gabrielfalcao/sure',

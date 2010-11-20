@@ -320,7 +320,11 @@ def test_that_checking_each_matches():
 def test_that_raises():
     "sure.that(callable, with_args=[arg1], and_kwargs={'arg2': 'value'}).raises(SomeException)"
 
+    called = False
+    global called
     def function(arg1=None, arg2=None):
+        global called
+        called = True
         if arg1 == 1 and arg2 == 2:
             raise RuntimeError('yeah, it failed')
 
@@ -336,16 +340,47 @@ def test_that_raises():
     except Exception:
         assert False, 'should not reach here'
 
+    finally:
+        assert called
+        called = False
+
     assert_raises(RuntimeError, function, 1, 2)
+
+    called = False
     assert_equals(function(3, 5), 'OK')
+    assert called
 
+    called = False
     assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises(RuntimeError)
-    assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises(RuntimeError, 'yeah, it failed')
-    assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises('yeah, it failed')
+    assert called
 
+    called = False
+    assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises(RuntimeError, 'yeah, it failed')
+    assert called
+
+    called = False
+    assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises('yeah, it failed')
+    assert called
+
+    called = False
     assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError)
+    assert called
+
+    called = False
     assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, 'yeah, it failed')
+    assert called
+
+    called = False
     assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises('yeah, it failed')
+    assert called
+
+    called = False
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(r'it fail')
+    assert called
+
+    called = False
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, r'it fail')
+    assert called
 
 def test_that_looks_like():
     "sure.that('String\\n with BREAKLINE').looks_like('string with breakline')"
@@ -386,3 +421,49 @@ def test_that_none_contains_string():
         assert False, 'should not reach here'
     except Exception, e:
         assert_equals(unicode(e), u'None is not a string, so is is impossible to check if "bungalow" is there')
+
+def test_that_some_iterable_is_empty():
+    "sure.that(some_iterable).is_empty and sure.that(something).are_empty"
+
+    assert that([]).is_empty
+    assert that([]).are_empty
+
+    assert that(tuple()).is_empty
+    assert that({}).are_empty
+
+    def fail_single():
+        assert that((1,)).is_empty
+
+    assert that(fail_single).raises('(1,) is not empty, it has 1 item')
+
+    def fail_plural():
+        assert that((1, 2)).is_empty
+
+    assert that(fail_plural).raises('(1, 2) is not empty, it has 2 items')
+
+def test_that_something_is_empty_raises():
+    "sure.that(something_not_iterable).is_empty and sure.that(something_not_iterable).are_empty raises"
+
+
+    obj = object()
+    def fail():
+        assert that(obj).is_empty
+        assert False, 'should not reach here'
+
+    assert that(fail).raises('%r is not iterable' % obj)
+
+def test_that_something_iterable_matches_another():
+    "sure.that(something_iterable).matches(another_iterable)"
+
+
+    assert that(range(10)).matches(xrange(10))
+    assert that(xrange(10)).matches(range(10))
+
+    def fail_1():
+        assert that(range(1)).matches(xrange(2))
+
+    def fail_2():
+        assert that(xrange(1)).matches(range(2))
+
+    assert that(fail_1).raises('[0] has 1 item, but xrange(2) has 2 items')
+    assert that(fail_2).raises('xrange(1) has 1 item, but [0, 1] has 2 items')

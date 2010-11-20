@@ -26,7 +26,12 @@
 import re
 from pprint import pformat
 from threading import local
-version = '0.1.7-alpha'
+
+version = '0.1.8'
+
+def itemize_length(items):
+    length = len(items)
+    return '%d item%s' % (length, length > 1 and "s" or "")
 
 def that_with_context(setup=None, teardown=None):
     def dec(func):
@@ -60,11 +65,7 @@ def explanation(msg):
     return dec
 
 def is_iterable(obj):
-    try:
-        list(obj)
-        return True
-    except TypeError:
-        return hasattr(obj, '__iter__')
+    return hasattr(obj, '__iter__') and not isinstance(obj, basestring)
 
 def all_integers(obj):
     if not is_iterable(obj):
@@ -112,16 +113,26 @@ class that(object):
 
         try:
             self._src(*self._callable_args, **self._callable_kw)
+
         except Exception, e:
+            if isinstance(exc, basestring):
+                msg = exc
+                exc = type(e)
+
             if isinstance(exc, type) and issubclass(exc, Exception):
                 if not isinstance(e, exc):
                     raise AssertionError('%r should raise %r, but raised %r' % (self._src, exc, e.__class__))
 
-                if isinstance(msg, basestring) and msg != unicode(e):
+                if isinstance(msg, basestring) and msg not in unicode(e):
                     raise AssertionError('%r raised %s, but the exception message does not match. Expected %r, got %r' % (self._src, e, msg, unicode(e)))
 
-            elif isinstance(msg, basestring) and msg != unicode(e):
-                raise AssertionError('When calling %r the exception message does not match. Expected %s, got %s' % (self._src, msg, unicode(e)))
+            elif isinstance(msg, basestring) and msg not in unicode(e):
+                raise AssertionError('When calling %r the exception message does not match. Expected %r, got %r' % (self._src, msg, unicode(e)))
+
+            else:
+                raise e
+        else:
+            raise AssertionError('calling function %s(%s at line: "%d") with args %r and kwargs %r did not raise %r' % (self._src.__name__, self._src.func_code.co_filename, self._src.func_code.co_firstlineno, self._callable_args, self._callable_kw, exc))
 
         return True
 
@@ -138,6 +149,14 @@ class that(object):
                 error = msg % (self._src, index, self._attribute, dst, attribute)
                 if attribute != dst:
                     raise AssertionError(error)
+        elif is_iterable(self._src) and is_iterable(dst):
+            length_src = len(self._src)
+            length_dst = len(dst)
+            assert length_src == length_dst, '%r has %s, but %r has %s' % (self._src, itemize_length(self._src), dst, itemize_length(dst))
+
+            for i, (x, y) in enumerate(zip(self._src, dst)):
+                assert x == y, '%r[%d] is %r and %r[%d] is %r' % (self._src, i, x, dst, i, y)
+
         else:
             error = '%s should be equals to %s, but is not' % (
                 pformat(self._src), pformat(dst)
@@ -301,8 +320,25 @@ class that(object):
                 error = msg % (self._src, index, self._eval, other, value)
                 if other != value:
                     raise AssertionError(error)
+        else:
+            return self.equals(items)
 
         return True
+
+    @property
+    def is_empty(self):
+        try:
+            lst = list(self._src)
+            length = len(lst)
+            assert length == 0, '%r is not empty, it has %s' % (self._src, itemize_length(self._src))
+            return True
+
+        except TypeError:
+            raise AssertionError("%r is not iterable" % self._src)
+
+    @property
+    def are_empty(self):
+        return self.is_empty
 
     def __contains__(self, what):
         if isinstance(self._src, dict):

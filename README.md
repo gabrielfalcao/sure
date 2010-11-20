@@ -47,6 +47,9 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
     objects = ['television', 'refrigerator']
     movies = ['conan', 'matrix', 'fight club', 'rocky', 'rambo']
 
+    assert that([]).is_empty
+    assert that([]).are_empty
+
     assert that(animals).len_is(3)
     assert that(animals).len_is(['list with', 'three', 'elements'])
 
@@ -142,6 +145,10 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
     assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError)
     assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, 'yeah, it failed')
     assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises('yeah, it failed')
+
+    # you can also match pieces of the string
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises('it failed')
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, 'it failed')
 
 # license
 

@@ -455,15 +455,26 @@ def test_that_something_is_empty_raises():
 def test_that_something_iterable_matches_another():
     "sure.that(something_iterable).matches(another_iterable)"
 
+    KlassOne = type('KlassOne', (object,), {})
+    KlassTwo = type('KlassTwo', (object,), {})
+    one = [
+        ("/1", KlassOne),
+        ("/2", KlassTwo),
+    ]
 
-    assert that(range(10)).matches(xrange(10))
-    assert that(xrange(10)).matches(range(10))
+    two = [
+        ("/1", KlassOne),
+        ("/2", KlassTwo),
+    ]
+
+    assert that(one).matches(two)
+    assert that(one).equals(two)
 
     def fail_1():
         assert that(range(1)).matches(xrange(2))
 
     def fail_2():
-        assert that(xrange(1)).matches(range(2))
+        assert that(xrange(1)).equals(range(2))
 
     assert that(fail_1).raises('[0] has 1 item, but xrange(2) has 2 items')
     assert that(fail_2).raises('xrange(1) has 1 item, but [0, 1] has 2 items')

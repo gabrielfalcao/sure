@@ -43,6 +43,14 @@ def that_with_context(setup=None, teardown=None):
                 setup(context)
             try:
                 func(context, *args, **kw)
+            except TypeError, e:
+                fmt = '%s() takes no arguments'
+                err = unicode(e)
+                if (fmt % func.__name__) in err or (fmt % func.__name__.replace('test_', '', 1)) in err:
+                    func(*args, **kw)
+                else:
+                    raise e
+
             finally:
                 if callable(teardown):
                     teardown(context)

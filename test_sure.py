@@ -46,6 +46,22 @@ def test_setup_with_context():
         'test_john_is_within_context'
     )
 
+def test_setup_with_context_optional_context():
+    "sure.that_with_context() handle optional context"
+
+    def setup(context):
+        context.name = "John Resig"
+
+    @sure.that_with_context(setup)
+    def it_passes():
+        assert True
+
+    it_passes() #?
+    assert_equals(
+        it_passes.__name__,
+        'test_it_passes'
+    )
+
 def test_teardown_with_context():
     "sure.with_context() runs teardown before the function itself"
 

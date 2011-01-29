@@ -1,5 +1,5 @@
 # sure
-> Version 0.1.7 (alpha)
+> Version 0.1.9
 
 # What
 
@@ -131,6 +131,37 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
 
 
     # and so on ...
+
+## timed tests
+
+    from sure import *
+
+    @within(five=seconds):
+    def test_sleep_for_4_seconds():
+        import time
+        time.sleep(4)
+
+    @within(ten=miliseconds):
+    def test_sleep_for_4_miliseconds():
+        import time
+        time.sleep(0.004)
+
+    @within(ten=microseconds):
+    def test_sleep_for_12_microseconds():
+        import time
+        time.sleep(0.00012)
+
+    @within(one=minute):
+    def test_sleep_for_59_seconds():
+        import time
+        time.sleep(59)
+
+    @within(two=minutes):
+    def test_sleep_for_1_minute_and_59_seconds():
+        import time
+        time.sleep(119)
+
+if any of the tests above take more than expected, a assertion_error is raised
 
 ## exceptions
 

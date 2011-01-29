@@ -152,7 +152,7 @@ def test_that_len_greater_than_should_raise_assertion_error():
     try:
         that(lst).len_greater_than(1000)
     except AssertionError, e:
-        assert_equals(str(e), 'the length of %r should be greater then %d, but is %d' % (lst, 1000, 1000))
+        assert_equals(str(e), 'the length of the list should be greater then %d, but is %d' % (1000, 1000))
 
 def test_that_len_greater_than_or_equals():
     "sure.that() len_greater_than_or_equals(number)"
@@ -478,3 +478,101 @@ def test_that_something_iterable_matches_another():
 
     assert that(fail_1).raises('[0] has 1 item, but xrange(2) has 2 items')
     assert that(fail_2).raises('xrange(1) has 1 item, but [0, 1] has 2 items')
+
+def test_within_pass():
+    "within(five=miliseconds) will pass"
+    from sure import within, miliseconds
+
+    within(five=miliseconds)(lambda *a: None)()
+
+def test_within_fail():
+    "within(five=miliseconds) will fail"
+    import time
+    from sure import within, miliseconds
+
+    def sleepy():
+        time.sleep(0.7)
+
+    failed = False
+    try:
+        within(five=miliseconds)(sleepy)()
+    except AssertionError, e:
+        failed = True
+        assert_equals('sleepy did not run within five miliseconds', str(e))
+
+    assert failed, 'within(five=miliseconds)(sleepy) did not fail'
+
+
+def test_word_to_number():
+    assert_equals(sure.word_to_number('one'),      1)
+    assert_equals(sure.word_to_number('two'),      2)
+    assert_equals(sure.word_to_number('three'),    3)
+    assert_equals(sure.word_to_number('four'),     4)
+    assert_equals(sure.word_to_number('five'),     5)
+    assert_equals(sure.word_to_number('six'),      6)
+    assert_equals(sure.word_to_number('seven'),    7)
+    assert_equals(sure.word_to_number('eight'),    8)
+    assert_equals(sure.word_to_number('nine'),     9)
+    assert_equals(sure.word_to_number('ten'),     10)
+    assert_equals(sure.word_to_number('eleven'),  11)
+    assert_equals(sure.word_to_number('twelve'),  12)
+
+
+def test_word_to_number_fail():
+    failed = False
+    try:
+        sure.word_to_number('twenty')
+    except AssertionError, e:
+        failed = True
+        assert_equals(unicode(e), 'sure supports only literal numbers from one ' \
+                      'to twelve, you tried the word "twenty"')
+
+    assert failed, 'should raise assertion error'
+
+def test_microsecond_unit():
+    "testing microseconds convertion"
+    cfrom, cto = sure.UNITS[sure.microsecond]
+
+    assert_equals(cfrom(1), 100000)
+    assert_equals(cto(1), 1)
+
+    cfrom, cto = sure.UNITS[sure.microseconds]
+
+    assert_equals(cfrom(1), 100000)
+    assert_equals(cto(1), 1)
+
+def test_milisecond_unit():
+    "testing miliseconds convertion"
+    cfrom, cto = sure.UNITS[sure.milisecond]
+
+    assert_equals(cfrom(1), 1000)
+    assert_equals(cto(100), 1)
+
+    cfrom, cto = sure.UNITS[sure.miliseconds]
+
+    assert_equals(cfrom(1), 1000)
+    assert_equals(cto(100), 1)
+
+def test_second_unit():
+    "testing seconds convertion"
+    cfrom, cto = sure.UNITS[sure.second]
+
+    assert_equals(cfrom(1), 1)
+    assert_equals(cto(100000), 1)
+
+    cfrom, cto = sure.UNITS[sure.seconds]
+
+    assert_equals(cfrom(1), 1)
+    assert_equals(cto(100000), 1)
+
+def test_minute_unit():
+    "testing minutes convertion"
+    cfrom, cto = sure.UNITS[sure.minute]
+
+    assert_equals(cfrom(60), 1)
+    assert_equals(cto(1), 6000000)
+
+    cfrom, cto = sure.UNITS[sure.minutes]
+
+    assert_equals(cfrom(60), 1)
+    assert_equals(cto(1), 6000000)

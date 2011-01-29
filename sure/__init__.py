@@ -24,10 +24,11 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 import re
+from datetime import datetime
 from pprint import pformat
 from threading import local
 
-version = '0.1.8'
+version = '0.1.9'
 
 def itemize_length(items):
     length = len(items)
@@ -40,10 +41,11 @@ def that_with_context(setup=None, teardown=None):
             context = local()
             if callable(setup):
                 setup(context)
-            func(context, *args, **kw)
-
-            if callable(teardown):
-                teardown(context)
+            try:
+                func(context, *args, **kw)
+            finally:
+                if callable(teardown):
+                    teardown(context)
 
         wrap.__name__ = func.__name__
         wrap.__doc__ = func.__doc__
@@ -155,10 +157,10 @@ class that(object):
             assert length_src == length_dst, '%r has %s, but %r has %s' % (self._src, itemize_length(self._src), dst, itemize_length(dst))
 
             for i, (x, y) in enumerate(zip(self._src, dst)):
-                assert x == y, '%r[%d] is %r and %r[%d] is %r' % (self._src, i, x, dst, i, y)
+                assert x == y, '%r != %r at index %d' % (x, y, i)
 
         else:
-            error = '%s should be equals to %s, but is not' % (
+            error = '%s != %s' % (
                 pformat(self._src), pformat(dst)
             )
             assert self._src == dst, error
@@ -212,8 +214,8 @@ class that(object):
         length = len(self._src)
 
         if length <= that:
-            error = 'the length of %r should be greater then %d, but is %d' % (
-                self._src,
+            error = 'the length of the %s should be greater then %d, but is %d' % (
+                type(self._src).__name__,
                 that,
                 length
             )
@@ -357,3 +359,71 @@ class that(object):
         assert isinstance(self._src, basestring), '%r is not a string, so is is impossible to check if "%s" is there' % (self._src, what)
         assert what in self._src, '"%s" should be in "%s"' % (what, self._src)
         return True
+
+def within(**units):
+    assert len(units) == 1, 'use within(number=unit). e.g.: within(one=second)'
+
+    word, unit = units.items()[0]
+    value = word_to_number(word)
+
+    convert_from, convert_to = UNITS[unit]
+    timeout = convert_from(value)
+    exc = []
+    def dec(func):
+        def wrap(*args, **kw):
+            start = datetime.now()
+
+            try:
+                func(*args, **kw)
+            except Exception, e:
+                exc.append(e)
+
+            end = datetime.now()
+            delta = (end - start)
+            took = convert_to(delta.microseconds)
+            print took, timeout
+            assert took < timeout, \
+                   '%s did not run within %s %s' % (func.__name__, word, unit)
+            if exc:
+                raise exc[0]
+
+        wrap.__name__ = func.__name__
+        wrap.__doc__ = func.__doc__
+        wrap.__dict__ = func.__dict__
+        return wrap
+
+    return dec
+
+UNITS = {
+    'minutes': (lambda from_num: from_num / 60.0, lambda to_num: to_num * 6000000),
+    'seconds': (lambda from_num: from_num, lambda to_num: to_num / 100000),
+    'miliseconds': (lambda from_num:from_num * 1000, lambda to_num: to_num/100),
+    'microseconds': (lambda from_num:from_num * 100000, lambda to_num: to_num),
+}
+
+milisecond = miliseconds = 'miliseconds'
+microsecond = microseconds = 'microseconds'
+second = seconds = 'seconds'
+minute = minutes = 'minutes'
+
+def word_to_number(word):
+    basic = {
+        'one': 1,
+        'two': 2,
+        'three': 3,
+        'four': 4,
+        'five': 5,
+        'six': 6,
+        'seven': 7,
+        'eight': 8,
+        'nine': 9,
+        'ten': 10,
+        'eleven': 11,
+        'twelve': 12,
+    }
+    try:
+        return basic[word]
+    except KeyError:
+        raise AssertionError(
+            'sure supports only literal numbers from one to twelve, ' \
+            'you tried the word "twenty"')

@@ -379,14 +379,22 @@ def within(**units):
     exc = []
     def dec(func):
         def wrap(*args, **kw):
-            start = datetime.now()
+            start = datetime.utcnow()
 
             try:
-                func(*args, **kw)
+                func(start, *args, **kw)
+            except TypeError, e:
+                fmt = '%s() takes no arguments'
+                err = unicode(e)
+                if (fmt % func.__name__) in err:
+                    func(*args, **kw)
+                else:
+                    exc.append(e)
+
             except Exception, e:
                 exc.append(e)
 
-            end = datetime.now()
+            end = datetime.utcnow()
             delta = (end - start)
             took = convert_to(delta.microseconds)
             print took, timeout

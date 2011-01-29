@@ -592,3 +592,13 @@ def test_minute_unit():
 
     assert_equals(cfrom(60), 1)
     assert_equals(cto(1), 6000000)
+
+def test_within_pass_utc():
+    "within(five=miliseconds) gives utc parameter"
+    from sure import within, miliseconds
+    from datetime import datetime
+    def assert_utc(utc):
+        assert isinstance(utc, datetime)
+
+    within(five=miliseconds)(assert_utc)()
+

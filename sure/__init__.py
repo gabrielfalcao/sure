@@ -28,7 +28,7 @@ from datetime import datetime
 from pprint import pformat
 from threading import local
 
-version = '0.1.9'
+version = '0.2'
 
 def itemize_length(items):
     length = len(items)

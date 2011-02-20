@@ -24,6 +24,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 import re
+import traceback
 from datetime import datetime
 from pprint import pformat
 from threading import local
@@ -401,7 +402,7 @@ def within(**units):
             assert took < timeout, \
                    '%s did not run within %s %s' % (func.__name__, word, unit)
             if exc:
-                raise exc[0]
+                raise AssertionError(traceback.format_exc(exc.pop(0)))
 
         wrap.__name__ = func.__name__
         wrap.__doc__ = func.__doc__

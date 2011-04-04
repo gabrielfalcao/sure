@@ -602,3 +602,13 @@ def test_within_pass_utc():
 
     within(five=miliseconds)(assert_utc)()
 
+def test_that_is_a_matcher_should_absorb_callables_to_be_used_as_matcher():
+    u"that.is_a_matcher should absorb callables to be used as matcher"
+    @that.is_a_matcher
+    def is_truthful(what):
+        assert bool(what), '{0} is so untrue'.format(what)
+        return 'foobar'
+
+    assert that('friend').is_truthful()
+    assert_equals(that('friend').is_truthful(), 'foobar')
+

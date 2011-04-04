@@ -28,8 +28,8 @@ import traceback
 from datetime import datetime
 from pprint import pformat
 from threading import local
-
-version = '0.2'
+from copy import deepcopy
+version = '0.3'
 
 def itemize_length(items):
     length = len(items)
@@ -117,6 +117,20 @@ class that(object):
 
         if isinstance(and_kwargs, dict):
             self._callable_kw.update(and_kwargs)
+
+    @classmethod
+    def is_a_matcher(cls, func):
+        assert func.__name__ not in dir(cls), \
+            "there is already a member named {0} on `that` class"
+
+        def match(self, *args, **kw):
+            return func(self._src, *args, **kw)
+
+        new_matcher = deepcopy(match)
+        new_matcher.__name__ = func.__name__
+        setattr(cls, func.__name__, new_matcher)
+
+        return new_matcher
 
     def raises(self, exc, msg=None):
         if not callable(self._src):

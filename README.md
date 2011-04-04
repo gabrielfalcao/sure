@@ -1,5 +1,5 @@
 # sure
-> Version 0.2
+> Version 0.3
 
 # What
 
@@ -23,9 +23,13 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
         attribute_one = "simple"
 
     assert "attribute_one" in that(FooBar)
+    assert that(FooBar).has("attribute_one")
     assert that(FooBar).equals(FooBar)
 
-    # and so on ...
+    # and also for dictionaries
+
+    name = dict(john='doe')
+    assert that(name).has('john')
 
 ## strings
 
@@ -180,6 +184,16 @@ if any of the tests above take more than expected, a assertion_error is raised
     # you can also match pieces of the string
     assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises('it failed')
     assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, 'it failed')
+
+## add your own matchers
+
+    @that.is_a_matcher
+    def could_work(matcher, parameter):
+        assert matcher._src == "this"
+        assert parameter == "I mean, for real!"
+        return "cool!"
+
+    assert that("this").could_work("I mean, for real!") == "cool!"
 
 # license
 

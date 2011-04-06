@@ -120,9 +120,6 @@ class that(object):
 
     @classmethod
     def is_a_matcher(cls, func):
-        assert func.__name__ not in dir(cls), \
-            "there is already a member named {0} on `that` class"
-
         def match(self, *args, **kw):
             return func(self._src, *args, **kw)
 

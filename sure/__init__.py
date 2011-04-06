@@ -29,7 +29,7 @@ from datetime import datetime
 from pprint import pformat
 from threading import local
 from copy import deepcopy
-version = '0.3'
+version = '0.4.0'
 
 def itemize_length(items):
     length = len(items)

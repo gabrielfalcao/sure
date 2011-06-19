@@ -612,3 +612,51 @@ def test_that_is_a_matcher_should_absorb_callables_to_be_used_as_matcher():
     assert that('friend').is_truthful()
     assert_equals(that('friend').is_truthful(), 'foobar')
 
+
+def test_accepts_setup_list():
+    "sure.with_context() accepts a list of callbacks for setup"
+
+    def setup1(context):
+        context.first_name = "John"
+
+    def setup2(context):
+        context.last_name = "Resig"
+
+    @sure.that_with_context([setup1, setup2])
+    def john_is_within_context(context):
+        assert context.first_name == 'John'
+        assert context.last_name == 'Resig'
+
+    c = local()
+    john_is_within_context(c)
+    assert_equals(
+        john_is_within_context.__name__,
+        'test_john_is_within_context',
+    )
+
+
+def test_accepts_teardown_list():
+    "sure.with_context() runs teardown before the function itself"
+
+    class something:
+        modified = True
+        finished = 'nope'
+
+    def setup(context):
+        something.modified = False
+
+    def teardown1(context):
+        something.modified = True
+
+    def teardown2(context):
+        something.finished = 'yep'
+
+    @sure.that_with_context(setup, [teardown1, teardown2])
+    def something_was_modified(context):
+        assert not something.modified
+        assert something.finished == 'nope'
+
+    c = local()
+    something_was_modified(c)
+    assert something.modified
+    assert something.finished == 'yep'

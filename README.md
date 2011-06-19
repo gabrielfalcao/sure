@@ -1,5 +1,5 @@
 # sure
-> Version 0.4.0
+> Version 0.5.0
 
 # What
 
@@ -130,11 +130,35 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
 
     @sure.that_with_context(setup_file, teardown_file):
     def file_is_a_xml(context):
-        "this the file is a xml"
+        "this file is a xml"
         sure.that(context.file.read()).contains("<root>")
 
 
-    # and so on ...
+### you can also use lists containing callbacks for setup/teardown
+
+Like this:
+
+    def setup_file(context):
+        context.file = open("foobar.xml")
+
+    def a_browser(context):
+        from httplib2 import Http
+        context.browser = Http()
+
+    def then_clean_file(context):
+        context.file.close()
+
+    def and_browser(context):
+        del context.browser
+
+    @sure.that_with_context([setup_file, a_browser], [then_clean_file, and_browser]):
+    def file_equals_response(context):
+        "the file equals the response"
+        headers, response_body = context.http.request('http://github.com', 'GET')
+
+        file_contents = context.file.read()
+        sure.that(response_body).contains(file_contents)
+
 
 ## timed tests
 

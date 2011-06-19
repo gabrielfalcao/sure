@@ -29,32 +29,60 @@ from datetime import datetime
 from pprint import pformat
 from threading import local
 from copy import deepcopy
-version = '0.4.0'
+version = '0.5.0'
+
 
 def itemize_length(items):
     length = len(items)
     return '%d item%s' % (length, length > 1 and "s" or "")
 
+
+class CallBack(object):
+    def __init__(self, cb, args, kwargs):
+        self.callback = cb
+        self.args = args or []
+        self.kwargs = kwargs or {}
+
+    def apply(self, *optional_args):
+        if not callable(self.callback):
+            return
+
+        args = list(optional_args)
+        args.extend(self.args)
+        try:
+            self.callback(*args, **self.kwargs)
+        except:
+            self.callback(*self.args, **self.kwargs)
+
+
 def that_with_context(setup=None, teardown=None):
     def dec(func):
         func.__name__ = "test_%s" % func.__name__
+
         def wrap(*args, **kw):
             context = local()
-            if callable(setup):
-                setup(context)
-            try:
-                func(context, *args, **kw)
-            except TypeError, e:
-                fmt = '%s() takes no arguments'
-                err = unicode(e)
-                if (fmt % func.__name__) in err or (fmt % func.__name__.replace('test_', '', 1)) in err:
-                    func(*args, **kw)
-                else:
-                    raise e
 
+            if callable(setup):
+                cb = CallBack(setup, args, kw)
+                cb.apply(context)
+
+            elif isinstance(setup, (set, list, tuple)):
+                for s in setup:
+                    cb = CallBack(s, args, kw)
+                    cb.apply(context)
+
+            test = CallBack(func, args, kw)
+            try:
+                test.apply(context)
             finally:
                 if callable(teardown):
-                    teardown(context)
+                    cb = CallBack(teardown, args, kw)
+                    cb.apply(context)
+
+                elif isinstance(teardown, (set, list, tuple)):
+                    for s in teardown:
+                        cb = CallBack(s, args, kw)
+                        cb.apply(context)
 
         wrap.__name__ = func.__name__
         wrap.__doc__ = func.__doc__

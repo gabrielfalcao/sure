@@ -24,6 +24,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 import re
+import inspect
 import traceback
 from datetime import datetime
 from pprint import pformat
@@ -182,7 +183,22 @@ class that(object):
             else:
                 raise e
         else:
-            raise AssertionError('calling function %s(%s at line: "%d") with args %r and kwargs %r did not raise %r' % (self._src.__name__, self._src.func_code.co_filename, self._src.func_code.co_firstlineno, self._callable_args, self._callable_kw, exc))
+            _src_filename = inspect.getfile(self._src)
+            if inspect.isfunction(self._src):
+                _src_lineno = inspect.getlineno(self._src)
+                raise AssertionError(
+                    'calling function %s(%s at line: "%d") with args %r and kwargs %r did not raise %r' % (
+                        self._src.__name__,
+                        _src_filename, _src_lineno,
+                        self._callable_args,
+                        self._callable_kw, exc))
+            else:
+                raise AssertionError(
+                    'at %s:\ncalling %s() with args %r and kwargs %r did not raise %r' % (
+                        _src_filename,
+                        self._src.__name__,
+                        self._callable_args,
+                        self._callable_kw, exc))
 
         return True
 

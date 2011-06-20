@@ -29,6 +29,7 @@ from sure import that
 from threading import local
 from nose.tools import assert_equals, assert_raises
 
+
 def test_setup_with_context():
     "sure.with_context() runs setup before the function itself"
 
@@ -43,8 +44,9 @@ def test_setup_with_context():
     john_is_within_context()
     assert_equals(
         john_is_within_context.__name__,
-        'test_john_is_within_context'
+        'test_john_is_within_context',
     )
+
 
 def test_setup_with_context_optional_context():
     "sure.that_with_context() handle optional context"
@@ -56,11 +58,12 @@ def test_setup_with_context_optional_context():
     def it_passes():
         assert True
 
-    it_passes() #?
+    it_passes()  # ?
     assert_equals(
         it_passes.__name__,
-        'test_it_passes'
+        'test_it_passes',
     )
+
 
 def test_teardown_with_context():
     "sure.with_context() runs teardown before the function itself"
@@ -82,6 +85,7 @@ def test_teardown_with_context():
     something_was_modified()
     assert not hasattr(something, "modified")
 
+
 def test_that_is_a():
     "sure.that() is_a(object)"
 
@@ -89,6 +93,7 @@ def test_that_is_a():
 
     assert that(something).is_a(str)
     assert isinstance(something, str)
+
 
 def test_that_equals():
     "sure.that() equals(object)"
@@ -98,6 +103,7 @@ def test_that_equals():
     assert that(something).equals(something)
     assert something == something
 
+
 def test_that_differs():
     "sure.that() differs(object)"
 
@@ -106,6 +112,7 @@ def test_that_differs():
     assert that(something).differs("23123%FYTUGIHOfdf")
     assert something != "23123%FYTUGIHOfdf"
 
+
 def test_that_has():
     "sure.that() has(object)"
 
@@ -113,7 +120,7 @@ def test_that_has():
         name = "some class"
     Object = Class()
     dictionary = {
-        'name': 'John'
+        'name': 'John',
     }
     name = "john"
 
@@ -142,6 +149,7 @@ def test_that_has():
     assert that(name).like("jo")
     assert "jo" in sure.that(name)
 
+
 def test_that_len_is():
     "sure.that() len_is(number)"
 
@@ -150,6 +158,7 @@ def test_that_len_is():
     assert that(lst).len_is(1000)
     assert len(lst) == 1000
     assert that(lst).len_is(lst)
+
 
 def test_that_len_greater_than():
     "sure.that() len_greater_than(number)"
@@ -161,6 +170,7 @@ def test_that_len_greater_than():
     assert len(lst) == 1000
     assert that(lst).len_greater_than(lst2)
 
+
 def test_that_len_greater_than_should_raise_assertion_error():
     "sure.that() len_greater_than(number) raise AssertionError"
 
@@ -168,7 +178,11 @@ def test_that_len_greater_than_should_raise_assertion_error():
     try:
         that(lst).len_greater_than(1000)
     except AssertionError, e:
-        assert_equals(str(e), 'the length of the list should be greater then %d, but is %d' % (1000, 1000))
+        assert_equals(
+            str(e),
+            'the length of the list should be greater then %d, but is %d'  \
+            % (1000, 1000))
+
 
 def test_that_len_greater_than_or_equals():
     "sure.that() len_greater_than_or_equals(number)"
@@ -182,6 +196,7 @@ def test_that_len_greater_than_or_equals():
     assert that(lst).len_greater_than_or_equals(lst2)
     assert that(lst).len_greater_than_or_equals(lst)
 
+
 def test_that_len_greater_than_or_equals_should_raise_assertion_error():
     "sure.that() len_greater_than_or_equals(number) raise AssertionError"
 
@@ -189,7 +204,11 @@ def test_that_len_greater_than_or_equals_should_raise_assertion_error():
     try:
         that(lst).len_greater_than_or_equals(1001)
     except AssertionError, e:
-        assert_equals(str(e), 'the length of %r should be greater then or equals %d, but is %d' % (lst, 1001, 1000))
+        assert_equals(
+            str(e),
+            'the length of %r should be greater then or equals %d, but is %d' \
+            % (lst, 1001, 1000))
+
 
 def test_that_len_lower_than():
     "sure.that() len_lower_than(number)"
@@ -201,6 +220,7 @@ def test_that_len_lower_than():
     assert len(lst) == 100
     assert that(lst).len_lower_than(lst2)
 
+
 def test_that_len_lower_than_should_raise_assertion_error():
     "sure.that() len_lower_than(number) raise AssertionError"
 
@@ -208,7 +228,11 @@ def test_that_len_lower_than_should_raise_assertion_error():
     try:
         that(lst).len_lower_than(1000)
     except AssertionError, e:
-        assert_equals(str(e), 'the length of %r should be lower then %d, but is %d' % (lst, 1000, 1000))
+        assert_equals(
+            str(e),
+            'the length of %r should be lower then %d, but is %d' % \
+            (lst, 1000, 1000))
+
 
 def test_that_len_lower_than_or_equals():
     "sure.that() len_lower_than_or_equals(number)"
@@ -222,6 +246,7 @@ def test_that_len_lower_than_or_equals():
     assert that(lst).len_lower_than_or_equals(lst2)
     assert that(lst).len_lower_than_or_equals(lst)
 
+
 def test_that_len_lower_than_or_equals_should_raise_assertion_error():
     "sure.that() len_lower_than_or_equals(number) raise AssertionError"
 
@@ -229,7 +254,11 @@ def test_that_len_lower_than_or_equals_should_raise_assertion_error():
     try:
         that(lst).len_lower_than_or_equals(100)
     except AssertionError, e:
-        assert_equals(str(e), 'the length of %r should be lower then or equals %d, but is %d' % (lst, 100, 1000))
+        assert_equals(
+            str(e),
+            'the length of %r should be lower then or equals %d, but is %d' % \
+            (lst, 100, 1000))
+
 
 def test_that_checking_all_atributes():
     "sure.that(iterable).the_attribute('name').equals('value')"
@@ -242,10 +271,11 @@ def test_that_checking_all_atributes():
         shape('circle'),
         shape('square'),
         shape('rectangle'),
-        shape('triangle')
+        shape('triangle'),
     ]
 
     assert that(shapes).the_attribute("kind").equals('geometrical form')
+
 
 def test_that_checking_all_atributes_of_range():
     "sure.that(iterable, within_range=(1, 2)).the_attribute('name').equals('value')"
@@ -253,6 +283,7 @@ def test_that_checking_all_atributes_of_range():
         def __init__(self, name):
             self.kind = 'geometrical form'
             self.name = name
+
         def __repr__(self):
             return '<%s:%s>' % (self.kind, self.name)
 
@@ -260,7 +291,7 @@ def test_that_checking_all_atributes_of_range():
         shape('circle'),
         shape('square'),
         shape('square'),
-        shape('triangle')
+        shape('triangle'),
     ]
 
     assert shapes[0].name != 'square'
@@ -269,7 +300,10 @@ def test_that_checking_all_atributes_of_range():
     assert shapes[1].name == 'square'
     assert shapes[2].name == 'square'
 
-    assert that(shapes, within_range=(1, 2)).the_attribute("name").equals('square')
+    assert that(shapes, within_range=(1, 2)). \
+                           the_attribute("name"). \
+                           equals('square')
+
 
 def test_that_checking_all_elements():
     "sure.that(iterable).every_one_is('value')"
@@ -277,7 +311,7 @@ def test_that_checking_all_elements():
         'cube',
         'ball',
         'ball',
-        'piramid'
+        'piramid',
     ]
 
     assert shapes[0] != 'ball'
@@ -287,6 +321,7 @@ def test_that_checking_all_elements():
     assert shapes[2] == 'ball'
 
     assert that(shapes, within_range=(1, 2)).every_one_is('ball')
+
 
 def test_that_checking_each_matches():
     "sure.that(iterable).in_each('').equals('value')"
@@ -319,9 +354,11 @@ def test_that_checking_each_matches():
     assert animals[4].attributes['class'] == 'mammal'
 
     assert that(animals).in_each("attributes['class']").matches('mammal')
-    assert that(animals).in_each("attributes['class']").matches(['mammal','mammal','mammal','mammal','mammal'])
+    assert that(animals).in_each("attributes['class']"). \
+           matches(['mammal','mammal','mammal','mammal','mammal'])
 
-    assert that(animals).in_each("attributes['kind']").matches(['dog','cat','cow','cow','cow'])
+    assert that(animals).in_each("attributes['kind']"). \
+           matches(['dog','cat','cow','cow','cow'])
 
     try:
         assert that(animals).in_each("attributes['kind']").matches(['dog'])
@@ -329,15 +366,17 @@ def test_that_checking_each_matches():
     except AssertionError, e:
         assert that(unicode(e)).equals(
             '%r has 5 items, but the matching list has 1: %r' % (
-                ['dog','cat','cow','cow','cow'], ['dog']
+                ['dog','cat','cow','cow','cow'], ['dog'],
             )
         )
+
 
 def test_that_raises():
     "sure.that(callable, with_args=[arg1], and_kwargs={'arg2': 'value'}).raises(SomeException)"
 
     called = False
     global called
+
     def function(arg1=None, arg2=None):
         global called
         called = True
@@ -367,40 +406,50 @@ def test_that_raises():
     assert called
 
     called = False
-    assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises(RuntimeError)
+    assert that(function, with_args=[1], and_kwargs={'arg2': 2}). \
+           raises(RuntimeError)
     assert called
 
     called = False
-    assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises(RuntimeError, 'yeah, it failed')
+    assert that(function, with_args=[1], and_kwargs={'arg2': 2}). \
+           raises(RuntimeError, 'yeah, it failed')
     assert called
 
     called = False
-    assert that(function, with_args=[1], and_kwargs={'arg2': 2}).raises('yeah, it failed')
+    assert that(function, with_args=[1], and_kwargs={'arg2': 2}). \
+           raises('yeah, it failed')
     assert called
 
     called = False
-    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError)
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}). \
+           raises(RuntimeError)
     assert called
 
     called = False
-    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, 'yeah, it failed')
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}). \
+           raises(RuntimeError, 'yeah, it failed')
     assert called
 
     called = False
-    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises('yeah, it failed')
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}). \
+           raises('yeah, it failed')
     assert called
 
     called = False
-    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(r'it fail')
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}). \
+           raises(r'it fail')
     assert called
 
     called = False
-    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, r'it fail')
+    assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}). \
+           raises(RuntimeError, r'it fail')
     assert called
+
 
 def test_that_looks_like():
     "sure.that('String\\n with BREAKLINE').looks_like('string with breakline')"
     assert that('String\n with BREAKLINE').looks_like('string with breakline')
+
 
 def test_that_raises_with_args():
     "sure.that(callable, with_args=['foo']).raises(FooError)"
@@ -414,11 +463,13 @@ def test_that_raises_with_args():
 
     assert that(my_function, with_args=['foo']).raises(FooError, 'OOps')
 
+
 def test_that_contains_string():
     "sure.that('foobar').contains('foo')"
 
     assert 'foo' in 'foobar'
     assert that('foobar').contains('foo')
+
 
 def test_that_contains_none():
     "sure.that('foobar').contains(None)"
@@ -429,6 +480,7 @@ def test_that_contains_none():
     except Exception, e:
         assert_equals(unicode(e), u'None should be a string')
 
+
 def test_that_none_contains_string():
     "sure.that(None).contains('bungalow')"
 
@@ -436,7 +488,11 @@ def test_that_none_contains_string():
         assert that(None).contains('bungalow')
         assert False, 'should not reach here'
     except Exception, e:
-        assert_equals(unicode(e), u'None is not a string, so is is impossible to check if "bungalow" is there')
+        assert_equals(
+            unicode(e),
+            u'None is not a string, so is is impossible to check ' \
+            'if "bungalow" is there')
+
 
 def test_that_some_iterable_is_empty():
     "sure.that(some_iterable).is_empty and sure.that(something).are_empty"
@@ -457,16 +513,18 @@ def test_that_some_iterable_is_empty():
 
     assert that(fail_plural).raises('(1, 2) is not empty, it has 2 items')
 
+
 def test_that_something_is_empty_raises():
     "sure.that(something_not_iterable).is_empty and sure.that(something_not_iterable).are_empty raises"
 
-
     obj = object()
+
     def fail():
         assert that(obj).is_empty
         assert False, 'should not reach here'
 
     assert that(fail).raises('%r is not iterable' % obj)
+
 
 def test_that_something_iterable_matches_another():
     "sure.that(something_iterable).matches(another_iterable)"
@@ -489,17 +547,25 @@ def test_that_something_iterable_matches_another():
     def fail_1():
         assert that(range(1)).matches(xrange(2))
 
-    def fail_2():
-        assert that(xrange(1)).equals(range(2))
+    class Fail2(object):
+        def __init__(self):
+            assert that(xrange(1)).equals(range(2))
+
+    class Fail3(object):
+        def __call__(self):
+            assert that(xrange(1)).equals(range(2))
 
     assert that(fail_1).raises('[0] has 1 item, but xrange(2) has 2 items')
-    assert that(fail_2).raises('xrange(1) has 1 item, but [0, 1] has 2 items')
+    assert that(Fail2).raises('xrange(1) has 1 item, but [0, 1] has 2 items')
+    assert that(Fail3()).raises('xrange(1) has 1 item, but [0, 1] has 2 items')
+
 
 def test_within_pass():
     "within(five=miliseconds) will pass"
     from sure import within, miliseconds
 
     within(five=miliseconds)(lambda *a: None)()
+
 
 def test_within_fail():
     "within(five=miliseconds) will fail"
@@ -540,10 +606,13 @@ def test_word_to_number_fail():
         sure.word_to_number('twenty')
     except AssertionError, e:
         failed = True
-        assert_equals(unicode(e), 'sure supports only literal numbers from one ' \
-                      'to twelve, you tried the word "twenty"')
+        assert_equals(
+            unicode(e),
+            'sure supports only literal numbers from one ' \
+            'to twelve, you tried the word "twenty"')
 
     assert failed, 'should raise assertion error'
+
 
 def test_microsecond_unit():
     "testing microseconds convertion"
@@ -557,6 +626,7 @@ def test_microsecond_unit():
     assert_equals(cfrom(1), 100000)
     assert_equals(cto(1), 1)
 
+
 def test_milisecond_unit():
     "testing miliseconds convertion"
     cfrom, cto = sure.UNITS[sure.milisecond]
@@ -568,6 +638,7 @@ def test_milisecond_unit():
 
     assert_equals(cfrom(1), 1000)
     assert_equals(cto(100), 1)
+
 
 def test_second_unit():
     "testing seconds convertion"
@@ -581,6 +652,7 @@ def test_second_unit():
     assert_equals(cfrom(1), 1)
     assert_equals(cto(100000), 1)
 
+
 def test_minute_unit():
     "testing minutes convertion"
     cfrom, cto = sure.UNITS[sure.minute]
@@ -593,14 +665,17 @@ def test_minute_unit():
     assert_equals(cfrom(60), 1)
     assert_equals(cto(1), 6000000)
 
+
 def test_within_pass_utc():
     "within(five=miliseconds) gives utc parameter"
     from sure import within, miliseconds
     from datetime import datetime
+
     def assert_utc(utc):
         assert isinstance(utc, datetime)
 
     within(five=miliseconds)(assert_utc)()
+
 
 def test_that_is_a_matcher_should_absorb_callables_to_be_used_as_matcher():
     u"that.is_a_matcher should absorb callables to be used as matcher"

@@ -65,6 +65,19 @@ def test_setup_with_context_optional_context():
     )
 
 
+def test_setup_with_context_context_failing():
+    "sure.that_with_context() in a failing test"
+
+    def setup(context):
+        context.name = "John Resig"
+
+    @sure.that_with_context(setup)
+    def it_fails(context):
+        assert False, 'should fail with this exception'
+
+    assert that(it_fails).raises('should fail with this exception')
+
+
 def test_teardown_with_context():
     "sure.with_context() runs teardown before the function itself"
 

@@ -52,8 +52,9 @@ class CallBack(object):
         args.extend(self.args)
         try:
             self.callback(*args, **self.kwargs)
-        except:
-            self.callback(*self.args, **self.kwargs)
+        except TypeError:
+            neat_args = [a for a in args if a not in optional_args]
+            self.callback(*neat_args, **self.kwargs)
 
 
 def that_with_context(setup=None, teardown=None):
@@ -91,6 +92,7 @@ def that_with_context(setup=None, teardown=None):
 
     return dec
 
+
 def explanation(msg):
     def dec(func):
         def wrap(self, what):
@@ -104,8 +106,10 @@ def explanation(msg):
 
     return dec
 
+
 def is_iterable(obj):
     return hasattr(obj, '__iter__') and not isinstance(obj, basestring)
+
 
 def all_integers(obj):
     if not is_iterable(obj):
@@ -116,6 +120,7 @@ def all_integers(obj):
             return
 
     return True
+
 
 class that(object):
     def __init__(self, src,
@@ -131,7 +136,7 @@ class that(object):
         if all_integers(within_range):
             if len(within_range) != 2:
                 raise TypeError(
-                    'within_range parameter must be a tuple with 2 objects'
+                    'within_range parameter must be a tuple with 2 objects',
                 )
 
             self._range = within_range

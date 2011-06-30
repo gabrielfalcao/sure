@@ -30,7 +30,7 @@ from datetime import datetime
 from pprint import pformat
 from threading import local
 from copy import deepcopy
-version = '0.5.1'
+version = '0.6'
 
 
 def itemize_length(items):
@@ -266,6 +266,14 @@ class that(object):
     @explanation('%r should be a instance of %r, but is not')
     def is_a(self, dst):
         return isinstance(self._src, dst)
+
+    def at(self, key):
+        assert self.has(key)
+        if isinstance(self._src, dict):
+            return that(self._src[key])
+
+        else:
+            return that(getattr(self._src, key))
 
     @explanation('%r should have %r, but have not')
     def has(self, that):

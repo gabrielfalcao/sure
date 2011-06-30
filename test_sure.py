@@ -163,6 +163,21 @@ def test_that_has():
     assert "jo" in sure.that(name)
 
 
+def test_that_at_key_equals():
+    "sure.that().at(object).equals(object)"
+
+    class Class:
+        name = "some class"
+    Object = Class()
+    dictionary = {
+        'name': 'John',
+    }
+
+    assert that(Class).at("name").equals('some class')
+    assert that(Object).at("name").equals('some class')
+    assert that(dictionary).at("name").equals('John')
+
+
 def test_that_len_is():
     "sure.that() len_is(number)"
 

@@ -1,5 +1,5 @@
 # sure
-> Version 0.5.1
+> Version 0.6
 
 # What
 
@@ -26,10 +26,17 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
     assert that(FooBar).has("attribute_one")
     assert that(FooBar).equals(FooBar)
 
+    # go faster
+
+    assert that(FooBar).at('attribute_one').equals('simple')
+
     # and also for dictionaries
 
     name = dict(john='doe')
     assert that(name).has('john')
+
+    # go faster
+    assert that(name).at('john').equals('doe')
 
 ## strings
 

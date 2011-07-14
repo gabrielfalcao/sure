@@ -59,8 +59,6 @@ class CallBack(object):
 
 def that_with_context(setup=None, teardown=None):
     def dec(func):
-        func.__name__ = "test_%s" % func.__name__
-
         def wrap(*args, **kw):
             context = local()
 

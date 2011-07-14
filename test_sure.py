@@ -44,7 +44,7 @@ def test_setup_with_context():
     john_is_within_context()
     assert_equals(
         john_is_within_context.__name__,
-        'test_john_is_within_context',
+        'john_is_within_context',
     )
 
 
@@ -61,7 +61,7 @@ def test_setup_with_context_optional_context():
     it_passes()  # ?
     assert_equals(
         it_passes.__name__,
-        'test_it_passes',
+        'it_passes',
     )
 
 
@@ -734,7 +734,7 @@ def test_accepts_setup_list():
     john_is_within_context(c)
     assert_equals(
         john_is_within_context.__name__,
-        'test_john_is_within_context',
+        'john_is_within_context',
     )
 
 

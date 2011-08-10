@@ -28,6 +28,7 @@ import os
 from sure import version
 from setuptools import setup
 
+
 def get_packages():
     # setuptools can't do the job :(
     packages = []
@@ -40,11 +41,11 @@ def get_packages():
 setup(name='sure',
     version=version,
     description='assertion toolbox for python',
-    author=u'Gabriel Falcão',
+    author=u'Gabriel Falcao',
     author_email='gabriel@nacaolivre.org',
     url='http://github.com/gabrielfalcao/sure',
     packages=get_packages(),
     install_requires=[
-        "nose"
+        "nose",
     ],
 )

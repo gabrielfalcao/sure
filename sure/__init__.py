@@ -27,9 +27,11 @@ import re
 import inspect
 import traceback
 from datetime import datetime
+from functools import wraps
 from pprint import pformat
 from threading import local
 from copy import deepcopy
+from collections import Iterable
 version = '0.6.1'
 
 
@@ -51,14 +53,18 @@ class CallBack(object):
         args = list(optional_args)
         args.extend(self.args)
         try:
-            self.callback(*args, **self.kwargs)
-        except TypeError:
-            neat_args = [a for a in args if a not in optional_args]
-            self.callback(*neat_args, **self.kwargs)
+            return self.callback(*args, **self.kwargs)
+        except Exception, e:
+            try:
+                neat_args = [a for a in args if a not in optional_args]
+                return self.callback(*neat_args, **self.kwargs)
+            except:
+                raise e
 
 
 def that_with_context(setup=None, teardown=None):
     def dec(func):
+        @wraps(func)
         def wrap(*args, **kw):
             context = local()
 
@@ -66,29 +72,30 @@ def that_with_context(setup=None, teardown=None):
                 cb = CallBack(setup, args, kw)
                 cb.apply(context)
 
-            elif isinstance(setup, (set, list, tuple)):
+            elif isinstance(setup, Iterable):
                 for s in setup:
                     cb = CallBack(s, args, kw)
                     cb.apply(context)
 
             test = CallBack(func, args, kw)
             try:
-                test.apply(context)
+                res = test.apply(context)
             finally:
                 if callable(teardown):
                     cb = CallBack(teardown, args, kw)
                     cb.apply(context)
 
-                elif isinstance(teardown, (set, list, tuple)):
+                elif isinstance(teardown, Iterable):
                     for s in teardown:
                         cb = CallBack(s, args, kw)
                         cb.apply(context)
 
-        wrap.__name__ = func.__name__
-        wrap.__doc__ = func.__doc__
+            return res
         return wrap
 
     return dec
+
+scenario = that_with_context
 
 
 def explanation(msg):
@@ -175,7 +182,9 @@ class that(object):
 
             if isinstance(exc, type) and issubclass(exc, Exception):
                 if not isinstance(e, exc):
-                    raise AssertionError('%r should raise %r, but raised %r' % (self._src, exc, e.__class__))
+                    raise AssertionError(
+                        '%r should raise %r, but raised %r' % (
+                            self._src, exc, e.__class__))
 
                 if isinstance(msg, basestring) and msg not in unicode(e):
                     raise AssertionError('%r raised %s, but the exception message does not match. Expected %r, got %r' % (self._src, e, msg, unicode(e)))
@@ -307,7 +316,7 @@ class that(object):
             error = 'the length of %r should be greater then or equals %d, but is %d' % (
                 self._src,
                 that,
-                length
+                length,
             )
             raise AssertionError(error)
 
@@ -321,7 +330,7 @@ class that(object):
             error = 'the length of %r should be lower then %d, but is %d' % (
                 self._src,
                 that,
-                length
+                length,
             )
             raise AssertionError(error)
 
@@ -331,14 +340,15 @@ class that(object):
         that = self._get_that(that)
 
         length = len(self._src)
+        error = 'the length of %r should be lower then or equals %d, but is %d'
 
         if length > that:
-            error = 'the length of %r should be lower then or equals %d, but is %d' % (
+            msg = error % (
                 self._src,
                 that,
-                length
+                length,
             )
-            raise AssertionError(error)
+            raise AssertionError(msg)
 
         return True
 
@@ -350,7 +360,7 @@ class that(object):
             error = 'the length of %r should be %d, but is %d' % (
                 self._src,
                 that,
-                length
+                length,
             )
             raise AssertionError(error)
 
@@ -370,7 +380,7 @@ class that(object):
     def matches(self, items):
         msg = '%r[%d].%s should be %r, but is %r'
         get_eval = lambda item: eval(
-            "%s.%s" % ('current', self._eval), {}, {'current': item}
+            "%s.%s" % ('current', self._eval), {}, {'current': item},
         )
 
         if self._eval and is_iterable(self._src):
@@ -384,7 +394,7 @@ class that(object):
 
                     raise AssertionError(
                         '%r has %d items, but the matching list has %d: %r'
-                        % (source, source_len, items_len, items)
+                        % (source, source_len, items_len, items),
                     )
 
             for index, (item, other) in enumerate(zip(self._src, items)):
@@ -407,7 +417,9 @@ class that(object):
         try:
             lst = list(self._src)
             length = len(lst)
-            assert length == 0, '%r is not empty, it has %s' % (self._src, itemize_length(self._src))
+            assert length == 0, \
+                   '%r is not empty, it has %s' % (self._src,
+                                                   itemize_length(self._src))
             return True
 
         except TypeError:
@@ -430,10 +442,17 @@ class that(object):
         return what in items
 
     def contains(self, what):
-        assert isinstance(what, basestring), '%r should be a string' % what
-        assert isinstance(self._src, basestring), '%r is not a string, so is is impossible to check if "%s" is there' % (self._src, what)
-        assert what in self._src, '"%s" should be in "%s"' % (what, self._src)
+        assert what in self._src, '%r should be in %r' % (what, self._src)
         return True
+
+    def does_not_contain(self, what):
+        assert what not in self._src, \
+            '%r should NOT be in %r' % (what, self._src)
+
+        return True
+
+    doesnt_contain = does_not_contain
+
 
 def within(**units):
     assert len(units) == 1, 'use within(number=unit). e.g.: within(one=second)'
@@ -444,6 +463,7 @@ def within(**units):
     convert_from, convert_to = UNITS[unit]
     timeout = convert_from(value)
     exc = []
+
     def dec(func):
         def wrap(*args, **kw):
             start = datetime.utcnow()
@@ -478,16 +498,29 @@ def within(**units):
     return dec
 
 UNITS = {
-    'minutes': (lambda from_num: from_num / 60.0, lambda to_num: to_num * 6000000),
-    'seconds': (lambda from_num: from_num, lambda to_num: to_num / 100000),
-    'miliseconds': (lambda from_num:from_num * 1000, lambda to_num: to_num/100),
-    'microseconds': (lambda from_num:from_num * 100000, lambda to_num: to_num),
+    'minutes': (
+        lambda from_num: from_num / 60.0,
+        lambda to_num: to_num * 6000000,
+    ),
+    'seconds': (
+        lambda from_num: from_num,
+        lambda to_num: to_num / 100000,
+    ),
+    'miliseconds': (
+        lambda from_num: from_num * 1000,
+        lambda to_num: to_num / 100,
+    ),
+    'microseconds': (
+        lambda from_num: from_num * 100000,
+        lambda to_num: to_num,
+    ),
 }
 
 milisecond = miliseconds = 'miliseconds'
 microsecond = microseconds = 'microseconds'
 second = seconds = 'seconds'
 minute = minutes = 'minutes'
+
 
 def word_to_number(word):
     basic = {
@@ -510,3 +543,33 @@ def word_to_number(word):
         raise AssertionError(
             'sure supports only literal numbers from one to twelve, ' \
             'you tried the word "twenty"')
+
+
+def action_in(scenario):
+    def decorate_and_absorb(func):
+        @wraps(func)
+        def wrapper(*args, **kw):
+            scenario.__sure_actions_ran__.append((func, args, kw))
+            result = func(*args, **kw)
+            scenario.__sure_action_results__.append(result)
+
+            return scenario
+
+        for attr in ['__sure_actions_ran__', '__sure_action_results__']:
+            actions_ran_attr = getattr(scenario, attr, None)
+            if not isinstance(actions_ran_attr, list):
+                setattr(scenario, attr, [])
+
+        setattr(scenario, func.__name__, wrapper)
+        return wrapper
+
+    if not hasattr(scenario, 'contextualized_as'):
+
+        def contextualized_as(name):
+            last_result = scenario.__sure_action_results__[-1]
+            setattr(scenario, name, last_result)
+            return scenario
+
+        scenario.contextualized_as = contextualized_as
+
+    return decorate_and_absorb

@@ -492,11 +492,32 @@ def test_that_raises_with_args():
     assert that(my_function, with_args=['foo']).raises(FooError, 'OOps')
 
 
+def test_that_does_not_raise_with_args():
+    "sure.that(callable).doesnt_raise(FooError) and does_not_raise"
+
+    class FooError(Exception):
+        pass
+
+    def my_function(string):
+        if string == 'foo':
+            raise FooError('OOps')
+
+    assert that(my_function, with_args=['foo']).raises(FooError, 'OOps')
+
+
 def test_that_contains_string():
     "sure.that('foobar').contains('foo')"
 
     assert 'foo' in 'foobar'
     assert that('foobar').contains('foo')
+
+
+def test_that_doesnt_contain_string():
+    "sure.that('foobar').does_not_contain('123'), .doesnt_contain"
+
+    assert '123' not in 'foobar'
+    assert that('foobar').doesnt_contain('123')
+    assert that('foobar').does_not_contain('123')
 
 
 def test_that_contains_none():
@@ -506,7 +527,10 @@ def test_that_contains_none():
         assert that('foobar').contains(None)
         assert False, 'should not reach here'
     except Exception, e:
-        assert_equals(unicode(e), u'None should be a string')
+        assert_equals(
+            unicode(e),
+            u"'in <string>' requires string as left operand, not NoneType",
+        )
 
 
 def test_that_none_contains_string():
@@ -518,8 +542,8 @@ def test_that_none_contains_string():
     except Exception, e:
         assert_equals(
             unicode(e),
-            u'None is not a string, so is is impossible to check ' \
-            'if "bungalow" is there')
+            u"argument of type 'NoneType' is not iterable",
+        )
 
 
 def test_that_some_iterable_is_empty():
@@ -763,3 +787,81 @@ def test_accepts_teardown_list():
     something_was_modified(c)
     assert something.modified
     assert something.finished == 'yep'
+
+
+def test_scenario_is_alias_for_context_on_setup_and_teardown():
+    "@scenario aliases @that_with_context for setup and teardown"
+    from sure import scenario
+
+    def setup(context):
+        context.name = "Robert C Martin"
+
+    def teardown(context):
+        assert_equals(context.name, "Robert C Martin")
+
+    @scenario([setup], [teardown])
+    def robert_is_within_context(context):
+        "Robert is within context"
+        assert isinstance(context, local)
+        assert hasattr(context, "name")
+        assert_equals(context.name, "Robert C Martin")
+
+    robert_is_within_context()
+    assert_equals(
+        robert_is_within_context.__name__,
+        'robert_is_within_context',
+    )
+
+
+def test_action_can_be_contextualized():
+    "stuff returned by functions under sure.action_in can be contextualized"
+    from sure import action_in, that, scenario
+
+    def with_setup(context):
+        @action_in(context)
+        def i_have_an_action(received_text):
+            assert_equals(received_text, "yay, I do!")
+            return "this pretty text"
+
+    @scenario([with_setup])
+    def i_can_use_actions(context):
+        given = the = context
+        given.i_have_an_action("yay, I do!").contextualized_as('value')
+
+        assert that(the.value).equals("this pretty text")
+        return True
+
+    assert i_can_use_actions()
+
+
+def test_that_contains_dictionary_keys():
+    "sure.that(dict(name='foobar')).contains('name')"
+
+    data = dict(name='foobar')
+    assert 'name' in data
+    assert 'name' in data.keys()
+    assert that(data).contains('name')
+
+
+def test_that_contains_list():
+    "sure.that(['foobar', '123']).contains('foobar')"
+
+    data = ['foobar', '123']
+    assert 'foobar' in data
+    assert that(data).contains('foobar')
+
+
+def test_that_contains_set():
+    "sure.that(set(['foobar', '123']).contains('foobar')"
+
+    data = set(['foobar', '123'])
+    assert 'foobar' in data
+    assert that(data).contains('foobar')
+
+
+def test_that_contains_tuple():
+    "sure.that(('foobar', '123')).contains('foobar')"
+
+    data = ('foobar', '123')
+    assert 'foobar' in data
+    assert that(data).contains('foobar')

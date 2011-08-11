@@ -885,3 +885,26 @@ def test_that_contains_tuple():
     data = ('foobar', '123')
     assert 'foobar' in data
     assert that(data).contains('foobar')
+
+
+def test_variables_bag_provides_meaningful_error_on_nonexisting_attribute():
+    "VariablesBag() provides a meaningful error when attr does not exist"
+
+    context = VariablesBag()
+
+    context.name = "John"
+    context.foo = "bar"
+
+    assert that(context.name).equals("John")
+    assert that(context.foo).equals("bar")
+
+    def access_nonexisting_attr():
+        assert context.bleh == 'crash :('
+
+    assert that(access_nonexisting_attr).raises(
+        AssertionError,
+        'you have tried to access the attribute "bleh" the context ' \
+        '(aka VariablesBag), but there is no such attribute assigned to it. ' \
+        'Maybe you misspelled it ? Well, here are the options: ' \
+        '[\'name\', \'foo\']',
+    )

@@ -40,11 +40,38 @@ def itemize_length(items):
     length = len(items)
     return '%d item%s' % (length, length > 1 and "s" or "")
 
+not_here_error = \
+    'you have tried to access the attribute "%s" the context ' \
+    '(aka VariablesBag), but there is no such attribute assigned to it. ' \
+    'Maybe you misspelled it ? Well, here are the options: [%s]'
+
 
 class VariablesBag(dict):
+    __varnames__ = None
+    __sure_actions_ran__ = None
+    __sure_action_results__ = None
+
+    def __init__(self, *args, **kw):
+        self.__varnames__ = []
+        self.__sure_actions_ran__ = []
+        self.__sure_action_results__ = []
+        return super(VariablesBag, self).__init__(*args, **kw)
+
     def __setattr__(self, attr, value):
-        self[attr] = value
+        if attr not in dir(VariablesBag):
+            self[attr] = value
+            self.__varnames__.append(attr)
         return super(VariablesBag, self).__setattr__(attr, value)
+
+    def __getattr__(self, attr):
+        try:
+            return super(VariablesBag, self).__getattribute__(attr)
+        except AttributeError:
+            if attr not in dir(VariablesBag):
+                raise AssertionError(not_here_error % (
+                    attr,
+                    ", ".join(map(repr, self.__varnames__)),
+                ))
 
 
 class CallBack(object):
@@ -570,11 +597,6 @@ def action_in(scenario):
             scenario.__sure_action_results__.append(result)
 
             return scenario
-
-        for attr in ['__sure_actions_ran__', '__sure_action_results__']:
-            actions_ran_attr = getattr(scenario, attr, None)
-            if not isinstance(actions_ran_attr, list):
-                setattr(scenario, attr, [])
 
         setattr(scenario, func.__name__, wrapper)
         return wrapper

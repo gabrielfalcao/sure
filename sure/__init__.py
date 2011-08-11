@@ -39,8 +39,10 @@ def itemize_length(items):
     return '%d item%s' % (length, length > 1 and "s" or "")
 
 
-class VariablesBag(object):
-    pass
+class VariablesBag(dict):
+    def __setattr__(self, attr, value):
+        self[attr] = value
+        return super(VariablesBag, self).__setattr__(attr, value)
 
 
 class CallBack(object):

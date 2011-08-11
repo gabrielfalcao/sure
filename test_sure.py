@@ -753,8 +753,7 @@ def test_accepts_setup_list():
         assert context.first_name == 'John'
         assert context.last_name == 'Resig'
 
-    c = VariablesBag()
-    john_is_within_context(c)
+    john_is_within_context()
     assert_equals(
         john_is_within_context.__name__,
         'john_is_within_context',
@@ -782,8 +781,7 @@ def test_accepts_teardown_list():
         assert not something.modified
         assert something.finished == 'nope'
 
-    c = VariablesBag()
-    something_was_modified(c)
+    something_was_modified()
     assert something.modified
     assert something.finished == 'yep'
 
@@ -850,7 +848,7 @@ def test_action_can_be_contextualized_aliased():
 
         assert that(the.awesomeness).equals("this other pretty text")
         the.awesomeness = 'was amazing'
-        return the.awesomeness
+        return the['awesomeness']
 
     assert_equals(scenario_above(), 'was amazing')
 

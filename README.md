@@ -1,5 +1,5 @@
 # sure
-> Version 0.6.1
+> Version 0.7.0
 
 # What
 
@@ -49,6 +49,8 @@ assert that("   string \n with    lots of \n spaces and breaklines\n\n ")
     .looks_like("string with lots of spaces and breaklines")
 
 assert that('foobar').contains('foo')
+assert that('foobar').doesnt_contain("123")
+assert that('foobar').does_not_contain("123")
 ```
 
 ## iterable objects
@@ -232,6 +234,15 @@ assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises('it failed')
 assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, 'it failed')
 ```
 
+### testing if some callback should never raise an exception
+
+```python
+def good_boy():
+    pass
+
+assert that(good_boy).does_not_raise(Exception)
+assert that(good_boy).doesnt_raise(Exception)
+
 ## add your own matchers
 
 ```python
@@ -242,6 +253,63 @@ def could_work(matcher, parameter):
     return "cool!"
 
 assert that("this").could_work("I mean, for real!") == "cool!"
+```
+
+# Go BDD with me :)
+
+Sure aliases the decorator `@that_with_context` as `@scenario` and the
+context passed as parameter is just a bag of variables you can mess
+with. So that your scenario can share data in a really flexible way.
+
+Aditionally, you can add actions through your setup functions and they
+will last only for your scenario's lifetime.
+
+## let's see it in action
+
+```python
+    from sure import action_in, that, scenario
+
+    def with_setup(context):
+        @action_in(context)
+        def i_have_an_action(received_text):
+            assert_equals(received_text, "yay, I do!")
+            return "this pretty text"
+
+    @scenario([with_setup])
+    def i_can_use_actions(context):
+        "We should be able to use actions"
+        given = the = context
+        given.i_have_an_action("yay, I do!").contextualized_as('value')
+
+        assert that(the.value).equals("this pretty text")
+        return True
+
+    assert i_can_use_actions()
+```
+
+### action_in, action_for, all the same thing!
+
+```python
+def test_action_can_be_contextualized_aliased():
+    "sure.action_for is an alias for sure.action_in"
+    from sure import action_for, that, scenario
+
+    def with_setup(context):
+        @action_for(context)
+        def i_have_an_action(received_text):
+            assert_equals(received_text, "super cool")
+            return "this other pretty text"
+
+    @scenario([with_setup])
+    def scenario_above(context):
+        given = the = context
+        given.i_have_an_action("super cool").contextualized_as('awesomeness')
+
+        assert that(the.awesomeness).equals("this other pretty text")
+        the.awesomeness = 'was amazing'
+        return the['awesomeness']
+
+    assert_equals(scenario_above(), 'was amazing')
 ```
 
 # license

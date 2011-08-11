@@ -24,6 +24,8 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 import re
+import os
+import sys
 import inspect
 import traceback
 from datetime import datetime
@@ -46,22 +48,34 @@ class VariablesBag(dict):
 
 
 class CallBack(object):
+    context_error = "the function %s defined at %s line %d, is being "\
+        "decorated by either @that_with_context or @scenario, so it should " \
+        "take at least 1 parameter, which is the test context"
+
     def __init__(self, cb, args, kwargs):
         self.callback = cb
         self.args = args or []
         self.kwargs = kwargs or {}
+        self.callback_name = cb.__name__
+        self.callback_filename = os.path.split(cb.func_code.co_filename)[-1]
+        self.callback_lineno = cb.func_code.co_firstlineno + 1
 
     def apply(self, *optional_args):
         args = list(optional_args)
         args.extend(self.args)
         try:
             return self.callback(*args, **self.kwargs)
-        except Exception, e:
-            try:
-                neat_args = [a for a in args if a not in optional_args]
-                return self.callback(*neat_args, **self.kwargs)
-            except:
-                raise e
+        except:
+            err = unicode(sys.exc_info()[1])
+            if err.startswith(self.callback_name) and \
+               'takes no arguments (1 given)' in err:
+                raise TypeError(self.context_error % (
+                    self.callback_name,
+                    self.callback_filename,
+                    self.callback_lineno,
+                    )
+                )
+            raise
 
 
 def that_with_context(setup=None, teardown=None):

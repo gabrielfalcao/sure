@@ -47,20 +47,21 @@ def test_setup_with_context():
     )
 
 
-def test_setup_with_context_optional_context():
-    "sure.that_with_context() handle optional context"
+def test_context_is_not_optional():
+    "sure.that_with_context() when no context is given it fails"
 
     def setup(context):
         context.name = "John Resig"
 
     @sure.that_with_context(setup)
-    def it_passes():
+    def it_crashes():
         assert True
 
-    it_passes()  # ?
-    assert_equals(
-        it_passes.__name__,
-        'it_passes',
+    assert that(it_crashes).raises(
+        TypeError,
+        "the function it_crashes defined at test_sure.py line 57, is being " \
+        "decorated by either @that_with_context or @scenario, so it should " \
+        "take at least 1 parameter, which is the test context",
     )
 
 

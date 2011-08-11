@@ -29,15 +29,18 @@ import traceback
 from datetime import datetime
 from functools import wraps
 from pprint import pformat
-from threading import local
 from copy import deepcopy
 from collections import Iterable
-version = '0.6.1'
+version = '0.7.0'
 
 
 def itemize_length(items):
     length = len(items)
     return '%d item%s' % (length, length > 1 and "s" or "")
+
+
+class VariablesBag(object):
+    pass
 
 
 class CallBack(object):
@@ -47,9 +50,6 @@ class CallBack(object):
         self.kwargs = kwargs or {}
 
     def apply(self, *optional_args):
-        if not callable(self.callback):
-            return
-
         args = list(optional_args)
         args.extend(self.args)
         try:
@@ -66,7 +66,7 @@ def that_with_context(setup=None, teardown=None):
     def dec(func):
         @wraps(func)
         def wrap(*args, **kw):
-            context = local()
+            context = VariablesBag()
 
             if callable(setup):
                 cb = CallBack(setup, args, kw)
@@ -573,3 +573,5 @@ def action_in(scenario):
         scenario.contextualized_as = contextualized_as
 
     return decorate_and_absorb
+
+action_for = action_in

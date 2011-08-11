@@ -25,8 +25,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 
 import sure
-from sure import that
-from threading import local
+from sure import that, VariablesBag
 from nose.tools import assert_equals, assert_raises
 
 
@@ -38,7 +37,7 @@ def test_setup_with_context():
 
     @sure.that_with_context(setup)
     def john_is_within_context(context):
-        assert isinstance(context, local)
+        assert isinstance(context, VariablesBag)
         assert hasattr(context, "name")
 
     john_is_within_context()
@@ -754,7 +753,7 @@ def test_accepts_setup_list():
         assert context.first_name == 'John'
         assert context.last_name == 'Resig'
 
-    c = local()
+    c = VariablesBag()
     john_is_within_context(c)
     assert_equals(
         john_is_within_context.__name__,
@@ -783,7 +782,7 @@ def test_accepts_teardown_list():
         assert not something.modified
         assert something.finished == 'nope'
 
-    c = local()
+    c = VariablesBag()
     something_was_modified(c)
     assert something.modified
     assert something.finished == 'yep'
@@ -802,7 +801,7 @@ def test_scenario_is_alias_for_context_on_setup_and_teardown():
     @scenario([setup], [teardown])
     def robert_is_within_context(context):
         "Robert is within context"
-        assert isinstance(context, local)
+        assert isinstance(context, VariablesBag)
         assert hasattr(context, "name")
         assert_equals(context.name, "Robert C Martin")
 
@@ -832,6 +831,28 @@ def test_action_can_be_contextualized():
         return True
 
     assert i_can_use_actions()
+
+
+def test_action_can_be_contextualized_aliased():
+    "sure.action_for is an alias for sure.action_in"
+    from sure import action_for, that, scenario
+
+    def with_setup(context):
+        @action_for(context)
+        def i_have_an_action(received_text):
+            assert_equals(received_text, "super cool")
+            return "this other pretty text"
+
+    @scenario([with_setup])
+    def scenario_above(context):
+        given = the = context
+        given.i_have_an_action("super cool").contextualized_as('awesomeness')
+
+        assert that(the.awesomeness).equals("this other pretty text")
+        the.awesomeness = 'was amazing'
+        return the.awesomeness
+
+    assert_equals(scenario_above(), 'was amazing')
 
 
 def test_that_contains_dictionary_keys():

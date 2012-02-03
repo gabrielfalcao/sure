@@ -242,6 +242,7 @@ def good_boy():
 
 assert that(good_boy).does_not_raise(Exception)
 assert that(good_boy).doesnt_raise(Exception)
+```
 
 ## add your own matchers
 

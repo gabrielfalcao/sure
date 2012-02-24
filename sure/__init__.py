@@ -33,7 +33,23 @@ from functools import wraps
 from pprint import pformat
 from copy import deepcopy
 from collections import Iterable
-version = '0.7.0'
+version = '0.8.0'
+
+
+def _get_file_name(func):
+    try:
+        name = inspect.getfile(func)
+    except AttributeError:
+        name = func.func_code.co_filename
+
+    return os.path.abspath(name)
+
+
+def _get_line_number(func):
+    try:
+        return inspect.getlineno(func)
+    except AttributeError:
+        return func.func_code.co_firstlineno
 
 
 def itemize_length(items):
@@ -50,11 +66,13 @@ class VariablesBag(dict):
     __varnames__ = None
     __sure_actions_ran__ = None
     __sure_action_results__ = None
+    __sure_providers_of__ = None
 
     def __init__(self, *args, **kw):
         self.__varnames__ = []
         self.__sure_actions_ran__ = []
         self.__sure_action_results__ = []
+        self.__sure_providers_of__ = {}
         return super(VariablesBag, self).__init__(*args, **kw)
 
     def __setattr__(self, attr, value):
@@ -230,17 +248,17 @@ class that(object):
                             self._src, exc, e.__class__))
 
                 if isinstance(msg, basestring) and msg not in unicode(e):
-                    raise AssertionError('%r raised %s, but the exception message does not match. Expected %r, got %r' % (self._src, e, msg, unicode(e)))
+                    raise AssertionError('%r raised %s, but the exception message does not match.\n\nEXPECTED:\n%r\n\nGOT:\n%r' % (self._src, type(e).__name__, msg, str(e)))
 
             elif isinstance(msg, basestring) and msg not in unicode(e):
-                raise AssertionError('When calling %r the exception message does not match. Expected %r, got %r' % (self._src, msg, unicode(e)))
+                raise AssertionError('When calling %r the exception message does not match. Expected: %r\n got:\n %r' % (self._src, msg, str(e)))
 
             else:
                 raise e
         else:
-            _src_filename = inspect.getfile(self._src)
+            _src_filename = _get_file_name(self._src)
             if inspect.isfunction(self._src):
-                _src_lineno = inspect.getlineno(self._src)
+                _src_lineno = _get_line_number(self._src)
                 raise AssertionError(
                     'calling function %s(%s at line: "%d") with args %r and kwargs %r did not raise %r' % (
                         self._src.__name__,
@@ -587,29 +605,77 @@ def word_to_number(word):
             'sure supports only literal numbers from one to twelve, ' \
             'you tried the word "twenty"')
 
+def action_for(context, provides=None, depends_on=None):
+    if not provides:
+        provides = []
 
-def action_in(scenario):
+    if not depends_on:
+        depends_on = []
+
+    def register_providers(func, attr):
+        if not attr in context.__sure_providers_of__:
+            context.__sure_providers_of__[attr] = []
+
+        context.__sure_providers_of__[attr].append(func)
+
+    def ensure_providers(func, attr):
+        assert hasattr(context, attr), \
+            'the action "%s" was supposed to provide the attribute "%s" ' \
+            'into the context, but it did not. Please double check its ' \
+            'implementation' % (func.__name__, attr)
+
+    dependency_error_lonely = 'the action "%s" defined at %s:%d ' \
+        'depends on the attribute "%s" to be available in the' \
+        ' context. It turns out that there are no actions providing ' \
+        'that. Please double-check the implementation'
+
+    dependency_error_hints = 'the action "%s" defined at %s:%d ' \
+        'depends on the attribute "%s" to be available in the context.'\
+        ' You need to call one of the following actions beforehand:\n'
+
+    def check_dependencies(func):
+        action = func.__name__
+        filename = _get_file_name(func)
+        lineno = _get_line_number(func)
+
+        for dependency in depends_on:
+            if dependency in context.__sure_providers_of__:
+                providers = context.__sure_providers_of__[dependency]
+                err = dependency_error_hints % (
+                    action,
+                    filename,
+                    lineno,
+                    dependency,
+                )
+                err += '\n'.join([
+                    ' -> %s at %s:%d' % (
+                        p.__name__,
+                        _get_file_name(p),
+                        _get_line_number(p)) for p in providers])
+
+            else:
+                err = dependency_error_lonely % (
+                    action,
+                    filename,
+                    lineno,
+                    dependency,
+                )
+
+            assert dependency in context, err
+
     def decorate_and_absorb(func):
+        [register_providers(func, attr) for attr in provides]
+
         @wraps(func)
         def wrapper(*args, **kw):
-            scenario.__sure_actions_ran__.append((func, args, kw))
+            context.__sure_actions_ran__.append((func, args, kw))
+            check_dependencies(func)
             result = func(*args, **kw)
-            scenario.__sure_action_results__.append(result)
+            [ensure_providers(func, attr) for attr in provides]
+            context.__sure_action_results__.append(result)
+            return context
 
-            return scenario
-
-        setattr(scenario, func.__name__, wrapper)
+        setattr(context, func.__name__, wrapper)
         return wrapper
 
-    if not hasattr(scenario, 'contextualized_as'):
-
-        def contextualized_as(name):
-            last_result = scenario.__sure_action_results__[-1]
-            setattr(scenario, name, last_result)
-            return scenario
-
-        scenario.contextualized_as = contextualized_as
-
     return decorate_and_absorb
-
-action_for = action_in

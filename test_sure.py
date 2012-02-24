@@ -811,47 +811,133 @@ def test_scenario_is_alias_for_context_on_setup_and_teardown():
     )
 
 
-def test_action_can_be_contextualized():
-    "stuff returned by functions under sure.action_in can be contextualized"
-    from sure import action_in, that, scenario
+def test_actions_returns_context():
+    "the actions always returns the context"
+    from sure import action_for, that, scenario
 
     def with_setup(context):
-        @action_in(context)
-        def i_have_an_action(received_text):
-            assert_equals(received_text, "yay, I do!")
-            return "this pretty text"
+        @action_for(context)
+        def action1():
+            pass
 
-    @scenario([with_setup])
+        @action_for(context)
+        def action2():
+            pass
+
+    @scenario(with_setup)
     def i_can_use_actions(context):
-        given = the = context
-        given.i_have_an_action("yay, I do!").contextualized_as('value')
-
-        assert that(the.value).equals("this pretty text")
+        assert that(context.action1()).equals(context)
+        assert that(context.action2()).equals(context)
         return True
 
     assert i_can_use_actions()
 
 
-def test_action_can_be_contextualized_aliased():
-    "sure.action_for is an alias for sure.action_in"
-    from sure import action_for, that, scenario
+def test_actions_providing_variables_in_the_context():
+    "the actions should be able to declare the variables they provide"
+    from sure import action_for, scenario
 
     def with_setup(context):
-        @action_for(context)
-        def i_have_an_action(received_text):
-            assert_equals(received_text, "super cool")
-            return "this other pretty text"
+        @action_for(context, provides=['var1', 'foobar'])
+        def the_context_has_variables():
+            context.var1 = 123
+            context.foobar = "qwerty"
 
-    @scenario([with_setup])
-    def scenario_above(context):
-        given = the = context
-        given.i_have_an_action("super cool").contextualized_as('awesomeness')
+    @scenario(with_setup)
+    def the_providers_are_working(Then):
+        Then.the_context_has_variables()
+        assert hasattr(Then, 'var1')
+        assert hasattr(Then, 'foobar')
+        assert hasattr(Then, '__sure_providers_of__')
 
-        assert that(the.awesomeness).equals("this other pretty text")
-        the.awesomeness = 'was amazing'
-        return the['awesomeness']
+        providers = Then.__sure_providers_of__
+        action = Then.the_context_has_variables.__name__
 
-    assert_equals(scenario_above(), 'was amazing')
+        providers_of_var1 = [p.__name__ for p in providers['var1']]
+        assert that(providers_of_var1).contains(action)
+
+        providers_of_foobar = [p.__name__ for p in providers['foobar']]
+        assert that(providers_of_foobar).contains(action)
+
+        return True
+
+    assert the_providers_are_working()
+
+
+def test_fails_when_action_doesnt_fulfill_the_agreement_of_provides():
+    "it fails when an action doesn't fulfill its agreements"
+    from sure import action_for, scenario
+
+    error = 'the action "bad_action" was supposed to provide the ' \
+        'attribute "two" into the context, but it did not. Please ' \
+        'double check its implementation'
+
+    def with_setup(context):
+        @action_for(context, provides=['one', 'two'])
+        def bad_action():
+            context.one = 123
+
+    @scenario(with_setup)
+    def the_providers_are_working(the):
+        assert that(the.bad_action).raises(AssertionError, error)
+        return True
+
+    assert the_providers_are_working()
+
+
+def test_depends_on_failing_due_nothing_found():
+    "it fails when an action depends on some attribute that is not " \
+        "provided by any other previous action"
+    import os
+    from sure import action_for, scenario
+
+    fullpath = os.path.abspath(__file__)
+    error = 'the action "lonely_action" defined at %s:901 ' \
+        'depends on the attribute "something" to be available in the' \
+        ' context. It turns out that there are no actions providing ' \
+        'that. Please double-check the implementation' % fullpath
+
+    def with_setup(context):
+        @action_for(context, depends_on=['something'])
+        def lonely_action():
+            pass
+
+    @scenario(with_setup)
+    def depends_on_fails(the):
+        assert that(the.lonely_action).raises(AssertionError, error)
+        return True
+
+    assert depends_on_fails()
+
+
+def test_depends_on_failing_due_not_calling_a_previous_action():
+    "it fails when an action depends on some attribute that is being " \
+        "provided by other actions"
+
+    import os
+    from sure import action_for, scenario
+
+    fullpath = os.path.abspath(__file__)
+    error = 'the action "my_action" defined at {0}:931 ' \
+        'depends on the attribute "some_attr" to be available in the context.'\
+        ' You need to call one of the following actions beforehand:\n' \
+        ' -> dependency_action at {0}:927'.format(fullpath)
+
+    def with_setup(context):
+        @action_for(context, provides=['some_attr'])
+        def dependency_action():
+            context.some_attr = True
+
+        @action_for(context, depends_on=['some_attr'])
+        def my_action():
+            pass
+
+    @scenario(with_setup)
+    def depends_on_fails(the):
+        assert that(the.my_action).raises(AssertionError, error)
+        return True
+
+    assert depends_on_fails()
 
 
 def test_that_contains_dictionary_keys():
@@ -903,7 +989,7 @@ def test_variables_bag_provides_meaningful_error_on_nonexisting_attribute():
 
     assert that(access_nonexisting_attr).raises(
         AssertionError,
-        'you have tried to access the attribute "bleh" the context ' \
+        'you have tried to access the attribute "bleh" from the context ' \
         '(aka VariablesBag), but there is no such attribute assigned to it. ' \
         'Maybe you misspelled it ? Well, here are the options: ' \
         '[\'name\', \'foo\']',

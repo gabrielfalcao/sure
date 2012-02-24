@@ -353,102 +353,76 @@ Let's go from a simple example and then we evolve into more features
 ## The simplest case
 
 ```python
-    from sure import action_for, that, scenario
-    from myapp import User
+from sure import action_for, that, scenario
+from myapp import User
 
-    @scenario
-    def users_should_introduce_themselves(context):
-        "Users should eb able to introduce themselves"
+@scenario
+def users_should_introduce_themselves(context):
+    "Users should eb able to introduce themselves"
 
-        # aliasing the context for semantic usage below
-        Given = Then = context
+    # aliasing the context for semantic usage below
+    Given = Then = context
 
-        # defining some actions
-        @action_for(context, provides=['user'])
-        def there_is_a_user_called(name):
-            context.user = User(first_name=name)
+    # defining some actions
+    @action_for(context, provides=['user'])
+    def there_is_a_user_called(name):
+        context.user = User(first_name=name)
 
-        @action_for(context, depends_on=['user'])
-        def he_introduces_himself_with(a_greeting):
-            assert that(context.user.say_hello()).looks_like(a_greeting)
+    @action_for(context, depends_on=['user'])
+    def he_introduces_himself_with(a_greeting):
+        assert that(context.user.say_hello()).looks_like(a_greeting)
 
-        # calling the actions
+    # calling the actions
 
-        Given.there_is_a_user_called('Fabio')
-        Then.he_introduces_himself_with('Hello, my name if Fabio. Nice meeting you')
+    Given.there_is_a_user_called('Fabio')
+    Then.he_introduces_himself_with('Hello, my name if Fabio. Nice meeting you')
 ```
 
 
 ## A slightly more elaborated example: browsing with django test client + lxml
 
 ```python
-    from django.test.client import Client
-    from lxml import html as lhtml
-    from sure import action_for, that, scenario
+from django.test.client import Client
+from lxml import html as lhtml
+from sure import action_for, that, scenario
 
-    def prepare_browser(context):
-        @action_in(context, provides=['browser', 'response', 'dom'])
-        def I_navigate_to(path):
-           # preparing the browser
-           context.browser = Client()
+def prepare_browser(context):
+    @action_in(context, provides=['browser', 'response', 'dom'])
+    def I_navigate_to(path):
+       # preparing the browser
+       context.browser = Client()
 
-           # saving the response
-           context.response = context.browser.get(path)
+       # saving the response
+       context.response = context.browser.get(path)
 
-           # also saving a DOM object for future traversing
-           context.dom = lhtml.fromstring(context.response.content)
+       # also saving a DOM object for future traversing
+       context.dom = lhtml.fromstring(context.response.content)
 
-        @action_in(context, depends_on=['browser'], provides=['title'])
-        def I_see_the_header_has_the_title(the_expected_title):
-            # just saving the title for future use
-            titles_found = context.dom.cssselect('header .title')
+    @action_in(context, depends_on=['browser'], provides=['title'])
+    def I_see_the_header_has_the_title(the_expected_title):
+        # just saving the title for future use
+        titles_found = context.dom.cssselect('header .title')
 
-            assert that(titles_found).len_is(1)
-            (context.title, ) = titles_found
+        assert that(titles_found).len_is(1)
+        (context.title, ) = titles_found
 
-            assert that(context.title.text).looks_like(the_expected_title)
+        assert that(context.title.text).looks_like(the_expected_title)
 
-        @action_in(context, depends_on=['title'])
-        def the_title_also_has_the_classes(expected_classes):
-            existing_classes = context.title.attrib.get('class', '')
-            for expected_class in expected_classes:
-                assert that(existing_classes).looks_like(expected_class)
+    @action_in(context, depends_on=['title'])
+    def the_title_also_has_the_classes(expected_classes):
+        existing_classes = context.title.attrib.get('class', '')
+        for expected_class in expected_classes:
+            assert that(existing_classes).looks_like(expected_class)
 
 
-    @scenario([prepare_browser])
-    def navigate_to_index_page(context):
-        "Navigate to the index page and check some HTML markup"
-        Given = Then = context
+@scenario([prepare_browser])
+def navigate_to_index_page(context):
+    "Navigate to the index page and check some HTML markup"
+    Given = Then = context
 
-        Given.I_navigate_to("/index")
-        When.I_see_the_header_has_the_title("Welcome to our nifty website")
-        Then.the_title_also_has_the_classes(["alert", "alert-info", "fade-in"])
-
-```
-
-### action_in, action_for, all the same thing!
-
-```python
-def test_action_can_be_contextualized_aliased():
-    "sure.action_for is an alias for sure.action_in"
-    from sure import action_for, that, scenario
-
-    def with_setup(context):
-        @action_for(context)
-        def i_have_an_action(received_text):
-            assert_equals(received_text, "super cool")
-            return "this other pretty text"
-
-    @scenario([with_setup])
-    def scenario_above(context):
-        given = the = context
-        given.i_have_an_action("super cool").contextualized_as('awesomeness')
-
-        assert that(the.awesomeness).equals("this other pretty text")
-        the.awesomeness = 'was amazing'
-        return the['awesomeness']
-
-    assert_equals(scenario_above(), 'was amazing')
+    Given.I_navigate_to("/index")
+    When.I_see_the_header_has_the_title("Welcome to our nifty website")
+    Then.the_title_also_has_the_classes(["alert", "alert-info", "fade-in"])
 ```
 
 # license

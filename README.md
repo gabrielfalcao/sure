@@ -24,7 +24,7 @@ class FooBar:
     attribute_one = "simple"
 
 assert "attribute_one" in that(FooBar)
-assert that(FooBar).has("attribute_one")
+vassert that(FooBar).has("attribute_one")
 assert that(FooBar).equals(FooBar)
 
 # go faster
@@ -283,7 +283,7 @@ scenario can share data in a really flexible way.
 
 ## The idea
 
-Firstly, if you are not familiar with [Behavior-driven development](http://antonymarcano.com/blog/2011/03/goals-tasks-action/) I strongly recommend the blog post ["What's in a story"](http://dannorth.net/whats-in-a-story/), by [Dan North](http://dannorth.net), former [ThoughtWorks](http://en.wikipedia.org/wiki/ThoughtWorks) employee. And as you might know, ThoughtWorks [is internatially recognized](http://en.wikipedia.org/wiki/ThoughtWorks#History) as being the cradle of agile methodologies, which often includes using assorted automated test engineering techniques.
+Firstly, if you are not familiar with [Behavior-driven development](http://antonymarcano.com/blog/2011/03/goals-tasks-action/) I strongly recommend the blog post ["What's in a story"](http://dannorth.net/whats-in-a-story/), by [Dan North](http://dannorth.net), former [ThoughtWorks](http://en.wikipedia.org/wiki/ThoughtWorks) employee. And as you might know, ThoughtWorks [is internationally recognized](http://en.wikipedia.org/wiki/ThoughtWorks#History) as being the cradle of agile methodologies, which often includes using assorted automated test engineering techniques.
 
 Sure is pretty much just a layer you should use on top of
 [nose-compatible test functions](http://readthedocs.org/docs/nose/en/latest/writing_tests.html#test-functions). It
@@ -345,6 +345,16 @@ the ones you want in each scenario.
 
 It may sound complicated, but during the rollout below you're gonna
 see it's easy peasy.
+
+#### !!! IMPORTANT NOTE ON SETUP/TEARDOWN !!!
+
+Never, ever name your setup and teardown functions as just `setup` and
+`teardown` respectivelly.  "Sure" has its own mechanism for calling
+them with a context variable, but if you name the callbacks as `setup`
+and/or `teardown`, then
+[nose will call them manually](http://readthedocs.org/docs/nose/en/latest/writing_tests.html#fixtures),
+but not only that: you will get a very bad error since the appropriate
+`context` variable will not be passed as first argument.
 
 
 ## Examples

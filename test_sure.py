@@ -1,7 +1,7 @@
 # #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # <sure - assertion toolbox>
-# Copyright (C) <2010>  Gabriel Falcão <gabriel@nacaolivre.org>
+# Copyright (C) <2010-2012>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
@@ -994,3 +994,34 @@ def test_variables_bag_provides_meaningful_error_on_nonexisting_attribute():
         'Maybe you misspelled it ? Well, here are the options: ' \
         '[\'name\', \'foo\']',
     )
+
+
+def test_actions_providing_dinamically_named_variables():
+    "the actions should be able to declare the variables they provide"
+    from sure import action_for, scenario
+
+    def with_setup(context):
+        @action_for(context, provides=['var1', '{0}'])
+        def the_context_has_variables(first_arg):
+            context.var1 = 123
+            context[first_arg] = "qwerty"
+
+    @scenario(with_setup)
+    def the_providers_are_working(Then):
+        Then.the_context_has_variables('JohnDoe')
+        assert hasattr(Then, 'var1')
+        assert 'JohnDoe' in Then
+        assert hasattr(Then, '__sure_providers_of__')
+
+        providers = Then.__sure_providers_of__
+        action = Then.the_context_has_variables.__name__
+
+        providers_of_var1 = [p.__name__ for p in providers['var1']]
+        assert that(providers_of_var1).contains(action)
+
+        providers_of_JohnDoe = [p.__name__ for p in providers['JohnDoe']]
+        assert that(providers_of_JohnDoe).contains(action)
+
+        return True
+
+    assert the_providers_are_working()

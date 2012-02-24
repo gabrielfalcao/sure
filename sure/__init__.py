@@ -1,7 +1,7 @@
 # #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # <sure - assertion toolbox>
-# Copyright (C) <2010>  Gabriel Falcão <gabriel@nacaolivre.org>
+# Copyright (C) <2010-2012>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
@@ -28,12 +28,14 @@ import os
 import sys
 import inspect
 import traceback
-from datetime import datetime
-from functools import wraps
-from pprint import pformat
+
 from copy import deepcopy
+from pprint import pformat
+from functools import wraps
+from datetime import datetime
 from collections import Iterable
-version = '0.8.0'
+
+version = '0.8.1'
 
 
 def _get_file_name(func):
@@ -613,13 +615,39 @@ def action_for(context, provides=None, depends_on=None):
         depends_on = []
 
     def register_providers(func, attr):
+        if re.search(ur'^[{]\d+[}]$', attr):
+            return  # ignore dinamically declared provides
+
         if not attr in context.__sure_providers_of__:
             context.__sure_providers_of__[attr] = []
 
         context.__sure_providers_of__[attr].append(func)
 
-    def ensure_providers(func, attr):
-        assert hasattr(context, attr), \
+    def register_dinamic_providers(func, attr, args, kwargs):
+        found = re.search(ur'^[{](\d+)[}]$', attr)
+        if not found:
+            return  # ignore dinamically declared provides
+
+        index = int(found.group(1))
+        assert index < len(args), \
+            'the dinamic provider index: {%d} is bigger than %d, which is ' \
+            'the length of the positional arguments passed to %s' % (
+            index, len(args), func.__name__)
+
+        attr = args[index]
+
+        if not attr in context.__sure_providers_of__:
+            context.__sure_providers_of__[attr] = []
+
+        context.__sure_providers_of__[attr].append(func)
+
+    def ensure_providers(func, attr, args, kwargs):
+        found = re.search(ur'^[{](\d+)[}]$', attr)
+        if found:
+            index = int(found.group(1))
+            attr = args[index]
+
+        assert attr in context, \
             'the action "%s" was supposed to provide the attribute "%s" ' \
             'into the context, but it did not. Please double check its ' \
             'implementation' % (func.__name__, attr)
@@ -668,10 +696,12 @@ def action_for(context, provides=None, depends_on=None):
 
         @wraps(func)
         def wrapper(*args, **kw):
+            [register_dinamic_providers(func, attr, args, kw)
+             for attr in provides]
             context.__sure_actions_ran__.append((func, args, kw))
             check_dependencies(func)
             result = func(*args, **kw)
-            [ensure_providers(func, attr) for attr in provides]
+            [ensure_providers(func, attr, args, kw) for attr in provides]
             context.__sure_action_results__.append(result)
             return context
 

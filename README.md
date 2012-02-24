@@ -264,7 +264,7 @@ behavior you expect your application to have, very focused on
 providing a very declarative and self-describing DSL through simple
 tricks around the python syntax.
 
-This may disagree with conventions like [PEP-8] and Tim Peters's
+This may disagree with conventions like [PEP-8](http://www.python.org/dev/peps/pep-0008/) and Tim Peters's
 [Zen of Python](http://www.python.org/dev/peps/pep-0020/).
 
 It's not that "sure" disagrees with those conventions, the module

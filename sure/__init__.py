@@ -41,7 +41,7 @@ def itemize_length(items):
     return '%d item%s' % (length, length > 1 and "s" or "")
 
 not_here_error = \
-    'you have tried to access the attribute "%s" the context ' \
+    'you have tried to access the attribute "%s" from the context ' \
     '(aka VariablesBag), but there is no such attribute assigned to it. ' \
     'Maybe you misspelled it ? Well, here are the options: [%s]'
 

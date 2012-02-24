@@ -256,36 +256,174 @@ def could_work(matcher, parameter):
 assert that("this").could_work("I mean, for real!") == "cool!"
 ```
 
-# Go BDD with me :)
+# Hipster BDD with just... python code
+
+Unlikely [lettuce](http://lettuce.it), sure allows you to describe the
+behavior you expect your application to have, very focused on
+providing a very declarative and self-describing DSL through simple
+tricks around the python syntax.
+
+This may disagree with conventions like [PEP-8] and Tim Peters's
+[Zen of Python](http://www.python.org/dev/peps/pep-0020/).
+
+It's not that "sure" disagrees with those conventions, the module
+itself follows both PEP-8 and PEP-20. But it turns out that "sure"
+provides you with sometimes conflicting conventions, for the sake of
+readability and maintainability of the code that makes sure your
+production code is always healthy.
 
 Sure aliases the decorator `@that_with_context` as `@scenario` and the
 context passed as parameter is just a bag of variables you can mess
-with. So that your scenario can share data in a really flexible way.
+around without feeling like juggling with machetes. So that your
+scenario can share data in a really flexible way.
 
-Aditionally, you can add actions through your setup functions and they
-will last only for your scenario's lifetime.
+*Don't worry, "sure"'s internals seal the variables you use within the
+ test scope and its setup/teardown functions. Everything is sandboxed.
 
-## let's see it in action
+## The idea
+
+Firstly, if you are not familiar with [Behavior-driven development](http://antonymarcano.com/blog/2011/03/goals-tasks-action/) I strongly recommend the blog post ["What's in a story"](http://dannorth.net/whats-in-a-story/), by [Dan North](http://dannorth.net), former [ThoughtWorks](http://en.wikipedia.org/wiki/ThoughtWorks) employee. And as you might know, ThoughtWorks [is internatially recognized](http://en.wikipedia.org/wiki/ThoughtWorks#History) as being the cradle of agile methodologies, which often includes using assorted automated test engineering techniques.
+
+Sure is pretty much just a layer you should use on top of
+[nose-compatible test functions](http://readthedocs.org/docs/nose/en/latest/writing_tests.html#test-functions). It
+provides you with decorators that leverage declaring scenarios and
+actions to be executed within them.
+
+The DSL itself is just python code, altough it requires a certain
+effort from the developers that authors the tests. In the other hand,
+it also provides builtin validation of action executions, looking for
+conflicting inter-dependency, as well as giving very meaningful
+feedback, so that you won't spend hours debugging messed up code.
+
+## Nomenclature
+
+There are a few small examples of usage through the sub-sections
+below, don't rely solely on them, to go further on the API usage,
+check the documentation.
+
+### Scenario
+
+Scenarios are actually just
+[nose-compatible test functions](http://readthedocs.org/docs/nose/en/latest/writing_tests.html#test-functions)
+decorated with `@scenario()`.
+
+Scenarios accepts lists of callbacks that will be called before and after
+themselves so that you have a fine grained setup/teardown management.
+Also, scenarios will call the original test functions with one
+argument: context
+
+### Context
+
+Context is a clever object that keeps records of its contents and
+reporting ant problems when trying to access them, so that you know
+what part of your test is wrong.
+
+Contexts are also a key thing when calling actions, you can create
+aliases of it named: `Given, When, Then, And` and so on... You can see
+more in the examples or docs.
+
+### Actions
+
+Are the smalllest portions of test that will compose your actions,
+declare them within any setup functions, the `@action_for` decorator
+also gives you ways to explicit what variables the action will create
+within the `context` argument, or require previous variables to be
+already in the `context`.
+
+This is one of the most important features of "sure", so that you and
+your team will spend less time debugging a test and more on getting
+things done.
+
+### Setup/Teardown
+
+As said above, the `@scenario()` decorators takes 2 positional
+arguments: setup and teardown.  They can be both `callables` or `a
+list of callables`.  This is specially useful when you wanna organize
+your `Actions` into separated setup functions, then you only include
+the ones you want in each scenario.
+
+It may sound complicated, but during the rollout below you're gonna
+see it's easy peasy.
+
+
+## Examples
+
+Let's go from a simple example and then we evolve into more features
+
+## The simplest case
 
 ```python
-    from sure import action_in, that, scenario
+    from sure import action_for, that, scenario
+    from myapp import User
 
-    def with_setup(context):
-        @action_in(context)
-        def i_have_an_action(received_text):
-            assert_equals(received_text, "yay, I do!")
-            return "this pretty text"
+    @scenario
+    def users_should_introduce_themselves(context):
+        "Users should eb able to introduce themselves"
 
-    @scenario([with_setup])
-    def i_can_use_actions(context):
-        "We should be able to use actions"
-        given = the = context
-        given.i_have_an_action("yay, I do!").contextualized_as('value')
+        # aliasing the context for semantic usage below
+        Given = Then = context
 
-        assert that(the.value).equals("this pretty text")
-        return True
+        # defining some actions
+        @action_for(context, provides=['user'])
+        def there_is_a_user_called(name):
+            context.user = User(first_name=name)
 
-    assert i_can_use_actions()
+        @action_for(context, depends_on=['user'])
+        def he_introduces_himself_with(a_greeting):
+            assert that(context.user.say_hello()).looks_like(a_greeting)
+
+        # calling the actions
+
+        Given.there_is_a_user_called('Fabio')
+        Then.he_introduces_himself_with('Hello, my name if Fabio. Nice meeting you')
+```
+
+
+## A slightly more elaborated example: browsing with django test client + lxml
+
+```python
+    from django.test.client import Client
+    from lxml import html as lhtml
+    from sure import action_for, that, scenario
+
+    def prepare_browser(context):
+        @action_in(context, provides=['browser', 'response', 'dom'])
+        def I_navigate_to(path):
+           # preparing the browser
+           context.browser = Client()
+
+           # saving the response
+           context.response = context.browser.get(path)
+
+           # also saving a DOM object for future traversing
+           context.dom = lhtml.fromstring(context.response.content)
+
+        @action_in(context, depends_on=['browser'], provides=['title'])
+        def I_see_the_header_has_the_title(the_expected_title):
+            # just saving the title for future use
+            titles_found = context.dom.cssselect('header .title')
+
+            assert that(titles_found).len_is(1)
+            (context.title, ) = titles_found
+
+            assert that(context.title.text).looks_like(the_expected_title)
+
+        @action_in(context, depends_on=['title'])
+        def the_title_also_has_the_classes(expected_classes):
+            existing_classes = context.title.attrib.get('class', '')
+            for expected_class in expected_classes:
+                assert that(existing_classes).looks_like(expected_class)
+
+
+    @scenario([prepare_browser])
+    def navigate_to_index_page(context):
+        "Navigate to the index page and check some HTML markup"
+        Given = Then = context
+
+        Given.I_navigate_to("/index")
+        When.I_see_the_header_has_the_title("Welcome to our nifty website")
+        Then.the_title_also_has_the_classes(["alert", "alert-info", "fade-in"])
+
 ```
 
 ### action_in, action_for, all the same thing!

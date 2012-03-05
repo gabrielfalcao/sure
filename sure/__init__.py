@@ -766,6 +766,7 @@ class DeepComparison(object):
         if type_X != type_Y:
             m = 'X has type %s whereas Y has type %s' % (type_X, type_Y)
             return DeepExplanation(m)
+
         elif X == Y:
             return True
         else:
@@ -845,7 +846,12 @@ class DeepComparison(object):
         X, Y = self.operands
 
         if self.is_simple(X) and self.is_simple(Y):  # both simple
-            return X == Y
+            if X == Y:
+                return True
+            c = self.get_context()
+            m = "X{0} is %r whereas Y{1} is %r"
+            msg = m.format(c.current_X_keys, c.current_Y_keys) % (X, Y)
+            return DeepExplanation(msg)
 
         elif type(X) is not type(Y):  # different types
             xname, yname = map(lambda _: type(_).__name__, (X, Y))

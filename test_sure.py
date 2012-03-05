@@ -1039,6 +1039,28 @@ def test_deep_equals_dict_level1_success():
     })
 
 
+def test_deep_equals_dict_level1_fail():
+    "sure.that() deep_equals(dict) failing on level 1"
+
+    something = {
+        'one': 'yeah',
+    }
+
+    def assertions():
+        assert that(something).deep_equals({
+            'one': 'oops',
+        })
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = {'one': 'yeah'}\n" \
+        "    and\n" \
+        "Y = {'one': 'oops'}\n" \
+        "X['one'] is 'yeah' whereas Y['one'] is 'oops'",
+    )
+
+
 def test_deep_equals_list_level1_success():
     "sure.that(list) deep_equals(list) succeeding on level 1"
 
@@ -1098,38 +1120,6 @@ def test_deep_equals_list_level1_fail_by_length_y_gt_x():
         "Y = ['one', 'yeah', 'damn']\n" \
         "Y has 3 items whereas X has only 2",
     )
-
-
-def test_deep_equals_dict_level2_success():
-    "sure.that() deep_equals(dict) succeeding on level 1"
-
-    something = {
-        'one': 'yeah',
-        'another': {
-            'two': 'cool',
-        },
-    }
-
-    assert that(something).deep_equals({
-        'one': 'yeah',
-        'another': {
-            'two': 'cool',
-        },
-    })
-
-
-# def test_deep_equals_dict_level2_list_success():
-#     "sure.that() deep_equals(dict) succeeding on level 1"
-
-#     something = {
-#         'one': 'yeah',
-#         'another': ['one', 'two', 3],
-#     }
-
-#     assert that(something).deep_equals({
-#         'one': 'yeah',
-#         'another': ['one', 'two', 3],
-#     })
 
 
 def test_deep_equals_dict_level1_fails_missing_key_on_y():
@@ -1285,4 +1275,63 @@ def test_deep_equals_fallsback_to_generic_comparator_failing():
         "    and\n" \
         "Y = {'date': datetime.datetime(2012, 3, 6, 0, 0)}\n" \
         "X['date'] != Y['date']",
+    )
+
+
+def test_deep_equals_dict_level2_success():
+    "sure.that() deep_equals(dict) succeeding on level 2"
+
+    something = {
+        'one': 'yeah',
+        'another': {
+            'two': 'cool',
+        },
+    }
+
+    assert that(something).deep_equals({
+        'one': 'yeah',
+        'another': {
+            'two': 'cool',
+        },
+    })
+
+
+def test_deep_equals_dict_level2_list_success():
+    "sure.that() deep_equals(dict) succeeding on level 2"
+
+    something = {
+        'one': 'yeah',
+        'another': ['one', 'two', 3],
+    }
+
+    assert that(something).deep_equals({
+        'one': 'yeah',
+        'another': ['one', 'two', 3],
+    })
+
+
+def test_deep_equals_dict_level2_fail():
+    "sure.that() deep_equals(dict) failing on level 2"
+
+    something = {
+        'one': 'yeah',
+        'another': {
+            'two': '##',
+        },
+    }
+
+    def assertions():
+        assert that(something).deep_equals({
+            'one': 'yeah',
+            'another': {
+                'two': '$$',
+            },
+        })
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = {'another': {'two': '##'}, 'one': 'yeah'}\n" \
+        "    and\n" \
+        "Y = {'another': {'two': '$$'}, 'one': 'yeah'}\n" \
+        "X['another']['two'] is '##' whereas Y['another']['two'] is '$$'",
     )

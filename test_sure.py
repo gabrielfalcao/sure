@@ -1077,3 +1077,19 @@ def test_deep_equals_failing_basic_vs_complex():
         "Y = {'two': 'yeah'}\n" \
         "X is a str and Y is a dict instead",
     )
+
+
+def test_deep_equals_failing_complex_vs_basic():
+    "sure.that(X) deep_equals(Y) fails with complex vc basic type"
+
+    def assertions():
+        assert that({'two': 'yeah'}).deep_equals('two yeah')
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = {'two': 'yeah'}\n" \
+        "    and\n" \
+        "Y = 'two yeah'\n"
+        "X is a dict and Y is a str instead",
+    )

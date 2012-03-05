@@ -755,6 +755,8 @@ class DeepCoparison(object):
         kind = type(X)
         mapping = {
             dict: self.compare_dicts,
+            list: self.compare_iterables,
+            tuple: self.compare_iterables,
         }
         return mapping[kind](X, Y)
 
@@ -770,13 +772,35 @@ class DeepCoparison(object):
         elif diff_y:
             msg = "Y has the key \"%s\" whereas X doesn't" % diff_y[0]
             return DeepExplanation(msg)
+        elif X == Y:
+            return True
         else:
             for key_X, key_Y in zip(x_keys, y_keys):
+                self.key_X = key_X
+                self.key_Y = key_Y
                 value_X = X[key_X]
                 value_Y = Y[key_Y]
                 child = DeepCoparison(value_X, value_Y).compare()
                 if child:
                     return child
+
+    def compare_iterables(self, X, Y):
+        len_X, len_Y = map(len, (X, Y))
+        if len_X > len_Y:
+            msg = "X has %d items whereas Y has only %d" % (len_X, len_Y)
+            return DeepExplanation(msg)
+        elif len_X < len_Y:
+            msg = "Y has %d items whereas X has only %d" % (len_Y, len_X)
+            return DeepExplanation(msg)
+        elif X == Y:
+            return True
+        else:
+            for i, (value_X, value_Y) in enumerate(zip(X, Y)):
+                self.key_X = self.key_Y = i
+                if value_Y != value_X:
+                    m = 'Y[{0}] is %r whereas should be like %r as in X[{0}]'
+                    msg = m.format(i) % (value_Y, value_X)
+                    return DeepExplanation(msg)
 
     def compare(self):
         X, Y = self.operands

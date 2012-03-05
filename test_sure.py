@@ -1039,6 +1039,99 @@ def test_deep_equals_dict_level1_success():
     })
 
 
+def test_deep_equals_list_level1_success():
+    "sure.that(list) deep_equals(list) succeeding on level 1"
+
+    something = ['one', 'yeah']
+    assert that(something).deep_equals(['one', 'yeah'])
+
+
+def test_deep_equals_list_level1_fail_by_value():
+    "sure.that(list) deep_equals(list) failing on level 1"
+
+    something = ['one', 'yeahs']
+
+    def assertions():
+        assert that(something).deep_equals(['one', 'yeah'])
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = ['one', 'yeahs']\n" \
+        "    and\n" \
+        "Y = ['one', 'yeah']\n" \
+        "Y[1] is 'yeah' whereas should be like 'yeahs' as in X[1]",
+    )
+
+
+def test_deep_equals_list_level1_fail_by_length_x_gt_y():
+    "sure.that(list) deep_equals(list) failing by length (len(X) > len(Y))"
+
+    something = ['one', 'yeah', 'awesome!']
+
+    def assertions():
+        assert that(something).deep_equals(['one', 'yeah'])
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = ['one', 'yeah', 'awesome!']\n" \
+        "    and\n" \
+        "Y = ['one', 'yeah']\n" \
+        "X has 3 items whereas Y has only 2",
+    )
+
+
+def test_deep_equals_list_level1_fail_by_length_y_gt_x():
+    "sure.that(list) deep_equals(list) failing by length (len(Y) > len(X))"
+
+    something = ['one', 'yeah']
+
+    def assertions():
+        assert that(something).deep_equals(['one', 'yeah', 'damn'])
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = ['one', 'yeah']\n" \
+        "    and\n" \
+        "Y = ['one', 'yeah', 'damn']\n" \
+        "Y has 3 items whereas X has only 2",
+    )
+
+
+def test_deep_equals_dict_level2_success():
+    "sure.that() deep_equals(dict) succeeding on level 1"
+
+    something = {
+        'one': 'yeah',
+        'another': {
+            'two': 'cool',
+        },
+    }
+
+    assert that(something).deep_equals({
+        'one': 'yeah',
+        'another': {
+            'two': 'cool',
+        },
+    })
+
+
+# def test_deep_equals_dict_level2_list_success():
+#     "sure.that() deep_equals(dict) succeeding on level 1"
+
+#     something = {
+#         'one': 'yeah',
+#         'another': ['one', 'two', 3],
+#     }
+
+#     assert that(something).deep_equals({
+#         'one': 'yeah',
+#         'another': ['one', 'two', 3],
+#     })
+
+
 def test_deep_equals_dict_level1_fails_missing_key_on_y():
     "sure.that(X) deep_equals(Y) fails when Y is missing a key that X has"
 
@@ -1092,4 +1185,65 @@ def test_deep_equals_failing_complex_vs_basic():
         "    and\n" \
         "Y = 'two yeah'\n"
         "X is a dict and Y is a str instead",
+    )
+
+
+def test_deep_equals_tuple_level1_success():
+    "sure.that(tuple) deep_equals(tuple) succeeding on level 1"
+
+    something = ('one', 'yeah')
+    assert that(something).deep_equals(('one', 'yeah'))
+
+
+def test_deep_equals_tuple_level1_fail_by_value():
+    "sure.that(tuple) deep_equals(tuple) failing on level 1"
+
+    something = ('one', 'yeahs')
+
+    def assertions():
+        assert that(something).deep_equals(('one', 'yeah'))
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = ('one', 'yeahs')\n" \
+        "    and\n" \
+        "Y = ('one', 'yeah')\n" \
+        "Y[1] is 'yeah' whereas should be like 'yeahs' as in X[1]",
+    )
+
+
+def test_deep_equals_tuple_level1_fail_by_length_x_gt_y():
+    "sure.that(tuple) deep_equals(tuple) failing by length (len(X) > len(Y))"
+
+    something = ('one', 'yeah', 'awesome!')
+
+    def assertions():
+        assert that(something).deep_equals(('one', 'yeah'))
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = ('one', 'yeah', 'awesome!')\n" \
+        "    and\n" \
+        "Y = ('one', 'yeah')\n" \
+        "X has 3 items whereas Y has only 2",
+    )
+
+
+def test_deep_equals_tuple_level1_fail_by_length_y_gt_x():
+    "sure.that(tuple) deep_equals(tuple) failing by length (len(Y) > len(X))"
+
+    something = ('one', 'yeah')
+
+    def assertions():
+        assert that(something).deep_equals(('one', 'yeah', 'damn'))
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = ('one', 'yeah')\n" \
+        "    and\n" \
+        "Y = ('one', 'yeah', 'damn')\n" \
+        "Y has 3 items whereas X has only 2",
     )

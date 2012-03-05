@@ -1,5 +1,5 @@
 # sure
-> Version 0.8.0
+> Version 0.9.0
 
 # What
 
@@ -112,6 +112,32 @@ mammals = [
 assert that(mammals).the_attribute('kind').equals('mammal')
 assert that(mammals, within_range(1, 2)).the_attribute('name').equals('cat')
 ```
+
+### deep comparisons
+
+Sure will iterate through your dictionaries, tuples and lists and compare all
+its contents, side-by-side, in depth. All you gotta do is use `deep_equals`.
+
+Example:
+
+
+```python
+something = {
+    'one': 'yeah',
+    'another': {
+        'two': 'cool',
+    },
+}
+
+assert that(something).deep_equals({
+    'one': 'yeah',
+    'another': {
+        'two': 'cool',
+    },
+})
+```
+
+And even better, when the comparison doesn't at some point, sure will show a **VERY** meaningful assertion message for you.
 
 #### further
 

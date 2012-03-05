@@ -287,7 +287,7 @@ class that(object):
         return True
 
     def deep_equals(self, dst):
-        deep = DeepCoparison(self._src, dst)
+        deep = DeepComparison(self._src, dst)
         comparison = deep.compare()
         if isinstance(comparison, bool):
             return comparison
@@ -740,11 +740,12 @@ Y = %r
         raise AssertionError(self.get_header(X, Y, self))
 
 
-class DeepCoparison(object):
+class DeepComparison(object):
     def __init__(self, X, Y, level=0, parent=None):
         self.operands = X, Y
         self.level = level
         self.parent = parent
+        self._context = None
 
     def is_simple(self, obj):
         return isinstance(obj, (
@@ -758,7 +759,19 @@ class DeepCoparison(object):
             list: self.compare_iterables,
             tuple: self.compare_iterables,
         }
-        return mapping[kind](X, Y)
+        return mapping.get(kind, self.compare_generic)(X, Y)
+
+    def compare_generic(self, X, Y):
+        type_X, type_Y = map(type, (X, Y))
+        if type_X != type_Y:
+            m = 'X has type %s whereas Y has type %s' % (type_X, type_Y)
+            return DeepExplanation(m)
+        elif X == Y:
+            return True
+        else:
+            c = self.get_context()
+            m = 'X{0} != Y{1}'.format(c.current_X_keys, c.current_Y_keys)
+            return DeepExplanation(m)
 
     def compare_dicts(self, X, Y):
         x_keys = X.keys()
@@ -780,9 +793,35 @@ class DeepCoparison(object):
                 self.key_Y = key_Y
                 value_X = X[key_X]
                 value_Y = Y[key_Y]
-                child = DeepCoparison(value_X, value_Y).compare()
+                child = DeepComparison(
+                    value_X,
+                    value_Y,
+                    level=self.level + 1,
+                    parent=self,
+                ).compare()
                 if child:
                     return child
+
+    def get_context(self):
+        if self._context:
+            return self._context
+
+        X_keys = []
+        Y_keys = []
+
+        comp = self
+        while comp.parent:
+            X_keys.insert(0, comp.parent.key_X)
+            Y_keys.insert(0, comp.parent.key_Y)
+            comp = comp.parent
+
+        class ComparisonContext:
+            current_X_keys = '[%s]' % ']['.join(map(repr, X_keys))
+            current_Y_keys = '[%s]' % ']['.join(map(repr, Y_keys))
+            parent = comp
+
+        self._context = ComparisonContext()
+        return self._context
 
     def compare_iterables(self, X, Y):
         len_X, len_Y = map(len, (X, Y))
@@ -817,7 +856,9 @@ class DeepCoparison(object):
             exp = self.compare_complex_stuff(X, Y)
 
         if isinstance(exp, DeepExplanation):
-            raise exp.as_assertion(X, Y)
+            c = self.get_context()
+            original_X, original_Y = c.parent.operands
+            raise exp.as_assertion(original_X, original_Y)
 
         return exp
 

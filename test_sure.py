@@ -1247,3 +1247,42 @@ def test_deep_equals_tuple_level1_fail_by_length_y_gt_x():
         "Y = ('one', 'yeah', 'damn')\n" \
         "Y has 3 items whereas X has only 2",
     )
+
+
+def test_deep_equals_fallsback_to_generic_comparator():
+    "sure.that() deep_equals(dict) falling back to generic comparator"
+    from datetime import datetime
+    now = datetime.now()
+    something = {
+        'one': 'yeah',
+        'date': now,
+    }
+
+    assert that(something).deep_equals({
+        'one': 'yeah',
+        'date': now,
+    })
+
+
+def test_deep_equals_fallsback_to_generic_comparator_failing():
+    "sure.that() deep_equals(dict) with generic comparator failing"
+    from datetime import datetime
+    now = datetime(2012, 3, 5)
+    tomorrow = datetime(2012, 3, 6)
+    something = {
+        'date': now,
+    }
+
+    def assertions():
+        assert that(something).deep_equals({
+            'date': tomorrow,
+        })
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = {'date': datetime.datetime(2012, 3, 5, 0, 0)}\n" \
+        "    and\n" \
+        "Y = {'date': datetime.datetime(2012, 3, 6, 0, 0)}\n" \
+        "X['date'] != Y['date']",
+    )

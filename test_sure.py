@@ -1140,7 +1140,7 @@ def test_deep_equals_dict_level1_fails_missing_key_on_y():
         "X = {'one': 'yeah'}\n" \
         "    and\n" \
         "Y = {'two': 'yeah'}\n" \
-        "X has the key \"one\" whereas Y doesn't",
+        "X has the key 'one' whereas Y doesn't",
     )
 
 
@@ -1278,6 +1278,29 @@ def test_deep_equals_fallsback_to_generic_comparator_failing():
     )
 
 
+def test_deep_equals_fallsback_to_generic_comparator_failing_type():
+    "sure.that() deep_equals(dict) with generic comparator failing"
+    from datetime import datetime
+    now = datetime(2012, 3, 5)
+    something = {
+        'date': now,
+    }
+
+    def assertions():
+        assert that(something).deep_equals({
+            'date': None,
+        })
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = {'date': datetime.datetime(2012, 3, 5, 0, 0)}\n" \
+        "    and\n" \
+        "Y = {'date': None}\n" \
+        "X['date'] is a datetime and Y['date'] is a NoneType instead",
+    )
+
+
 def test_deep_equals_dict_level2_success():
     "sure.that() deep_equals(dict) succeeding on level 2"
 
@@ -1337,7 +1360,7 @@ def test_deep_equals_dict_level2_fail():
     )
 
 
-def test_deep_equals_dict_level3_success():
+def test_deep_equals_dict_level3_fail_values():
     "sure.that() deep_equals(dict) failing on level 3"
 
     something = {
@@ -1361,3 +1384,92 @@ def test_deep_equals_dict_level3_success():
         "Y = {'my::all_users': [{'age': 30, 'name': 'John'}]}\n" \
         "X['my::all_users'][0]['age'] is 33 whereas Y['my::all_users'][0]['age'] is 30",
     )
+
+
+def test_deep_equals_dict_level3_fails_missing_key():
+    "sure.that() deep_equals(dict) failing on level 3 when missing a key"
+
+    something = {
+        'my::all_users': [
+            {'name': 'John', 'age': 33},
+        ],
+    }
+
+    def assertions():
+        assert that(something).deep_equals({
+            'my::all_users': [
+                {'name': 'John', 'age': 30, 'foo': 'bar'},
+            ],
+        })
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = {'my::all_users': [{'age': 33, 'name': 'John'}]}\n" \
+        "    and\n" \
+        "Y = {'my::all_users': [{'age': 30, 'foo': 'bar', 'name': 'John'}]}\n" \
+        "X['my::all_users'][0] doesn't have the key 'foo' whereas Y['my::all_users'][0] has it",
+    )
+
+
+def test_deep_equals_dict_level3_fails_extra_key():
+    "sure.that() deep_equals(dict) failing on level 3 when has an extra key"
+
+    something = {
+        'my::all_users': [
+            {'name': 'John', 'age': 33, 'foo': 'bar'},
+        ],
+    }
+
+    def assertions():
+        assert that(something).deep_equals({
+            'my::all_users': [
+                {'name': 'John', 'age': 30},
+            ],
+        })
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = {'my::all_users': [{'age': 33, 'foo': 'bar', 'name': 'John'}]}\n" \
+        "    and\n" \
+        "Y = {'my::all_users': [{'age': 30, 'name': 'John'}]}\n" \
+        "X['my::all_users'][0] has the key 'foo' whereas Y['my::all_users'][0] doesn't",
+    )
+
+
+def test_deep_equals_list_level2_fail_by_length_x_gt_y():
+    "sure.that(list) deep_equals(list) failing by length (len(X) > len(Y))"
+
+    something = {'iterable': ['one', 'yeah', 'awesome!']}
+
+    def assertions():
+        assert that(something).deep_equals({'iterable': ['one', 'yeah']})
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = {'iterable': ['one', 'yeah', 'awesome!']}\n" \
+        "    and\n" \
+        "Y = ['one', 'yeah']\n" \
+        "X has 3 items whereas Y has only 2",
+    )
+
+
+def test_deep_equals_list_level2_fail_by_length_y_gt_x():
+    "sure.that(list) deep_equals(list) failing by length (len(Y) > len(X))"
+
+    something = ['one', 'yeah']
+
+    def assertions():
+        assert that(something).deep_equals(['one', 'yeah', 'damn'])
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = ['one', 'yeah']\n" \
+        "    and\n" \
+        "Y = ['one', 'yeah', 'damn']\n" \
+        "Y has 3 items whereas X has only 2",
+    )
+

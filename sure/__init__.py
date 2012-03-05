@@ -761,32 +761,38 @@ class DeepComparison(object):
         return mapping.get(kind, self.compare_generic)(X, Y)
 
     def compare_generic(self, X, Y):
-        type_X, type_Y = map(type, (X, Y))
-        if type_X != type_Y:
-            m = 'X has type %s whereas Y has type %s' % (type_X, type_Y)
-            return DeepExplanation(m)
-
-        elif X == Y:
+        c = self.get_context()
+        if X == Y:
             return True
         else:
-            c = self.get_context()
             m = 'X{0} != Y{1}'.format(c.current_X_keys, c.current_Y_keys)
             return DeepExplanation(m)
 
     def compare_dicts(self, X, Y):
+        c = self.get_context()
+
         x_keys = X.keys()
         y_keys = Y.keys()
 
         diff_x = list(set(x_keys).difference(set(y_keys)))
         diff_y = list(set(y_keys).difference(set(x_keys)))
         if diff_x:
-            msg = "X has the key \"%s\" whereas Y doesn't" % diff_x[0]
+            msg = "X{0} has the key '%s' whereas Y{1} doesn't".format(
+                c.current_X_keys,
+                c.current_Y_keys,
+            ) % diff_x[0]
             return DeepExplanation(msg)
+
         elif diff_y:
-            msg = "Y has the key \"%s\" whereas X doesn't" % diff_y[0]
+            msg = "X{0} doesn't have the key '%s' whereas Y{1} has it".format(
+                c.current_X_keys,
+                c.current_Y_keys,
+            ) % diff_y[0]
             return DeepExplanation(msg)
+
         elif X == Y:
             return True
+
         else:
             for key_X, key_Y in zip(x_keys, y_keys):
                 self.key_X = key_X
@@ -849,10 +855,9 @@ class DeepComparison(object):
                 if isinstance(child, DeepExplanation):
                     return child
 
-
     def compare(self):
         X, Y = self.operands
-
+        c = self.get_context()
         if self.is_simple(X) and self.is_simple(Y):  # both simple
             if X == Y:
                 return True
@@ -863,14 +868,17 @@ class DeepComparison(object):
 
         elif type(X) is not type(Y):  # different types
             xname, yname = map(lambda _: type(_).__name__, (X, Y))
-            msg = 'X is a %s and Y is a %s instead' % (xname, yname)
+            msg = 'X{0} is a %s and Y{1} is a %s instead'.format(
+                c.current_X_keys,
+                c.current_Y_keys,
+            ) % (xname, yname)
             exp = DeepExplanation(msg)
 
         else:
             exp = self.compare_complex_stuff(X, Y)
 
         if isinstance(exp, DeepExplanation):
-            c = self.get_context()
+
             original_X, original_Y = c.parent.operands
             raise exp.as_assertion(original_X, original_Y)
 

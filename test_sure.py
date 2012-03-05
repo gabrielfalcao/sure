@@ -109,12 +109,12 @@ def test_that_is_a():
 
 
 def test_that_equals():
-    "sure.that() equals(object)"
+    "sure.that() equals(string)"
 
     something = "something"
 
-    assert that(something).equals(something)
-    assert something == something
+    assert that('something').equals(something)
+    assert something == 'something'
 
 
 def test_that_differs():
@@ -1025,3 +1025,55 @@ def test_actions_providing_dinamically_named_variables():
         return True
 
     assert the_providers_are_working()
+
+
+def test_deep_equals_dict_level1_success():
+    "sure.that() deep_equals(dict) succeeding on level 1"
+
+    something = {
+        'one': 'yeah',
+    }
+
+    assert that(something).deep_equals({
+        'one': 'yeah',
+    })
+
+
+def test_deep_equals_dict_level1_fails_missing_key_on_y():
+    "sure.that(X) deep_equals(Y) fails when Y is missing a key that X has"
+
+    something = {
+        'one': 'yeah',
+    }
+
+    def assertions():
+        assert that(something).deep_equals({
+            'two': 'yeah',
+        })
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = {'one': 'yeah'}\n" \
+        "    and\n" \
+        "Y = {'two': 'yeah'}\n" \
+        "X has the key \"one\" whereas Y doesn't",
+    )
+
+
+def test_deep_equals_failing_basic_vs_complex():
+    "sure.that(X) deep_equals(Y) fails with basic vc complex type"
+
+    def assertions():
+        assert that('two yeah').deep_equals({
+            'two': 'yeah',
+        })
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = 'two yeah'\n"
+        "    and\n" \
+        "Y = {'two': 'yeah'}\n" \
+        "X is a str and Y is a dict instead",
+    )

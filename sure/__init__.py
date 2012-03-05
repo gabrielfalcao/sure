@@ -239,9 +239,11 @@ class that(object):
             self._src(*self._callable_args, **self._callable_kw)
 
         except Exception, e:
+            err = str(e)
+            exc = type(e)
+
             if isinstance(exc, basestring):
                 msg = exc
-                exc = type(e)
 
             if isinstance(exc, type) and issubclass(exc, Exception):
                 if not isinstance(e, exc):
@@ -249,11 +251,18 @@ class that(object):
                         '%r should raise %r, but raised %r' % (
                             self._src, exc, e.__class__))
 
-                if isinstance(msg, basestring) and msg not in unicode(e):
-                    raise AssertionError('%r raised %s, but the exception message does not match.\n\nEXPECTED:\n%r\n\nGOT:\n%r' % (self._src, type(e).__name__, msg, str(e)))
+                if isinstance(msg, basestring) and msg not in err:
+                    raise AssertionError('''
+                    %r raised %s, but the exception message does not
+                    match.\n\nEXPECTED:\n%s\n\nGOT:\n%s'''.strip() % (
+                            self._src,
+                            type(e).__name__,
+                            msg, err))
 
-            elif isinstance(msg, basestring) and msg not in unicode(e):
-                raise AssertionError('When calling %r the exception message does not match. Expected: %r\n got:\n %r' % (self._src, msg, str(e)))
+            elif isinstance(msg, basestring) and msg not in err:
+                raise AssertionError(
+                    'When calling %r the exception message does not match. ' \
+                    'Expected: %r\n got:\n %r' % (self._src, msg, err))
 
             else:
                 raise e
@@ -276,6 +285,14 @@ class that(object):
                         self._callable_kw, exc))
 
         return True
+
+    def deep_equals(self, dst):
+        deep = DeepCoparison(self._src, dst)
+        comparison = deep.compare()
+        if isinstance(comparison, bool):
+            return comparison
+
+        raise comparison.as_assertion(), deep.explanation
 
     def equals(self, dst):
         if self._attribute and is_iterable(self._src):
@@ -709,3 +726,76 @@ def action_for(context, provides=None, depends_on=None):
         return wrapper
 
     return decorate_and_absorb
+
+
+class DeepExplanation(unicode):
+    def get_header(self, X, Y, suffix):
+        return """given
+X = %r
+    and
+Y = %r
+%s""".strip() % (X, Y, suffix)
+
+    def as_assertion(self, X, Y):
+        raise AssertionError(self.get_header(X, Y, self))
+
+
+class DeepCoparison(object):
+    def __init__(self, X, Y, level=0, parent=None):
+        self.operands = X, Y
+        self.level = level
+        self.parent = parent
+
+    def is_simple(self, obj):
+        return isinstance(obj, (
+            int, long, float, basestring,
+        ))
+
+    def compare_complex_stuff(self, X, Y):
+        kind = type(X)
+        mapping = {
+            dict: self.compare_dicts,
+        }
+        return mapping[kind](X, Y)
+
+    def compare_dicts(self, X, Y):
+        x_keys = X.keys()
+        y_keys = Y.keys()
+
+        diff_x = list(set(x_keys).difference(set(y_keys)))
+        diff_y = list(set(y_keys).difference(set(x_keys)))
+        if diff_x:
+            msg = "X has the key \"%s\" whereas Y doesn't" % diff_x[0]
+            return DeepExplanation(msg)
+        elif diff_y:
+            msg = "Y has the key \"%s\" whereas X doesn't" % diff_y[0]
+            return DeepExplanation(msg)
+        else:
+            for key_X, key_Y in zip(x_keys, y_keys):
+                value_X = X[key_X]
+                value_Y = Y[key_Y]
+                child = DeepCoparison(value_X, value_Y).compare()
+                if child:
+                    return child
+
+    def compare(self):
+        X, Y = self.operands
+
+        if self.is_simple(X) and self.is_simple(Y):  # both simple
+            return X == Y
+
+        elif type(X) is not type(Y):  # different types
+            xname, yname = map(lambda _: type(_).__name__, (X, Y))
+            msg = 'X is a %s and Y is a %s instead' % (xname, yname)
+            exp = DeepExplanation(msg)
+
+        else:
+            exp = self.compare_complex_stuff(X, Y)
+
+        if isinstance(exp, DeepExplanation):
+            raise exp.as_assertion(X, Y)
+
+        return exp
+
+    def explanation(self):
+        return self._explanation

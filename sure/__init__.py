@@ -35,7 +35,7 @@ from functools import wraps
 from datetime import datetime
 from collections import Iterable
 
-version = '0.9.0'
+version = '0.9.1'
 
 
 def _get_file_name(func):

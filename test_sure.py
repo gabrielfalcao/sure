@@ -1082,7 +1082,7 @@ def test_deep_equals_list_level1_fail_by_value():
         "X = ['one', 'yeahs']\n" \
         "    and\n" \
         "Y = ['one', 'yeah']\n" \
-        "Y[1] is 'yeah' whereas should be like 'yeahs' as in X[1]",
+        "X[1] is 'yeahs' whereas Y[1] is 'yeah'",
     )
 
 
@@ -1199,7 +1199,7 @@ def test_deep_equals_tuple_level1_fail_by_value():
         "X = ('one', 'yeahs')\n" \
         "    and\n" \
         "Y = ('one', 'yeah')\n" \
-        "Y[1] is 'yeah' whereas should be like 'yeahs' as in X[1]",
+        "X[1] is 'yeahs' whereas Y[1] is 'yeah'",
     )
 
 
@@ -1334,4 +1334,30 @@ def test_deep_equals_dict_level2_fail():
         "    and\n" \
         "Y = {'another': {'two': '$$'}, 'one': 'yeah'}\n" \
         "X['another']['two'] is '##' whereas Y['another']['two'] is '$$'",
+    )
+
+
+def test_deep_equals_dict_level3_success():
+    "sure.that() deep_equals(dict) failing on level 3"
+
+    something = {
+        'my::all_users': [
+            {'name': 'John', 'age': 33},
+        ],
+    }
+
+    def assertions():
+        assert that(something).deep_equals({
+            'my::all_users': [
+                {'name': 'John', 'age': 30},
+            ],
+        })
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = {'my::all_users': [{'age': 33, 'name': 'John'}]}\n" \
+        "    and\n" \
+        "Y = {'my::all_users': [{'age': 30, 'name': 'John'}]}\n" \
+        "X['my::all_users'][0]['age'] is 33 whereas Y['my::all_users'][0]['age'] is 30",
     )

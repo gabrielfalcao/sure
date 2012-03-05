@@ -741,9 +741,8 @@ Y = %r
 
 
 class DeepComparison(object):
-    def __init__(self, X, Y, level=0, parent=None):
+    def __init__(self, X, Y, parent=None):
         self.operands = X, Y
-        self.level = level
         self.parent = parent
         self._context = None
 
@@ -797,10 +796,9 @@ class DeepComparison(object):
                 child = DeepComparison(
                     value_X,
                     value_Y,
-                    level=self.level + 1,
                     parent=self,
                 ).compare()
-                if child:
+                if isinstance(child, DeepExplanation):
                     return child
 
     def get_context(self):
@@ -816,9 +814,15 @@ class DeepComparison(object):
             Y_keys.insert(0, comp.parent.key_Y)
             comp = comp.parent
 
+        def get_keys(i):
+            if not i:
+                return ''
+
+            return '[%s]' % ']['.join(map(repr, i))
+
         class ComparisonContext:
-            current_X_keys = '[%s]' % ']['.join(map(repr, X_keys))
-            current_Y_keys = '[%s]' % ']['.join(map(repr, Y_keys))
+            current_X_keys = get_keys(X_keys)
+            current_Y_keys = get_keys(Y_keys)
             parent = comp
 
         self._context = ComparisonContext()
@@ -837,10 +841,14 @@ class DeepComparison(object):
         else:
             for i, (value_X, value_Y) in enumerate(zip(X, Y)):
                 self.key_X = self.key_Y = i
-                if value_Y != value_X:
-                    m = 'Y[{0}] is %r whereas should be like %r as in X[{0}]'
-                    msg = m.format(i) % (value_Y, value_X)
-                    return DeepExplanation(msg)
+                child = DeepComparison(
+                    value_X,
+                    value_Y,
+                    parent=self,
+                ).compare()
+                if isinstance(child, DeepExplanation):
+                    return child
+
 
     def compare(self):
         X, Y = self.operands

@@ -1,6 +1,8 @@
 # sure
 > Version 0.10.0
 
+[![Build Status](https://secure.travis-ci.org/gabrielfalcao/sure.png)](http://travis-ci.org/gabrielfalcao/sure)
+
 # What
 
 a assertion toolbox that works fine with [nose](http://code.google.com/p/python-nose/)

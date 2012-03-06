@@ -23,7 +23,6 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-
 import sure
 from sure import that, VariablesBag
 from nose.tools import assert_equals, assert_raises
@@ -59,7 +58,7 @@ def test_context_is_not_optional():
 
     assert that(it_crashes).raises(
         TypeError,
-        "the function it_crashes defined at test_sure.py line 57, is being " \
+        "the function it_crashes defined at test_sure.py line 56, is being " \
         "decorated by either @that_with_context or @scenario, so it should " \
         "take at least 1 parameter, which is the test context",
     )
@@ -523,14 +522,13 @@ def test_that_doesnt_contain_string():
 def test_that_contains_none():
     "sure.that('foobar').contains(None)"
 
-    try:
+    def assertions():
         assert that('foobar').contains(None)
-        assert False, 'should not reach here'
-    except Exception, e:
-        assert_equals(
-            unicode(e),
-            u"'in <string>' requires string as left operand, not NoneType",
-        )
+
+    assert that(assertions).raises(
+        AssertionError,
+        u"'in <string>' requires string as left operand",
+    )
 
 
 def test_that_none_contains_string():
@@ -892,7 +890,7 @@ def test_depends_on_failing_due_nothing_found():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__)
-    error = 'the action "lonely_action" defined at %s:901 ' \
+    error = 'the action "lonely_action" defined at %s:899 ' \
         'depends on the attribute "something" to be available in the' \
         ' context. It turns out that there are no actions providing ' \
         'that. Please double-check the implementation' % fullpath
@@ -918,10 +916,10 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__)
-    error = 'the action "my_action" defined at {0}:931 ' \
+    error = 'the action "my_action" defined at {0}:929 ' \
         'depends on the attribute "some_attr" to be available in the context.'\
         ' You need to call one of the following actions beforehand:\n' \
-        ' -> dependency_action at {0}:927'.replace('{0}', fullpath)
+        ' -> dependency_action at {0}:925'.replace('{0}', fullpath)
 
     def with_setup(context):
         @action_for(context, provides=['some_attr'])

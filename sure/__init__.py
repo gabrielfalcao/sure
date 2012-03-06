@@ -38,7 +38,7 @@ try:
 except ImportError:
     Iterable = (list, dict, tuple)
 
-version = '0.9.3'
+version = '0.10.0'
 
 
 def _get_file_name(func):

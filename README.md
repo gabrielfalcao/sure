@@ -1,5 +1,5 @@
 # sure
-> Version 0.9.3
+> Version 0.10.0
 
 # What
 
@@ -461,6 +461,14 @@ def navigate_to_index_page(context):
     When.I_see_the_header_has_the_title("Welcome to our nifty website")
     Then.the_title_also_has_the_classes(["alert", "alert-info", "fade-in"])
 ```
+
+# acknowledgements
+
+Thanks to the folks of [Travis CI](http://travis-ci.org), thanks to it
+sure's builds are running agains python 2.5, 2.6 and 2.7 so I can
+garantee it works for all those python versions.
+
+I love you guys
 
 # license
 

@@ -733,7 +733,7 @@ def test_that_is_a_matcher_should_absorb_callables_to_be_used_as_matcher():
     u"that.is_a_matcher should absorb callables to be used as matcher"
     @that.is_a_matcher
     def is_truthful(what):
-        assert bool(what), '{0} is so untrue'.format(what)
+        assert bool(what), '%s is so untrue' % (what)
         return 'foobar'
 
     assert that('friend').is_truthful()
@@ -921,7 +921,7 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
     error = 'the action "my_action" defined at {0}:931 ' \
         'depends on the attribute "some_attr" to be available in the context.'\
         ' You need to call one of the following actions beforehand:\n' \
-        ' -> dependency_action at {0}:927'.format(fullpath)
+        ' -> dependency_action at {0}:927'.replace('{0}', fullpath)
 
     def with_setup(context):
         @action_for(context, provides=['some_attr'])

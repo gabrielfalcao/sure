@@ -768,7 +768,7 @@ class DeepComparison(object):
         if X == Y:
             return True
         else:
-            m = 'X{0} != Y{1}'.format(c.current_X_keys, c.current_Y_keys)
+            m = 'X%s != Y%s' % (c.current_X_keys, c.current_Y_keys)
             return DeepExplanation(m)
 
     def compare_dicts(self, X, Y):
@@ -780,14 +780,14 @@ class DeepComparison(object):
         diff_x = list(set(x_keys).difference(set(y_keys)))
         diff_y = list(set(y_keys).difference(set(x_keys)))
         if diff_x:
-            msg = "X{0} has the key '%s' whereas Y{1} doesn't".format(
+            msg = "X%s has the key '%%s' whereas Y%s doesn't" % (
                 c.current_X_keys,
                 c.current_Y_keys,
             ) % diff_x[0]
             return DeepExplanation(msg)
 
         elif diff_y:
-            msg = "X{0} doesn't have the key '%s' whereas Y{1} has it".format(
+            msg = "X%s doesn't have the key '%%s' whereas Y%s has it" % (
                 c.current_X_keys,
                 c.current_Y_keys,
             ) % diff_y[0]
@@ -865,13 +865,13 @@ class DeepComparison(object):
             if X == Y:
                 return True
             c = self.get_context()
-            m = "X{0} is %r whereas Y{1} is %r"
-            msg = m.format(c.current_X_keys, c.current_Y_keys) % (X, Y)
+            m = "X%s is %%r whereas Y%s is %%r"
+            msg = m % (c.current_X_keys, c.current_Y_keys) % (X, Y)
             return DeepExplanation(msg)
 
         elif type(X) is not type(Y):  # different types
             xname, yname = map(lambda _: type(_).__name__, (X, Y))
-            msg = 'X{0} is a %s and Y{1} is a %s instead'.format(
+            msg = 'X%s is a %%s and Y%s is a %%s instead' % (
                 c.current_X_keys,
                 c.current_Y_keys,
             ) % (xname, yname)

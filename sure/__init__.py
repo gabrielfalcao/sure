@@ -771,8 +771,8 @@ class DeepComparison(object):
     def compare_dicts(self, X, Y):
         c = self.get_context()
 
-        x_keys = X.keys()
-        y_keys = Y.keys()
+        x_keys = list(sorted(X.keys()))
+        y_keys = list(sorted(Y.keys()))
 
         diff_x = list(set(x_keys).difference(set(y_keys)))
         diff_y = list(set(y_keys).difference(set(x_keys)))

@@ -33,7 +33,10 @@ from copy import deepcopy
 from pprint import pformat
 from functools import wraps
 from datetime import datetime
-from collections import Iterable
+try:
+    from collections import Iterable
+except ImportError:
+    Iterable = (list, dict, tuple)
 
 version = '0.9.3'
 

@@ -1438,6 +1438,32 @@ def test_deep_equals_dict_level3_fails_extra_key():
     )
 
 
+def test_deep_equals_dict_level3_fails_different_key():
+    "sure.that() deep_equals(dict) failing on level 3 when has an extra key"
+
+    something = {
+        'my::all_users': [
+            {'name': 'John', 'age': 33, 'foo': 'bar'},
+        ],
+    }
+
+    def assertions():
+        assert that(something).deep_equals({
+            'my::all_users': [
+            {'name': 'John', 'age': 33, 'bar': 'foo'},
+            ],
+        })
+
+    assert that(assertions).raises(
+        AssertionError,
+        "given\n" \
+        "X = {'my::all_users': [{'age': 33, 'foo': 'bar', 'name': 'John'}]}\n" \
+        "    and\n" \
+        "Y = {'my::all_users': [{'age': 33, 'bar': 'foo', 'name': 'John'}]}\n" \
+        "X['my::all_users'][0] has the key 'foo' whereas Y['my::all_users'][0] doesn't",
+    )
+
+
 def test_deep_equals_list_level2_fail_by_length_x_gt_y():
     "sure.that(list) deep_equals(list) failing by length (len(X) > len(Y))"
 
@@ -1451,7 +1477,7 @@ def test_deep_equals_list_level2_fail_by_length_x_gt_y():
         "given\n" \
         "X = {'iterable': ['one', 'yeah', 'awesome!']}\n" \
         "    and\n" \
-        "Y = ['one', 'yeah']\n" \
+        "Y = {'iterable': ['one', 'yeah']}\n" \
         "X has 3 items whereas Y has only 2",
     )
 

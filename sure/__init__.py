@@ -307,23 +307,12 @@ class that(object):
                         continue
 
                 attribute = getattr(item, self._attribute)
-                error = msg % (self._src, index, self._attribute, dst, attribute)
+                error = msg % (
+                    self._src, index, self._attribute, dst, attribute)
                 if attribute != dst:
                     raise AssertionError(error)
-        elif is_iterable(self._src) and is_iterable(dst):
-            length_src = len(self._src)
-            length_dst = len(dst)
-            assert length_src == length_dst, '%r has %s, but %r has %s' % (self._src, itemize_length(self._src), dst, itemize_length(dst))
-
-            for i, (x, y) in enumerate(zip(self._src, dst)):
-                assert x == y, '%r != %r at index %d' % (x, y, i)
-
         else:
-            error = '%s != %s' % (
-                pformat(self._src), pformat(dst)
-            )
-            assert self._src == dst, error
-            return self._src == dst
+            return self.deep_equals(dst)
 
         return True
 

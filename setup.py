@@ -46,6 +46,7 @@ setup(name='sure',
     url='http://github.com/gabrielfalcao/sure',
     packages=get_packages(),
     install_requires=[
-        "nose",
+          "nose",
+          "ipdb",
     ],
 )

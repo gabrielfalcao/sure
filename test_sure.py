@@ -1497,3 +1497,15 @@ def test_deep_equals_list_level2_fail_by_length_y_gt_x():
         "Y has 3 items whereas X has only 2",
     )
 
+
+def test_function_decorated_with_wip_should_set_a_flag():
+    "@sure.work_in_progress should set an internal flag into `sure`"
+
+    @sure.work_in_progress
+    def this_was_called():
+        assert sure.it('is_running')
+        return True
+
+    assert not sure._registry['is_running']
+    assert this_was_called()
+    assert not sure._registry['is_running']

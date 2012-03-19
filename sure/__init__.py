@@ -38,7 +38,8 @@ try:
 except ImportError:
     Iterable = (list, dict, tuple)
 
-version = '0.10.0'
+from sure.registry import context as _registry
+version = '0.10.1'
 
 
 def _get_file_name(func):
@@ -878,3 +879,18 @@ class DeepComparison(object):
 
     def explanation(self):
         return self._explanation
+
+
+def work_in_progress(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        _registry['is_running'] = True
+        ret = func(*args, **kwargs)
+        _registry['is_running'] = False
+        return ret
+
+    return wrapper
+
+
+def it(name, *args, **kw):
+    return _registry.get(name, *args, **kw)

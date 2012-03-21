@@ -1509,3 +1509,21 @@ def test_function_decorated_with_wip_should_set_a_flag():
     assert not sure._registry['is_running']
     assert this_was_called()
     assert not sure._registry['is_running']
+
+
+def test_that_equals_fails():
+    "sure.that() equals(string) when it's supposed to fail"
+
+    something = "else"
+
+    def fail():
+        assert that('something').equals(something)
+
+    assert that(fail).raises(
+        AssertionError,
+        "given\n" \
+        "X = 'something'\n" \
+        "    and\n" \
+        "Y = 'else'\n" \
+        "X is 'something' whereas Y is 'else'",
+    )

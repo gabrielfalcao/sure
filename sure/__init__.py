@@ -296,7 +296,7 @@ class that(object):
         if isinstance(comparison, bool):
             return comparison
 
-        raise comparison.as_assertion(), deep.explanation
+        raise comparison.as_assertion(self._src, dst)
 
     def equals(self, dst):
         if self._attribute and is_iterable(self._src):
@@ -374,7 +374,7 @@ class that(object):
             error = 'the length of the %s should be greater then %d, but is %d' % (
                 type(self._src).__name__,
                 that,
-                length
+                length,
             )
             raise AssertionError(error)
 
@@ -616,6 +616,7 @@ def word_to_number(word):
         raise AssertionError(
             'sure supports only literal numbers from one to twelve, ' \
             'you tried the word "twenty"')
+
 
 def action_for(context, provides=None, depends_on=None):
     if not provides:

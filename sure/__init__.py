@@ -506,10 +506,9 @@ class that(object):
         if isinstance(self._src, dict):
             items = self._src.keys()
 
-        try:
-            list(self._src)
+        if isinstance(self._src, Iterable):
             items = self._src
-        except TypeError:
+        else:
             items = dir(self._src)
 
         return what in items

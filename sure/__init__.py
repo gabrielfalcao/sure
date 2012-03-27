@@ -39,7 +39,7 @@ except ImportError:
     Iterable = (list, dict, tuple)
 
 from sure.registry import context as _registry
-version = '0.10.2'
+version = '0.10.3'
 
 
 def _get_file_name(func):

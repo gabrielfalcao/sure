@@ -1,5 +1,5 @@
 # sure
-> Version 0.10.2
+> Version 0.10.3
 
 [![Build Status](https://secure.travis-ci.org/gabrielfalcao/sure.png)](http://travis-ci.org/gabrielfalcao/sure)
 

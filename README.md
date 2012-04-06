@@ -209,6 +209,7 @@ def file_equals_response(context):
     sure.that(response_body).contains(file_contents)
 ```
 
+<a name="timed"></a>
 ## timed tests
 
 ```python

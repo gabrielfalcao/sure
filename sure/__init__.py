@@ -357,7 +357,7 @@ class that(object):
 
     @explanation('%r should have %r, but have not')
     def has(self, that):
-        return that in self
+        return that in self or that in self._src
 
     def _get_that(self, that):
         try:

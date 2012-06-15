@@ -23,7 +23,7 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-import sure
+import sys, sure
 from sure import that, VariablesBag
 from nose.tools import assert_equals, assert_raises
 
@@ -153,13 +153,13 @@ def test_that_has():
 
     assert that(name).has("john")
     assert that(name).like("john")
-    assert "john" in sure.that(name)
+    if sys.version_info >= (2, 6): assert "john" in sure.that(name)
     assert that(name).has("hn")
     assert that(name).like("hn")
-    assert "hn" in sure.that(name)
+    if sys.version_info >= (2, 6): assert "hn" in sure.that(name)
     assert that(name).has("jo")
     assert that(name).like("jo")
-    assert "jo" in sure.that(name)
+    if sys.version_info >= (2, 6): assert "jo" in sure.that(name)
 
 
 def test_that_at_key_equals():

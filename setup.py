@@ -45,8 +45,4 @@ setup(name='sure',
     author_email='gabriel@nacaolivre.org',
     url='http://github.com/gabrielfalcao/sure',
     packages=get_packages(),
-    install_requires=[
-          "nose",
-          "ipdb",
-    ],
 )

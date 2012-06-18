@@ -26,7 +26,7 @@ class FooBar:
     attribute_one = "simple"
 
 assert "attribute_one" in that(FooBar)
-vassert that(FooBar).has("attribute_one")
+assert that(FooBar).has("attribute_one")
 assert that(FooBar).equals(FooBar)
 
 # go faster

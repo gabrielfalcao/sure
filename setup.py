@@ -47,6 +47,5 @@ setup(name='sure',
     packages=get_packages(),
     install_requires=[
           "nose",
-          "ipdb",
     ],
 )

@@ -73,3 +73,8 @@ assert that("something").is_a(str)
 assert that("something").like("some")
 assert "thing" in that("something")
 ```
+
+
+# Requirements
+
+Python >= 2.6

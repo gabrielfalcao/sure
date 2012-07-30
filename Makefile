@@ -1,12 +1,8 @@
-all: check_dependencies test
+all: test
 
 filename=sure-`python -c 'import sure;print sure.version'`.tar.gz
 
 export PYTHONPATH:=  ${PWD}
-
-check_dependencies:
-	@echo "Checking for dependencies to run tests ..."
-	@python -c "import nose" 2>/dev/null || (echo "You must install nose in order to run nose's tests" && exit 3)
 
 test: clean
 	@echo "Running code examples from README.md as tests"

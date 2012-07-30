@@ -9,8 +9,8 @@ check_dependencies:
 	@python -c "import nose" 2>/dev/null || (echo "You must install nose in order to run nose's tests" && exit 3)
 
 test: clean
-	@echo "Running tests ..."
-	@nosetests -s --verbosity=2 --with-coverage --cover-erase --cover-inclusive --cover-package=sure
+	@echo "Running code examples from README.md as tests"
+	@python sure/docs.py
 
 clean:
 	@printf "Cleaning up files that are already in .gitignore... "

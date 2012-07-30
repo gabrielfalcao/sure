@@ -5,8 +5,7 @@ filename=sure-`python -c 'import sure;print sure.version'`.tar.gz
 export PYTHONPATH:=  ${PWD}
 
 test: clean
-	@echo "Running code examples from README.md as tests"
-	@python sure/docs.py
+	@steadymark
 
 clean:
 	@printf "Cleaning up files that are already in .gitignore... "

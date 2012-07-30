@@ -1,8 +1,11 @@
-all: test
+all: install_deps test
 
 filename=sure-`python -c 'import sure;print sure.version'`.tar.gz
 
 export PYTHONPATH:=  ${PWD}
+
+install_deps: clean
+	@pip install -r requirements.pip
 
 test: clean
 	@steadymark

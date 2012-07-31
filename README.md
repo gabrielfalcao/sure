@@ -74,7 +74,39 @@ assert that("something").like("some")
 assert "thing" in that("something")
 ```
 
+# Fluent assertions
 
-# Requirements
+## `it.exists()` asserts that the given object is truthy
+
+```python
+from sure import it
+
+assert it.exists(True)
+assert it.exists(object())
+```
+
+## `it.dont.exists()` or `it.doesnt.exists` asserts that the given object is falsy
+
+```python
+from sure import it
+
+assert it.dont.exists({})
+assert it.dont.exists([])
+assert it.dont.exists('')
+assert it.dont.exists(False)
+assert it.dont.exists(None)
+
+assert it.doesnt.exists({})
+assert it.doesnt.exists([])
+assert it.doesnt.exists('')
+assert it.doesnt.exists(False)
+assert it.doesnt.exists(None)
+```
+
+# Python compatibility
+
+```
 
 Python >= 2.6
+
+```

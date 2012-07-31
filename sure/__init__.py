@@ -893,5 +893,17 @@ def work_in_progress(func):
     return wrapper
 
 
-def it(name, *args, **kw):
-    return _registry.get(name, *args, **kw)
+class AssertionBuilder(object):
+    def __init__(self, negative=False):
+        self.negative = negative
+        if not negative:
+            self.dont = self.doesnt = AssertionBuilder(not self.negative)
+
+    def exists(self, what):
+        if self.negative:
+            return not what
+
+        return bool(what)
+
+
+it = AssertionBuilder()

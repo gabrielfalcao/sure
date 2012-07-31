@@ -64,16 +64,6 @@ test suite.
 
     user@machine:~$ [sudo] pip install sure
 
-# Guide
-
-```python
-from sure import that
-
-assert that("something").is_a(str)
-assert that("something").like("some")
-assert "thing" in that("something")
-```
-
 # Fluent assertions
 
 ## `it.exists()` asserts that the given object is truthy

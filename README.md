@@ -7,7 +7,7 @@
 
 # Fluent assertions with `it` and `this`
 
-## `exists()` and `should.exist` asserts that the given object is truthy
+#### `exists()` and `should.exist()` asserts that the given object is truthy
 
 ```python
 from sure import it, this
@@ -25,7 +25,7 @@ assert this.should.exists(True)
 assert this.should.exists(object())
 ```
 
-## `dont.exists()`, `doesnt.exists()` and `shouldnt.exist()` asserts that the given object is falsy
+#### `dont.exists()`, `doesnt.exists()` and `shouldnt.exist()` asserts that the given object is falsy
 
 ```python
 from sure import it, this
@@ -67,7 +67,7 @@ assert this.shouldnt.exist(False)
 assert this.shouldnt.exist(None)
 ```
 
-## `be.ok`
+#### `should.be.ok` and `shouldnt.be.ok`
 
 Assert truthfulness:
 
@@ -96,7 +96,7 @@ assert this({}).shouldnt.be.ok
 
 Mind-blowing easy and fluent assertions.
 
-## `(number).should.equal(number)`
+#### `(number).should.equal(number)`
 
 ```python
 import sure
@@ -105,13 +105,13 @@ assert (4).should.equal(2 + 2)
 assert (7.5).should.equal(3.5 + 4)
 ```
 
-## `{'a': 'collection'}.should.equal({'a': 'collection'})` does deep comparation
+#### `{'a': 'collection'}.should.equal({'a': 'collection'})` does deep comparation
 
 ```python
 assert {'foo': 'bar'}.should.equal({'foo': 'bar'})
 ```
 
-## `"A string".lower().should.equal("a string")` also works
+#### `"A string".lower().should.equal("a string")` also works
 
 ```python
 assert "Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])

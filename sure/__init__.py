@@ -28,6 +28,7 @@ import re
 import os
 import sys
 import inspect
+import platform
 import traceback
 
 from copy import deepcopy
@@ -40,7 +41,6 @@ except ImportError:
     Iterable = (list, dict, tuple)
 
 from sure.registry import context as _registry
-from sure.magic import patchable_builtin
 
 version = '0.10.4'
 
@@ -896,29 +896,54 @@ def work_in_progress(func):
 
 
 class AssertionBuilder(object):
-    def __init__(self, negative=False):
+    def __init__(self, name, negative=False):
+        self._name = name
         self.negative = negative
-        if not negative:
-            self.dont = self.doesnt = AssertionBuilder(not self.negative)
 
-        self.stack = []
+        self.stack = [name]
 
     def __call__(self, obj):
         self.stack.append('it')
+
+        if isinstance(obj, self.__class__):
+            obj = obj.obj
+
         self.obj = obj
+
         return self
 
-    def __getattr__(self, attr, *args, **kw):
-        if attr in ['be', 'ok', 'exist', 'exists']:
-            return super(AssertionBuilder, self).__getattribute__(attr)
+    def __getattr__(self, attr):
+        special_case = False
+
+        special_case = attr in ('should', 'shouldnt')
+        self.negative = special_case and attr.endswith('shouldnt') or False
 
         if attr == 'should':
             self.negative = False
+            special_case = True
 
         if attr == 'shouldnt':
             self.negative = True
+            special_case = True
 
+        if special_case:
+            self.stack.append(attr)
+
+            return self
+
+        return super(AssertionBuilder, self).__getattribute__(attr)
+
+    @property
+    def does(self):
+        self.negative = False
         return self
+
+    @property
+    def dont(self):
+        self.negative = True
+        return self
+
+    doesnt = dont
 
     @property
     def be(self):
@@ -927,32 +952,40 @@ class AssertionBuilder(object):
 
     @property
     def ok(self):
-        assert hasattr(self, 'obj'), (
-            'you need to call {it,this}(obj){should,shouldnt}.be.ok')
+        self.stack.append('ok')
 
         if self.negative:
             return not bool(self.obj)
         else:
             return bool(self.obj)
 
+    def equal(self, what):
+        return that(self.obj).equals(what)
+
     def exists(self, what):
         if self.negative:
-            return not what
+            return not bool(what)
 
         return bool(what)
 
     exist = exists
 
-this = it = AssertionBuilder()
+this = AssertionBuilder('this')
+it = AssertionBuilder('it')
 
 
-class should(object):
-    def __init__(self, obj):
-        self.obj = obj
+if platform.python_implementation() == 'CPython':
+    from sure.magic import patchable_builtin
 
-    def equal(self, what):
-        return True
+    def should(self):
+        clear_should = AssertionBuilder('should')
+        return clear_should(self)
 
-int_handler = patchable_builtin(int)
+    def shouldnt(self):
+        clear_should = AssertionBuilder('shouldnt', negative=True)
+        return clear_should(self)
 
-int_handler['should'] = should(int_handler)
+    object_handler = patchable_builtin(object)
+    object_handler['should'] = property(should)
+    object_handler['shouldnt'] = property(shouldnt)
+    object_handler['not'] = property(shouldnt)

@@ -24,43 +24,43 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-
-import ctypes
-from types import DictProxyType
-
-Py_ssize_t = \
-    hasattr(ctypes.pythonapi, 'Py_InitModule4_64') \
-        and ctypes.c_int64 or ctypes.c_int
+import platform
 
 
-class PyObject(ctypes.Structure):
-    pass
+if platform.python_implementation() == 'CPython':
 
+    import ctypes
+    from types import DictProxyType
 
-PyObject._fields_ = [
-    ('ob_refcnt', Py_ssize_t),
-    ('ob_type', ctypes.POINTER(PyObject)),
-]
+    Py_ssize_t = \
+        hasattr(ctypes.pythonapi, 'Py_InitModule4_64') \
+            and ctypes.c_int64 or ctypes.c_int
 
+    class PyObject(ctypes.Structure):
+        pass
 
-class SlotsProxy(PyObject):
-    _fields_ = [('dict', ctypes.POINTER(PyObject))]
+    PyObject._fields_ = [
+        ('ob_refcnt', Py_ssize_t),
+        ('ob_type', ctypes.POINTER(PyObject)),
+    ]
 
+    class SlotsProxy(PyObject):
+        _fields_ = [('dict', ctypes.POINTER(PyObject))]
 
-def patchable_builtin(klass):
-    name = klass.__name__
-    target = getattr(klass, '__dict__', name)
+    def patchable_builtin(klass):
+        name = klass.__name__
+        target = getattr(klass, '__dict__', name)
 
-    if not isinstance(target, DictProxyType):
-        return target
+        if not isinstance(target, DictProxyType):
+            return target
 
-    proxy_dict = SlotsProxy.from_address(id(target))
-    namespace = {}
+        proxy_dict = SlotsProxy.from_address(id(target))
+        namespace = {}
 
-    ctypes.pythonapi.PyDict_SetItem(
-        ctypes.py_object(namespace),
-        ctypes.py_object(name),
-        proxy_dict.dict,
-    )
+        ctypes.pythonapi.PyDict_SetItem(
+            ctypes.py_object(namespace),
+            ctypes.py_object(name),
+            proxy_dict.dict,
+        )
 
-    return namespace[name]
+        return namespace[name]

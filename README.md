@@ -149,6 +149,33 @@ assert this('').shouldnt.be.ok
 assert this({}).shouldnt.be.ok
 ```
 
+# Fluent assertions
+
+> available only on cpython (no support for Jython, IronPython, PyPy, etc)
+
+Mind-blowing easy and fluent assertions.
+
+## `(number).should.equal(number)`
+
+```python
+import sure
+
+assert (4).should.equal(2 + 2)
+assert (7.5).should.equal(3.5 + 4)
+```
+
+## `{'a': 'collection'}.should.equal({'a': 'collection'})` does deep comparation
+
+```python
+assert {'foo': 'bar'}.should.equal({'foo': 'bar'})
+```
+
+## `"A string".lower().should.equal("a string")` also works
+
+```python
+assert "Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])
+```
+
 # Python compatibility
 
 ```

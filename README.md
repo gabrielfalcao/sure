@@ -142,7 +142,7 @@ And negate truthfulness:
 
 ```python
 
-from sure import it
+from sure import this
 
 assert this(False).shouldnt.be.ok
 assert this('').shouldnt.be.ok

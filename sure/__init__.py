@@ -928,7 +928,7 @@ class AssertionBuilder(object):
     @property
     def ok(self):
         assert hasattr(self, 'obj'), (
-            'you need to call {it,this}(obj).{should,shouldnt}.be.ok')
+            'you need to call {it,this}(obj){should,shouldnt}.be.ok')
 
         if self.negative:
             return not bool(self.obj)

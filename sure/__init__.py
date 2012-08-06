@@ -40,6 +40,8 @@ except ImportError:
     Iterable = (list, dict, tuple)
 
 from sure.registry import context as _registry
+from sure.magic import patchable_builtin
+
 version = '0.10.4'
 
 
@@ -899,11 +901,58 @@ class AssertionBuilder(object):
         if not negative:
             self.dont = self.doesnt = AssertionBuilder(not self.negative)
 
+        self.stack = []
+
+    def __call__(self, obj):
+        self.stack.append('it')
+        self.obj = obj
+        return self
+
+    def __getattr__(self, attr, *args, **kw):
+        if attr in ['be', 'ok', 'exist', 'exists']:
+            return super(AssertionBuilder, self).__getattribute__(attr)
+
+        if attr == 'should':
+            self.negative = False
+
+        if attr == 'shouldnt':
+            self.negative = True
+
+        return self
+
+    @property
+    def be(self):
+        self.stack.append('be')
+        return self
+
+    @property
+    def ok(self):
+        assert hasattr(self, 'obj'), (
+            'you need to call {it,this}(obj).{should,shouldnt}.be.ok')
+
+        if self.negative:
+            return not bool(self.obj)
+        else:
+            return bool(self.obj)
+
     def exists(self, what):
         if self.negative:
             return not what
 
         return bool(what)
 
+    exist = exists
 
-it = AssertionBuilder()
+this = it = AssertionBuilder()
+
+
+class should(object):
+    def __init__(self, obj):
+        self.obj = obj
+
+    def equal(self, what):
+        return True
+
+int_handler = patchable_builtin(int)
+
+int_handler['should'] = should(int_handler)

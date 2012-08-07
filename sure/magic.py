@@ -26,7 +26,11 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 import platform
 
-if 'default' in platform.python_build():
+is_cpython = (
+    hasattr(platform, 'python_implementation')
+    and platform.python_implementation())
+
+if is_cpython:
 
     import ctypes
     from types import DictProxyType
@@ -63,3 +67,5 @@ if 'default' in platform.python_build():
         )
 
         return namespace[name]
+else:
+    patchable_builtin = lambda *args, **kw: None

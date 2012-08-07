@@ -28,7 +28,6 @@ import re
 import os
 import sys
 import inspect
-import platform
 import traceback
 
 from copy import deepcopy
@@ -40,7 +39,9 @@ try:
 except ImportError:
     Iterable = (list, dict, tuple, set)
 
+from sure.magic import is_cpython, patchable_builtin
 from sure.registry import context as _registry
+
 
 version = '1.0.0alpha'
 
@@ -1015,9 +1016,7 @@ these = AssertionBuilder('these')
 those = AssertionBuilder('those')
 
 
-if 'default' in platform.python_build():
-    from sure.magic import patchable_builtin
-
+if is_cpython:
     def should(self):
         clear_should = AssertionBuilder('should')
         return clear_should(self)

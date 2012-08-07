@@ -909,6 +909,7 @@ class AssertionBuilder(object):
             obj = obj.obj
 
         self.obj = obj
+        self.__that = that(obj)
 
         return self
 
@@ -949,6 +950,14 @@ class AssertionBuilder(object):
     def be(self):
         self.stack.append('be')
         return self
+
+    @property
+    def empty(self):
+        self.stack.append('empty')
+        if self.negative:
+            return self.__that.len_greater_than(0)
+        else:
+            return self.__that.len_is(0)
 
     @property
     def ok(self):

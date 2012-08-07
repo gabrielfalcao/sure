@@ -101,20 +101,38 @@ Mind-blowing easy and fluent assertions.
 ```python
 import sure
 
-assert (4).should.equal(2 + 2)
-assert (7.5).should.equal(3.5 + 4)
+(4).should.be.equal(2 + 2)
+(7.5).should.be.equal(3.5 + 4)
+
+(3).shouldnt.be.equal(10 / 3)
 ```
 
 #### `{'a': 'collection'}.should.equal({'a': 'collection'})` does deep comparation
 
 ```python
-assert {'foo': 'bar'}.should.equal({'foo': 'bar'})
+{'foo': 'bar'}.should.equal({'foo': 'bar'})
 ```
 
 #### `"A string".lower().should.equal("a string")` also works
 
 ```python
-assert "Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])
+"Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])
+```
+
+#### `{iterable}.should.be.empty` applies to any iterable of length 0
+
+```python
+
+[].should.be.empty;
+{}.should.be.empty;
+set().should.be.empty;
+"".should.be.empty;
+().should.be.empty
+{x for x in []}.should.be.empty;
+range(0).should.be.empty;
+
+[1, 2, 3].shouldnt.be.empty;
+"Lincoln de Sousa".shouldnt.be.empty;
 ```
 
 # Python compatibility

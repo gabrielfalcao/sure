@@ -892,6 +892,19 @@ def work_in_progress(func):
     return wrapper
 
 
+def assertionmethod(func):
+    @wraps(func)
+    def wrapper(self, *args, **kw):
+        self.stack.append(func.__name__)
+        return func(self, *args, **kw)
+
+    return wrapper
+
+
+def assertionproperty(func):
+    return property(assertionmethod(func))
+
+
 class AssertionBuilder(object):
     def __init__(self, name, negative=False):
         self._name = name
@@ -912,15 +925,17 @@ class AssertionBuilder(object):
 
     def __getattr__(self, attr):
         special_case = False
+        positives = ['should']
+        negatives = ['shouldnt', 'dont', 'doesnt']
 
-        special_case = attr in ('should', 'shouldnt')
+        special_case = attr in (positives + negatives)
         self.negative = special_case and attr.endswith('shouldnt') or False
 
-        if attr == 'should':
+        if attr in positives:
             self.negative = False
             special_case = True
 
-        if attr == 'shouldnt':
+        if attr in negatives:
             self.negative = True
             special_case = True
 
@@ -931,35 +946,19 @@ class AssertionBuilder(object):
 
         return super(AssertionBuilder, self).__getattribute__(attr)
 
-    @property
-    def does(self):
-        self.negative = False
-        return self
-
-    @property
-    def dont(self):
-        self.negative = True
-        return self
-
-    doesnt = dont
-
-    @property
+    @assertionproperty
     def be(self):
-        self.stack.append('be')
         return self
 
-    @property
+    @assertionproperty
     def empty(self):
-        self.stack.append('empty')
         if self.negative:
             return self.__that.len_greater_than(0)
         else:
             return self.__that.len_is(0)
 
-    @property
+    @assertionproperty
     def ok(self):
-        self.stack.append('ok')
-
         if self.negative:
             return not bool(self.obj)
         else:
@@ -969,8 +968,8 @@ class AssertionBuilder(object):
         raise AssertionError('{0}{1}{2}'.format(
             ".".join(self.stack), self.obj, suffix))
 
+    @assertionmethod
     def within(self, *args):
-        self.stack.append('within')
         if not args:
             return self.__raise(suffix=" re")
 
@@ -985,16 +984,15 @@ class AssertionBuilder(object):
         else:
             return collection_should.contains(self.obj)
 
+    @assertionmethod
     def equal(self, what):
-        self.stack.append('equal')
-
         return that(self.obj).equals(what)
 
     eql = equal
     equals = equal
 
+    @assertionmethod
     def exists(self, what):
-        self.stack.append('exists')
         if self.negative:
             return not bool(what)
 
@@ -1009,6 +1007,7 @@ those = AssertionBuilder('those')
 
 
 if is_cpython:
+
     def should(self):
         clear_should = AssertionBuilder('should')
         return clear_should(self)

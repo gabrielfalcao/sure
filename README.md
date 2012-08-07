@@ -178,6 +178,9 @@ Python >= 2.6
 
 The assertion library is 100% inspired be the awesomeness of [should.js](https://github.com/visionmedia/should.js) which is simple, declarative and fluent.
 
+# Old API
+
+Sure still provides to all the assertions from v0.10 up, you can [find the old documentation here](https://github.com/gabrielfalcao/sure/blob/master/OLD_API.md)
 
 ## Authors
 

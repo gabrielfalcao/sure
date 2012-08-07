@@ -132,7 +132,6 @@ import sure
 set().should.be.empty;
 "".should.be.empty;
 ().should.be.empty
-{x for x in []}.should.be.empty;
 range(0).should.be.empty;
 
 # negate with:

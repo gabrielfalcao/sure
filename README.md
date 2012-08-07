@@ -11,7 +11,7 @@ version.should.be.equal('1.0.0alpha')
 
     user@machine:~$ [sudo] pip install sure
 
-# Fluent assertions with `it` and `this`
+# Static assertions with `it`, `this`, `those` and `these`
 
 #### `exists()` and `should.exist()` asserts that the given object is truthy
 

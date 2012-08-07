@@ -1,4 +1,4 @@
-# #!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # <sure - assertion toolbox>
 # Copyright (C) <2010-2012>  Gabriel Falcão <gabriel@nacaolivre.org>
@@ -31,8 +31,8 @@ try:
 except ImportError:
     Iterable = (list, dict, tuple, set)
 
-from sure.magic import is_cpython, patchable_builtin
 from sure.registry import context as _registry
+from sure.magic import is_cpython, patchable_builtin
 
 
 version = '1.0.0alpha'

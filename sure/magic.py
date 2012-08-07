@@ -1,4 +1,4 @@
-## #!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # <sure - assertion toolbox>
 # Copyright (C) <2012>  Gabriel Falcão <gabriel@nacaolivre.org>

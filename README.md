@@ -200,6 +200,10 @@ range(0).should.be.empty;
 Sure provides you with a lot of synonyms so that you can pick the ones
 that makes more sense for your tests.
 
+Note that the examples below are merely illustrative, they work not
+only with numbers but with any of the assertions you read early in
+this documentation.
+
 ## Positive synonyms
 
 ```python
@@ -220,6 +224,39 @@ that makes more sense for your tests.
 (2).doesnot.equals(3)
 (2).dont.equal(3)
 (2).do_not.equal(3)
+```
+
+## Equality synonyms
+
+```python
+
+(2).should.equal(2)
+(2).should.equals(2)
+(2).should.eql(2)
+```
+
+## Existence synonyms
+
+```python
+
+it.exists(1)
+it.exist(1)
+```
+
+## Positive boolean synonyms
+
+```python
+
+(not None).should.be.ok;
+(not None).should.be.truthy;
+(not None).should.be.true;
+```
+
+## Negative boolean synonyms
+
+```python
+(False).should.be.falsy;
+(False).should.be.false;
 ```
 
 # Python compatibility

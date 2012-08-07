@@ -979,6 +979,18 @@ class AssertionBuilder(object):
         else:
             return bool(self.obj)
 
+    truthy = ok
+    true = ok
+
+    @assertionproperty
+    def falsy(self):
+        if self.negative:
+            return bool(self.obj)
+        else:
+            return not bool(self.obj)
+
+    false = falsy
+
     def __raise(self, prefix="", suffix=""):
         raise AssertionError('{0}{1}{2}'.format(
             ".".join(self.stack), self.obj, suffix))

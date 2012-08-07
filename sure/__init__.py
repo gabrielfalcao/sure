@@ -43,7 +43,7 @@ except ImportError:
 
 from sure.registry import context as _registry
 
-version = '0.10.4'
+version = '1.0.0alpha'
 
 
 def _get_file_name(func):

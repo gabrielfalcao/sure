@@ -8,8 +8,9 @@ install_deps:
 	@pip install -r requirements.pip
 
 test:
-	@steadymark README.md
+	@nosetests --verbosity=2 test_sure.py
 	@steadymark OLD_API.md
+	@steadymark README.md
 
 clean:
 	@printf "Cleaning up files that are already in .gitignore... "

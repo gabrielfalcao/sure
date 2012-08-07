@@ -30,6 +30,7 @@ import sys
 import inspect
 import platform
 import traceback
+from collections import Iterable
 
 from copy import deepcopy
 from pprint import pformat
@@ -968,10 +969,36 @@ class AssertionBuilder(object):
         else:
             return bool(self.obj)
 
+    def __raise(self, prefix="", suffix=""):
+        raise AssertionError('{0}{1}{2}'.format(
+            ".".join(self.stack), self.obj, suffix))
+
+    def within(self, *args):
+        self.stack.append('within')
+        if not args:
+            return self.__raise(suffix=" re")
+
+        first = args[0]
+        if isinstance(first, Iterable):
+            collection_should = that(first)
+        else:
+            collection_should = that(range(*args))
+
+        if self.negative:
+            return collection_should.does_not_contain(self.obj)
+        else:
+            return collection_should.contains(self.obj)
+
     def equal(self, what):
+        self.stack.append('equal')
+
         return that(self.obj).equals(what)
 
+    eql = equal
+    equals = equal
+
     def exists(self, what):
+        self.stack.append('exists')
         if self.negative:
             return not bool(what)
 

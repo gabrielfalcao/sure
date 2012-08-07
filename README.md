@@ -102,7 +102,8 @@ Mind-blowing easy and fluent assertions.
 import sure
 
 (4).should.be.equal(2 + 2)
-(7.5).should.be.equal(3.5 + 4)
+(7.5).should.eql(3.5 + 4)
+(2).should.equal(8 / 4)
 
 (3).shouldnt.be.equal(10 / 3)
 ```
@@ -111,6 +112,9 @@ import sure
 
 ```python
 {'foo': 'bar'}.should.equal({'foo': 'bar'})
+{'foo': 'bar'}.should.eql({'foo': 'bar'})
+
+
 ```
 
 #### `"A string".lower().should.equal("a string")` also works
@@ -131,11 +135,38 @@ set().should.be.empty;
 {x for x in []}.should.be.empty;
 range(0).should.be.empty;
 
+# negate with:
+
 [1, 2, 3].shouldnt.be.empty;
 "Lincoln de Sousa".shouldnt.be.empty;
 ```
 
+
+#### `{number}.should.be.within(0, 10)` asserts inclusive numeric range:
+
+```python
+(1).should.be.within(0, 2)
+(5).should.be.within(10)
+
+# negate with:
+
+(1).shouldnt.be.within(5, 6)
+```
+
+#### `{member}.should.be.within({iterable})` asserts that a member is part of the iterable:
+
+```python
+"g".should.be.within("gabriel")
+'name'.should.be.within({'name': 'Gabriel'})
+'Lincoln'.should.be.within(['Lincoln', 'Gabriel'])
+
+# negate with:
+
+'Bug'.shouldnt.be.within(['Sure 1.0'])
+```
+
 # Python compatibility
+
 
 ```
 

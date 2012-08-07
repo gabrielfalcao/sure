@@ -234,7 +234,7 @@ required by sure.
 Differently of [ruby](http://www.ruby-lang.org) python doesn't have
 [open classes](http://blog.aizatto.com/2007/06/01/ruby-and-open-classes/),
 but [Lincoln de Sousa](https://github.com/clarete/) came out with a
-super sick code that uses the ctypes module to create a pointer to the
+super [sick code](https://github.com/gabrielfalcao/sure/blob/master/sure/magic.py) that uses the ctypes module to create a pointer to the
 `__dict__` of builtin types.
 
 Yes, it is dangerous, non-pythonic and should not be used in production code.

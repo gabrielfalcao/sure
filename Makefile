@@ -4,10 +4,10 @@ filename=sure-`python -c 'import sure;print sure.version'`.tar.gz
 
 export PYTHONPATH:=  ${PWD}
 
-install_deps: clean
+install_deps:
 	@pip install -r requirements.pip
 
-test: clean
+test:
 	@steadymark README.md
 	@steadymark OLD_API.md
 
@@ -16,7 +16,7 @@ clean:
 	@for pattern in `cat .gitignore`; do rm -rf $$pattern; find . -name "$$pattern" -exec rm -rf {} \;; done
 	@echo "OK!"
 
-release: test publish
+release: clean test publish
 	@printf "Exporting to $(filename)... "
 	@tar czf $(filename) sure setup.py README.md COPYING
 	@echo "DONE!"

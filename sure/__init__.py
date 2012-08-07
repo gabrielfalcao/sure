@@ -400,13 +400,17 @@ class that(object):
         return True
 
     def len_lower_than(self, that):
-        that = self._get_that(that)
+        original_that = that
+        if isinstance(that, Iterable):
+            that = len(that)
+        else:
+            that = self._get_that(that)
         length = len(self._src)
 
         if length >= that:
-            error = 'the length of %r should be lower then %d, but is %d' % (
+            error = 'the length of %r should be lower then %r, but is %d' % (
                 self._src,
-                that,
+                original_that,
                 length,
             )
             raise AssertionError(error)

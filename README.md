@@ -16,19 +16,22 @@ version.should.be.equal('1.0.0alpha')
 #### `exists()` and `should.exist()` asserts that the given object is truthy
 
 ```python
-from sure import it, this
+from sure import it, this, these, those
 
-assert it.exists(True)
+assert it.should.exist(True)
 assert it.exists(object())
 
-assert this.exists(True)
+assert this.should.exist(True)
 assert this.exists(object())
 
 assert it.should.exist(True)
-assert it.should.exists(object())
+assert it.exists(object())
 
 assert this.should.exists(True)
 assert this.should.exists(object())
+
+bugs = []
+assert those.shouldnt.exist(bugs)
 ```
 
 #### `dont.exists()`, `doesnt.exists()` and `shouldnt.exist()` asserts that the given object is falsy
@@ -36,29 +39,29 @@ assert this.should.exists(object())
 ```python
 from sure import it, this
 
-assert it.dont.exists({})
-assert it.dont.exists([])
-assert it.dont.exists('')
-assert it.dont.exists(False)
-assert it.dont.exists(None)
+assert it.dont.exist({})
+assert it.dont.exist([])
+assert it.dont.exist('')
+assert it.dont.exist(False)
+assert it.dont.exist(None)
 
-assert it.doesnt.exists({})
-assert it.doesnt.exists([])
-assert it.doesnt.exists('')
-assert it.doesnt.exists(False)
-assert it.doesnt.exists(None)
+assert it.doesnt.exist({})
+assert it.doesnt.exist([])
+assert it.doesnt.exist('')
+assert it.doesnt.exist(False)
+assert it.doesnt.exist(None)
 
-assert this.dont.exists({})
-assert this.dont.exists([])
-assert this.dont.exists('')
-assert this.dont.exists(False)
-assert this.dont.exists(None)
+assert this.dont.exist({})
+assert this.dont.exist([])
+assert this.dont.exist('')
+assert this.dont.exist(False)
+assert this.dont.exist(None)
 
-assert this.doesnt.exists({})
-assert this.doesnt.exists([])
-assert this.doesnt.exists('')
-assert this.doesnt.exists(False)
-assert this.doesnt.exists(None)
+assert this.doesnt.exist({})
+assert this.doesnt.exist([])
+assert this.doesnt.exist('')
+assert this.doesnt.exist(False)
+assert this.doesnt.exist(None)
 
 assert it.shouldnt.exist({})
 assert it.shouldnt.exist([])
@@ -114,7 +117,7 @@ import sure
 (3).shouldnt.be.equal(10 / 3)
 ```
 
-#### `{'a': 'collection'}.should.equal({'a': 'collection'})` does deep comparation
+#### `{'a': 'collection'}.should.equal({'a': 'collection'})` does deep comparison
 
 ```python
 {'foo': 'bar'}.should.equal({'foo': 'bar'})

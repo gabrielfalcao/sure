@@ -1012,6 +1012,8 @@ class AssertionBuilder(object):
 
 this = AssertionBuilder('this')
 it = AssertionBuilder('it')
+these = AssertionBuilder('these')
+those = AssertionBuilder('those')
 
 
 if platform.python_implementation() == 'CPython':

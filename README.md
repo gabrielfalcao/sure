@@ -32,12 +32,16 @@ assert this.should.exists(object())
 
 bugs = []
 assert those.shouldnt.exist(bugs)
+
+users = []
+assert these.shouldnt.exist(users)
+
 ```
 
 #### `dont.exists()`, `doesnt.exists()` and `shouldnt.exist()` asserts that the given object is falsy
 
 ```python
-from sure import it, this
+from sure import it, this, these, those
 
 assert it.dont.exist({})
 assert it.dont.exist([])
@@ -45,11 +49,23 @@ assert it.dont.exist('')
 assert it.dont.exist(False)
 assert it.dont.exist(None)
 
+assert these.dont.exist({})
+assert these.dont.exist([])
+assert these.dont.exist('')
+assert these.dont.exist(False)
+assert these.dont.exist(None)
+
 assert it.doesnt.exist({})
 assert it.doesnt.exist([])
 assert it.doesnt.exist('')
 assert it.doesnt.exist(False)
 assert it.doesnt.exist(None)
+
+assert those.doesnt.exist({})
+assert those.doesnt.exist([])
+assert those.doesnt.exist('')
+assert those.doesnt.exist(False)
+assert those.doesnt.exist(None)
 
 assert this.dont.exist({})
 assert this.dont.exist([])

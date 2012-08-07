@@ -904,6 +904,23 @@ def assertionmethod(func):
 def assertionproperty(func):
     return property(assertionmethod(func))
 
+POSITIVES = [
+    'should',
+    'does',
+    'must',
+]
+
+NEGATIVES = [
+    'shouldnt',
+    'dont',
+    'do_not',
+    'doesnt',
+    'does_not',
+    'doesnot',
+    'should_not',
+    'shouldnot',
+]
+
 
 class AssertionBuilder(object):
     def __init__(self, name, negative=False):
@@ -925,17 +942,15 @@ class AssertionBuilder(object):
 
     def __getattr__(self, attr):
         special_case = False
-        positives = ['should']
-        negatives = ['shouldnt', 'dont', 'doesnt']
+        special_case = attr in (POSITIVES + NEGATIVES)
 
-        special_case = attr in (positives + negatives)
-        self.negative = special_case and attr.endswith('shouldnt') or False
+        self.negative = attr in NEGATIVES
 
-        if attr in positives:
+        if attr in POSITIVES:
             self.negative = False
             special_case = True
 
-        if attr in negatives:
+        if attr in NEGATIVES:
             self.negative = True
             special_case = True
 
@@ -986,7 +1001,10 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def equal(self, what):
-        return that(self.obj).equals(what)
+        if self.negative:
+            return self.__that.differs(what)
+        else:
+            return self.__that.equals(what)
 
     eql = equal
     equals = equal
@@ -1008,15 +1026,24 @@ those = AssertionBuilder('those')
 
 if is_cpython:
 
-    def should(self):
-        clear_should = AssertionBuilder('should')
-        return clear_should(self)
+    def builtin_assertion(name, negative=False):
+        def method(self):
+            clear_should = AssertionBuilder(name, negative=negative)
+            clear_should.stack.append(name)
+            return clear_should(self)
 
-    def shouldnt(self):
-        clear_should = AssertionBuilder('shouldnt', negative=True)
-        return clear_should(self)
+        method.__name__ = name
+        return property(method)
+
+    def positive_assertion(name):
+        return builtin_assertion(name, negative=False)
+
+    def negative_assertion(name):
+        return builtin_assertion(name, negative=True)
 
     object_handler = patchable_builtin(object)
-    object_handler['should'] = property(should)
-    object_handler['shouldnt'] = property(shouldnt)
-    object_handler['not'] = property(shouldnt)
+    for name in POSITIVES:
+        object_handler[name] = positive_assertion(name)
+
+    for name in NEGATIVES:
+        object_handler[name] = negative_assertion(name)

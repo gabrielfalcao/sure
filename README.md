@@ -111,8 +111,8 @@ And negate truthfulness:
 from sure import this
 
 assert this(False).shouldnt.be.ok
-assert this('').shouldnt.be.ok
-assert this({}).shouldnt.be.ok
+assert this('').should_not.be.ok
+assert this({}).shouldnot.be.ok
 ```
 
 # Fluent assertions
@@ -130,7 +130,7 @@ import sure
 (7.5).should.eql(3.5 + 4)
 (2).should.equal(8 / 4)
 
-(3).shouldnt.be.equal(10 / 3)
+(3).shouldnt.be.equal(5)
 ```
 
 #### `{'a': 'collection'}.should.equal({'a': 'collection'})` does deep comparison
@@ -138,7 +138,7 @@ import sure
 ```python
 {'foo': 'bar'}.should.equal({'foo': 'bar'})
 {'foo': 'bar'}.should.eql({'foo': 'bar'})
-
+{'foo': 'bar'}.must.be.equal({'foo': 'bar'})
 
 ```
 
@@ -163,6 +163,8 @@ range(0).should.be.empty;
 
 [1, 2, 3].shouldnt.be.empty;
 "Lincoln de Sousa".shouldnt.be.empty;
+"Lincoln de Sousa".should_not.be.empty;
+
 ```
 
 
@@ -187,9 +189,39 @@ range(0).should.be.empty;
 # negate with:
 
 'Bug'.shouldnt.be.within(['Sure 1.0'])
+'Bug'.should_not.be.within(['Sure 1.0'])
+
 ```
 
 #### lists, tuples
+
+# Synonyms
+
+Sure provides you with a lot of synonyms so that you can pick the ones
+that makes more sense for your tests.
+
+## Positive synonyms
+
+```python
+
+(2 + 2).should.be.equal(4)
+(2 + 2).must.be.equal(4)
+(2 + 2).does.equals(4)
+```
+
+## Negative synonyms
+
+```python
+
+(2).should_not.be.equal(3)
+(2).shouldnt.be.equal(3)
+(2).doesnt.equals(3)
+(2).does_not.equals(3)
+(2).doesnot.equals(3)
+(2).dont.equal(3)
+(2).do_not.equal(3)
+```
+
 # Python compatibility
 
 ## Those are the python versions that support the assertions above [`CPython`](http://en.wikipedia.org/wiki/CPython)

@@ -30,7 +30,6 @@ import sys
 import inspect
 import platform
 import traceback
-from collections import Iterable
 
 from copy import deepcopy
 from pprint import pformat
@@ -39,7 +38,7 @@ from datetime import datetime
 try:
     from collections import Iterable
 except ImportError:
-    Iterable = (list, dict, tuple)
+    Iterable = (list, dict, tuple, set)
 
 from sure.registry import context as _registry
 
@@ -1016,7 +1015,7 @@ these = AssertionBuilder('these')
 those = AssertionBuilder('those')
 
 
-if platform.python_implementation() == 'CPython':
+if 'default' in platform.python_build():
     from sure.magic import patchable_builtin
 
     def should(self):

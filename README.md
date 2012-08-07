@@ -189,15 +189,59 @@ range(0).should.be.empty;
 'Bug'.shouldnt.be.within(['Sure 1.0'])
 ```
 
+#### lists, tuples
 # Python compatibility
 
+## Those are the python versions that support the assertions above `([CPython](http://en.wikipedia.org/wiki/CPython))`
+
 
 ```
 
-Python >= 2.6
+Python ~= 2.6 (CPython)
+Python ~= 2.7 (CPython)
 
 ```
 
+## Not supported:
+
+```
+
+Jython
+
+PyPy
+
+IronPython
+
+UnladenSwallow
+
+StacklessPython
+
+...
+```
+
+## Why CPython-only ?
+
+Sure has a slick algorithm that makes use of the
+[ctypes](http://docs.python.org/library/ctypes), and although it is
+also available in other implementations such as
+[Jython](http://www.jython.org/) does have the `ctypes` module, only
+the CPython provides
+[`ctypes.pythonapi`](http://docs.python.org/library/ctypes#loading-shared-libraries),
+required by sure.
+
+### Holy guacamole, how did you implement that feature ?
+
+Differently of [ruby](http://www.ruby-lang.org) python doesn't have
+[open classes](http://blog.aizatto.com/2007/06/01/ruby-and-open-classes/),
+but [Lincoln de Sousa](https://github.com/clarete/) came out with a
+super sick code that uses the ctypes module to create a pointer to the
+`__dict__` of builtin types.
+
+Yes, it is dangerous, non-pythonic and should not be used in production code.
+
+Although `sure` is here to be used __ONLY__ in test code, therefore it
+should be running in __ONLY__ possible environments: your local
+machine or your continuous-integration server.
 
 # About sure 1.0
 

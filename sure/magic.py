@@ -26,8 +26,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 import platform
 
-
-if platform.python_implementation() == 'CPython':
+if 'default' in platform.python_build():
 
     import ctypes
     from types import DictProxyType

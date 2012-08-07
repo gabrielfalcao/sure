@@ -192,7 +192,7 @@ range(0).should.be.empty;
 #### lists, tuples
 # Python compatibility
 
-## Those are the python versions that support the assertions above `([CPython](http://en.wikipedia.org/wiki/CPython))`
+## Those are the python versions that support the assertions above [`CPython`](http://en.wikipedia.org/wiki/CPython)
 
 
 ```
@@ -256,20 +256,21 @@ Sure still provides to all the assertions from v0.10 up, you can [find the old d
 [Gabriel Falcão](http://github.com/gabrielfalcao) and [Lincoln Clarete](http://github.com/clarete)
 
 
-# License
+# License (GPLv3)
 
-Copyright (C) <2012>  Gabriel Falcão <gabriel@nacaolivre.org>
-Copyright (C) <2012>  Lincoln Clarete <lincoln@comum.org>
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+    Copyright (C) <2012>  Gabriel Falcão <gabriel@nacaolivre.org>
+    Copyright (C) <2012>  Lincoln Clarete <lincoln@comum.org>
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.

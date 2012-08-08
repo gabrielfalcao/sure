@@ -17,6 +17,7 @@ version.should.be.equal('1.0.0alpha')
 
 Mind-blowing easy and fluent assertions.
 
+
 #### `(number).should.equal(number)`
 
 ```python
@@ -96,9 +97,9 @@ Assert truthfulness:
 ```python
 from sure import this
 
-assert True.should.be.ok
-assert 'truthy tring'.should.be.ok
-assert {'truthy': 'dictionary'}.should.be.ok
+True.should.be.ok
+'truthy tring'.should.be.ok
+{'truthy': 'dictionary'}.should.be.ok
 ```
 
 And negate truthfulness:
@@ -107,9 +108,15 @@ And negate truthfulness:
 
 from sure import this
 
-assert False.shouldnt.be.ok
-assert ''.should_not.be.ok
-assert {}.shouldnot.be.ok
+False.shouldnt.be.ok
+''.should_not.be.ok
+{}.shouldnot.be.ok
+```
+
+#### Assert the length of objects with `{iterable}.should.have.length_of(N)`
+
+```python
+
 ```
 
 # Static assertions with `it`, `this`, `those` and `these`
@@ -138,6 +145,40 @@ users = []
 assert these.shouldnt.exist(users)
 
 ```
+
+### A note about the `assert` keyword
+
+_you can use or not the_ `assert` _keyword, sure internally already
+raises an appropriate_ `AssertionError` _with an assertion message so
+that you don't have to specify your own, but you can still use_
+`assert` _if you find it more semantic_
+
+Example:
+
+```python
+import sure
+
+"Name".lower().should.equal('name')
+
+# or you can also use
+
+assert "Name".lower().should.equal('name')
+
+# or still
+
+from sure import this
+
+assert this("Name".lower()).should.equal('name')
+
+# also without the `assert`
+
+this("Name".lower()).should.equal('name')
+
+```
+
+Any of the examples above will raise their own `AssertionError` with a
+meaningful error message.
+
 
 #### `dont.exists()`, `doesnt.exists()` and `shouldnt.exist()` asserts that the given object is falsy
 
@@ -314,7 +355,19 @@ machine or your continuous-integration server.
 
 # About sure 1.0
 
-The assertion library is 100% inspired be the awesomeness of [should.js](https://github.com/visionmedia/should.js) which is simple, declarative and fluent.
+The assertion library is 100% inspired be the awesomeness of
+[should.js](https://github.com/visionmedia/should.js) which is simple,
+declarative and fluent.
+
+Sure strives to provide everything a python developer needs in an assertion:
+
+* Assertion messages are easy to understand
+
+* When comparing iterables the comparation is recursive and shows
+  exactly where is the error
+
+* Fluency: the builtin types are changed in order to provide awesome
+  simple assertions
 
 # Old API
 

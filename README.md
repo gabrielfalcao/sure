@@ -1,4 +1,4 @@
-## sure `1.0.0alpha` - utility belt for automated testing in python
+## sure `1.0.0alpha` - utility belt for automated testing in python (also an alternative to [RSpec](http://rspec.info/) for python)
 [![Build Status](https://secure.travis-ci.org/gabrielfalcao/sure.png)](http://travis-ci.org/gabrielfalcao/sure)
 
 ```python
@@ -10,6 +10,107 @@ version.should.be.equal('1.0.0alpha')
 # Installing
 
     user@machine:~$ [sudo] pip install sure
+
+# Fluent assertions
+
+> available only on cpython (no support for Jython, IronPython, PyPy, etc)
+
+Mind-blowing easy and fluent assertions.
+
+#### `(number).should.equal(number)`
+
+```python
+import sure
+
+(4).should.be.equal(2 + 2)
+(7.5).should.eql(3.5 + 4)
+(2).should.equal(8 / 4)
+
+(3).shouldnt.be.equal(5)
+```
+
+#### `{'a': 'collection'}.should.equal({'a': 'collection'})` does deep comparison
+
+```python
+{'foo': 'bar'}.should.equal({'foo': 'bar'})
+{'foo': 'bar'}.should.eql({'foo': 'bar'})
+{'foo': 'bar'}.must.be.equal({'foo': 'bar'})
+
+```
+
+#### `"A string".lower().should.equal("a string")` also works
+
+```python
+"Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])
+```
+
+#### `{iterable}.should.be.empty` applies to any iterable of length 0
+
+```python
+
+[].should.be.empty;
+{}.should.be.empty;
+set().should.be.empty;
+"".should.be.empty;
+().should.be.empty
+range(0).should.be.empty;
+
+# negate with:
+
+[1, 2, 3].shouldnt.be.empty;
+"Lincoln de Sousa".shouldnt.be.empty;
+"Lincoln de Sousa".should_not.be.empty;
+
+```
+
+
+#### `{number}.should.be.within(0, 10)` asserts inclusive numeric range:
+
+```python
+(1).should.be.within(0, 2)
+(5).should.be.within(10)
+
+# negate with:
+
+(1).shouldnt.be.within(5, 6)
+```
+
+#### `{member}.should.be.within({iterable})` asserts that a member is part of the iterable:
+
+```python
+"g".should.be.within("gabriel")
+'name'.should.be.within({'name': 'Gabriel'})
+'Lincoln'.should.be.within(['Lincoln', 'Gabriel'])
+
+# negate with:
+
+'Bug'.shouldnt.be.within(['Sure 1.0'])
+'Bug'.should_not.be.within(['Sure 1.0'])
+
+```
+
+#### `should.be.ok` and `shouldnt.be.ok`
+
+Assert truthfulness:
+
+```python
+from sure import this
+
+assert True.should.be.ok
+assert 'truthy tring'.should.be.ok
+assert {'truthy': 'dictionary'}.should.be.ok
+```
+
+And negate truthfulness:
+
+```python
+
+from sure import this
+
+assert False.shouldnt.be.ok
+assert ''.should_not.be.ok
+assert {}.shouldnot.be.ok
+```
 
 # Static assertions with `it`, `this`, `those` and `these`
 
@@ -91,109 +192,6 @@ assert this.shouldnt.exist('')
 assert this.shouldnt.exist(False)
 assert this.shouldnt.exist(None)
 ```
-
-#### `should.be.ok` and `shouldnt.be.ok`
-
-Assert truthfulness:
-
-```python
-from sure import this
-
-assert this(True).should.be.ok
-assert this('truthy tring').should.be.ok
-assert this({'truthy': 'dictionary'}).should.be.ok
-```
-
-And negate truthfulness:
-
-```python
-
-from sure import this
-
-assert this(False).shouldnt.be.ok
-assert this('').should_not.be.ok
-assert this({}).shouldnot.be.ok
-```
-
-# Fluent assertions
-
-> available only on cpython (no support for Jython, IronPython, PyPy, etc)
-
-Mind-blowing easy and fluent assertions.
-
-#### `(number).should.equal(number)`
-
-```python
-import sure
-
-(4).should.be.equal(2 + 2)
-(7.5).should.eql(3.5 + 4)
-(2).should.equal(8 / 4)
-
-(3).shouldnt.be.equal(5)
-```
-
-#### `{'a': 'collection'}.should.equal({'a': 'collection'})` does deep comparison
-
-```python
-{'foo': 'bar'}.should.equal({'foo': 'bar'})
-{'foo': 'bar'}.should.eql({'foo': 'bar'})
-{'foo': 'bar'}.must.be.equal({'foo': 'bar'})
-
-```
-
-#### `"A string".lower().should.equal("a string")` also works
-
-```python
-"Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])
-```
-
-#### `{iterable}.should.be.empty` applies to any iterable of length 0
-
-```python
-
-[].should.be.empty;
-{}.should.be.empty;
-set().should.be.empty;
-"".should.be.empty;
-().should.be.empty
-range(0).should.be.empty;
-
-# negate with:
-
-[1, 2, 3].shouldnt.be.empty;
-"Lincoln de Sousa".shouldnt.be.empty;
-"Lincoln de Sousa".should_not.be.empty;
-
-```
-
-
-#### `{number}.should.be.within(0, 10)` asserts inclusive numeric range:
-
-```python
-(1).should.be.within(0, 2)
-(5).should.be.within(10)
-
-# negate with:
-
-(1).shouldnt.be.within(5, 6)
-```
-
-#### `{member}.should.be.within({iterable})` asserts that a member is part of the iterable:
-
-```python
-"g".should.be.within("gabriel")
-'name'.should.be.within({'name': 'Gabriel'})
-'Lincoln'.should.be.within(['Lincoln', 'Gabriel'])
-
-# negate with:
-
-'Bug'.shouldnt.be.within(['Sure 1.0'])
-'Bug'.should_not.be.within(['Sure 1.0'])
-
-```
-
-#### lists, tuples
 
 # Synonyms
 

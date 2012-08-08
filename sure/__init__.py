@@ -439,6 +439,19 @@ class that(object):
 
         return True
 
+    def len_is_not(self, that):
+        that = self._get_that(that)
+        length = len(self._src)
+
+        if length == that:
+            error = 'the length of %r should not be %d' % (
+                self._src,
+                that,
+            )
+            raise AssertionError(error)
+
+        return True
+
     def like(self, that):
         return self.has(that)
 
@@ -966,6 +979,10 @@ class AssertionBuilder(object):
         return self
 
     @assertionproperty
+    def have(self):
+        return self
+
+    @assertionproperty
     def empty(self):
         if self.negative:
             return self.__that.len_greater_than(0)
@@ -1029,6 +1046,13 @@ class AssertionBuilder(object):
         return bool(what)
 
     exist = exists
+
+    @assertionmethod
+    def length_of(self, num):
+        if self.negative:
+            return self.__that.len_is_not(num)
+
+        return self.__that.len_is(num)
 
 this = AssertionBuilder('this')
 it = AssertionBuilder('it')

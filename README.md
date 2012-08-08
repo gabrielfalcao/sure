@@ -117,6 +117,11 @@ False.shouldnt.be.ok
 
 ```python
 
+[3, 4].should.have.length_of(2)
+
+"Python".should.have.length_of(6)
+
+{'john': 'person'}.should_not.have.length_of(2)
 ```
 
 # Static assertions with `it`, `this`, `those` and `these`

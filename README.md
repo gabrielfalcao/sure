@@ -253,8 +253,10 @@ it.exist(1)
 ## Negative boolean synonyms
 
 ```python
-(False).should.be.falsy;
-(False).should.be.false;
+False.should.be.falsy;
+False.should.be.false;
+False.should_not.be.true;
+False.should_not.be.ok;
 ```
 
 # Python compatibility

@@ -35,7 +35,7 @@ from sure.registry import context as _registry
 from sure.magic import is_cpython, patchable_builtin
 
 
-version = '1.0.1alpha'
+version = '1.0.2-alpha'
 
 
 def _get_file_name(func):
@@ -113,7 +113,10 @@ class CallBack(object):
         try:
             return self.callback(*args, **self.kwargs)
         except:
-            err = unicode(sys.exc_info()[1])
+            exc_klass, exc_value, tb = sys.exc_info()
+            err = traceback.format_exc(tb).splitlines()[-1]
+            err = err.replace('{0}:'.format(exc_klass.__name__), '').strip()
+
             if err.startswith(self.callback_name) and \
                'takes no arguments (1 given)' in err:
                 raise TypeError(self.context_error % (

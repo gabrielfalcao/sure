@@ -921,6 +921,7 @@ POSITIVES = [
     'should',
     'does',
     'must',
+    'when',
 ]
 
 NEGATIVES = [
@@ -936,11 +937,14 @@ NEGATIVES = [
 
 
 class AssertionBuilder(object):
-    def __init__(self, name, negative=False):
+    def __init__(self, name=None, negative=False):
         self._name = name
         self.negative = negative
-
-        self.stack = [name]
+        self._callable_args = []
+        self._callable_kw = {}
+        self.stack = []
+        if name:
+            self.stack.append(name)
 
     def __call__(self, obj):
         self.stack.append('it')
@@ -949,7 +953,7 @@ class AssertionBuilder(object):
             obj = obj.obj
 
         self.obj = obj
-        self.__that = that(obj)
+        self._that = that(obj)
 
         return self
 
@@ -979,15 +983,19 @@ class AssertionBuilder(object):
         return self
 
     @assertionproperty
+    def when(self):
+        return self
+
+    @assertionproperty
     def have(self):
         return self
 
     @assertionproperty
     def empty(self):
         if self.negative:
-            return self.__that.len_greater_than(0)
+            return self._that.len_greater_than(0)
         else:
-            return self.__that.len_is(0)
+            return self._that.len_is(0)
 
     @assertionproperty
     def ok(self):
@@ -1031,9 +1039,9 @@ class AssertionBuilder(object):
     @assertionmethod
     def equal(self, what):
         if self.negative:
-            return self.__that.differs(what)
+            return self._that.differs(what)
         else:
-            return self.__that.equals(what)
+            return self._that.equals(what)
 
     eql = equal
     equals = equal
@@ -1050,9 +1058,46 @@ class AssertionBuilder(object):
     @assertionmethod
     def length_of(self, num):
         if self.negative:
-            return self.__that.len_is_not(num)
+            return self._that.len_is_not(num)
 
-        return self.__that.len_is(num)
+        return self._that.len_is(num)
+
+    @assertionmethod
+    def called_with(self, *args, **kw):
+        self._callable_args = args
+        self._callable_kw = kw
+        return self
+
+    @assertionmethod
+    def throw(self, *args, **kw):
+        _that = that(self.obj,
+                     with_args=self._callable_args,
+                     and_kwargs=self._callable_kw)
+
+        if self.negative:
+            msg = (u"{0} called with args {1} and kwargs {2} should "
+                   "not raise {3} but raised {4}")
+
+            exc = args and args[0] or Exception
+            try:
+                _that.raises(*args, **kw)
+                return True
+            except AssertionError, e:
+                err = msg.format(
+                    self.obj,
+                    self._that._callable_args,
+                    self._that._callable_kw,
+                    exc,
+                    e,
+                )
+                raise AssertionError(err)
+
+        return _that.raises(*args, **kw)
+
+    @assertionmethod
+    def return_value(self, value):
+        return_value = self.obj(*self._callable_args, **self._callable_kw)
+        return this(return_value).should.equal(value)
 
 this = AssertionBuilder('this')
 it = AssertionBuilder('it')
@@ -1061,21 +1106,24 @@ those = AssertionBuilder('those')
 
 
 if is_cpython:
+    positive_builder = AssertionBuilder(negative=False)
+    negative_builder = AssertionBuilder(negative=True)
 
-    def builtin_assertion(name, negative=False):
+    def positive_assertion(name):
         def method(self):
-            clear_should = AssertionBuilder(name, negative=negative)
-            clear_should.stack.append(name)
-            return clear_should(self)
+            positive_builder.stack.append(name)
+            return positive_builder(self)
 
         method.__name__ = name
         return property(method)
 
-    def positive_assertion(name):
-        return builtin_assertion(name, negative=False)
-
     def negative_assertion(name):
-        return builtin_assertion(name, negative=True)
+        def method(self):
+            negative_builder.stack.append(name)
+            return negative_builder(self)
+
+        method.__name__ = name
+        return property(method)
 
     object_handler = patchable_builtin(object)
     for name in POSITIVES:

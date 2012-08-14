@@ -124,6 +124,25 @@ False.shouldnt.be.ok
 {'john': 'person'}.should_not.have.length_of(2)
 ```
 
+#### `function.when.called_with(arg1, kwarg1=2).should.throw(Exception)`
+
+```python
+import sure
+
+range.when.called_with(10, step="20").should.throw(TypeError, "range() takes no keyword arguments")
+range.when.called_with("chuck norris").should.throw("range() integer end argument expected, got str.")
+range.when.called_with("chuck norris").should.throw(TypeError)
+range.when.called_with(10).should_not.throw(TypeError)
+```
+
+#### `function.when.called_with(arg1, kwarg1=2).should.return_value(value)`
+
+```python
+import sure
+
+range.when.called_with(2).should.return_value([0, 1])
+```
+
 # Static assertions with `it`, `this`, `those` and `these`
 
 #### `exists()` and `should.exist()` asserts that the given object is truthy

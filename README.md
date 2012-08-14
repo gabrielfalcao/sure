@@ -1,10 +1,10 @@
-## sure `1.0.0alpha` - utility belt for automated testing in python (also an alternative to [RSpec](http://rspec.info/) for python)
+## sure `1.0.1alpha` - utility belt for automated testing in python (also an alternative to [RSpec](http://rspec.info/) for python)
 [![Build Status](https://secure.travis-ci.org/gabrielfalcao/sure.png)](http://travis-ci.org/gabrielfalcao/sure)
 
 ```python
 from sure import version
 
-version.should.be.equal('1.0.0alpha')
+version.should.be.equal('1.0.1alpha')
 ```
 
 # Installing

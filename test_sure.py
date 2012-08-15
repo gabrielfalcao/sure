@@ -882,7 +882,7 @@ def test_depends_on_failing_due_nothing_found():
     import os
     from sure import action_for, scenario
 
-    fullpath = os.path.abspath(__file__)
+    fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
     error = 'the action "lonely_action" defined at %s:892 ' \
         'depends on the attribute "something" to be available in the' \
         ' context. It turns out that there are no actions providing ' \
@@ -908,7 +908,7 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
     import os
     from sure import action_for, scenario
 
-    fullpath = os.path.abspath(__file__)
+    fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
     error = 'the action "my_action" defined at {0}:922 ' \
         'depends on the attribute "some_attr" to be available in the context.'\
         ' You need to call one of the following actions beforehand:\n' \

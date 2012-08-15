@@ -361,8 +361,11 @@ it.exist(1)
 ```python
 False.should.be.falsy;
 False.should.be.false;
+None.should.be.none;
 False.should_not.be.true;
 False.should_not.be.ok;
+None.should_not.be.true;
+None.should_not.be.ok;
 ```
 
 # Python compatibility

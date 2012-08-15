@@ -1018,6 +1018,13 @@ class AssertionBuilder(object):
 
     false = falsy
 
+    @assertionproperty
+    def none(self):
+        if self.negative:
+            return self.obj is None
+        else:
+            return not self.obj is None
+
     def __raise(self, prefix="", suffix=""):
         raise AssertionError('{0}{1}{2}'.format(
             ".".join(self.stack), self.obj, suffix))
@@ -1126,25 +1133,31 @@ if is_cpython:
     positive_builder = AssertionBuilder(negative=False)
     negative_builder = AssertionBuilder(negative=True)
 
-    def positive_assertion(name):
+    def positive_assertion(name, prop=True):
         def method(self):
             positive_builder.stack.append(name)
             return positive_builder(self)
 
         method.__name__ = name
-        return property(method)
+        return (property(method) if prop else method(None))
 
-    def negative_assertion(name):
+    def negative_assertion(name, prop=True):
         def method(self):
             negative_builder.stack.append(name)
             return negative_builder(self)
 
         method.__name__ = name
-        return property(method)
+        return (property(method) if prop else method(None))
 
     object_handler = patchable_builtin(object)
+
+    # None does not have a tp_dict associated to it's PyObject, so this
+    # is the only way we could make it work like we expected.
+    none = patchable_builtin(None.__class__)
     for name in POSITIVES:
         object_handler[name] = positive_assertion(name)
+        none[name] = positive_assertion(name, False)
 
     for name in NEGATIVES:
         object_handler[name] = negative_assertion(name)
+        none[name] = negative_assertion(name, False)

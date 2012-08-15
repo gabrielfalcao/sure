@@ -1071,6 +1071,14 @@ class AssertionBuilder(object):
     a = an
 
     @assertionmethod
+    def below(self, num):
+        return self.obj < num
+
+    @assertionmethod
+    def above(self, num):
+        return self.obj > num
+
+    @assertionmethod
     def exists(self, what):
         if self.negative:
             return not bool(what)

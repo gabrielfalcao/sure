@@ -184,6 +184,20 @@ u"".should.be.an(unicode)
 [].should.be.a(list)
 ```
 
+#### `instance.should.be.above(num)` and `instance.should.be.below(num)`
+
+assert the instance value above and below `num`
+
+```python
+import sure
+
+(10).should.be.below(11)
+(10).should.be.above(9)
+(10).should_not.be.above(11)
+(10).should_not.be.below(9)
+```
+
+
 # Static assertions with `it`, `this`, `those` and `these`
 
 #### `exists()` and `should.exist()` asserts that the given object is truthy

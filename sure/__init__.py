@@ -15,7 +15,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 import re
 import os
 import sys
@@ -35,7 +34,7 @@ from sure.registry import context as _registry
 from sure.magic import is_cpython, patchable_builtin
 
 
-version = '1.0.2-alpha'
+version = '1.0.3'
 
 
 def _get_file_name(func):
@@ -1048,6 +1047,21 @@ class AssertionBuilder(object):
 
     eql = equal
     equals = equal
+
+    @assertionmethod
+    def an(self, klass):
+        if isinstance(klass, basestring):
+            if '.' in klass:
+                items = klass.split('.')
+                first = items.pop(0)
+            else:
+                first = '__builtin__'
+                items = [klass]
+
+            klass = reduce(getattr, items, __import__(first))
+        return self._that.is_a(klass)
+
+    a = an
 
     @assertionmethod
     def exists(self, what):

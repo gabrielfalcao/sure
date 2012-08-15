@@ -1,10 +1,10 @@
-## sure `1.0.2-alpha` - utility belt for automated testing in python (also an alternative to [RSpec](http://rspec.info/) for python)
+## sure `1.0.3` - utility belt for automated testing in python (inspired by [should.js](https://github.com/visionmedia/should.js/) )
 [![Build Status](https://secure.travis-ci.org/gabrielfalcao/sure.png)](http://travis-ci.org/gabrielfalcao/sure)
 
 ```python
 from sure import version
 
-version.should.be.equal('1.0.2-alpha')
+version.should.be.equal('1.0.3')
 ```
 
 # Installing
@@ -124,7 +124,10 @@ False.shouldnt.be.ok
 {'john': 'person'}.should_not.have.length_of(2)
 ```
 
-#### `function.when.called_with(arg1, kwarg1=2).should.throw(Exception)`
+#### `callable.when.called_with(arg1, kwarg1=2).should.throw(Exception)`
+
+You can use this feature to assert that a callable raises an
+exception:
 
 ```python
 import sure
@@ -137,10 +140,48 @@ range.when.called_with(10).should_not.throw(TypeError)
 
 #### `function.when.called_with(arg1, kwarg1=2).should.return_value(value)`
 
+This is a shorthand for testing that a callable returns the expected
+result
+
 ```python
 import sure
 
 range.when.called_with(2).should.return_value([0, 1])
+```
+
+this is the same as
+
+```
+value = range(2)
+value.should.equal([0, 1])
+```
+
+there are no differences between those 2 possibilities, use at will
+
+#### `instance.should.be.a('typename')` and `instance.should.be.an('typename')`
+
+this takes a type name and checks if the class matches that name
+
+```python
+import sure
+
+{}.should.be.a('dict')
+(5).should.be.an('int')
+
+# also works with paths
+
+range(10).should.be.a('collections.Iterable')
+```
+
+#### `instance.should.be.a(type)` and `instance.should.be.an(type)`
+
+this takes the class (type) itself and checks if the object is an instance of it
+
+```python
+import sure
+
+u"".should.be.an(unicode)
+[].should.be.a(list)
 ```
 
 # Static assertions with `it`, `this`, `those` and `these`

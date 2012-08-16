@@ -28,7 +28,7 @@ def test_assertion_builder_synonyms():
     assert that(those).is_a(AssertionBuilder)
 
 
-def test_4_2p2():
+def test_4_equal_2p2():
     (u"this(4).should.equal(2 + 2)")
 
     assert this(4).should.equal(2 + 2)
@@ -38,3 +38,15 @@ def test_4_2p2():
 
     assert that(opposite).raises(AssertionError)
     assert that(opposite).raises("X is 4 whereas Y is 8")
+
+
+def test_2_within_0a2():
+    (u"this(1).should.be.within(0, 2)")
+
+    assert this(1).should.be.within(0, 2)
+
+    def opposite():
+        assert this(1).should.be.within(2, 4)
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises("1 should be in [2, 3]")

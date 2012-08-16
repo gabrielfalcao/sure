@@ -1072,11 +1072,24 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def below(self, num):
-        return self.obj < num
+        if self.negative:
+            msg = u"{0} should not be below {1}".format(self.obj, num)
+            assert not self.obj < num, msg
+        else:
+            msg = u"{0} should be below {1}".format(self.obj, num)
+            assert self.obj < num, msg
+
+        return True
 
     @assertionmethod
     def above(self, num):
-        return self.obj > num
+        if self.negative:
+            msg = u"{0} should not be above {1}".format(self.obj, num)
+            assert not self.obj > num, msg
+        else:
+            msg = u"{0} should be above {1}".format(self.obj, num)
+            assert self.obj > num, msg
+        return True
 
     @assertionmethod
     def exists(self, what):

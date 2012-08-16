@@ -357,8 +357,8 @@ this documentation.
 
 ```python
 
-it.exists(1)
-it.exist(1)
+assert it.should.exist(1)
+assert it.should.exist(1)
 ```
 
 ## Positive boolean synonyms

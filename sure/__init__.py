@@ -911,7 +911,14 @@ def assertionmethod(func):
     @wraps(func)
     def wrapper(self, *args, **kw):
         self.stack.append(func.__name__)
-        return func(self, *args, **kw)
+        value = func(self, *args, **kw)
+        msg = u"{0}({1}) failed".format(
+            func.__name__,
+            u", ".join(map(repr, args)),
+            u", ".join([u"{0}={1}".format(k, repr(kw[k])) for k in kw]),
+        )
+        assert value, msg
+        return value
 
     return wrapper
 
@@ -1182,7 +1189,7 @@ if is_cpython:
 
     object_handler = patchable_builtin(object)
 
-    # None does not have a tp_dict associated to it's PyObject, so this
+    # None does not have a tp_dict associated to its PyObject, so this
     # is the only way we could make it work like we expected.
     none = patchable_builtin(None.__class__)
     for name in POSITIVES:

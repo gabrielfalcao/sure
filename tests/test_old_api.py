@@ -50,10 +50,10 @@ def test_context_is_not_optional():
         assert True
 
     assert that(it_crashes).raises(
-        TypeError,
-        "the function it_crashes defined at test_sure.py line 49, is being " \
-        "decorated by either @that_with_context or @scenario, so it should " \
-        "take at least 1 parameter, which is the test context",
+        TypeError, (
+        "the function it_crashes defined at test_old_api.py line 49, is being "
+        "decorated by either @that_with_context or @scenario, so it should "
+        "take at least 1 parameter, which is the test context"),
     )
 
 
@@ -592,15 +592,15 @@ def test_that_something_iterable_matches_another():
 
     class Fail2(object):
         def __init__(self):
-            assert that(xrange(1)).equals(range(2))
+            assert that(xrange(1)).matches(range(2))
 
     class Fail3(object):
         def __call__(self):
-            assert that(xrange(1)).equals(range(2))
+            assert that(xrange(1)).matches(range(2))
 
-    assert that(fail_1).raises('[0] has 1 item, but xrange(2) has 2 items')
-    assert that(Fail2).raises('xrange(1) has 1 item, but [0, 1] has 2 items')
-    assert that(Fail3()).raises('xrange(1) has 1 item, but [0, 1] has 2 items')
+    assert that(fail_1).raises('X is a list and Y is a xrange instead')
+    assert that(Fail2).raises('X is a xrange and Y is a list instead')
+    assert that(Fail3()).raises('X is a xrange and Y is a list instead')
 
 
 def test_within_pass():
@@ -1520,3 +1520,20 @@ def test_that_equals_fails():
         "Y = 'else'\n" \
         "X is 'something' whereas Y is 'else'",
     )
+
+
+def test_raises_with_string():
+    "that(callable).raises('message') should compare the message"
+
+    def it_fails():
+        assert False, 'should fail with this exception'
+
+    try:
+        that(it_fails).raises('wrong msg')
+        raise RuntimeError('should not reach here')
+    except AssertionError, e:
+        assert that(unicode(e)).contains('''EXPECTED:
+wrong msg
+
+GOT:
+should fail with this exception''')

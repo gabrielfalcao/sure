@@ -241,11 +241,11 @@ class that(object):
             self._src(*self._callable_args, **self._callable_kw)
 
         except Exception, e:
-            err = str(e)
-            exc = type(e)
-
             if isinstance(exc, basestring):
                 msg = exc
+
+            err = str(e)
+            exc = type(e)
 
             if isinstance(exc, type) and issubclass(exc, Exception):
                 if not isinstance(e, exc):
@@ -1112,6 +1112,8 @@ class AssertionBuilder(object):
         self._callable_args = args
         self._callable_kw = kw
         return self
+
+    called = property(called_with)
 
     @assertionmethod
     def throw(self, *args, **kw):

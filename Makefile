@@ -9,7 +9,7 @@ install_deps:
 
 test:
 	@steadymark README.md
-	@nosetests --verbosity=2 test_sure.py
+	@nosetests --verbosity=2 tests
 	@steadymark OLD_API.md
 
 clean:

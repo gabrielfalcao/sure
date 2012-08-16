@@ -1002,9 +1002,13 @@ class AssertionBuilder(object):
     @assertionproperty
     def ok(self):
         if self.negative:
-            return not bool(self.obj)
+            msg = 'expected `{0}` to be falsy'.format(self.obj)
+            assert not bool(self.obj), msg
         else:
-            return bool(self.obj)
+            msg = 'expected `{0}` to be truthy'.format(self.obj)
+            assert bool(self.obj), msg
+
+        return True
 
     truthy = ok
     true = ok
@@ -1012,9 +1016,13 @@ class AssertionBuilder(object):
     @assertionproperty
     def falsy(self):
         if self.negative:
-            return bool(self.obj)
+            msg = 'expected `{0}` to be truthy'.format(self.obj)
+            assert bool(self.obj), msg
         else:
-            return not bool(self.obj)
+            msg = 'expected `{0}` to be falsy'.format(self.obj)
+            assert not bool(self.obj), msg
+
+        return True
 
     false = falsy
 

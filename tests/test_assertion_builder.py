@@ -32,21 +32,74 @@ def test_4_equal_2p2():
     (u"this(4).should.equal(2 + 2)")
 
     assert this(4).should.equal(2 + 2)
+    assert this(4).should_not.equal(8)
 
     def opposite():
         assert this(4).should.equal(8)
 
+    def opposite_not():
+        assert this(4).should_not.equal(4)
+
     assert that(opposite).raises(AssertionError)
     assert that(opposite).raises("X is 4 whereas Y is 8")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises(
+        "4 should differ to 4, but is the same thing")
 
 
 def test_2_within_0a2():
     (u"this(1).should.be.within(0, 2)")
 
     assert this(1).should.be.within(0, 2)
+    assert this(4).should_not.be.within(0, 2)
 
     def opposite():
         assert this(1).should.be.within(2, 4)
 
+    def opposite_not():
+        assert this(1).should_not.be.within(0, 2)
+
     assert that(opposite).raises(AssertionError)
     assert that(opposite).raises("1 should be in [2, 3]")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises("1 should NOT be in [0, 1]")
+
+
+def test_true_be_ok():
+    (u"this(True).should.be.ok")
+
+    assert this(True).should.be.ok
+    assert this(False).should_not.be.ok
+
+    def opposite():
+        assert this(False).should.be.ok
+
+    def opposite_not():
+        assert this(True).should_not.be.ok
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises("expected `False` to be truthy")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises("expected `True` to be falsy")
+
+
+def test_false_be_falsy():
+    (u"this(False).should.be.false")
+
+    assert this(False).should.be.falsy
+    assert this(True).should_not.be.falsy
+
+    def opposite():
+        assert this(True).should.be.falsy
+
+    def opposite_not():
+        assert this(False).should_not.be.falsy
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises("expected `True` to be falsy")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises("expected `False` to be truthy")

@@ -34,7 +34,7 @@ from sure.registry import context as _registry
 from sure.magic import is_cpython, patchable_builtin
 
 
-version = '1.0.3'
+version = '1.0.4'
 
 
 def _get_file_name(func):

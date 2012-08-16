@@ -929,6 +929,7 @@ def assertionproperty(func):
 POSITIVES = [
     'should',
     'does',
+    'do',
     'must',
     'when',
 ]

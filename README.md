@@ -329,6 +329,7 @@ this documentation.
 (2 + 2).should.be.equal(4)
 (2 + 2).must.be.equal(4)
 (2 + 2).does.equals(4)
+(2 + 2).do.equals(4)
 ```
 
 ## Negative synonyms
@@ -357,7 +358,7 @@ this documentation.
 
 ```python
 
-assert it.should.exist(1)
+assert it.do.exists(1)
 assert it.should.exist(1)
 ```
 

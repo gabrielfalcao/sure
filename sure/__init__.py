@@ -32,7 +32,7 @@ except ImportError:
 
 from sure.registry import context as _registry
 from sure.magic import is_cpython, patchable_builtin
-
+from sure.terminal import red, green, white, yellow
 
 version = '1.0.4'
 
@@ -773,7 +773,7 @@ class DeepComparison(object):
         if X == Y:
             return True
         else:
-            m = 'X%s != Y%s' % (c.current_X_keys, c.current_Y_keys)
+            m = 'X%s != Y%s' % (red(c.current_X_keys), green(c.current_Y_keys))
             return DeepExplanation(m)
 
     def compare_dicts(self, X, Y):
@@ -786,15 +786,15 @@ class DeepComparison(object):
         diff_y = list(set(y_keys).difference(set(x_keys)))
         if diff_x:
             msg = "X%s has the key '%%s' whereas Y%s doesn't" % (
-                c.current_X_keys,
-                c.current_Y_keys,
+                red(c.current_X_keys),
+                green(c.current_Y_keys),
             ) % diff_x[0]
             return DeepExplanation(msg)
 
         elif diff_y:
             msg = "X%s doesn't have the key '%%s' whereas Y%s has it" % (
-                c.current_X_keys,
-                c.current_Y_keys,
+                red(c.current_X_keys),
+                green(c.current_Y_keys),
             ) % diff_y[0]
             return DeepExplanation(msg)
 
@@ -871,14 +871,14 @@ class DeepComparison(object):
                 return True
             c = self.get_context()
             m = "X%s is %%r whereas Y%s is %%r"
-            msg = m % (c.current_X_keys, c.current_Y_keys) % (X, Y)
+            msg = m % (red(c.current_X_keys), green(c.current_Y_keys)) % (X, Y)
             return DeepExplanation(msg)
 
         elif type(X) is not type(Y):  # different types
             xname, yname = map(lambda _: type(_).__name__, (X, Y))
             msg = 'X%s is a %%s and Y%s is a %%s instead' % (
-                c.current_X_keys,
-                c.current_Y_keys,
+                red(c.current_X_keys),
+                green(c.current_Y_keys),
             ) % (xname, yname)
             exp = DeepExplanation(msg)
 

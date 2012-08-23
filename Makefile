@@ -3,6 +3,7 @@ all: install_deps test
 filename=sure-`python -c 'import sure;print sure.version'`.tar.gz
 
 export PYTHONPATH:=  ${PWD}
+export SURE_NO_COLORS:=  true
 
 install_deps:
 	@pip install -r requirements.pip

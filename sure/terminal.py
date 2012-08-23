@@ -32,6 +32,8 @@ for handle in [sys.stdout, sys.stderr]:
 if os.getenv('SURE_NO_COLORS'):
     SUPPORTS_ANSI = False
 
+SUPPORTS_ANSI = False
+
 
 def red(string):
     if not SUPPORTS_ANSI:

@@ -1037,9 +1037,13 @@ class AssertionBuilder(object):
     @assertionproperty
     def none(self):
         if self.negative:
-            return self.obj is None
+            assert self.obj is not None, (
+                ur"expected `{0}` to not be None".format(self.obj))
         else:
-            return not self.obj is None
+            assert self.obj is None, (
+                ur"expected `{0}` to be None".format(self.obj))
+
+        return True
 
     def __raise(self, prefix="", suffix=""):
         raise AssertionError('{0}{1}{2}'.format(

@@ -90,6 +90,21 @@ range(0).should.be.empty;
 
 ```
 
+#### `should.be.none` and `should_not.be.none`
+
+Assert whether an object is or not `None`:
+
+```python
+
+value = None
+value.should.be.none
+None.should.be.none
+
+"".should_not.be.none
+(not None).should_not.be.none
+
+```
+
 #### `should.be.ok` and `shouldnt.be.ok`
 
 Assert truthfulness:
@@ -319,21 +334,20 @@ this documentation.
 
 ```python
 
-(not None).should.be.ok;
-(not None).should.be.truthy;
-(not None).should.be.true;
+(not None).should.be.ok
+(not None).should.be.truthy
+(not None).should.be.true
 ```
 
 ## Negative boolean synonyms
 
 ```python
-False.should.be.falsy;
-False.should.be.false;
-None.should.be.none;
-False.should_not.be.true;
-False.should_not.be.ok;
-None.should_not.be.true;
-None.should_not.be.ok;
+False.should.be.falsy
+False.should.be.false
+False.should_not.be.true
+False.should_not.be.ok
+None.should_not.be.true
+None.should_not.be.ok
 ```
 
 # Python compatibility

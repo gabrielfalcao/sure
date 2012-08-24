@@ -103,3 +103,22 @@ def test_false_be_falsy():
 
     assert that(opposite_not).raises(AssertionError)
     assert that(opposite_not).raises("expected `False` to be truthy")
+
+
+def test_none():
+    (u"this(None).should.be.none")
+
+    assert this(None).should.be.none
+    assert this(not None).should_not.be.none
+
+    def opposite():
+        assert this("cool").should.be.none
+
+    def opposite_not():
+        assert this(None).should_not.be.none
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises("expected `cool` to be None")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises("expected `None` to not be None")

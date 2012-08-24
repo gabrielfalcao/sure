@@ -910,7 +910,6 @@ def work_in_progress(func):
 def assertionmethod(func):
     @wraps(func)
     def wrapper(self, *args, **kw):
-        self.stack.append(func.__name__)
         value = func(self, *args, **kw)
         msg = u"{0}({1}) failed".format(
             func.__name__,
@@ -952,13 +951,8 @@ class AssertionBuilder(object):
         self.negative = negative
         self._callable_args = []
         self._callable_kw = {}
-        self.stack = []
-        if name:
-            self.stack.append(name)
 
     def __call__(self, obj):
-        self.stack.append('it')
-
         if isinstance(obj, self.__class__):
             obj = obj.obj
 
@@ -982,8 +976,6 @@ class AssertionBuilder(object):
             special_case = True
 
         if special_case:
-            self.stack.append(attr)
-
             return self
 
         return super(AssertionBuilder, self).__getattribute__(attr)
@@ -1045,14 +1037,9 @@ class AssertionBuilder(object):
 
         return True
 
-    def __raise(self, prefix="", suffix=""):
-        raise AssertionError('{0}{1}{2}'.format(
-            ".".join(self.stack), self.obj, suffix))
-
     @assertionmethod
     def within(self, *args):
-        if not args:
-            return self.__raise(suffix=" re")
+        assert args, u'you should provide at least one argument to .within()'
 
         first = args[0]
         if isinstance(first, Iterable):
@@ -1169,7 +1156,6 @@ if is_cpython:
 
     def positive_assertion(name, prop=True):
         def method(self):
-            positive_builder.stack.append(name)
             return positive_builder(self)
 
         method.__name__ = name
@@ -1177,7 +1163,6 @@ if is_cpython:
 
     def negative_assertion(name, prop=True):
         def method(self):
-            negative_builder.stack.append(name)
             return negative_builder(self)
 
         method.__name__ = name

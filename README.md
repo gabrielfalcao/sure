@@ -1,10 +1,10 @@
-## sure `1.0.4` - utility belt for automated testing in python (inspired by [should.js](https://github.com/visionmedia/should.js/) )
+## sure `1.0.5` - utility belt for automated testing in python (inspired by [should.js](https://github.com/visionmedia/should.js/) )
 [![Build Status](https://secure.travis-ci.org/gabrielfalcao/sure.png)](http://travis-ci.org/gabrielfalcao/sure)
 
 ```python
 from sure import version
 
-version.should.be.equal('1.0.4')
+version.should.be.equal('1.0.5')
 ```
 
 # Installing

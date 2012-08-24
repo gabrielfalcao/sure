@@ -1108,15 +1108,6 @@ class AssertionBuilder(object):
         return True
 
     @assertionmethod
-    def exists(self, what):
-        if self.negative:
-            return not bool(what)
-
-        return bool(what)
-
-    exist = exists
-
-    @assertionmethod
     def length_of(self, num):
         if self.negative:
             return self._that.len_is_not(num)

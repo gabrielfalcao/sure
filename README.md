@@ -274,61 +274,6 @@ this("Name".lower()).should.equal('name')
 Any of the examples above will raise their own `AssertionError` with a
 meaningful error message.
 
-
-#### `dont.exists()`, `doesnt.exists()` and `shouldnt.exist()` asserts that the given object is falsy
-
-```python
-from sure import it, this, these, those
-
-assert it.dont.exist({})
-assert it.dont.exist([])
-assert it.dont.exist('')
-assert it.dont.exist(False)
-assert it.dont.exist(None)
-
-assert these.dont.exist({})
-assert these.dont.exist([])
-assert these.dont.exist('')
-assert these.dont.exist(False)
-assert these.dont.exist(None)
-
-assert it.doesnt.exist({})
-assert it.doesnt.exist([])
-assert it.doesnt.exist('')
-assert it.doesnt.exist(False)
-assert it.doesnt.exist(None)
-
-assert those.doesnt.exist({})
-assert those.doesnt.exist([])
-assert those.doesnt.exist('')
-assert those.doesnt.exist(False)
-assert those.doesnt.exist(None)
-
-assert this.dont.exist({})
-assert this.dont.exist([])
-assert this.dont.exist('')
-assert this.dont.exist(False)
-assert this.dont.exist(None)
-
-assert this.doesnt.exist({})
-assert this.doesnt.exist([])
-assert this.doesnt.exist('')
-assert this.doesnt.exist(False)
-assert this.doesnt.exist(None)
-
-assert it.shouldnt.exist({})
-assert it.shouldnt.exist([])
-assert it.shouldnt.exist('')
-assert it.shouldnt.exist(False)
-assert it.shouldnt.exist(None)
-
-assert this.shouldnt.exist({})
-assert this.shouldnt.exist([])
-assert this.shouldnt.exist('')
-assert this.shouldnt.exist(False)
-assert this.shouldnt.exist(None)
-```
-
 # Synonyms
 
 Sure provides you with a lot of synonyms so that you can pick the ones
@@ -368,14 +313,6 @@ this documentation.
 (2).should.equal(2)
 (2).should.equals(2)
 (2).should.eql(2)
-```
-
-## Existence synonyms
-
-```python
-
-assert it.do.exists(1)
-assert it.should.exist(1)
 ```
 
 ## Positive boolean synonyms

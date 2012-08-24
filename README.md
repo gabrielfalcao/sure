@@ -200,30 +200,46 @@ import sure
 
 # Static assertions with `it`, `this`, `those` and `these`
 
-#### `exists()` and `should.exist()` asserts that the given object is truthy
+Whether you don't like the `object.should` syntax or you are simply
+not running CPython, sure still allows you to use any of the
+assertions above, all you need to do is wrap the object that is being
+compared in one of the following options: `it`, `this`, `those` and
+`these`.
+
+## Too long, don't read
+
+### All those possibilities below work just as the same
 
 ```python
-from sure import it, this, these, those
+from sure import it, this, those, these
 
-assert it.should.exist(True)
-assert it.exists(object())
+(10).should.be.equal(5 + 5)
 
-assert this.should.exist(True)
-assert this.exists(object())
+this(10).should.be.equal(5 + 5)
 
-assert it.should.exist(True)
-assert it.exists(object())
+it(10).should.be.equal(5 + 5)
 
-assert this.should.exists(True)
-assert this.should.exists(object())
+these(10).should.be.equal(5 + 5)
 
-bugs = []
-assert those.shouldnt.exist(bugs)
-
-users = []
-assert these.shouldnt.exist(users)
-
+those(10).should.be.equal(5 + 5)
 ```
+
+### Also if you prefer using the `assert` keyword in your tests just go ahead an do it!
+
+```python
+from sure import it, this, those, these
+
+assert (10).should.be.equal(5 + 5)
+
+assert this(10).should.be.equal(5 + 5)
+
+assert it(10).should.be.equal(5 + 5)
+
+assert these(10).should.be.equal(5 + 5)
+
+assert those(10).should.be.equal(5 + 5)
+```
+
 
 ### A note about the `assert` keyword
 

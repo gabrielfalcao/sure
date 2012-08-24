@@ -269,7 +269,11 @@ class that(object):
             else:
                 raise e
         else:
-            _src_filename = _get_file_name(self._src)
+            if inspect.isbuiltin(self._src):
+                _src_filename = '<built-in function>'
+            else:
+                _src_filename = _get_file_name(self._src)
+
             if inspect.isfunction(self._src):
                 _src_lineno = _get_line_number(self._src)
                 raise AssertionError(
@@ -1125,9 +1129,9 @@ class AssertionBuilder(object):
 
             exc = args and args[0] or Exception
             try:
-                _that.raises(*args, **kw)
+                self.obj(*self._callable_args, **self._callable_kw)
                 return True
-            except AssertionError, e:
+            except Exception, e:
                 err = msg.format(
                     self.obj,
                     self._that._callable_args,
@@ -1151,19 +1155,33 @@ those = AssertionBuilder('those')
 
 
 if is_cpython:
-    positive_builder = AssertionBuilder(negative=False)
-    negative_builder = AssertionBuilder(negative=True)
 
     def positive_assertion(name, prop=True):
         def method(self):
-            return positive_builder(self)
+            builder = AssertionBuilder(negative=False)
+            instance = builder(self)
+            callable_args = getattr(self, '_callable_args', None)
+            if callable_args:
+                instance._callable_args = callable_args
+            callable_kw = getattr(self, '_callable_kw', None)
+            if callable_kw:
+                instance._callable_kw = callable_kw
+            return instance
 
         method.__name__ = name
         return (property(method) if prop else method(None))
 
     def negative_assertion(name, prop=True):
         def method(self):
-            return negative_builder(self)
+            builder = AssertionBuilder(negative=True)
+            instance = builder(self)
+            callable_args = getattr(self, '_callable_args', None)
+            if callable_args:
+                instance._callable_args = callable_args
+            callable_kw = getattr(self, '_callable_kw', None)
+            if callable_kw:
+                instance._callable_kw = callable_kw
+            return instance
 
         method.__name__ = name
         return (property(method) if prop else method(None))

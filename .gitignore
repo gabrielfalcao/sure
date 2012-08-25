@@ -4,3 +4,4 @@ docs/_build
 build/
 dist/
 sure.egg-info/
+.tox

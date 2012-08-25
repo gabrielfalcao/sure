@@ -961,6 +961,7 @@ class AssertionBuilder(object):
             obj = obj.obj
 
         self.obj = obj
+        self.repr = repr(obj)
         self._that = that(obj)
 
         return self
@@ -1009,10 +1010,15 @@ class AssertionBuilder(object):
 
     @assertionproperty
     def empty(self):
+        length = len(self.obj)
         if self.negative:
-            return self._that.len_greater_than(0)
+            assert length > 0, (
+                u"expected `{0}` to not be empty".format(repr(self.obj)))
         else:
-            return self._that.len_is(0)
+            assert length is 0, (
+                u"expected `{0}` to be empty but it has {1} items".format(self.repr, length))
+
+        return True
 
     @assertionproperty
     def ok(self):

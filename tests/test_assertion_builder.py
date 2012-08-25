@@ -161,3 +161,23 @@ def test_should_be_callable():
     assert that(opposite_not).raises(AssertionError)
     assert that(opposite_not).raises(
         "expected `{0}` to not be callable but it is".format(repr(opposite)))
+
+
+def test_iterable_should_be_empty():
+    (u"this(iterable).should.be.empty")
+
+    assert this([]).should.be.empty
+    assert this([1, 2, 3]).should_not.be.empty
+
+    def opposite():
+        assert this([3, 2, 1]).should.be.empty
+
+    def opposite_not():
+        assert this({}).should_not.be.empty
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises(
+        "expected `[3, 2, 1]` to be empty but it has 3 items")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises("expected `{}` to not be empty")

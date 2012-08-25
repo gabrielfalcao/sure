@@ -15,7 +15,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 from sure import this, these, those, it, that, AssertionBuilder
 
 
@@ -122,3 +121,43 @@ def test_none():
 
     assert that(opposite_not).raises(AssertionError)
     assert that(opposite_not).raises("expected `None` to not be None")
+
+
+def test_should_be_a():
+    (u"this(None).should.be.none")
+
+    assert this(1).should.be.an(int)
+    assert this([]).should.be.a('collections.Iterable')
+    assert this({}).should_not.be.a(list)
+
+    def opposite():
+        assert this(1).should_not.be.an(int)
+
+    def opposite_not():
+        assert this([]).should_not.be.a('list')
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises("expected `1` to not be an int")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises("expected `[]` to not be a list")
+
+
+def test_should_be_callable():
+    (u"this(function).should.be.callable")
+
+    assert this(lambda: None).should.be.callable
+    assert this("aa").should_not.be.callable
+
+    def opposite():
+        assert this("foo").should.be.callable
+
+    def opposite_not():
+        assert this(opposite).should_not.be.callable
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises("expected 'foo' to be callable")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises(
+        "expected `{0}` to not be callable but it is".format(repr(opposite)))

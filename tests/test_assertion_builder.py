@@ -181,3 +181,24 @@ def test_iterable_should_be_empty():
 
     assert that(opposite_not).raises(AssertionError)
     assert that(opposite_not).raises("expected `{}` to not be empty")
+
+
+def test_iterable_should_have_length_of():
+    (u"this(iterable).should.have.length_of(N)")
+
+    assert this({'foo': 'bar', 'a': 'b'}).should.have.length_of(2)
+    assert this([1, 2, 3]).should_not.have.length_of(4)
+
+    def opposite():
+        assert this(('foo', 'bar', 'a', 'b')).should.have.length_of(1)
+
+    def opposite_not():
+        assert this([1, 2, 3]).should_not.have.length_of(3)
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises(
+        "the length of ('foo', 'bar', 'a', 'b') should be 1, but is 4")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises(
+        "the length of [1, 2, 3] should not be 3")

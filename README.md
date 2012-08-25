@@ -255,6 +255,17 @@ assert these(10).should.be.equal(5 + 5)
 assert those(10).should.be.equal(5 + 5)
 ```
 
+#### `(lambda: None).should.be.callable`
+
+Test if something is or not callable
+
+```python
+import sure
+
+range.should.be.callable
+(lambda: None).should.be.callable;
+(123).should_not.be.callable
+```
 
 ### A note about the `assert` keyword
 

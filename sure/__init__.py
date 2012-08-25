@@ -985,6 +985,17 @@ class AssertionBuilder(object):
         return super(AssertionBuilder, self).__getattribute__(attr)
 
     @assertionproperty
+    def callable(self):
+        if self.negative:
+            assert not callable(self.obj), (
+                'expected `{0}` to not be callable but it is'.format(repr(self.obj)))
+        else:
+            assert callable(self.obj), (
+                'expected {0} to be callable'.format(repr(self.obj)))
+
+        return True
+
+    @assertionproperty
     def be(self):
         return self
 
@@ -1066,16 +1077,40 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def an(self, klass):
+        if isinstance(klass, type):
+            class_name = klass.__name__
+        elif isinstance(klass, basestring):
+            class_name = klass.strip()
+        else:
+            class_name = unicode(klass)
+
+        is_vowel = class_name[0] in 'aeiou'
+
         if isinstance(klass, basestring):
             if '.' in klass:
                 items = klass.split('.')
                 first = items.pop(0)
+                if not items:
+                    items = [first]
+                    first = '_abcoll'
             else:
                 first = u'__builtin__'
                 items = [klass]
 
             klass = reduce(getattr, items, __import__(first))
-        return self._that.is_a(klass)
+
+        suffix = is_vowel and "n" or ""
+
+        if self.negative:
+            assert not isinstance(self.obj, klass), (
+                'expected `{0}` to not be a{1} {2}'.format(
+                    self.obj, suffix, class_name))
+
+        else:
+            assert isinstance(self.obj, klass), (
+                'expected `{0}` to be a{1} {2}'.format(
+                    self.obj, suffix, class_name))
+        return True
 
     a = an
 

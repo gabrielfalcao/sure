@@ -1042,13 +1042,11 @@ class AssertionBuilder(object):
         return True
 
     @assertionmethod
-    def within(self, *args):
-        assert args, u'you should provide at least one argument to .within()'
-
-        first = args[0]
+    def within(self, first, *rest):
         if isinstance(first, Iterable):
             collection_should = that(first)
         else:
+            args = [first] + list(rest)
             collection_should = that(range(*args))
 
         if self.negative:

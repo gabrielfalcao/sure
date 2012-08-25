@@ -113,7 +113,7 @@ Assert truthfulness:
 from sure import this
 
 True.should.be.ok
-'truthy tring'.should.be.ok
+'truthy string'.should.be.ok
 {'truthy': 'dictionary'}.should.be.ok
 ```
 

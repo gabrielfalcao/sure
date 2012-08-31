@@ -1232,7 +1232,9 @@ those = AssertionBuilder('those')
 expect = AssertionBuilder('expect')
 
 
-if is_cpython:
+allows_new_syntax = not os.getenv('SURE_DISABLE_NEW_SYNTAX')
+
+if is_cpython and allows_new_syntax:
 
     def positive_assertion(name, prop=True):
         def method(self):

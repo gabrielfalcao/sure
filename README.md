@@ -376,6 +376,16 @@ None.should_not.be.true
 None.should_not.be.ok
 ```
 
+# Can I disable those the new syntax by default ?
+
+Sure! :+1:
+
+Just export the `SURE_DISABLE_NEW_SYNTAX` environment variable before
+running your tests.
+
+```console
+export SURE_DISABLE_NEW_SYNTAX=True
+```
 # Python compatibility
 
 ## Those are the python versions that support the assertions above [`CPython`](http://en.wikipedia.org/wiki/CPython)

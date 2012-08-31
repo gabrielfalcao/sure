@@ -1537,3 +1537,47 @@ wrong msg
 
 GOT:
 should fail with this exception''')
+
+
+def test_deep_equals_weird():
+    part1 = [
+        ('Bootstraping Redis role', []),
+        ('Restart scalarizr', []),
+        ('Rebundle server', [u'rebundle']),
+        ('Use new role', [u'rebundle']),
+        ('Restart scalarizr after bundling', [u'rebundle']),
+        ('Bundling data', []),
+        ('Modifying data', []),
+        ('Reboot server', []),
+        ('Backuping data on Master', []),
+        ('Setup replication', []),
+        ('Restart scalarizr in slave', []),
+        ('Slave force termination', []),
+        ('Slave delete EBS', [u'ec2']),
+        ('Setup replication for EBS test', [u'ec2']),
+        ('Writing on Master, reading on Slave', []),
+        ('Slave -> Master promotion', []),
+        ('Restart farm', [u'restart_farm']),
+    ]
+
+    part2 = [
+        ('Bootstraping Redis role', [u'rebundle', u'rebundle', u'rebundle']),
+        ('Restart scalarizr', []),
+        ('Rebundle server', [u'rebundle']),
+        ('Use new role', [u'rebundle']),
+        ('Restart scalarizr after bundling', [u'rebundle']),
+        ('Bundling data', []),
+        ('Modifying data', []),
+        ('Reboot server', []),
+        ('Backuping data on Master', []),
+        ('Setup replication', []),
+        ('Restart scalarizr in slave', []),
+        ('Slave force termination', []),
+        ('Slave delete EBS', [u'ec2']),
+        ('Setup replication for EBS test', [u'ec2']),
+        ('Writing on Master, reading on Slave', []),
+        ('Slave -> Master promotion', []),
+        ('Restart farm', [u'restart_farm']),
+    ]
+
+    that(part1).equals.when.called_with(part2).should.throw("")

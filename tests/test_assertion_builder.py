@@ -202,3 +202,45 @@ def test_iterable_should_have_length_of():
     assert that(opposite_not).raises(AssertionError)
     assert that(opposite_not).raises(
         "the length of [1, 2, 3] should not be 3")
+
+
+def test_greater_than():
+    (u"this(X).should.be.greater_than(Y)")
+
+    assert this(5).should.be.greater_than(4)
+    assert this(1).should_not.be.greater_than(2)
+
+    def opposite():
+        assert this(4).should.be.greater_than(5)
+
+    def opposite_not():
+        assert this(2).should_not.be.greater_than(1)
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises(
+        "expected `4` to be greater than `5`")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises(
+        "expected `2` to not be greater than `1`")
+
+
+def test_lower_than():
+    (u"this(X).should.be.lower_than(Y)")
+
+    assert this(4).should.be.lower_than(5)
+    assert this(2).should_not.be.lower_than(1)
+
+    def opposite():
+        assert this(5).should.be.lower_than(4)
+
+    def opposite_not():
+        assert this(1).should_not.be.lower_than(2)
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises(
+        "expected `5` to be lower than `4`")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises(
+        "expected `1` to not be lower than `2`")

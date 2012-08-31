@@ -1001,6 +1001,14 @@ class AssertionBuilder(object):
         return self
 
     @assertionproperty
+    def not_be(self):
+        return self.obj.should_not
+
+    @assertionproperty
+    def to(self):
+        return self
+
+    @assertionproperty
     def when(self):
         return self
 
@@ -1121,6 +1129,36 @@ class AssertionBuilder(object):
     a = an
 
     @assertionmethod
+    def greater_than(self, dest):
+        if self.negative:
+            msg = u"expected `{0}` to not be greater than `{1}`".format(
+                self.obj, dest)
+
+            assert not self.obj > dest, msg
+
+        else:
+            msg = u"expected `{0}` to be greater than `{1}`".format(
+                self.obj, dest)
+            assert self.obj > dest, msg
+
+        return True
+
+    @assertionmethod
+    def lower_than(self, dest):
+        if self.negative:
+            msg = u"expected `{0}` to not be lower than `{1}`".format(
+                self.obj, dest)
+
+            assert not self.obj < dest, msg
+
+        else:
+            msg = u"expected `{0}` to be lower than `{1}`".format(
+                self.obj, dest)
+            assert self.obj < dest, msg
+
+        return True
+
+    @assertionmethod
     def below(self, num):
         if self.negative:
             msg = u"{0} should not be below {1}".format(self.obj, num)
@@ -1191,6 +1229,7 @@ this = AssertionBuilder('this')
 it = AssertionBuilder('it')
 these = AssertionBuilder('these')
 those = AssertionBuilder('those')
+expect = AssertionBuilder('expect')
 
 
 if is_cpython:

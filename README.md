@@ -139,6 +139,15 @@ False.shouldnt.be.ok
 {'john': 'person'}.should_not.have.length_of(2)
 ```
 
+#### Assert the magnitude of objects with `{X}.should.be.greater_than(Y)` and `{Y}.should.be.lower_than(X)`
+
+```python
+(5).should.be.greater_than(4)
+(5).should_not.be.greater_than(10)
+(1).should.be.lower_than(2)
+(1).should_not.be.lower_than(0)
+```
+
 #### `callable.when.called_with(arg1, kwarg1=2).should.throw(Exception)`
 
 You can use this feature to assert that a callable raises an
@@ -242,7 +251,7 @@ those(10).should.be.equal(5 + 5)
 ### Also if you prefer using the `assert` keyword in your tests just go ahead an do it!
 
 ```python
-from sure import it, this, those, these
+from sure import it, this, those, these, expect
 
 assert (10).should.be.equal(5 + 5)
 
@@ -253,6 +262,9 @@ assert it(10).should.be.equal(5 + 5)
 assert these(10).should.be.equal(5 + 5)
 
 assert those(10).should.be.equal(5 + 5)
+
+expect(10).to.be.equal(5 + 5)
+expect(10).to.not_be.equal(8)
 ```
 
 #### `(lambda: None).should.be.callable`
@@ -322,6 +334,7 @@ this documentation.
 ## Negative synonyms
 
 ```python
+from sure import expect
 
 (2).should_not.be.equal(3)
 (2).shouldnt.be.equal(3)
@@ -330,6 +343,8 @@ this documentation.
 (2).doesnot.equals(3)
 (2).dont.equal(3)
 (2).do_not.equal(3)
+
+expect(3).to.not_be.equal(1)
 ```
 
 ## Equality synonyms

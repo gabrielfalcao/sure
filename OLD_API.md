@@ -120,6 +120,8 @@ Example:
 
 
 ```python
+from sure import that
+
 something = {
     'one': 'yeah',
     'another': {
@@ -140,6 +142,8 @@ And even better, when the comparison doesn't at some point, sure will show a **V
 #### further
 
 ```python
+from sure import that
+
 class animal(object):
     def __init__(self, kind):
         self.attributes = {
@@ -183,6 +187,7 @@ def file_is_a_xml(context):
 Like this:
 
 ```python
+import sure
 def setup_file(context):
     context.file = open("foobar.xml")
 
@@ -242,6 +247,7 @@ if any of the tests above take more than expected, a assertion_error is raised
 ## exceptions
 
 ```python
+from sure import that
 def function(arg1=None, arg2=None):
     if arg1 and arg2:
         raise RuntimeError('yeah, it failed')
@@ -262,6 +268,7 @@ assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, '
 ## add your own matchers
 
 ```python
+from sure import that
 @that.is_a_matcher
 def could_work(matcher, parameter):
     assert matcher == "this"

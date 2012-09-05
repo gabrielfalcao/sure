@@ -244,3 +244,114 @@ def test_lower_than():
     assert that(opposite_not).raises(AssertionError)
     assert that(opposite_not).raises(
         "expected `1` to not be lower than `2`")
+
+
+def test_have_property():
+    (u"this(instance).should.have.property(property_name)")
+
+    class Person(object):
+        name = "John Doe"
+
+        def __repr__(self):
+            return ur"Person()"
+
+    jay = Person()
+
+    assert this(jay).should.have.property("name")
+    assert this(jay).should_not.have.property("age")
+
+    def opposite():
+        assert this(jay).should_not.have.property("name")
+
+    def opposite_not():
+        assert this(jay).should.have.property("age")
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises(
+        "Person() should not have the property `name`, but it is 'John Doe'")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises(
+        "Person() should have the property `age` but doesn't")
+
+
+def test_have_property_with_value():
+    (u"this(instance).should.have.property(property_name).being or "
+     ".with_value should allow chain up")
+
+    class Person(object):
+        name = "John Doe"
+
+        def __repr__(self):
+            return ur"Person()"
+
+    jay = Person()
+
+    assert this(jay).should.have.property("name").being.equal("John Doe")
+    assert this(jay).should.have.property("name").not_being.equal("Foo")
+
+    def opposite():
+        assert this(jay).should.have.property("name").not_being.equal(
+            "John Doe")
+
+    def opposite_not():
+        assert this(jay).should.have.property("name").being.equal(
+            "Foo")
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises(
+        "'John Doe' should differ to 'John Doe', but is the same thing")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises(
+        "X is 'John Doe' whereas Y is 'Foo'")
+
+
+def test_have_key():
+    (u"this(dictionary).should.have.key(key_name)")
+
+    jay = dict(name="John Doe")
+
+    assert this(jay).should.have.key("name")
+    assert this(jay).should_not.have.key("age")
+
+    def opposite():
+        assert this(jay).should_not.have.key("name")
+
+    def opposite_not():
+        assert this(jay).should.have.key("age")
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises(
+        "{'name': 'John Doe'} should not have the key `name`, "
+        "but it is 'John Doe'")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises(
+        "{'name': 'John Doe'} should have the key `age` but doesn't")
+
+
+def test_have_key_with_value():
+    (u"this(dictionary).should.have.key(key_name).being or "
+     ".with_value should allow chain up")
+
+    jay = dict(name="John Doe")
+
+    assert this(jay).should.have.key("name").being.equal("John Doe")
+    assert this(jay).should.have.key("name").not_being.equal("Foo")
+
+    def opposite():
+        assert this(jay).should.have.key("name").not_being.equal(
+            "John Doe")
+
+    def opposite_not():
+        assert this(jay).should.have.key("name").being.equal(
+            "Foo")
+
+    assert that(opposite).raises(AssertionError)
+    assert that(opposite).raises(
+        "'John Doe' should differ to 'John Doe', but is the same thing")
+
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises(
+        "X is 'John Doe' whereas Y is 'Foo'")

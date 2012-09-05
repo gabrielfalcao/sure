@@ -128,6 +128,59 @@ False.shouldnt.be.ok
 {}.shouldnot.be.ok
 ```
 
+#### Assert existence of properties and its values
+
+```python
+
+class Basket(object):
+    fruits = ["apple", "banana"]
+
+
+basket1 = Basket()
+
+basket1.should.have.property("fruits")
+```
+
+##### .have.property().being allows chaining up
+
+If the programmer calls `have.property()` it returns an assertion
+builder of the property if it exists, so that you can chain up
+assertions for the property value itself.
+
+```python
+
+class Basket(object):
+    fruits = ["apple", "banana"]
+
+basket2 = Basket()
+basket2.should.have.property("fruits").being.equal(["apple", "banana"])
+basket2.should.have.property("fruits").with_value.equal(["apple", "banana"])
+basket2.should.have.property("fruits").with_value.being.equal(["apple", "banana"])
+```
+
+
+#### Assert existence of keys and its values
+
+```python
+basket3 = dict(fruits=["apple", "banana"])
+basket3.should.have.key("fruits")
+```
+
+##### .have.key().being allows chaining up
+
+If the programmer calls `have.key()` it returns an assertion
+builder of the key if it exists, so that you can chain up
+assertions for the dictionary key value itself.
+
+
+```python
+
+person = dict(name=None)
+
+person.should.have.key("name").being.none
+person.should.have.key("name").being.equal(None)
+```
+
 #### Assert the length of objects with `{iterable}.should.have.length_of(N)`
 
 ```python
@@ -345,6 +398,24 @@ from sure import expect
 (2).do_not.equal(3)
 
 expect(3).to.not_be.equal(1)
+```
+
+## Chain-up synonyms
+
+Any of those synonyms work as an alias to the assertion builder:
+
+* `be`
+* `being`
+* `to`
+* `when`
+* `have`
+* `with_value`
+
+```python
+from sure import expect
+
+{"foo": 1}.must.with_value.being.equal({"foo": 1})
+{"foo": 1}.does.have.key("foo").being.with_value.equal(1)
 ```
 
 ## Equality synonyms

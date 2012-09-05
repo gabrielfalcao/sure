@@ -18,6 +18,7 @@
 import re
 import os
 import sys
+import __builtin__
 import inspect
 import traceback
 
@@ -504,7 +505,7 @@ class that(object):
 
         return True
 
-    @property
+    @__builtin__.property
     def is_empty(self):
         try:
             lst = list(self._src)
@@ -517,7 +518,7 @@ class that(object):
         except TypeError:
             raise AssertionError("%r is not iterable" % self._src)
 
-    @property
+    @__builtin__.property
     def are_empty(self):
         return self.is_empty
 
@@ -927,7 +928,7 @@ def assertionmethod(func):
 
 
 def assertionproperty(func):
-    return property(assertionmethod(func))
+    return __builtin__.property(assertionmethod(func))
 
 POSITIVES = [
     'should',
@@ -1001,6 +1002,14 @@ class AssertionBuilder(object):
         return self
 
     @assertionproperty
+    def being(self):
+        return self
+
+    @assertionproperty
+    def not_being(self):
+        return self.should_not
+
+    @assertionproperty
     def not_be(self):
         return self.obj.should_not
 
@@ -1015,6 +1024,36 @@ class AssertionBuilder(object):
     @assertionproperty
     def have(self):
         return self
+
+    @assertionproperty
+    def with_value(self):
+        return self
+
+    def property(self, name):
+        has_it = hasattr(self.obj, name)
+        if self.negative:
+            assert not has_it, (
+                '%r should not have the property `%s`, '
+                'but it is %r' % (self.obj, name, getattr(self.obj, name)))
+            return True
+
+        assert has_it, (
+            "%r should have the property `%s` but doesn't" % (
+                self.obj, name))
+        return expect(getattr(self.obj, name))
+
+    def key(self, name):
+        has_it = name in self.obj
+        if self.negative:
+            assert not has_it, (
+                '%r should not have the key `%s`, '
+                'but it is %r' % (self.obj, name, self.obj[name]))
+            return True
+
+        assert has_it, (
+            "%r should have the key `%s` but doesn't" % (
+                self.obj, name))
+        return expect(self.obj[name])
 
     @assertionproperty
     def empty(self):
@@ -1192,7 +1231,7 @@ class AssertionBuilder(object):
         self._callable_kw = kw
         return self
 
-    called = property(called_with)
+    called = __builtin__.property(called_with)
 
     @assertionmethod
     def throw(self, *args, **kw):
@@ -1249,7 +1288,7 @@ if is_cpython and allows_new_syntax:
             return instance
 
         method.__name__ = name
-        return (property(method) if prop else method(None))
+        return (__builtin__.property(method) if prop else method(None))
 
     def negative_assertion(name, prop=True):
         def method(self):
@@ -1264,7 +1303,7 @@ if is_cpython and allows_new_syntax:
             return instance
 
         method.__name__ = name
-        return (property(method) if prop else method(None))
+        return (__builtin__.property(method) if prop else method(None))
 
     object_handler = patchable_builtin(object)
 

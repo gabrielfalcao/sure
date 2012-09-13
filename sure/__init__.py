@@ -743,11 +743,10 @@ def action_for(context, provides=None, depends_on=None):
 
 class DeepExplanation(unicode):
     def get_header(self, X, Y, suffix):
-        return """given
-X = %r
-    and
-Y = %r
-%s""".strip() % (X, Y, suffix)
+        return (u"given\nX = %s\n    and\nY = %s\n%s" % (
+            repr(X).decode('utf-8'),
+            repr(Y).decode('utf-8'),
+            suffix)).strip()
 
     def as_assertion(self, X, Y):
         raise AssertionError(self.get_header(X, Y, self))

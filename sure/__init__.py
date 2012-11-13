@@ -1182,6 +1182,21 @@ class AssertionBuilder(object):
         return True
 
     @assertionmethod
+    def greater_than_or_equal_to(self, dest):
+        if self.negative:
+            msg = u"expected `{0}` to not be greater than or equal to `{1}`".format(
+                self.obj, dest)
+
+            assert not self.obj >= dest, msg
+
+        else:
+            msg = u"expected `{0}` to be greater than or equal to `{1}`".format(
+                self.obj, dest)
+            assert self.obj >= dest, msg
+
+        return True
+
+    @assertionmethod
     def lower_than(self, dest):
         if self.negative:
             msg = u"expected `{0}` to not be lower than `{1}`".format(
@@ -1193,6 +1208,21 @@ class AssertionBuilder(object):
             msg = u"expected `{0}` to be lower than `{1}`".format(
                 self.obj, dest)
             assert self.obj < dest, msg
+
+        return True
+
+    @assertionmethod
+    def lower_than_or_equal_to(self, dest):
+        if self.negative:
+            msg = u"expected `{0}` to not be lower than or equal to `{1}`".format(
+                self.obj, dest)
+
+            assert not self.obj <= dest, msg
+
+        else:
+            msg = u"expected `{0}` to be lower than or equal to `{1}`".format(
+                self.obj, dest)
+            assert self.obj <= dest, msg
 
         return True
 

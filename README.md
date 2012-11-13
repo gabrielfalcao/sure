@@ -192,13 +192,18 @@ person.should.have.key("name").being.equal(None)
 {'john': 'person'}.should_not.have.length_of(2)
 ```
 
-#### Assert the magnitude of objects with `{X}.should.be.greater_than(Y)` and `{Y}.should.be.lower_than(X)`
+#### Assert the magnitude of objects with `{X}.should.be.greater_than(Y)` and `{Y}.should.be.lower_than(X)` as well as `{X}.should.be.greater_than_or_equal_to(Y)` and `{Y}.should.be.lower_than_or_equal_to(X)`
 
 ```python
 (5).should.be.greater_than(4)
 (5).should_not.be.greater_than(10)
 (1).should.be.lower_than(2)
 (1).should_not.be.lower_than(0)
+
+(5).should.be.greater_than_or_equal_to(4)
+(5).should_not.be.greater_than_or_equal_to(10)
+(1).should.be.lower_than_or_equal_to(2)
+(1).should_not.be.lower_than_or_equal_to(0)
 ```
 
 #### `callable.when.called_with(arg1, kwarg1=2).should.throw(Exception)`

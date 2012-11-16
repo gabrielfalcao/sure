@@ -39,6 +39,7 @@ from sure.core import DeepExplanation
 from sure.core import _get_file_name
 from sure.core import _get_line_number
 from sure.core import safe_repr
+from sure.core import anything
 
 from sure.magic import is_cpython, patchable_builtin
 from sure.registry import context as _registry

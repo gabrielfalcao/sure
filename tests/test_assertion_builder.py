@@ -21,7 +21,7 @@ import mock
 from collections import OrderedDict
 
 from datetime import datetime
-from sure import this, these, those, it, expect, AssertionBuilder
+from sure import this, these, those, it, expect, anything, AssertionBuilder
 from six import PY3
 from sure.compat import compat_repr
 
@@ -794,3 +794,17 @@ X = {u'children': {}, u'fields': {u'age': u'22', u'name': u'John'}}
     and
 Y = {u'children': {}, u'fields': {u'age': u'22', u'name': u'John'}}
 X[u'fields'] and Y[u'fields'] are in a different order""")
+
+
+def test_equals_anything():
+    val = 1
+    expect(val).to.be.equal(anything)
+
+    val = {'key': 1, 'other_key': 4}
+    expect(val).to.be.equal({'key': 1, 'other_key': anything})
+
+    val = {'key': 1, 'other_key': 'yo!'}
+    expect(val).to.be.equal({'key': 1, 'other_key': anything})
+
+    val = [1, 2, 3, 4]
+    expect(val).to.be.equal([1, anything, 3, anything])

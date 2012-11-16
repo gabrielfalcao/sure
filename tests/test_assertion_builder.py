@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from sure import this, these, those, it, that, AssertionBuilder
+from sure import this, these, those, it, that, anything, AssertionBuilder
 
 
 def test_assertion_builder_synonyms():
@@ -393,3 +393,18 @@ def test_have_key_with_value():
     assert that(opposite_not).raises(AssertionError)
     assert that(opposite_not).raises(
         "X is 'John Doe' whereas Y is 'Foo'")
+
+
+def test_equals_anything():
+
+    val = 1
+    assert this(val).should.equal(anything)
+
+    val = {'key': 1, 'other_key': 4}
+    assert this(val).should.equal({'key': 1, 'other_key': anything})
+
+    val = {'key': 1, 'other_key': 'yo!'}
+    assert this(val).should.equal({'key': 1, 'other_key': anything})
+
+    val = [1, 2, 3, 4]
+    assert this(val).should.equal([1, anything, 3, anything])

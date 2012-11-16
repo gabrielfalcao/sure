@@ -38,6 +38,12 @@ from sure.terminal import red, green, white, yellow
 version = '1.0.6'
 
 
+class Anything(object):
+    pass
+
+anything = Anything()
+
+
 def _get_file_name(func):
     try:
         name = inspect.getfile(func)
@@ -298,7 +304,6 @@ class that(object):
         comparison = deep.compare()
         if isinstance(comparison, bool):
             return comparison
-
         raise comparison.as_assertion(self._src, dst)
 
     def equals(self, dst):
@@ -760,7 +765,7 @@ class DeepComparison(object):
 
     def is_simple(self, obj):
         return isinstance(obj, (
-            int, long, float, basestring,
+            int, long, float, basestring, Anything,
         ))
 
     def compare_complex_stuff(self, X, Y):
@@ -871,7 +876,7 @@ class DeepComparison(object):
         X, Y = self.operands
         c = self.get_context()
         if self.is_simple(X) and self.is_simple(Y):  # both simple
-            if X == Y:
+            if X == Y or anything in (X, Y):
                 return True
             c = self.get_context()
             m = u"X%s is %%r whereas Y%s is %%r"
@@ -890,11 +895,12 @@ class DeepComparison(object):
             exp = self.compare_complex_stuff(X, Y)
 
         if isinstance(exp, DeepExplanation):
-
             original_X, original_Y = c.parent.operands
             raise exp.as_assertion(original_X, original_Y)
 
-        return exp
+        # If compare_complex_stuff() call does not return a
+        # DeepExplanation, we're good to say that things worked.
+        return exp or True
 
     def explanation(self):
         return self._explanation

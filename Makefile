@@ -9,7 +9,7 @@ install_deps:
 	@pip install -r requirements.pip
 
 test:
-	@nosetests --verbosity=2 tests
+	@nosetests -s --verbosity=2 tests
 	@steadymark OLD_API.md
 	@steadymark README.md
 

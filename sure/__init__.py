@@ -772,9 +772,25 @@ allows_new_syntax = not os.getenv('SURE_DISABLE_NEW_SYNTAX')
 
 if is_cpython and allows_new_syntax:
 
+    def make_safe_property(method, name, should_be_property=True):
+        if not should_be_property:
+            return method(None)
+
+        def deleter(self, *args, **kw):
+            pass
+
+        def setter(self, other):
+            pass
+
+        return builtins.property(
+            fget=method,
+            fset=setter,
+            fdel=deleter,
+        )
+
     def positive_assertion(name, prop=True):
         def method(self):
-            builder = AssertionBuilder(negative=False)
+            builder = AssertionBuilder(name, negative=False)
             instance = builder(self)
             callable_args = getattr(self, '_callable_args', None)
             if callable_args:
@@ -785,11 +801,11 @@ if is_cpython and allows_new_syntax:
             return instance
 
         method.__name__ = name
-        return (__builtin__.property(method) if prop else method(None))
+        return make_safe_property(method, name, prop)
 
     def negative_assertion(name, prop=True):
         def method(self):
-            builder = AssertionBuilder(negative=True)
+            builder = AssertionBuilder(name, negative=True)
             instance = builder(self)
             callable_args = getattr(self, '_callable_args', None)
             if callable_args:
@@ -800,7 +816,7 @@ if is_cpython and allows_new_syntax:
             return instance
 
         method.__name__ = name
-        return (__builtin__.property(method) if prop else method(None))
+        return make_safe_property(method, name, prop)
 
     object_handler = patchable_builtin(object)
 

@@ -36,3 +36,8 @@ def test_it_works_with_objects():
 #     f = Foo()
 
 #     f.should.be.a(Foo)
+
+# def test_can_override_properties():
+#     x =1
+#     x.should = 2
+#     assert x.should == 2

@@ -18,45 +18,25 @@
 import re
 import os
 import sys
-import __builtin__
-import inspect
+
 import traceback
 
-from copy import deepcopy
-from pprint import pformat
 from functools import wraps
 from datetime import datetime
-try:
-    from collections import Iterable
-except ImportError:
-    Iterable = (list, dict, tuple, set)
 
+from sure.deprecated import AssertionHelper
+from sure.deprecated import Iterable
+from sure.deprecated import builtins
 from sure.registry import context as _registry
 from sure.magic import is_cpython, patchable_builtin
-from sure.terminal import red, green, white, yellow
-
-version = '1.0.6'
-
-
-def _get_file_name(func):
-    try:
-        name = inspect.getfile(func)
-    except AttributeError:
-        name = func.func_code.co_filename
-
-    return os.path.abspath(name)
+from sure.core import DeepComparison
+from sure.core import DeepExplanation
+from sure.core import _get_file_name
+from sure.core import _get_line_number
 
 
-def _get_line_number(func):
-    try:
-        return inspect.getlineno(func)
-    except AttributeError:
-        return func.func_code.co_firstlineno
+version = '1.1.0'
 
-
-def itemize_length(items):
-    length = len(items)
-    return '%d item%s' % (length, length > 1 and "s" or "")
 
 not_here_error = \
     'you have tried to access the attribute "%s" from the context ' \
@@ -162,389 +142,6 @@ def that_with_context(setup=None, teardown=None):
     return dec
 
 scenario = that_with_context
-
-
-def explanation(msg):
-    def dec(func):
-        def wrap(self, what):
-            ret = func(self, what)
-            assert ret, msg % (self._src, what)
-            return True
-
-        wrap.__name__ = func.__name__
-        wrap.__doc__ = func.__doc__
-        return wrap
-
-    return dec
-
-
-def is_iterable(obj):
-    return hasattr(obj, '__iter__') and not isinstance(obj, basestring)
-
-
-def all_integers(obj):
-    if not is_iterable(obj):
-        return
-
-    for element in obj:
-        if not isinstance(element, int):
-            return
-
-    return True
-
-
-class that(object):
-    def __init__(self, src,
-                 within_range=None,
-                 with_args=None,
-                 with_kwargs=None,
-                 and_kwargs=None):
-
-        self._src = src
-        self._attribute = None
-        self._eval = None
-        self._range = None
-        if all_integers(within_range):
-            if len(within_range) != 2:
-                raise TypeError(
-                    'within_range parameter must be a tuple with 2 objects',
-                )
-
-            self._range = within_range
-
-        self._callable_args = []
-        if isinstance(with_args, (list, tuple)):
-            self._callable_args = list(with_args)
-
-        self._callable_kw = {}
-        if isinstance(with_kwargs, dict):
-            self._callable_kw.update(with_kwargs)
-
-        if isinstance(and_kwargs, dict):
-            self._callable_kw.update(and_kwargs)
-
-    @classmethod
-    def is_a_matcher(cls, func):
-        def match(self, *args, **kw):
-            return func(self._src, *args, **kw)
-
-        new_matcher = deepcopy(match)
-        new_matcher.__name__ = func.__name__
-        setattr(cls, func.__name__, new_matcher)
-
-        return new_matcher
-
-    def raises(self, exc, msg=None):
-        if not callable(self._src):
-            raise TypeError('%r is not callable' % self._src)
-
-        try:
-            self._src(*self._callable_args, **self._callable_kw)
-
-        except Exception, e:
-            if isinstance(exc, basestring):
-                msg = exc
-
-            err = str(e)
-            exc = type(e)
-
-            if isinstance(exc, type) and issubclass(exc, Exception):
-                if not isinstance(e, exc):
-                    raise AssertionError(
-                        '%r should raise %r, but raised %r' % (
-                            self._src, exc, e.__class__))
-
-                if isinstance(msg, basestring) and msg not in err:
-                    raise AssertionError('''
-                    %r raised %s, but the exception message does not
-                    match.\n\nEXPECTED:\n%s\n\nGOT:\n%s'''.strip() % (
-                            self._src,
-                            type(e).__name__,
-                            msg, err))
-
-            elif isinstance(msg, basestring) and msg not in err:
-                raise AssertionError(
-                    'When calling %r the exception message does not match. ' \
-                    'Expected: %r\n got:\n %r' % (self._src, msg, err))
-
-            else:
-                raise e
-        else:
-            if inspect.isbuiltin(self._src):
-                _src_filename = '<built-in function>'
-            else:
-                _src_filename = _get_file_name(self._src)
-
-            if inspect.isfunction(self._src):
-                _src_lineno = _get_line_number(self._src)
-                raise AssertionError(
-                    'calling function %s(%s at line: "%d") with args %r and kwargs %r did not raise %r' % (
-                        self._src.__name__,
-                        _src_filename, _src_lineno,
-                        self._callable_args,
-                        self._callable_kw, exc))
-            else:
-                raise AssertionError(
-                    'at %s:\ncalling %s() with args %r and kwargs %r did not raise %r' % (
-                        _src_filename,
-                        self._src.__name__,
-                        self._callable_args,
-                        self._callable_kw, exc))
-
-        return True
-
-    def deep_equals(self, dst):
-        deep = DeepComparison(self._src, dst)
-        comparison = deep.compare()
-        if isinstance(comparison, bool):
-            return comparison
-
-        raise comparison.as_assertion(self._src, dst)
-
-    def equals(self, dst):
-        if self._attribute and is_iterable(self._src):
-            msg = u'%r[%d].%s should be %r, but is %r'
-
-            for index, item in enumerate(self._src):
-                if self._range:
-                    if index < self._range[0] or index > self._range[1]:
-                        continue
-
-                attribute = getattr(item, self._attribute)
-                error = msg % (
-                    self._src, index, self._attribute, dst, attribute)
-                if attribute != dst:
-                    raise AssertionError(error)
-        else:
-            return self.deep_equals(dst)
-
-        return True
-
-    def looks_like(self, dst):
-        old_src = pformat(self._src)
-        old_dst = pformat(dst)
-        self._src = re.sub(r'\s', '', self._src).lower()
-        dst = re.sub(r'\s', '', dst).lower()
-        error = u'%s does not look like %s' % (old_src, old_dst)
-        assert self._src == dst, error
-        return self._src == dst
-
-    def every_one_is(self, dst):
-        msg = u'all members of %r should be %r, but the %dth is %r'
-        for index, item in enumerate(self._src):
-            if self._range:
-                if index < self._range[0] or index > self._range[1]:
-                    continue
-
-            error = msg % (self._src, dst, index, item)
-            if item != dst:
-                raise AssertionError(error)
-
-        return True
-
-    @explanation('%r should differ to %r, but is the same thing')
-    def differs(self, dst):
-        return self._src != dst
-
-    @explanation('%r should be a instance of %r, but is not')
-    def is_a(self, dst):
-        return isinstance(self._src, dst)
-
-    def at(self, key):
-        assert self.has(key)
-        if isinstance(self._src, dict):
-            return that(self._src[key])
-
-        else:
-            return that(getattr(self._src, key))
-
-    @explanation('%r should have %r, but have not')
-    def has(self, that):
-        return that in self
-
-    def _get_that(self, that):
-        try:
-            that = int(that)
-        except TypeError:
-            that = len(that)
-        return that
-
-    def len_greater_than(self, that):
-        that = self._get_that(that)
-        length = len(self._src)
-
-        if length <= that:
-            error = u'the length of the %s should be greater then %d, but is %d' % (
-                type(self._src).__name__,
-                that,
-                length,
-            )
-            raise AssertionError(error)
-
-        return True
-
-    def len_greater_than_or_equals(self, that):
-        that = self._get_that(that)
-
-        length = len(self._src)
-
-        if length < that:
-            error = u'the length of %r should be greater then or equals %d, but is %d' % (
-                self._src,
-                that,
-                length,
-            )
-            raise AssertionError(error)
-
-        return True
-
-    def len_lower_than(self, that):
-        original_that = that
-        if isinstance(that, Iterable):
-            that = len(that)
-        else:
-            that = self._get_that(that)
-        length = len(self._src)
-
-        if length >= that:
-            error = u'the length of %r should be lower then %r, but is %d' % (
-                self._src,
-                original_that,
-                length,
-            )
-            raise AssertionError(error)
-
-        return True
-
-    def len_lower_than_or_equals(self, that):
-        that = self._get_that(that)
-
-        length = len(self._src)
-        error = u'the length of %r should be lower then or equals %d, but is %d'
-
-        if length > that:
-            msg = error % (
-                self._src,
-                that,
-                length,
-            )
-            raise AssertionError(msg)
-
-        return True
-
-    def len_is(self, that):
-        that = self._get_that(that)
-        length = len(self._src)
-
-        if length != that:
-            error = u'the length of %r should be %d, but is %d' % (
-                self._src,
-                that,
-                length,
-            )
-            raise AssertionError(error)
-
-        return True
-
-    def len_is_not(self, that):
-        that = self._get_that(that)
-        length = len(self._src)
-
-        if length == that:
-            error = u'the length of %r should not be %d' % (
-                self._src,
-                that,
-            )
-            raise AssertionError(error)
-
-        return True
-
-    def like(self, that):
-        return self.has(that)
-
-    def the_attribute(self, attr):
-        self._attribute = attr
-        return self
-
-    def in_each(self, attr):
-        self._eval = attr
-        return self
-
-    def matches(self, items):
-        msg = u'%r[%d].%s should be %r, but is %r'
-        get_eval = lambda item: eval(
-            "%s.%s" % ('current', self._eval), {}, {'current': item},
-        )
-
-        if self._eval and is_iterable(self._src):
-            if isinstance(items, basestring):
-                items = [items for x in range(len(items))]
-            else:
-                if len(items) != len(self._src):
-                    source = map(get_eval, self._src)
-                    source_len = len(source)
-                    items_len = len(items)
-
-                    raise AssertionError(
-                        '%r has %d items, but the matching list has %d: %r'
-                        % (source, source_len, items_len, items),
-                    )
-
-            for index, (item, other) in enumerate(zip(self._src, items)):
-                if self._range:
-                    if index < self._range[0] or index > self._range[1]:
-                        continue
-
-                value = get_eval(item)
-
-                error = msg % (self._src, index, self._eval, other, value)
-                if other != value:
-                    raise AssertionError(error)
-        else:
-            return self.equals(items)
-
-        return True
-
-    @__builtin__.property
-    def is_empty(self):
-        try:
-            lst = list(self._src)
-            length = len(lst)
-            assert length == 0, \
-                   '%r is not empty, it has %s' % (self._src,
-                                                   itemize_length(self._src))
-            return True
-
-        except TypeError:
-            raise AssertionError("%r is not iterable" % self._src)
-
-    @__builtin__.property
-    def are_empty(self):
-        return self.is_empty
-
-    def __contains__(self, what):
-        if isinstance(self._src, dict):
-            items = self._src.keys()
-
-        if isinstance(self._src, Iterable):
-            items = self._src
-        else:
-            items = dir(self._src)
-
-        return what in items
-
-    def contains(self, what):
-        assert what in self._src, '%r should be in %r' % (what, self._src)
-        return True
-
-    def does_not_contain(self, what):
-        assert what not in self._src, \
-            '%r should NOT be in %r' % (what, self._src)
-
-        return True
-
-    doesnt_contain = does_not_contain
-
 
 def within(**units):
     assert len(units) == 1, 'use within(number=unit). e.g.: within(one=second)'
@@ -741,165 +338,6 @@ def action_for(context, provides=None, depends_on=None):
     return decorate_and_absorb
 
 
-class DeepExplanation(unicode):
-    def get_header(self, X, Y, suffix):
-        return (u"given\nX = %s\n    and\nY = %s\n%s" % (
-            repr(X).decode('utf-8'),
-            repr(Y).decode('utf-8'),
-            suffix)).strip()
-
-    def as_assertion(self, X, Y):
-        raise AssertionError(self.get_header(X, Y, self))
-
-
-class DeepComparison(object):
-    def __init__(self, X, Y, parent=None):
-        self.operands = X, Y
-        self.parent = parent
-        self._context = None
-
-    def is_simple(self, obj):
-        return isinstance(obj, (
-            int, long, float, basestring,
-        ))
-
-    def compare_complex_stuff(self, X, Y):
-        kind = type(X)
-        mapping = {
-            dict: self.compare_dicts,
-            list: self.compare_iterables,
-            tuple: self.compare_iterables,
-        }
-        return mapping.get(kind, self.compare_generic)(X, Y)
-
-    def compare_generic(self, X, Y):
-        c = self.get_context()
-        if X == Y:
-            return True
-        else:
-            m = u'X%s != Y%s' % (red(c.current_X_keys), green(c.current_Y_keys))
-            return DeepExplanation(m)
-
-    def compare_dicts(self, X, Y):
-        c = self.get_context()
-
-        x_keys = list(sorted(X.keys()))
-        y_keys = list(sorted(Y.keys()))
-
-        diff_x = list(set(x_keys).difference(set(y_keys)))
-        diff_y = list(set(y_keys).difference(set(x_keys)))
-        if diff_x:
-            msg = u"X%s has the key '%%s' whereas Y%s doesn't" % (
-                red(c.current_X_keys),
-                green(c.current_Y_keys),
-            ) % diff_x[0]
-            return DeepExplanation(msg)
-
-        elif diff_y:
-            msg = u"X%s doesn't have the key '%%s' whereas Y%s has it" % (
-                red(c.current_X_keys),
-                green(c.current_Y_keys),
-            ) % diff_y[0]
-            return DeepExplanation(msg)
-
-        elif X == Y:
-            return True
-
-        else:
-            for key_X, key_Y in zip(x_keys, y_keys):
-                self.key_X = key_X
-                self.key_Y = key_Y
-                value_X = X[key_X]
-                value_Y = Y[key_Y]
-                child = DeepComparison(
-                    value_X,
-                    value_Y,
-                    parent=self,
-                ).compare()
-                if isinstance(child, DeepExplanation):
-                    return child
-
-    def get_context(self):
-        if self._context:
-            return self._context
-
-        X_keys = []
-        Y_keys = []
-
-        comp = self
-        while comp.parent:
-            X_keys.insert(0, comp.parent.key_X)
-            Y_keys.insert(0, comp.parent.key_Y)
-            comp = comp.parent
-
-        def get_keys(i):
-            if not i:
-                return ''
-
-            return '[%s]' % ']['.join(map(repr, i))
-
-        class ComparisonContext:
-            current_X_keys = get_keys(X_keys)
-            current_Y_keys = get_keys(Y_keys)
-            parent = comp
-
-        self._context = ComparisonContext()
-        return self._context
-
-    def compare_iterables(self, X, Y):
-        len_X, len_Y = map(len, (X, Y))
-        if len_X > len_Y:
-            msg = u"X has %d items whereas Y has only %d" % (len_X, len_Y)
-            return DeepExplanation(msg)
-        elif len_X < len_Y:
-            msg = u"Y has %d items whereas X has only %d" % (len_Y, len_X)
-            return DeepExplanation(msg)
-        elif X == Y:
-            return True
-        else:
-            for i, (value_X, value_Y) in enumerate(zip(X, Y)):
-                self.key_X = self.key_Y = i
-                child = DeepComparison(
-                    value_X,
-                    value_Y,
-                    parent=self,
-                ).compare()
-                if isinstance(child, DeepExplanation):
-                    return child
-
-    def compare(self):
-        X, Y = self.operands
-        c = self.get_context()
-        if self.is_simple(X) and self.is_simple(Y):  # both simple
-            if X == Y:
-                return True
-            c = self.get_context()
-            m = u"X%s is %%r whereas Y%s is %%r"
-            msg = m % (red(c.current_X_keys), green(c.current_Y_keys)) % (X, Y)
-            return DeepExplanation(msg)
-
-        elif type(X) is not type(Y):  # different types
-            xname, yname = map(lambda _: type(_).__name__, (X, Y))
-            msg = u'X%s is a %%s and Y%s is a %%s instead' % (
-                red(c.current_X_keys),
-                green(c.current_Y_keys),
-            ) % (xname, yname)
-            exp = DeepExplanation(msg)
-
-        else:
-            exp = self.compare_complex_stuff(X, Y)
-
-        if isinstance(exp, DeepExplanation):
-
-            original_X, original_Y = c.parent.operands
-            raise exp.as_assertion(original_X, original_Y)
-
-        return exp
-
-    def explanation(self):
-        return self._explanation
-
-
 def work_in_progress(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -927,7 +365,7 @@ def assertionmethod(func):
 
 
 def assertionproperty(func):
-    return __builtin__.property(assertionmethod(func))
+    return builtins.property(assertionmethod(func))
 
 POSITIVES = [
     'should',
@@ -957,13 +395,13 @@ class AssertionBuilder(object):
         self._callable_kw = {}
 
     def __call__(self, obj):
-        if isinstance(obj, self.__class__):
-            obj = obj.obj
-
         self.obj = obj
-        self.repr = repr(obj)
-        self._that = that(obj)
 
+        if isinstance(obj, self.__class__):
+            self.obj = obj.obj
+
+        self.repr = repr(self.obj)
+        self._that = AssertionHelper(self.obj)
         return self
 
     def __getattr__(self, attr):
@@ -1107,10 +545,10 @@ class AssertionBuilder(object):
     @assertionmethod
     def within(self, first, *rest):
         if isinstance(first, Iterable):
-            collection_should = that(first)
+            collection_should = AssertionHelper(first)
         else:
             args = [first] + list(rest)
-            collection_should = that(range(*args))
+            collection_should = AssertionHelper(range(*args))
 
         if self.negative:
             return collection_should.does_not_contain(self.obj)
@@ -1119,10 +557,22 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def equal(self, what):
+        comparison = DeepComparison(self.obj, what).compare()
+        error = False
+        if isinstance(comparison, DeepExplanation):
+            error = comparison.get_assertion(self.obj, what)
+
         if self.negative:
-            return self._that.differs(what)
+            if error:
+                return True
+
+            msg = '%r should differ to %r, but is the same thing'
+            raise AssertionError(msg % (self.obj, what))
+
         else:
-            return self._that.equals(what)
+            if not error:
+                return True
+            raise error
 
     eql = equal
     equals = equal
@@ -1260,11 +710,11 @@ class AssertionBuilder(object):
         self._callable_kw = kw
         return self
 
-    called = __builtin__.property(called_with)
+    called = builtins.property(called_with)
 
     @assertionmethod
     def throw(self, *args, **kw):
-        _that = that(self.obj,
+        _that = AssertionHelper(self.obj,
                      with_args=self._callable_args,
                      and_kwargs=self._callable_kw)
 

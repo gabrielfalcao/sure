@@ -16,7 +16,7 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
 ## testing behaviour of objects
 
 ```python
-from sure import that
+from sure.deprecated import that
 
 assert that("something").is_a(str)
 assert that("something").like("some")
@@ -45,7 +45,7 @@ assert that(name).at('john').equals('doe')
 ## strings
 
 ```python
-from sure import that
+from sure.deprecated import that
 
 assert (that("   string \n with    lots of \n spaces and breaklines\n\n ")
     .looks_like("string with lots of spaces and breaklines"))
@@ -61,7 +61,7 @@ assert that('foobar').does_not_contain("123")
 ### testing length
 
 ```python
-from sure import that
+from sure.deprecated import that
 
 animals = ['dog', 'cat', 'chicken']
 objects = ['television', 'refrigerator']
@@ -93,7 +93,7 @@ assert that(objects).len_lower_than_or_equals(movies)
 ### testing elements
 
 ```python
-from sure import that
+from sure.deprecated import that
 
 class Animal:
   def __init__(self, name):
@@ -120,7 +120,7 @@ Example:
 
 
 ```python
-from sure import that
+from sure.deprecated import that
 
 something = {
     'one': 'yeah',
@@ -142,7 +142,7 @@ And even better, when the comparison doesn't at some point, sure will show a **V
 #### further
 
 ```python
-from sure import that
+from sure.deprecated import that
 
 class animal(object):
     def __init__(self, kind):
@@ -247,7 +247,7 @@ if any of the tests above take more than expected, a assertion_error is raised
 ## exceptions
 
 ```python
-from sure import that
+from sure.deprecated import that
 def function(arg1=None, arg2=None):
     if arg1 and arg2:
         raise RuntimeError('yeah, it failed')
@@ -268,7 +268,7 @@ assert that(function, with_kwargs={'arg1': 1, 'arg2': 2}).raises(RuntimeError, '
 ## add your own matchers
 
 ```python
-from sure import that
+from sure.deprecated import that
 @that.is_a_matcher
 def could_work(matcher, parameter):
     assert matcher == "this"
@@ -386,7 +386,8 @@ Let's go from a simple example and then we evolve into more features
 ## The simplest case
 
 ```python
-from sure import action_for, that, scenario
+from sure.deprecated import that
+from sure import action_for, scenario
 
 
 @scenario
@@ -416,7 +417,8 @@ def users_should_introduce_themselves(context):
 ## A slightly more elaborated example: browsing with django test client + lxml
 
 ```python
-from sure import action_for, that, scenario
+from sure.deprecated import that
+from sure import action_for, scenario
 
 def prepare_browser(context):
     from django.test.client import Client

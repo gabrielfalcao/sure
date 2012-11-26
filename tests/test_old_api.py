@@ -17,7 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sure
-from sure import that, VariablesBag
+from sure.deprecated import that
+from sure import VariablesBag
 from nose.tools import assert_equals, assert_raises
 
 
@@ -51,7 +52,7 @@ def test_context_is_not_optional():
 
     assert that(it_crashes).raises(
         TypeError, (
-        "the function it_crashes defined at test_old_api.py line 49, is being "
+        "the function it_crashes defined at test_old_api.py line 50, is being "
         "decorated by either @that_with_context or @scenario, so it should "
         "take at least 1 parameter, which is the test context"),
     )
@@ -92,7 +93,7 @@ def test_teardown_with_context():
 
 
 def test_that_is_a():
-    "sure.that() is_a(object)"
+    "that() is_a(object)"
 
     something = "something"
 
@@ -101,7 +102,7 @@ def test_that_is_a():
 
 
 def test_that_equals():
-    "sure.that() equals(string)"
+    "that() equals(string)"
 
     something = "something"
 
@@ -110,7 +111,7 @@ def test_that_equals():
 
 
 def test_that_differs():
-    "sure.that() differs(object)"
+    "that() differs(object)"
 
     something = "something"
 
@@ -119,8 +120,7 @@ def test_that_differs():
 
 
 def test_that_has():
-    "sure.that() has(object)"
-
+    "that() has(object)"
     class Class:
         name = "some class"
     Object = Class()
@@ -132,31 +132,31 @@ def test_that_has():
     assert hasattr(Class, 'name')
     assert that(Class).has("name")
     assert that(Class).like("name")
-    assert "name" in sure.that(Class)
+    assert "name" in that(Class)
 
     assert hasattr(Object, 'name')
     assert that(Object).has("name")
     assert that(Object).like("name")
-    assert "name" in sure.that(Object)
+    assert "name" in that(Object)
 
     assert dictionary.has_key('name')
     assert that(dictionary).has("name")
     assert that(dictionary).like("name")
-    assert "name" in sure.that(dictionary)
+    assert "name" in that(dictionary)
 
     assert that(name).has("john")
     assert that(name).like("john")
-    assert "john" in sure.that(name)
+    assert "john" in that(name)
     assert that(name).has("hn")
     assert that(name).like("hn")
-    assert "hn" in sure.that(name)
+    assert "hn" in that(name)
     assert that(name).has("jo")
     assert that(name).like("jo")
-    assert "jo" in sure.that(name)
+    assert "jo" in that(name)
 
 
 def test_that_at_key_equals():
-    "sure.that().at(object).equals(object)"
+    "that().at(object).equals(object)"
 
     class Class:
         name = "some class"
@@ -171,7 +171,7 @@ def test_that_at_key_equals():
 
 
 def test_that_len_is():
-    "sure.that() len_is(number)"
+    "that() len_is(number)"
 
     lst = range(1000)
 
@@ -181,7 +181,7 @@ def test_that_len_is():
 
 
 def test_that_len_greater_than():
-    "sure.that() len_greater_than(number)"
+    "that() len_greater_than(number)"
 
     lst = range(1000)
     lst2 = range(100)
@@ -192,7 +192,7 @@ def test_that_len_greater_than():
 
 
 def test_that_len_greater_than_should_raise_assertion_error():
-    "sure.that() len_greater_than(number) raise AssertionError"
+    "that() len_greater_than(number) raise AssertionError"
 
     lst = range(1000)
     try:
@@ -205,7 +205,7 @@ def test_that_len_greater_than_should_raise_assertion_error():
 
 
 def test_that_len_greater_than_or_equals():
-    "sure.that() len_greater_than_or_equals(number)"
+    "that() len_greater_than_or_equals(number)"
 
     lst = range(1000)
     lst2 = range(100)
@@ -218,7 +218,7 @@ def test_that_len_greater_than_or_equals():
 
 
 def test_that_len_greater_than_or_equals_should_raise_assertion_error():
-    "sure.that() len_greater_than_or_equals(number) raise AssertionError"
+    "that() len_greater_than_or_equals(number) raise AssertionError"
 
     lst = range(1000)
     try:
@@ -231,7 +231,7 @@ def test_that_len_greater_than_or_equals_should_raise_assertion_error():
 
 
 def test_that_len_lower_than():
-    "sure.that() len_lower_than(number)"
+    "that() len_lower_than(number)"
 
     lst = range(100)
     lst2 = range(1000)
@@ -242,7 +242,7 @@ def test_that_len_lower_than():
 
 
 def test_that_len_lower_than_should_raise_assertion_error():
-    "sure.that() len_lower_than(number) raise AssertionError"
+    "that() len_lower_than(number) raise AssertionError"
 
     lst = range(1000)
     try:
@@ -255,7 +255,7 @@ def test_that_len_lower_than_should_raise_assertion_error():
 
 
 def test_that_len_lower_than_or_equals():
-    "sure.that() len_lower_than_or_equals(number)"
+    "that() len_lower_than_or_equals(number)"
 
     lst = range(1000)
     lst2 = range(1001)
@@ -268,7 +268,7 @@ def test_that_len_lower_than_or_equals():
 
 
 def test_that_len_lower_than_or_equals_should_raise_assertion_error():
-    "sure.that() len_lower_than_or_equals(number) raise AssertionError"
+    "that() len_lower_than_or_equals(number) raise AssertionError"
 
     lst = range(1000)
     try:
@@ -281,7 +281,7 @@ def test_that_len_lower_than_or_equals_should_raise_assertion_error():
 
 
 def test_that_checking_all_atributes():
-    "sure.that(iterable).the_attribute('name').equals('value')"
+    "that(iterable).the_attribute('name').equals('value')"
     class shape(object):
         def __init__(self, name):
             self.kind = 'geometrical form'
@@ -298,7 +298,7 @@ def test_that_checking_all_atributes():
 
 
 def test_that_checking_all_atributes_of_range():
-    "sure.that(iterable, within_range=(1, 2)).the_attribute('name').equals('value')"
+    "that(iterable, within_range=(1, 2)).the_attribute('name').equals('value')"
     class shape(object):
         def __init__(self, name):
             self.kind = 'geometrical form'
@@ -326,7 +326,7 @@ def test_that_checking_all_atributes_of_range():
 
 
 def test_that_checking_all_elements():
-    "sure.that(iterable).every_one_is('value')"
+    "that(iterable).every_one_is('value')"
     shapes = [
         'cube',
         'ball',
@@ -344,7 +344,7 @@ def test_that_checking_all_elements():
 
 
 def test_that_checking_each_matches():
-    "sure.that(iterable).in_each('').equals('value')"
+    "that(iterable).in_each('').equals('value')"
     class animal(object):
         def __init__(self, kind):
             self.attributes = {
@@ -392,7 +392,7 @@ def test_that_checking_each_matches():
 
 
 def test_that_raises():
-    "sure.that(callable, with_args=[arg1], and_kwargs={'arg2': 'value'}).raises(SomeException)"
+    "that(callable, with_args=[arg1], and_kwargs={'arg2': 'value'}).raises(SomeException)"
 
     called = False
     global called
@@ -467,12 +467,12 @@ def test_that_raises():
 
 
 def test_that_looks_like():
-    "sure.that('String\\n with BREAKLINE').looks_like('string with breakline')"
+    "that('String\\n with BREAKLINE').looks_like('string with breakline')"
     assert that('String\n with BREAKLINE').looks_like('string with breakline')
 
 
 def test_that_raises_with_args():
-    "sure.that(callable, with_args=['foo']).raises(FooError)"
+    "that(callable, with_args=['foo']).raises(FooError)"
 
     class FooError(Exception):
         pass
@@ -485,7 +485,7 @@ def test_that_raises_with_args():
 
 
 def test_that_does_not_raise_with_args():
-    "sure.that(callable).doesnt_raise(FooError) and does_not_raise"
+    "that(callable).doesnt_raise(FooError) and does_not_raise"
 
     class FooError(Exception):
         pass
@@ -498,14 +498,14 @@ def test_that_does_not_raise_with_args():
 
 
 def test_that_contains_string():
-    "sure.that('foobar').contains('foo')"
+    "that('foobar').contains('foo')"
 
     assert 'foo' in 'foobar'
     assert that('foobar').contains('foo')
 
 
 def test_that_doesnt_contain_string():
-    "sure.that('foobar').does_not_contain('123'), .doesnt_contain"
+    "that('foobar').does_not_contain('123'), .doesnt_contain"
 
     assert '123' not in 'foobar'
     assert that('foobar').doesnt_contain('123')
@@ -513,7 +513,7 @@ def test_that_doesnt_contain_string():
 
 
 def test_that_contains_none():
-    "sure.that('foobar').contains(None)"
+    "that('foobar').contains(None)"
 
     def assertions():
         assert that('foobar').contains(None)
@@ -525,7 +525,7 @@ def test_that_contains_none():
 
 
 def test_that_none_contains_string():
-    "sure.that(None).contains('bungalow')"
+    "that(None).contains('bungalow')"
 
     try:
         assert that(None).contains('bungalow')
@@ -538,7 +538,7 @@ def test_that_none_contains_string():
 
 
 def test_that_some_iterable_is_empty():
-    "sure.that(some_iterable).is_empty and sure.that(something).are_empty"
+    "that(some_iterable).is_empty and that(something).are_empty"
 
     assert that([]).is_empty
     assert that([]).are_empty
@@ -558,7 +558,7 @@ def test_that_some_iterable_is_empty():
 
 
 def test_that_something_is_empty_raises():
-    "sure.that(something_not_iterable).is_empty and sure.that(something_not_iterable).are_empty raises"
+    "that(something_not_iterable).is_empty and that(something_not_iterable).are_empty raises"
 
     obj = object()
 
@@ -570,7 +570,7 @@ def test_that_something_is_empty_raises():
 
 
 def test_that_something_iterable_matches_another():
-    "sure.that(something_iterable).matches(another_iterable)"
+    "that(something_iterable).matches(another_iterable)"
 
     KlassOne = type('KlassOne', (object,), {})
     KlassTwo = type('KlassTwo', (object,), {})
@@ -804,7 +804,7 @@ def test_scenario_is_alias_for_context_on_setup_and_teardown():
 
 def test_actions_returns_context():
     "the actions always returns the context"
-    from sure import action_for, that, scenario
+    from sure import action_for, scenario
 
     def with_setup(context):
         @action_for(context)
@@ -932,7 +932,7 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
 
 
 def test_that_contains_dictionary_keys():
-    "sure.that(dict(name='foobar')).contains('name')"
+    "that(dict(name='foobar')).contains('name')"
 
     data = dict(name='foobar')
     assert 'name' in data
@@ -941,7 +941,7 @@ def test_that_contains_dictionary_keys():
 
 
 def test_that_contains_list():
-    "sure.that(['foobar', '123']).contains('foobar')"
+    "that(['foobar', '123']).contains('foobar')"
 
     data = ['foobar', '123']
     assert 'foobar' in data
@@ -949,7 +949,7 @@ def test_that_contains_list():
 
 
 def test_that_contains_set():
-    "sure.that(set(['foobar', '123']).contains('foobar')"
+    "that(set(['foobar', '123']).contains('foobar')"
 
     data = set(['foobar', '123'])
     assert 'foobar' in data
@@ -957,7 +957,7 @@ def test_that_contains_set():
 
 
 def test_that_contains_tuple():
-    "sure.that(('foobar', '123')).contains('foobar')"
+    "that(('foobar', '123')).contains('foobar')"
 
     data = ('foobar', '123')
     assert 'foobar' in data
@@ -1019,7 +1019,7 @@ def test_actions_providing_dinamically_named_variables():
 
 
 def test_deep_equals_dict_level1_success():
-    "sure.that() deep_equals(dict) succeeding on level 1"
+    "that() deep_equals(dict) succeeding on level 1"
 
     something = {
         'one': 'yeah',
@@ -1031,7 +1031,7 @@ def test_deep_equals_dict_level1_success():
 
 
 def test_deep_equals_dict_level1_fail():
-    "sure.that() deep_equals(dict) failing on level 1"
+    "that() deep_equals(dict) failing on level 1"
 
     something = {
         'one': 'yeah',
@@ -1053,14 +1053,14 @@ def test_deep_equals_dict_level1_fail():
 
 
 def test_deep_equals_list_level1_success():
-    "sure.that(list) deep_equals(list) succeeding on level 1"
+    "that(list) deep_equals(list) succeeding on level 1"
 
     something = ['one', 'yeah']
     assert that(something).deep_equals(['one', 'yeah'])
 
 
 def test_deep_equals_list_level1_fail_by_value():
-    "sure.that(list) deep_equals(list) failing on level 1"
+    "that(list) deep_equals(list) failing on level 1"
 
     something = ['one', 'yeahs']
 
@@ -1078,7 +1078,7 @@ def test_deep_equals_list_level1_fail_by_value():
 
 
 def test_deep_equals_list_level1_fail_by_length_x_gt_y():
-    "sure.that(list) deep_equals(list) failing by length (len(X) > len(Y))"
+    "that(list) deep_equals(list) failing by length (len(X) > len(Y))"
 
     something = ['one', 'yeah', 'awesome!']
 
@@ -1096,7 +1096,7 @@ def test_deep_equals_list_level1_fail_by_length_x_gt_y():
 
 
 def test_deep_equals_list_level1_fail_by_length_y_gt_x():
-    "sure.that(list) deep_equals(list) failing by length (len(Y) > len(X))"
+    "that(list) deep_equals(list) failing by length (len(Y) > len(X))"
 
     something = ['one', 'yeah']
 
@@ -1114,7 +1114,7 @@ def test_deep_equals_list_level1_fail_by_length_y_gt_x():
 
 
 def test_deep_equals_dict_level1_fails_missing_key_on_y():
-    "sure.that(X) deep_equals(Y) fails when Y is missing a key that X has"
+    "that(X) deep_equals(Y) fails when Y is missing a key that X has"
 
     something = {
         'one': 'yeah',
@@ -1136,7 +1136,7 @@ def test_deep_equals_dict_level1_fails_missing_key_on_y():
 
 
 def test_deep_equals_failing_basic_vs_complex():
-    "sure.that(X) deep_equals(Y) fails with basic vc complex type"
+    "that(X) deep_equals(Y) fails with basic vc complex type"
 
     def assertions():
         assert that('two yeah').deep_equals({
@@ -1154,7 +1154,7 @@ def test_deep_equals_failing_basic_vs_complex():
 
 
 def test_deep_equals_failing_complex_vs_basic():
-    "sure.that(X) deep_equals(Y) fails with complex vc basic type"
+    "that(X) deep_equals(Y) fails with complex vc basic type"
 
     def assertions():
         assert that({'two': 'yeah'}).deep_equals('two yeah')
@@ -1170,14 +1170,14 @@ def test_deep_equals_failing_complex_vs_basic():
 
 
 def test_deep_equals_tuple_level1_success():
-    "sure.that(tuple) deep_equals(tuple) succeeding on level 1"
+    "that(tuple) deep_equals(tuple) succeeding on level 1"
 
     something = ('one', 'yeah')
     assert that(something).deep_equals(('one', 'yeah'))
 
 
 def test_deep_equals_tuple_level1_fail_by_value():
-    "sure.that(tuple) deep_equals(tuple) failing on level 1"
+    "that(tuple) deep_equals(tuple) failing on level 1"
 
     something = ('one', 'yeahs')
 
@@ -1195,7 +1195,7 @@ def test_deep_equals_tuple_level1_fail_by_value():
 
 
 def test_deep_equals_tuple_level1_fail_by_length_x_gt_y():
-    "sure.that(tuple) deep_equals(tuple) failing by length (len(X) > len(Y))"
+    "that(tuple) deep_equals(tuple) failing by length (len(X) > len(Y))"
 
     something = ('one', 'yeah', 'awesome!')
 
@@ -1213,7 +1213,7 @@ def test_deep_equals_tuple_level1_fail_by_length_x_gt_y():
 
 
 def test_deep_equals_tuple_level1_fail_by_length_y_gt_x():
-    "sure.that(tuple) deep_equals(tuple) failing by length (len(Y) > len(X))"
+    "that(tuple) deep_equals(tuple) failing by length (len(Y) > len(X))"
 
     something = ('one', 'yeah')
 
@@ -1231,7 +1231,7 @@ def test_deep_equals_tuple_level1_fail_by_length_y_gt_x():
 
 
 def test_deep_equals_fallsback_to_generic_comparator():
-    "sure.that() deep_equals(dict) falling back to generic comparator"
+    "that() deep_equals(dict) falling back to generic comparator"
     from datetime import datetime
     now = datetime.now()
     something = {
@@ -1246,7 +1246,7 @@ def test_deep_equals_fallsback_to_generic_comparator():
 
 
 def test_deep_equals_fallsback_to_generic_comparator_failing():
-    "sure.that() deep_equals(dict) with generic comparator failing"
+    "that() deep_equals(dict) with generic comparator failing"
     from datetime import datetime
     now = datetime(2012, 3, 5)
     tomorrow = datetime(2012, 3, 6)
@@ -1270,7 +1270,7 @@ def test_deep_equals_fallsback_to_generic_comparator_failing():
 
 
 def test_deep_equals_fallsback_to_generic_comparator_failing_type():
-    "sure.that() deep_equals(dict) with generic comparator failing"
+    "that() deep_equals(dict) with generic comparator failing"
     from datetime import datetime
     now = datetime(2012, 3, 5)
     something = {
@@ -1293,7 +1293,7 @@ def test_deep_equals_fallsback_to_generic_comparator_failing_type():
 
 
 def test_deep_equals_dict_level2_success():
-    "sure.that() deep_equals(dict) succeeding on level 2"
+    "that() deep_equals(dict) succeeding on level 2"
 
     something = {
         'one': 'yeah',
@@ -1311,7 +1311,7 @@ def test_deep_equals_dict_level2_success():
 
 
 def test_deep_equals_dict_level2_list_success():
-    "sure.that() deep_equals(dict) succeeding on level 2"
+    "that() deep_equals(dict) succeeding on level 2"
 
     something = {
         'one': 'yeah',
@@ -1325,7 +1325,7 @@ def test_deep_equals_dict_level2_list_success():
 
 
 def test_deep_equals_dict_level2_fail():
-    "sure.that() deep_equals(dict) failing on level 2"
+    "that() deep_equals(dict) failing on level 2"
 
     something = {
         'one': 'yeah',
@@ -1352,7 +1352,7 @@ def test_deep_equals_dict_level2_fail():
 
 
 def test_deep_equals_dict_level3_fail_values():
-    "sure.that() deep_equals(dict) failing on level 3"
+    "that() deep_equals(dict) failing on level 3"
 
     something = {
         'my::all_users': [
@@ -1378,7 +1378,7 @@ def test_deep_equals_dict_level3_fail_values():
 
 
 def test_deep_equals_dict_level3_fails_missing_key():
-    "sure.that() deep_equals(dict) failing on level 3 when missing a key"
+    "that() deep_equals(dict) failing on level 3 when missing a key"
 
     something = {
         'my::all_users': [
@@ -1404,7 +1404,7 @@ def test_deep_equals_dict_level3_fails_missing_key():
 
 
 def test_deep_equals_dict_level3_fails_extra_key():
-    "sure.that() deep_equals(dict) failing on level 3 when has an extra key"
+    "that() deep_equals(dict) failing on level 3 when has an extra key"
 
     something = {
         'my::all_users': [
@@ -1430,7 +1430,7 @@ def test_deep_equals_dict_level3_fails_extra_key():
 
 
 def test_deep_equals_dict_level3_fails_different_key():
-    "sure.that() deep_equals(dict) failing on level 3 when has an extra key"
+    "that() deep_equals(dict) failing on level 3 when has an extra key"
 
     something = {
         'my::all_users': [
@@ -1456,7 +1456,7 @@ def test_deep_equals_dict_level3_fails_different_key():
 
 
 def test_deep_equals_list_level2_fail_by_length_x_gt_y():
-    "sure.that(list) deep_equals(list) failing by length (len(X) > len(Y))"
+    "that(list) deep_equals(list) failing by length (len(X) > len(Y))"
 
     something = {'iterable': ['one', 'yeah', 'awesome!']}
 
@@ -1474,7 +1474,7 @@ def test_deep_equals_list_level2_fail_by_length_x_gt_y():
 
 
 def test_deep_equals_list_level2_fail_by_length_y_gt_x():
-    "sure.that(list) deep_equals(list) failing by length (len(Y) > len(X))"
+    "that(list) deep_equals(list) failing by length (len(Y) > len(X))"
 
     something = ['one', 'yeah']
 
@@ -1505,7 +1505,7 @@ def test_function_decorated_with_wip_should_set_a_flag():
 
 
 def test_that_equals_fails():
-    "sure.that() equals(string) when it's supposed to fail"
+    "that() equals(string) when it's supposed to fail"
 
     something = "else"
 

@@ -598,7 +598,10 @@ class AssertionBuilder(object):
                     items = [first]
                     first = '_abcoll'
             else:
-                first = u'__builtin__'
+                if sys.version_info <= (3, 0, 0):
+                    first = u'__builtin__'
+                else:
+                    first = u'builtins'
                 items = [klass]
 
             klass = reduce(getattr, items, __import__(first))

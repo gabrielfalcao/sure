@@ -395,21 +395,20 @@ def test_have_key_with_value():
         "X is 'John Doe' whereas Y is 'Foo'")
 
 
-# def test_look_like():
-#     (u"this('   aa  \n  ').should.look_like('aa')")
+def test_look_like():
+    (u"this('   aa  \n  ').should.look_like('aa')")
 
-#     assert this('   \n  aa \n  ').should.look_like('aa')
-#     assert this('   \n  bb \n  ').should_not.look_like('aa')
+    assert this('   \n  aa \n  ').should.look_like('AA')
+    assert this('   \n  bb \n  ').should_not.look_like('aa')
 
-#     def opposite():
-#         assert this('   \n  aa \n  ').should.look_like('bb')
+    def opposite():
+        assert this('\n aa \n').should.look_like('bb')
 
-#     def opposite_not():
-#         assert this('   \n  aa \n  ').should_not.look_like('aa')
+    def opposite_not():
+        assert this('\n aa \n').should_not.look_like('aa')
 
-#     expect(opposite).when.called.to.throw(AssertionError)
-#     expect(opposite).when.called.to.throw("X is 4 whereas Y is 8")
+    expect(opposite).when.called.to.throw(AssertionError)
+    expect(opposite).when.called.to.throw(r"'\n aa \n' does not look like 'bb'")
 
-#     expect(opposite_not).when.called.to.throw(AssertionError)
-#     expect(opposite_not).when.called.to.throw(
-#         "4 should differ to 4, but is the same thing")
+    expect(opposite_not).when.called.to.throw(AssertionError)
+    expect(opposite_not).when.called.to.throw(r"'\n aa \n' should not look like 'aa' but does")

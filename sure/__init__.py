@@ -24,15 +24,17 @@ import traceback
 from functools import wraps
 from datetime import datetime
 
-from sure.deprecated import AssertionHelper
-from sure.deprecated import Iterable
-from sure.deprecated import builtins
-from sure.registry import context as _registry
-from sure.magic import is_cpython, patchable_builtin
+from sure.old import AssertionHelper
+from sure.old import Iterable
+from sure.old import builtins
+
 from sure.core import DeepComparison
 from sure.core import DeepExplanation
 from sure.core import _get_file_name
 from sure.core import _get_line_number
+
+from sure.magic import is_cpython, patchable_builtin
+from sure.registry import context as _registry
 
 
 version = '1.1.0'
@@ -742,6 +744,19 @@ class AssertionBuilder(object):
     def return_value(self, value):
         return_value = self.obj(*self._callable_args, **self._callable_kw)
         return this(return_value).should.equal(value)
+
+    @assertionmethod
+    def look_like(self, value):
+        if self.negative:
+            try:
+                self._that.looks_like(value)
+            except AssertionError:
+                return True
+            else:
+                msg = '%r should not look like %r but does'
+                raise AssertionError(msg % (self.obj, value))
+
+        return self._that.looks_like(value)
 
 this = AssertionBuilder('this')
 it = AssertionBuilder('it')

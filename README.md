@@ -45,6 +45,18 @@ import sure
 "Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])
 ```
 
+#### `should.look_like` and `should_not.look_like`
+
+```python
+
+"""
+
+THIS IS MY loose string
+""".should.look_like('this is my loose string')
+
+"""this one is different""".should_not.look_like('this is my loose string')
+```
+
 #### `{iterable}.should.be.empty` applies to any iterable of length 0
 
 ```python

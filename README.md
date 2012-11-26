@@ -1,10 +1,10 @@
-## sure `1.1.0` - utility belt for automated testing in python (inspired by [should.js](https://github.com/visionmedia/should.js/) )
+## sure `1.1.1` - utility belt for automated testing in python (inspired by [should.js](https://github.com/visionmedia/should.js/) )
 [![Build Status](https://secure.travis-ci.org/gabrielfalcao/sure.png)](http://travis-ci.org/gabrielfalcao/sure)
 
 ```python
 from sure import version
 
-version.should.be.equal('1.1.0')
+version.should.be.equal('1.1.1')
 ```
 
 # Installing
@@ -552,6 +552,7 @@ Sure still provides to all the assertions from v0.10 up, you can [find the old d
 ## on version 1.1.0
 
 * `from sure import that` is not deprecated, use `from sure.deprecated import that` instead, but aim on replacing usage of `that()` to `expect()`
+
 ## Authors
 
 [Gabriel Falcão](http://github.com/gabrielfalcao) and [Lincoln Clarete](http://github.com/clarete)

@@ -15,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from datetime import datetime
 from sure import this, these, those, it, expect, AssertionBuilder
 
 
@@ -30,8 +31,10 @@ def test_assertion_builder_synonyms():
 def test_4_equal_2p2():
     (u"this(4).should.equal(2 + 2)")
 
+    time = datetime.now()
+
     assert this(4).should.equal(2 + 2)
-    assert this(4).should_not.equal(8)
+    assert this(time).should_not.equal(datetime.now())
 
     def opposite():
         assert this(4).should.equal(8)

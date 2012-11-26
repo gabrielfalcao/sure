@@ -37,7 +37,7 @@ from sure.magic import is_cpython, patchable_builtin
 from sure.registry import context as _registry
 
 
-version = '1.1.0'
+version = '1.1.1'
 
 
 not_here_error = \
@@ -453,6 +453,10 @@ class AssertionBuilder(object):
         return self.obj.should_not
 
     @assertionproperty
+    def not_have(self):
+        return self.obj.should_not
+
+    @assertionproperty
     def to(self):
         return self
 
@@ -559,8 +563,13 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def equal(self, what):
-        comparison = DeepComparison(self.obj, what).compare()
-        error = False
+        try:
+            comparison = DeepComparison(self.obj, what).compare()
+            error = False
+        except AssertionError as e:
+            error = e
+            comparison = None
+
         if isinstance(comparison, DeepExplanation):
             error = comparison.get_assertion(self.obj, what)
 
@@ -760,6 +769,10 @@ class AssertionBuilder(object):
                 raise AssertionError(msg % (self.obj, value))
 
         return self._that.looks_like(value)
+
+    @assertionmethod
+    def contain(self, what):
+        import ipdb;ipdb.set_trace()
 
 this = AssertionBuilder('this')
 it = AssertionBuilder('it')

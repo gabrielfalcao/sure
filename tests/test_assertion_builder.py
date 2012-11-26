@@ -224,6 +224,7 @@ def test_greater_than():
     expect(opposite_not).when.called.to.throw(
         "expected `2` to not be greater than `1`")
 
+
 def test_greater_than_or_equal_to():
     (u"this(X).should.be.greater_than_or_equal_to(Y)")
 
@@ -236,13 +237,14 @@ def test_greater_than_or_equal_to():
     def opposite_not():
         assert this(2).should_not.be.greater_than_or_equal_to(1)
 
-    assert that(opposite).raises(AssertionError)
-    assert that(opposite).raises(
+    expect(opposite).when.called.to.throw(AssertionError)
+    expect(opposite).when.called.to.throw(
         "expected `4` to be greater than or equal to `5`")
 
-    assert that(opposite_not).raises(AssertionError)
-    assert that(opposite_not).raises(
+    expect(opposite_not).when.called.to.throw(AssertionError)
+    expect(opposite_not).when.called.to.throw(
         "expected `2` to not be greater than or equal to `1`")
+
 
 def test_lower_than():
     (u"this(X).should.be.lower_than(Y)")
@@ -264,6 +266,7 @@ def test_lower_than():
     expect(opposite_not).when.called.to.throw(
         "expected `1` to not be lower than `2`")
 
+
 def test_lower_than_or_equal_to():
     (u"this(X).should.be.lower_than_or_equal_to(Y)")
 
@@ -276,12 +279,12 @@ def test_lower_than_or_equal_to():
     def opposite_not():
         assert this(1).should_not.be.lower_than_or_equal_to(2)
 
-    assert that(opposite).raises(AssertionError)
-    assert that(opposite).raises(
+    expect(opposite).when.called.to.throw(AssertionError)
+    expect(opposite).when.called.to.throw(
         "expected `5` to be lower than or equal to `4`")
 
-    assert that(opposite_not).raises(AssertionError)
-    assert that(opposite_not).raises(
+    expect(opposite_not).when.called.to.throw(AssertionError)
+    expect(opposite_not).when.called.to.throw(
         "expected `1` to not be lower than or equal to `2`")
 
 def test_have_property():

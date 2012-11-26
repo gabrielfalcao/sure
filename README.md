@@ -547,6 +547,11 @@ Sure strives to provide everything a python developer needs in an assertion:
 
 Sure still provides to all the assertions from v0.10 up, you can [find the old documentation here](https://github.com/gabrielfalcao/sure/blob/master/OLD_API.md)
 
+# Release Notes:
+
+## on version 1.1.0
+
+* `from sure import that` is not deprecated, use `from sure.deprecated import that` instead, but aim on replacing usage of `that()` to `expect()`
 ## Authors
 
 [Gabriel Falcão](http://github.com/gabrielfalcao) and [Lincoln Clarete](http://github.com/clarete)

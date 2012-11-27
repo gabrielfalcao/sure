@@ -32,6 +32,7 @@ from sure.core import DeepComparison
 from sure.core import DeepExplanation
 from sure.core import _get_file_name
 from sure.core import _get_line_number
+from sure.core import safe_repr
 
 from sure.magic import is_cpython, patchable_builtin
 from sure.registry import context as _registry
@@ -72,7 +73,7 @@ class VariablesBag(dict):
             if attr not in dir(VariablesBag):
                 raise AssertionError(not_here_error % (
                     attr,
-                    ", ".join(map(repr, self.__varnames__)),
+                    ", ".join(map(safe_repr, self.__varnames__)),
                 ))
 
 
@@ -355,12 +356,12 @@ def assertionmethod(func):
     @wraps(func)
     def wrapper(self, *args, **kw):
         value = func(self, *args, **kw)
-        msg = u"{0}({1}) failed".format(
+        msg = "{0}({1}) failed".format(
             func.__name__,
-            u", ".join(map(repr, args)),
-            u", ".join([u"{0}={1}".format(k, repr(kw[k])) for k in kw]),
+            ", ".join(map(safe_repr, args)),
+            ", ".join(["{0}={1}".format(k, repr(kw[k])) for k in kw]),
         )
-        assert value, msg
+        assert value, unicode(msg)
         return value
 
     return wrapper
@@ -402,7 +403,6 @@ class AssertionBuilder(object):
         if isinstance(obj, self.__class__):
             self.obj = obj.obj
 
-        self.repr = repr(self.obj)
         self._that = AssertionHelper(self.obj)
         return self
 
@@ -500,13 +500,14 @@ class AssertionBuilder(object):
 
     @assertionproperty
     def empty(self):
+        representation = safe_repr(self.obj)
         length = len(self.obj)
         if self.negative:
             assert length > 0, (
-                u"expected `{0}` to not be empty".format(repr(self.obj)))
+                u"expected `{0}` to not be empty".format(representation))
         else:
             assert length is 0, (
-                u"expected `{0}` to be empty but it has {1} items".format(self.repr, length))
+                u"expected `{0}` to be empty but it has {1} items".format(representation, length))
 
         return True
 

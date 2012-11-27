@@ -17,14 +17,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import inspect
-from sure.terminal import red, green
+from sure.terminal import red, green, yellow
+
+
+def safe_repr(x):
+    try:
+        return green(repr(x).decode('utf-8'))
+    except UnicodeEncodeError:
+        return red('a {} that cannot be represented'.format(repr(type(x))))
 
 
 class DeepExplanation(unicode):
     def get_header(self, X, Y, suffix):
-        return (u"given\nX = %s\n    and\nY = %s\n%s" % (
-            repr(X).decode('utf-8'),
-            repr(Y).decode('utf-8'),
+        return yellow(u"given\nX = %s\n    and\nY = %s\n%s" % (
+            safe_repr(X),
+            safe_repr(Y),
             suffix)).strip()
 
     def get_assertion(self, X, Y):
@@ -118,7 +125,7 @@ class DeepComparison(object):
             if not i:
                 return ''
 
-            return '[%s]' % ']['.join(map(repr, i))
+            return '[%s]' % ']['.join(map(safe_repr, i))
 
         class ComparisonContext:
             current_X_keys = get_keys(X_keys)

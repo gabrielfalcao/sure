@@ -418,3 +418,29 @@ def test_look_like():
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(r"'\n aa \n' should not look like 'aa' but does")
+
+
+def test_equal_with_complex_types_and_unicode():
+    (u"expect(complex1).to.equal(complex2)")
+
+    class Y(object):
+        def __init__(self, x):
+            self.x = x
+
+        def __repr__(self):
+            return self.x
+
+        def __eq__(self, other):
+            return self.x == other.x
+
+    y1 = dict(
+        a=2,
+        b=Y(u'Gabriel Falcão'),
+        c='Foo',
+    )
+
+    expect(y1).to.equal(dict(
+        a=2,
+        b=Y(u'Gabriel Falcão'),
+        c='Foo',
+    ))

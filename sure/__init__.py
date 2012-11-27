@@ -359,7 +359,7 @@ def assertionmethod(func):
         msg = "{0}({1}) failed".format(
             func.__name__,
             ", ".join(map(safe_repr, args)),
-            ", ".join(["{0}={1}".format(k, repr(kw[k])) for k in kw]),
+            ", ".join(["{0}={1}".format(k, safe_repr(kw[k])) for k in kw]),
         )
         assert value, unicode(msg)
         return value
@@ -429,10 +429,10 @@ class AssertionBuilder(object):
     def callable(self):
         if self.negative:
             assert not callable(self.obj), (
-                'expected `{0}` to not be callable but it is'.format(repr(self.obj)))
+                'expected `{0}` to not be callable but it is'.format(safe_repr(self.obj)))
         else:
             assert callable(self.obj), (
-                'expected {0} to be callable'.format(repr(self.obj)))
+                'expected {0} to be callable'.format(safe_repr(self.obj)))
 
         return True
 

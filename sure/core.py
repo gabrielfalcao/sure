@@ -24,7 +24,7 @@ def safe_repr(x):
     try:
         return green(repr(x).decode('utf-8'))
     except UnicodeEncodeError:
-        return red('a {} that cannot be represented'.format(repr(type(x))))
+        return red('a %r that cannot be represented' % type(x))
 
 
 class DeepExplanation(unicode):

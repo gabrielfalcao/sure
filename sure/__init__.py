@@ -361,6 +361,7 @@ def assertionmethod(func):
             ", ".join(map(safe_repr, args)),
             ", ".join(["{0}={1}".format(k, safe_repr(kw[k])) for k in kw]),
         )
+
         assert value, unicode(msg)
         return value
 
@@ -454,6 +455,10 @@ class AssertionBuilder(object):
 
     @assertionproperty
     def not_have(self):
+        return self.obj.should_not
+
+    @assertionproperty
+    def to_not(self):
         return self.obj.should_not
 
     @assertionproperty

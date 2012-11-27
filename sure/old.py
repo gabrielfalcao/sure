@@ -34,6 +34,7 @@ from sure.core import DeepComparison
 from sure.core import _get_file_name
 from sure.core import _get_line_number
 from sure.core import itemize_length
+from sure.core import utf8_bytes
 
 
 def is_iterable(obj):
@@ -114,9 +115,9 @@ class AssertionHelper(object):
 
         except Exception, e:
             if isinstance(exc, basestring):
-                msg = exc
+                msg = utf8_bytes(exc)
 
-            err = str(e)
+            err = utf8_bytes(str(e))
             exc = type(e)
 
             if isinstance(exc, type) and issubclass(exc, Exception):

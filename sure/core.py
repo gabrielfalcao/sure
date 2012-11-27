@@ -22,17 +22,25 @@ from sure.terminal import red, green, yellow
 
 def safe_repr(x):
     try:
-        return green(repr(x).decode('utf-8'))
+        ret = green(repr(x).decode('utf-8'))
     except UnicodeEncodeError:
-        return red('a %r that cannot be represented' % type(x))
+        ret = red('a %r that cannot be represented' % type(x))
+
+    return utf8_bytes(ret)
+
+
+def utf8_bytes(string):
+    if isinstance(string, unicode):
+        string = string.encode('utf-8')
+    return string
 
 
 class DeepExplanation(unicode):
     def get_header(self, X, Y, suffix):
-        return yellow(u"given\nX = %s\n    and\nY = %s\n%s" % (
-            safe_repr(X),
-            safe_repr(Y),
-            suffix)).strip()
+        params = (safe_repr(X), safe_repr(Y), str(suffix))
+        header = "given\nX = %s\n    and\nY = %s\n%s" % params
+
+        return yellow(header).strip()
 
     def get_assertion(self, X, Y):
         return AssertionError(self.get_header(X, Y, self))

@@ -420,8 +420,8 @@ def test_look_like():
     expect(opposite_not).when.called.to.throw(r"'\n aa \n' should not look like 'aa' but does")
 
 
-def test_equal_with_complex_types_and_unicode():
-    (u"expect(complex1).to.equal(complex2)")
+def test_equal_with_repr_of_complex_types_and_unicode():
+    (u"test usage of repr() inside expect(complex1).to.equal(complex2)")
 
     class Y(object):
         def __init__(self, x):
@@ -444,3 +444,56 @@ def test_equal_with_complex_types_and_unicode():
         b=Y(u'Gabriel Falcão'),
         c='Foo',
     ))
+
+
+def test_equal_with_repr_of_complex_types_and_repr():
+    (u"test usage of repr() inside expect(complex1).to.equal(complex2)")
+
+    class Y(object):
+        def __init__(self, x):
+            self.x = x
+
+        def __repr__(self):
+            return self.x.encode('utf-8')
+
+        def __eq__(self, other):
+            return self.x == other.x
+
+    y1 = dict(
+        a=2,
+        b=Y(u'Gabriel Falcão'),
+        c='Foo',
+    )
+
+    expect(y1).to.equal(dict(
+        a=2,
+        b=Y(u'Gabriel Falcão'),
+        c='Foo',
+    ))
+
+    expect(y1).to_not.equal(dict(
+        a=2,
+        b=Y(u'Gabriel Falçao'),
+        c='Foo',
+    ))
+
+    def opposite():
+        expect(y1).to.equal(dict(
+            a=2,
+            b=Y(u'Gabriel Falçao'),
+            c='Foo',
+        ))
+
+    def opposite_not():
+        expect(y1).to_not.equal(dict(
+            a=2,
+            b=Y(u'Gabriel Falcão'),
+            c='Foo',
+        ))
+
+    expect(opposite).when.called.to.throw(AssertionError)
+    expect(opposite).when.called.to.throw("X['b'] != Y['b']")
+
+    expect(opposite_not).when.called.to.throw(AssertionError)
+    expect(opposite_not).when.called.to.throw(
+        u"{'a': 2, 'c': 'Foo', 'b': Gabriel Falcão} should differ to {'a': 2, 'c': 'Foo', 'b': Gabriel Falcão}, but is the same thing")

@@ -17,7 +17,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
 
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from sure.ordereddict import OrderedDict
+
 import os
 import inspect
 from sure.terminal import red, green, yellow

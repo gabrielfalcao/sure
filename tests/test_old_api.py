@@ -604,9 +604,9 @@ def test_that_something_iterable_matches_another():
             assert that(xrange(1)).matches([2])
 
     xrange_name = xrange.__name__
-    assert that(fail_1).raises('X is a list and Y is a {} instead'.format(xrange_name))
-    assert that(Fail2).raises('X is a {} and Y is a list instead'.format(xrange_name))
-    assert that(Fail3()).raises('X is a {} and Y is a list instead'.format(xrange_name))
+    assert that(fail_1).raises('X is a list and Y is a {0} instead'.format(xrange_name))
+    assert that(Fail2).raises('X is a {0} and Y is a list instead'.format(xrange_name))
+    assert that(Fail3()).raises('X is a {0} and Y is a list instead'.format(xrange_name))
 
 
 def test_within_pass():

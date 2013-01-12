@@ -170,9 +170,9 @@ def within(**units):
             except TypeError as e:
                 if PY3:
                     # PY3 has different error message
-                    fmt = u'{}() takes 0 positional arguments but 1 was given'
+                    fmt = u'{0}() takes 0 positional arguments but 1 was given'
                 else:
-                    fmt = u'{}() takes no arguments'
+                    fmt = u'{0}() takes no arguments'
                 err = text_type(e)
                 if fmt.format(func.__name__) in err:
                     func(*args, **kw)

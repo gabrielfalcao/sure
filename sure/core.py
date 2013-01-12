@@ -44,8 +44,8 @@ class FakeOrderedDict(OrderedDict):
             key, value = repr(key), repr(value)
             if isinstance(value, binary_type) and not PY3:
                 value = value.decode("utf-8")
-            key_values.append("{}: {}".format(key, value))
-        res = "{{{}}}".format(", ".join(key_values))
+            key_values.append("{0}: {1}".format(key, value))
+        res = "{{{0}}}".format(", ".join(key_values))
         return res
 
     if PY3:

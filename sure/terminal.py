@@ -15,6 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import unicode_literals
+
 import os
 import sys
 import platform
@@ -38,22 +40,22 @@ SUPPORTS_ANSI = False
 def red(string):
     if not SUPPORTS_ANSI:
         return string
-    return ur"\033[1;31m{0}\033[0m".format(string)
+    return r"\033[1;31m{0}\033[0m".format(string)
 
 
 def green(string):
     if not SUPPORTS_ANSI:
         return string
-    return ur"\033[1;32m{0}\033[0m".format(string)
+    return r"\033[1;32m{0}\033[0m".format(string)
 
 
 def yellow(string):
     if not SUPPORTS_ANSI:
         return string
-    return ur"\033[1;33m{0}\033[0m".format(string)
+    return r"\033[1;33m{0}\033[0m".format(string)
 
 
 def white(string):
     if not SUPPORTS_ANSI:
         return string
-    return ur"\033[1;37m{0}\033[0m".format(string)
+    return r"\033[1;37m{0}\033[0m".format(string)

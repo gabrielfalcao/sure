@@ -15,6 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import unicode_literals
+
 import re
 import inspect
 from copy import deepcopy
@@ -34,11 +36,11 @@ from sure.core import DeepComparison
 from sure.core import _get_file_name
 from sure.core import _get_line_number
 from sure.core import itemize_length
-from sure.core import utf8_bytes
+from sure.six import string_types, text_type
 
 
 def is_iterable(obj):
-    return hasattr(obj, '__iter__') and not isinstance(obj, basestring)
+    return hasattr(obj, '__iter__') and not isinstance(obj, string_types)
 
 
 def all_integers(obj):
@@ -112,12 +114,11 @@ class AssertionHelper(object):
 
         try:
             self._src(*self._callable_args, **self._callable_kw)
+        except Exception as e:
+            if isinstance(exc, string_types):
+                msg = exc
 
-        except Exception, e:
-            if isinstance(exc, basestring):
-                msg = utf8_bytes(exc)
-
-            err = utf8_bytes(str(e))
+            err = text_type(e)
             exc = type(e)
 
             if isinstance(exc, type) and issubclass(exc, Exception):
@@ -126,7 +127,7 @@ class AssertionHelper(object):
                         '%r should raise %r, but raised %r' % (
                             self._src, exc, e.__class__))
 
-                if isinstance(msg, basestring) and msg not in err:
+                if isinstance(msg, string_types) and msg not in err:
                     raise AssertionError('''
                     %r raised %s, but the exception message does not
                     match.\n\nEXPECTED:\n%s\n\nGOT:\n%s'''.strip() % (
@@ -134,7 +135,7 @@ class AssertionHelper(object):
                             type(e).__name__,
                             msg, err))
 
-            elif isinstance(msg, basestring) and msg not in err:
+            elif isinstance(msg, string_types) and msg not in err:
                 raise AssertionError(
                     'When calling %r the exception message does not match. ' \
                     'Expected: %r\n got:\n %r' % (self._src, msg, err))
@@ -349,11 +350,11 @@ class AssertionHelper(object):
         )
 
         if self._eval and is_iterable(self._src):
-            if isinstance(items, basestring):
+            if isinstance(items, string_types):
                 items = [items for x in range(len(items))]
             else:
                 if len(items) != len(self._src):
-                    source = map(get_eval, self._src)
+                    source = list(map(get_eval, self._src))
                     source_len = len(source)
                     items_len = len(items)
 

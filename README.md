@@ -225,9 +225,14 @@ exception:
 
 ```python
 import sure
+from sure.six import PY3
 
-range.when.called_with(10, step="20").should.throw(TypeError, "range() takes no keyword arguments")
-range.when.called_with("chuck norris").should.throw("range() integer end argument expected, got str.")
+if PY3:
+    range.when.called_with(10, step=20).should.throw(TypeError, "range() does not take keyword arguments")
+    range.when.called_with("chuck norris").should.throw(TypeError, "'str' object cannot be interpreted as an integer")
+else:
+    range.when.called_with(10, step="20").should.throw(TypeError, "range() takes no keyword arguments")
+    range.when.called_with(b"chuck norris").should.throw("range() integer end argument expected, got str.")
 range.when.called_with("chuck norris").should.throw(TypeError)
 range.when.called_with(10).should_not.throw(TypeError)
 ```
@@ -240,7 +245,7 @@ result
 ```python
 import sure
 
-range.when.called_with(2).should.return_value([0, 1])
+list.when.called_with([0, 1]).should.return_value([0, 1])
 ```
 
 this is the same as
@@ -273,8 +278,12 @@ this takes the class (type) itself and checks if the object is an instance of it
 
 ```python
 import sure
+from sure.six import PY3
 
-u"".should.be.an(unicode)
+if PY3:
+    u"".should.be.an(str)
+else:
+    u"".should.be.an(unicode)
 [].should.be.a(list)
 ```
 

@@ -15,27 +15,82 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import unicode_literals
+
+try:
+    from collections import OrderedDict
+except ImportError:
+    from sure.ordereddict import OrderedDict
+
 import os
 import inspect
 from sure.terminal import red, green, yellow
+from sure.six import (
+    text_type, integer_types, string_types, binary_type,
+    PY3, get_function_code
+)
 
 
-def safe_repr(x):
+class FakeOrderedDict(OrderedDict):
+    """ OrderedDict that has the repr of a normal dict
+
+    We must return a string whether in py2 or py3.
+    """
+    def __unicode__(self):
+        if not self:
+            return '{}'
+        key_values = []
+        for key, value in self.items():
+            key, value = repr(key), repr(value)
+            if isinstance(value, binary_type) and not PY3:
+                value = value.decode("utf-8")
+            key_values.append("{0}: {1}".format(key, value))
+        res = "{{{0}}}".format(", ".join(key_values))
+        return res
+
+    if PY3:
+        def __repr__(self):
+            return self.__unicode__()
+    else:
+        def __repr__(self):
+            return self.__unicode__().encode('utf-8')
+
+
+def _obj_with_safe_repr(obj):
+    if isinstance(obj, dict):
+        ret = FakeOrderedDict()
+        for key in sorted(obj.keys()):
+            ret[_obj_with_safe_repr(key)] = _obj_with_safe_repr(obj[key])
+    elif isinstance(obj, list):
+        ret = []
+        for x in obj:
+            if isinstance(x, dict):
+                ret.append(_obj_with_safe_repr(x))
+            else:
+                ret.append(x)
+    else:
+        ret = obj
+    return ret
+
+
+def safe_repr(val):
     try:
-        ret = green(repr(x).decode('utf-8'))
+        if isinstance(val, dict):
+            # We special case dicts to have a sorted repr. This makes testing
+            # significantly easier
+            val = _obj_with_safe_repr(val)
+        ret = repr(val)
+        if not PY3:
+            ret = ret.decode('utf-8')
     except UnicodeEncodeError:
-        ret = red('a %r that cannot be represented' % type(x))
+        ret = red('a %r that cannot be represented' % type(val))
+    else:
+        ret = green(ret)
 
-    return utf8_bytes(ret)
-
-
-def utf8_bytes(string):
-    if isinstance(string, unicode):
-        string = string.encode('utf-8')
-    return string
+    return ret
 
 
-class DeepExplanation(unicode):
+class DeepExplanation(text_type):
     def get_header(self, X, Y, suffix):
         params = (safe_repr(X), safe_repr(Y), str(suffix))
         header = "given\nX = %s\n    and\nY = %s\n%s" % params
@@ -57,7 +112,7 @@ class DeepComparison(object):
 
     def is_simple(self, obj):
         return isinstance(obj, (
-            int, long, float, basestring,
+            float, string_types, integer_types
         ))
 
     def compare_complex_stuff(self, X, Y):
@@ -86,14 +141,14 @@ class DeepComparison(object):
         diff_x = list(set(x_keys).difference(set(y_keys)))
         diff_y = list(set(y_keys).difference(set(x_keys)))
         if diff_x:
-            msg = u"X%s has the key '%%s' whereas Y%s doesn't" % (
+            msg = u"X%s has the key %%r whereas Y%s does not" % (
                 red(c.current_X_keys),
                 green(c.current_Y_keys),
             ) % diff_x[0]
             return DeepExplanation(msg)
 
         elif diff_y:
-            msg = u"X%s doesn't have the key '%%s' whereas Y%s has it" % (
+            msg = u"X%s does not have the key %%r whereas Y%s has it" % (
                 red(c.current_X_keys),
                 green(c.current_Y_keys),
             ) % diff_y[0]
@@ -201,7 +256,7 @@ def _get_file_name(func):
     try:
         name = inspect.getfile(func)
     except AttributeError:
-        name = func.func_code.co_filename
+        name = get_function_code(func).co_filename
 
     return os.path.abspath(name)
 
@@ -210,7 +265,7 @@ def _get_line_number(func):
     try:
         return inspect.getlineno(func)
     except AttributeError:
-        return func.func_code.co_firstlineno
+        return get_function_code(func).co_firstlineno
 
 
 def itemize_length(items):

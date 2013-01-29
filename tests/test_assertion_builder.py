@@ -15,8 +15,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import unicode_literals
 from datetime import datetime
 from sure import this, these, those, it, expect, AssertionBuilder
+from sure.six import PY3, compat_repr
 
 
 def test_assertion_builder_synonyms():
@@ -159,7 +161,8 @@ def test_should_be_callable():
         assert this(opposite).should_not.be.callable
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw("expected 'foo' to be callable")
+    expect(opposite).when.called.to.throw(compat_repr(
+        "expected 'foo' to be callable"))
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
@@ -199,8 +202,8 @@ def test_iterable_should_have_length_of():
         assert this([1, 2, 3]).should_not.have.length_of(3)
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(
-        "the length of ('foo', 'bar', 'a', 'b') should be 1, but is 4")
+    expect(opposite).when.called.to.throw(compat_repr(
+        "the length of ('foo', 'bar', 'a', 'b') should be 1, but is 4"))
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
@@ -290,6 +293,7 @@ def test_lower_than_or_equal_to():
     expect(opposite_not).when.called.to.throw(
         "expected `1` to not be lower than or equal to `2`")
 
+
 def test_have_property():
     (u"this(instance).should.have.property(property_name)")
 
@@ -297,7 +301,7 @@ def test_have_property():
         name = "John Doe"
 
         def __repr__(self):
-            return ur"Person()"
+            return r"Person()"
 
     jay = Person()
 
@@ -311,12 +315,12 @@ def test_have_property():
         assert this(jay).should.have.property("age")
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(
-        "Person() should not have the property `name`, but it is 'John Doe'")
+    expect(opposite).when.called.to.throw(compat_repr(
+        "Person() should not have the property `name`, but it is 'John Doe'"))
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
-        "Person() should have the property `age` but doesn't")
+        "Person() should have the property `age` but does not")
 
 
 def test_have_property_with_value():
@@ -327,7 +331,7 @@ def test_have_property_with_value():
         name = "John Doe"
 
         def __repr__(self):
-            return ur"Person()"
+            return r"Person()"
 
     jay = Person()
 
@@ -343,18 +347,18 @@ def test_have_property_with_value():
             "Foo")
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(
-        "'John Doe' should differ to 'John Doe', but is the same thing")
+    expect(opposite).when.called.to.throw(compat_repr(
+        "'John Doe' should differ to 'John Doe', but is the same thing"))
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw(
-        "X is 'John Doe' whereas Y is 'Foo'")
+    expect(opposite_not).when.called.to.throw(compat_repr(
+        "X is 'John Doe' whereas Y is 'Foo'"))
 
 
 def test_have_key():
     (u"this(dictionary).should.have.key(key_name)")
 
-    jay = dict(name="John Doe")
+    jay = {'name': "John Doe"}
 
     assert this(jay).should.have.key("name")
     assert this(jay).should_not.have.key("age")
@@ -366,13 +370,13 @@ def test_have_key():
         assert this(jay).should.have.key("age")
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(
+    expect(opposite).when.called.to.throw(compat_repr(
         "{'name': 'John Doe'} should not have the key `name`, "
-        "but it is 'John Doe'")
+        "but it is 'John Doe'"))
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw(
-        "{'name': 'John Doe'} should have the key `age` but doesn't")
+    expect(opposite_not).when.called.to.throw(compat_repr(
+        "{'name': 'John Doe'} should have the key `age` but does not"))
 
 
 def test_have_key_with_value():
@@ -393,12 +397,12 @@ def test_have_key_with_value():
             "Foo")
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(
-        "'John Doe' should differ to 'John Doe', but is the same thing")
+    expect(opposite).when.called.to.throw(compat_repr(
+        "'John Doe' should differ to 'John Doe', but is the same thing"))
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw(
-        "X is 'John Doe' whereas Y is 'Foo'")
+    expect(opposite_not).when.called.to.throw(compat_repr(
+        "X is 'John Doe' whereas Y is 'Foo'"))
 
 
 def test_look_like():
@@ -414,10 +418,10 @@ def test_look_like():
         assert this('\n aa \n').should_not.look_like('aa')
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(r"'\n aa \n' does not look like 'bb'")
+    expect(opposite).when.called.to.throw(compat_repr(r"'\n aa \n' does not look like 'bb'"))
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw(r"'\n aa \n' should not look like 'aa' but does")
+    expect(opposite_not).when.called.to.throw(compat_repr(r"'\n aa \n' should not look like 'aa' but does"))
 
 
 def test_equal_with_repr_of_complex_types_and_unicode():
@@ -428,7 +432,11 @@ def test_equal_with_repr_of_complex_types_and_unicode():
             self.x = x
 
         def __repr__(self):
-            return self.x
+            if PY3:
+                # PY3K should return the regular (unicode) string
+                return self.x
+            else:
+                return self.x.encode('utf-8')
 
         def __eq__(self, other):
             return self.x == other.x
@@ -454,46 +462,50 @@ def test_equal_with_repr_of_complex_types_and_repr():
             self.x = x
 
         def __repr__(self):
-            return self.x.encode('utf-8')
+            if PY3:
+                # PY3K should return the regular (unicode) string
+                return self.x
+            else:
+                return self.x.encode('utf-8')
 
         def __eq__(self, other):
             return self.x == other.x
 
-    y1 = dict(
-        a=2,
-        b=Y(u'Gabriel Falcão'),
-        c='Foo',
-    )
+    y1 = {
+        'a': 2,
+        'b': Y(u'Gabriel Falcão'),
+        'c': 'Foo',
+    }
 
-    expect(y1).to.equal(dict(
-        a=2,
-        b=Y(u'Gabriel Falcão'),
-        c='Foo',
-    ))
+    expect(y1).to.equal({
+        'a': 2,
+        'b': Y(u'Gabriel Falcão'),
+        'c': 'Foo',
+    })
 
-    expect(y1).to_not.equal(dict(
-        a=2,
-        b=Y(u'Gabriel Falçao'),
-        c='Foo',
-    ))
+    expect(y1).to_not.equal({
+        'a': 2,
+        'b': Y(u'Gabriel Falçao'),
+        'c': 'Foo',
+    })
 
     def opposite():
-        expect(y1).to.equal(dict(
-            a=2,
-            b=Y(u'Gabriel Falçao'),
-            c='Foo',
-        ))
+        expect(y1).to.equal({
+            'a': 2,
+            'b': Y(u'Gabriel Falçao'),
+            'c': 'Foo',
+        })
 
     def opposite_not():
-        expect(y1).to_not.equal(dict(
-            a=2,
-            b=Y(u'Gabriel Falcão'),
-            c='Foo',
-        ))
+        expect(y1).to_not.equal({
+            'a': 2,
+            'b': Y(u'Gabriel Falcão'),
+            'c': 'Foo',
+        })
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw("X['b'] != Y['b']")
+    expect(opposite).when.called.to.throw(compat_repr("X['b'] != Y['b']"))
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw(
-        u"{'a': 2, 'c': 'Foo', 'b': Gabriel Falcão} should differ to {'a': 2, 'c': 'Foo', 'b': Gabriel Falcão}, but is the same thing")
+    expect(opposite_not).when.called.to.throw(compat_repr(
+        u"{'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'} should differ to {'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'}, but is the same thing"))

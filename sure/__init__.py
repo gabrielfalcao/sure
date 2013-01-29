@@ -38,7 +38,7 @@ from sure.magic import is_cpython, patchable_builtin
 from sure.registry import context as _registry
 
 
-version = '1.1.4'
+version = '1.1.5'
 
 
 not_here_error = \

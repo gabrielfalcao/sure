@@ -21,7 +21,7 @@ import platform
 
 is_cpython = (
     hasattr(platform, 'python_implementation')
-    and platform.python_implementation())
+    and platform.python_implementation().lower() == 'cpython')
 
 if is_cpython:
 

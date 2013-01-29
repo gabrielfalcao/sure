@@ -572,7 +572,7 @@ class AssertionBuilder(object):
         try:
             comparison = DeepComparison(self.obj, what).compare()
             error = False
-        except AssertionError as e:
+        except AssertionError, e:
             error = e
             comparison = None
 

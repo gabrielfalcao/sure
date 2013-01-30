@@ -41,7 +41,7 @@ from sure.registry import context as _registry
 from sure.six import string_types, text_type, PY3, get_function_code
 from sure.six.moves import reduce
 
-version = '1.1.5'
+version = '1.1.6'
 
 
 not_here_error = \

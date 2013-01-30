@@ -57,6 +57,38 @@ THIS IS MY loose string
 """this one is different""".should_not.look_like('this is my loose string')
 ```
 
+#### `should.contain` and `should_not.contain`
+
+`expect(collection).to.contain(item)` is a shorthand to `expect(item).to.be.within(collection)`
+
+```python
+"My bucket of text".should.contain('bucket')
+
+"goosfraba".should_not.contain('anger')
+
+[1,2,3].should.contain(2)
+```
+
+#### `should.match` and `should_not.match` matches regular expression
+
+You can also use the modifiers:
+
+* [`re.DEBUG`](http://docs.python.org/2/library/re.html#re.DEBUG)
+* [`re.I` and `re.IGNORECASE`](http://docs.python.org/2/library/re.html#re.IGNORECASE)
+* [`re.M` and `re.MULTILINE`](http://docs.python.org/2/library/re.html#re.MULTILINE)
+* [`re.S` and `re.DOTALL`](http://docs.python.org/2/library/re.html#re.DOTALL)
+* [`re.U` and `re.UNICODE`](http://docs.python.org/2/library/re.html#re.UNICODE)
+* [`re.X` and `re.VERBOSE`](http://docs.python.org/2/library/re.html#re.VERBOSE)
+
+```python
+import re
+
+"SOME STRING".should.match(r'some \w+', re.I)
+
+"FOO BAR CHUCK NORRIS".should_not.match(r'some \w+', re.M)
+```
+
+
 #### `{iterable}.should.be.empty` applies to any iterable of length 0
 
 ```python

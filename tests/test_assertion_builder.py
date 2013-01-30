@@ -509,3 +509,45 @@ def test_equal_with_repr_of_complex_types_and_repr():
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(compat_repr(
         u"{'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'} should differ to {'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'}, but is the same thing"))
+
+
+def test_match_regex():
+    (u"expect('some string').to.match(r'\w{4} \w{6}') matches regex")
+
+    assert this("some string").should.match(r"\w{4} \w{6}")
+    assert this("some string").should_not.match(r"^\d*$")
+
+    def opposite():
+        assert this("some string").should.match(r"\d{2} \d{4}")
+
+    def opposite_not():
+        assert this("some string").should_not.match(r"some string")
+
+    expect(opposite).when.called.to.throw(AssertionError)
+    expect(opposite).when.called.to.throw(
+        "'some string' doesn't match the regular expression /\d{2} \d{4}/")
+
+    expect(opposite_not).when.called.to.throw(AssertionError)
+    expect(opposite_not).when.called.to.throw(
+        "'some string' should not match the regular expression /some string/")
+
+
+def test_match_contain():
+    (u"expect('some string').to.contain('tri')")
+
+    assert this("some string").should.contain("tri")
+    assert this("some string").should_not.contain('foo')
+
+    def opposite():
+        assert this("some string").should.contain("bar")
+
+    def opposite_not():
+        assert this("some string").should_not.contain(r"string")
+
+    expect(opposite).when.called.to.throw(AssertionError)
+    expect(opposite).when.called.to.throw(
+        "u'bar' should be in u'some string'")
+
+    expect(opposite_not).when.called.to.throw(AssertionError)
+    expect(opposite_not).when.called.to.throw(
+        "u'string' should NOT be in u'some string'")

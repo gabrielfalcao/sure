@@ -789,7 +789,38 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def contain(self, what):
-        import ipdb;ipdb.set_trace()
+        if self.negative:
+            return expect(what).to.not_be.within(self.obj)
+        else:
+            return expect(what).to.be.within(self.obj)
+
+    @assertionmethod
+    def match(self, regex, *args):
+        obj_repr = repr(self.obj)
+        assert isinstance(self.obj, basestring), (
+            "{} should be a string in order to compare using .match()".format(obj_repr)
+        )
+        matched = re.search(regex, self.obj, *args)
+
+        modifiers = "{}{}{}{}{}".format(
+            re.I in args and "i" or "",
+            re.L in args and "l" or "",
+            re.M in args and "m" or "",
+            re.S in args and "s" or "",
+            re.U in args and "u" or "",
+        )
+        regex_representation = '/{}/{}'.format(regex, modifiers)
+        if self.negative:
+            assert matched is None, (
+                "{} should not match the regular expression {}".format(
+                    obj_repr, regex_representation))
+
+        else:
+            assert matched is not None, (
+                "{} doesn't match the regular expression {}".format(
+                    obj_repr, regex_representation))
+
+        return True
 
 this = AssertionBuilder('this')
 it = AssertionBuilder('it')

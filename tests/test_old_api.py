@@ -523,7 +523,7 @@ def test_that_contains_none():
         assert that('foobar' if PY3 else b'foobar').contains(None)
 
     assert that(assertions).raises(
-        AssertionError,
+        TypeError,
         u"'in <string>' requires string as left operand, not NoneType",
     )
 

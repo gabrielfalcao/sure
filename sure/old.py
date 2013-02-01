@@ -117,9 +117,9 @@ class AssertionHelper(object):
         except Exception as e:
             if isinstance(exc, string_types):
                 msg = exc
-
+                exc = type(e)
+            
             err = text_type(e)
-            exc = type(e)
 
             if isinstance(exc, type) and issubclass(exc, Exception):
                 if not isinstance(e, exc):

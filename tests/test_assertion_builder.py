@@ -523,8 +523,8 @@ def test_match_regex():
     def opposite_not():
         assert this("some string").should_not.match(r"some string")
 
-    expect(opposite).when.called.to.throw(AssertionError)
     expect(opposite).when.called.to.throw(
+        AssertionError,
         "'some string' doesn't match the regular expression /\d{2} \d{4}/")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
@@ -545,9 +545,17 @@ def test_match_contain():
         assert this("some string").should_not.contain(r"string")
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(
-        "u'bar' should be in u'some string'")
+    if PY3:
+        expect(opposite).when.called.to.throw(
+            "'bar' should be in 'some string'")
+    else:
+        expect(opposite).when.called.to.throw(
+            "u'bar' should be in u'some string'")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw(
-        "u'string' should NOT be in u'some string'")
+    if PY3:
+        expect(opposite_not).when.called.to.throw(
+            "'string' should NOT be in 'some string'")
+    else:
+        expect(opposite_not).when.called.to.throw(
+            "u'string' should NOT be in u'some string'")

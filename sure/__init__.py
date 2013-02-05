@@ -41,6 +41,9 @@ from sure.registry import context as _registry
 from sure.six import string_types, text_type, PY3, get_function_code
 from sure.six.moves import reduce
 
+if PY3:
+    basestring = str
+
 version = '1.1.7'
 
 
@@ -798,31 +801,34 @@ class AssertionBuilder(object):
     def match(self, regex, *args):
         obj_repr = repr(self.obj)
         assert isinstance(self.obj, basestring), (
-            "{} should be a string in order to compare using .match()".format(obj_repr)
+            "{0} should be a string in order to compare using .match()".format(obj_repr)
         )
         matched = re.search(regex, self.obj, *args)
 
-        modifiers = "{}{}{}{}{}".format(
-            re.I in args and "i" or "",
-            re.L in args and "l" or "",
-            re.M in args and "m" or "",
-            re.S in args and "s" or "",
-            re.U in args and "u" or "",
-        )
-        regex_representation = '/{}/{}'.format(regex, modifiers)
+        modifiers_map = {
+            re.I: "i",
+            re.L: "l",
+            re.M: "m",
+            re.S: "s",
+            re.U: "u",
+        }
+        modifiers = "".join([modifiers_map.get(x, "") for x in args])
+        regex_representation = '/{0}/{1}'.format(regex, modifiers)
+
         if self.negative:
             assert matched is None, (
-                "{} should not match the regular expression {}".format(
+                "{0} should not match the regular expression {1}".format(
                     obj_repr, regex_representation))
 
         else:
             assert matched is not None, (
-                "{} doesn't match the regular expression {}".format(
+                "{0} doesn't match the regular expression {1}".format(
                     obj_repr, regex_representation))
 
         return True
 
 this = AssertionBuilder('this')
+the = AssertionBuilder('the')
 it = AssertionBuilder('it')
 these = AssertionBuilder('these')
 those = AssertionBuilder('those')

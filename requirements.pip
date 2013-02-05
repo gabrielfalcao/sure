@@ -1,3 +1,3 @@
 distribute>=0.6.24
-steadymark>=0.4.4
+steadymark>=0.4.5
 nose>=1.1.2

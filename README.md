@@ -1,5 +1,6 @@
 ## sure `1.1.7` - utility belt for automated testing in python (inspired by [should.js](https://github.com/visionmedia/should.js/) )
-[![Build Status](https://secure.travis-ci.org/gabrielfalcao/sure.png)](http://travis-ci.org/gabrielfalcao/sure)
+
+[![Build Status](https://travis-ci.org/gabrielfalcao/sure.png?branch=master)](https://travis-ci.org/gabrielfalcao/sure)
 
 ```python
 from sure import version

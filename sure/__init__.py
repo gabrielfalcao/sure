@@ -63,7 +63,7 @@ def safely_patch_dir(object_handler):
 if PY3:
     basestring = str
 
-version = '1.1.7'
+version = '1.2.0'
 
 
 not_here_error = \

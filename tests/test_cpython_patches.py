@@ -15,20 +15,31 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import unicode_literals
+
 import sure
 
 
 def test_it_works_with_objects():
-    (u"anything that inherits from object should be patched")
+    ("anything that inherits from object should be patched")
 
     (4).should.equal(2 + 2)
     "foo".should.equal("f" + ("o" * 2))
     {}.should.be.empty
 
 
+def test_dir_conceals_sure_specific_attributes():
+    ("dir(obj) should conceal names of methods that were grafted by sure")
+
+    x = 123
+
+    set(dir(x)).intersection(set(sure.POSITIVES)).should.be.empty
+    set(dir(x)).intersection(set(sure.NEGATIVES)).should.be.empty
+
+
 # TODO
 # def test_it_works_with_non_objects():
-#     (u"anything that inherits from non-object should also be patched")
+#     ("anything that inherits from non-object should also be patched")
 
 #     class Foo:
 #         pass

@@ -396,9 +396,9 @@ def test_that_checking_each_matches():
 
 def test_that_raises():
     "that(callable, with_args=[arg1], and_kwargs={'arg2': 'value'}).raises(SomeException)"
+    global called
 
     called = False
-    global called
 
     def function(arg1=None, arg2=None):
         global called

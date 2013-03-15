@@ -41,6 +41,25 @@ from sure.registry import context as _registry
 from sure.six import string_types, text_type, PY3, get_function_code
 from sure.six.moves import reduce
 
+
+def safely_patch_dir(object_handler):
+    def custom_dir(self):
+        if not PY3:
+            try:
+                meta = list(self.__dict__)
+            except AttributeError:
+                meta = list(type(self).__dict__)
+
+            object_attrs = set(meta)
+        else:
+            object_attrs = set(super().__dir__())
+
+        sure_methods = set(POSITIVES + NEGATIVES)
+        return list(object_attrs.difference(sure_methods))
+
+    object_handler['__dir__'] = custom_dir
+
+
 if PY3:
     basestring = str
 
@@ -51,6 +70,9 @@ not_here_error = \
     'you have tried to access the attribute %r from the context ' \
     '(aka VariablesBag), but there is no such attribute assigned to it. ' \
     'Maybe you misspelled it ? Well, here are the options: %s'
+
+
+original_obj_attrs = dir(object)
 
 
 class VariablesBag(dict):
@@ -886,10 +908,11 @@ if is_cpython and allows_new_syntax:
         return make_safe_property(method, name, prop)
 
     object_handler = patchable_builtin(object)
-
+    safely_patch_dir(object_handler)
     # None does not have a tp_dict associated to its PyObject, so this
     # is the only way we could make it work like we expected.
     none = patchable_builtin(None.__class__)
+
     for name in POSITIVES:
         object_handler[name] = positive_assertion(name)
         none[name] = positive_assertion(name, False)

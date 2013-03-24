@@ -8,4 +8,4 @@ python:
 install:
   - pip install -r requirements.pip
 # command to run tests
-script: make test
+script: nosetests --verbosity 2

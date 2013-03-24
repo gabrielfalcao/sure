@@ -18,14 +18,16 @@
 from __future__ import unicode_literals
 
 import sure
+from sure import expect
 
 
-def test_it_works_with_objects():
-    ("anything that inherits from object should be patched")
+if sure.allows_new_syntax:
+    def test_it_works_with_objects():
+        ("anything that inherits from object should be patched")
 
-    (4).should.equal(2 + 2)
-    "foo".should.equal("f" + ("o" * 2))
-    {}.should.be.empty
+        (4).should.equal(2 + 2)
+        "foo".should.equal("f" + ("o" * 2))
+        {}.should.be.empty
 
 
 def test_dir_conceals_sure_specific_attributes():
@@ -33,8 +35,8 @@ def test_dir_conceals_sure_specific_attributes():
 
     x = 123
 
-    set(dir(x)).intersection(set(sure.POSITIVES)).should.be.empty
-    set(dir(x)).intersection(set(sure.NEGATIVES)).should.be.empty
+    expect(set(dir(x)).intersection(set(sure.POSITIVES))).to.be.empty
+    expect(set(dir(x)).intersection(set(sure.NEGATIVES))).to.be.empty
 
 
 # TODO

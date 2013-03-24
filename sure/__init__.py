@@ -63,7 +63,7 @@ def safely_patch_dir(object_handler):
 if PY3:
     basestring = str
 
-version = '1.2.0'
+version = '1.2.1'
 
 
 not_here_error = \
@@ -428,11 +428,13 @@ NEGATIVES = [
 
 
 class AssertionBuilder(object):
-    def __init__(self, name=None, negative=False):
+    def __init__(self, name=None, negative=False, obj=None):
         self._name = name
         self.negative = negative
+        self.obj = obj
         self._callable_args = []
         self._callable_kw = {}
+        self._that = AssertionHelper(self.obj)
 
     def __call__(self, obj):
         self.obj = obj
@@ -447,18 +449,10 @@ class AssertionBuilder(object):
         special_case = False
         special_case = attr in (POSITIVES + NEGATIVES)
 
-        self.negative = attr in NEGATIVES
-
-        if attr in POSITIVES:
-            self.negative = False
-            special_case = True
-
-        if attr in NEGATIVES:
-            self.negative = True
-            special_case = True
+        negative = attr in NEGATIVES
 
         if special_case:
-            return self
+            return AssertionBuilder(attr, negative=negative, obj=self.obj)
 
         return super(AssertionBuilder, self).__getattribute__(attr)
 
@@ -487,15 +481,15 @@ class AssertionBuilder(object):
 
     @assertionproperty
     def not_be(self):
-        return self.obj.should_not
+        return self.should_not
 
     @assertionproperty
     def not_have(self):
-        return self.obj.should_not
+        return self.should_not
 
     @assertionproperty
     def to_not(self):
-        return self.obj.should_not
+        return self.should_not
 
     @assertionproperty
     def to(self):
@@ -857,7 +851,8 @@ those = AssertionBuilder('those')
 expect = AssertionBuilder('expect')
 
 
-allows_new_syntax = not os.getenv('SURE_DISABLE_NEW_SYNTAX')
+allows_new_syntax = sys.version.startswith('2.7') and not os.getenv('SURE_DISABLE_NEW_SYNTAX')
+
 
 if is_cpython and allows_new_syntax:
 

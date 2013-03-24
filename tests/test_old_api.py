@@ -19,7 +19,7 @@ from __future__ import unicode_literals
 
 import sure
 from sure.deprecated import that
-from sure import VariablesBag
+from sure import VariablesBag, expect
 from nose.tools import assert_equals, assert_raises
 from sure.six import text_type, text_type_name, compat_repr, PY3
 from sure.six.moves import xrange
@@ -1586,4 +1586,4 @@ def test_deep_equals_weird():
         ('Restart farm', [u'restart_farm']),
     ]
 
-    that(part1).equals.when.called_with(part2).should.throw("")
+    expect(that(part1).equals).when.called_with(part2).should.throw("")

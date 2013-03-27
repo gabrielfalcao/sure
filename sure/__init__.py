@@ -46,7 +46,7 @@ from sure.six.moves import reduce
 if PY3:
     basestring = str
 
-version = '1.2.1'
+version = '1.2.2'
 
 
 not_here_error = \
@@ -834,7 +834,7 @@ those = AssertionBuilder('those')
 expect = AssertionBuilder('expect')
 
 
-allows_new_syntax = sys.version.startswith('2.7') and not os.getenv('SURE_DISABLE_NEW_SYNTAX')
+allows_new_syntax = not os.getenv('SURE_DISABLE_NEW_SYNTAX')
 
 
 if is_cpython and allows_new_syntax:

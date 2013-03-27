@@ -1,11 +1,11 @@
-## sure `1.2.1` - utility belt for automated testing in python (inspired by [should.js](https://github.com/visionmedia/should.js/) )
+## sure `1.2.2` - utility belt for automated testing in python (inspired by [should.js](https://github.com/visionmedia/should.js/) )
 
 [![Build Status](https://travis-ci.org/gabrielfalcao/sure.png?branch=master)](https://travis-ci.org/gabrielfalcao/sure)
 
 ```python
 from sure import version
 
-version.should.be.equal('1.2.1')
+version.should.be.equal('1.2.2')
 ```
 
 # Installing
@@ -341,8 +341,6 @@ not running CPython, sure still allows you to use any of the
 assertions above, all you need to do is wrap the object that is being
 compared in one of the following options: `it`, `this`, `those` and
 `these`.
-
-Also as of version 1.2.1 it only supports this syntax sugar for python 2.7
 
 ## Too long, don't read
 

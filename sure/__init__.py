@@ -21,6 +21,7 @@ import re
 import os
 import sys
 
+import inspect
 import traceback
 
 from functools import wraps
@@ -40,24 +41,6 @@ from sure.magic import is_cpython, patchable_builtin
 from sure.registry import context as _registry
 from sure.six import string_types, text_type, PY3, get_function_code
 from sure.six.moves import reduce
-
-
-def safely_patch_dir(object_handler):
-    def custom_dir(self):
-        if not PY3:
-            try:
-                meta = list(self.__dict__)
-            except AttributeError:
-                meta = list(type(self).__dict__)
-
-            object_attrs = set(meta)
-        else:
-            object_attrs = set(super().__dir__())
-
-        sure_methods = set(POSITIVES + NEGATIVES)
-        return list(object_attrs.difference(sure_methods))
-
-    object_handler['__dir__'] = custom_dir
 
 
 if PY3:
@@ -903,7 +886,7 @@ if is_cpython and allows_new_syntax:
         return make_safe_property(method, name, prop)
 
     object_handler = patchable_builtin(object)
-    safely_patch_dir(object_handler)
+
     # None does not have a tp_dict associated to its PyObject, so this
     # is the only way we could make it work like we expected.
     none = patchable_builtin(None.__class__)
@@ -915,3 +898,18 @@ if is_cpython and allows_new_syntax:
     for name in NEGATIVES:
         object_handler[name] = negative_assertion(name)
         none[name] = negative_assertion(name, False)
+
+
+old_dir = dir
+
+
+@wraps(builtins.dir)
+def _new_dir(obj=None):
+    if obj is None:
+        frame = inspect.currentframe()
+        return sorted(frame.f_back.f_locals.keys())
+    else:
+        return sorted(set(old_dir(obj)).difference(POSITIVES + NEGATIVES))
+
+
+builtins.dir = _new_dir

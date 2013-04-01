@@ -903,13 +903,13 @@ if is_cpython and allows_new_syntax:
 old_dir = dir
 
 
-@wraps(builtins.dir)
-def _new_dir(obj=None):
-    if obj is None:
-        frame = inspect.currentframe()
-        return sorted(frame.f_back.f_locals.keys())
-    else:
-        return sorted(set(old_dir(obj)).difference(POSITIVES + NEGATIVES))
+if allows_new_syntax:
+    @wraps(builtins.dir)
+    def _new_dir(obj=None):
+        if obj is None:
+            frame = inspect.currentframe()
+            return sorted(frame.f_back.f_locals.keys())
+        else:
+            return sorted(set(old_dir(obj)).difference(POSITIVES + NEGATIVES))
 
-
-builtins.dir = _new_dir
+    builtins.dir = _new_dir

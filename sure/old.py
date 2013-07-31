@@ -114,14 +114,14 @@ class AssertionHelper(object):
 
         try:
             self._src(*self._callable_args, **self._callable_kw)
-        except Exception as e:
+        except BaseException as e:
             if isinstance(exc, string_types):
                 msg = exc
                 exc = type(e)
             
             err = text_type(e)
 
-            if isinstance(exc, type) and issubclass(exc, Exception):
+            if isinstance(exc, type) and issubclass(exc, BaseException):
                 if not isinstance(e, exc):
                     raise AssertionError(
                         '%r should raise %r, but raised %r' % (

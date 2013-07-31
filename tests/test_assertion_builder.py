@@ -559,3 +559,15 @@ def test_match_contain():
     else:
         expect(opposite_not).when.called.to.throw(
             "u'string' should NOT be in u'some string'")
+
+
+def test_catching_exceptions():
+
+    # Given that I have a function that raises an exceptiont that does *not*
+    # inherit from the `Exception` class
+    def blah():
+        raise SystemExit(2)
+
+    # When I call it testing which exception it's raising, Then it should be
+    # successful
+    expect(blah).when.called_with().should.throw(SystemExit)

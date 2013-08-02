@@ -173,7 +173,7 @@ False.shouldnt.be.ok
 {}.shouldnot.be.ok
 ```
 
-#### Assert existence of properties and its values
+#### Assert existence of properties and their values
 
 ```python
 

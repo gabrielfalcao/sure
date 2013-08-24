@@ -606,6 +606,7 @@ class AssertionBuilder(object):
 
     eql = equal
     equals = equal
+    equal_to = equal
 
     @assertionmethod
     def an(self, klass):

@@ -25,3 +25,18 @@ release: clean test publish
 
 publish:
 	@python setup.py sdist register upload
+
+docstests: clean
+	@steadymark README.md
+	@steadymark spec/*.md
+
+docs: docstests
+	@markment --server -o . -t modernist --sitemap-for="http://falcao.it/sure" spec
+	@git co master && \
+		(git br -D gh-pages || printf "") && \
+		git checkout --orphan gh-pages && \
+		markment -o . -t modernist --sitemap-for="http://falcao.it/sure" spec && \
+		git add . && \
+		git commit -am 'documentation' && \
+		git push --force origin gh-pages && \
+		git checkout master

@@ -1,0 +1,20 @@
+project:
+  name: "Sure"
+  version: 0.1.0
+  description: testing library for python
+
+  github_maintainer: gabrielfalcao
+  github_maintainer_name: Gabriel Falc&atilde;o
+  github_maintainer_url: http://github.com/gabrielfalcao
+  github_maintainer_gravatar: https://secure.gravatar.com/avatar/3fa0df5c54f5ac0f8652d992d7d24039?s=64
+
+  github_url: http://github.com/gabrielfalcao/sure
+  github_fork_url: https://github.com/gabrielfalcao/sure/archive/master.tar.gz
+  tarball_download_url: https://github.com/gabrielfalcao/sure/archive/master.tar.gz
+  zipball_download_url: https://github.com/gabrielfalcao/sure/archive/master.zip
+
+  logo_path: images/logo.png
+  logo_inline_css: "display: block"
+  full_index: true
+documentation:
+  index: intro.md

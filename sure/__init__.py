@@ -409,6 +409,20 @@ NEGATIVES = [
     'shouldnot',
 ]
 
+class _IdentityAssertion(object):
+    def __init__(self, assertion_builder):
+        self._ab = assertion_builder
+
+    def __call__(self, other):
+        if self._ab.negative:
+            assert self._ab.obj is not other, "{0} should not be the same object as {1}, but it is".format(self._ab.obj, other)
+            return True
+        assert self._ab.obj is other, "{0} should be the same object as {1}, but it is not".format(self._ab.obj, other)
+        return True
+
+    def __getattr__(self, name):
+        return getattr(self._ab, name)
+
 
 class AssertionBuilder(object):
     def __init__(self, name=None, negative=False, obj=None):
@@ -452,19 +466,15 @@ class AssertionBuilder(object):
 
     @assertionproperty
     def be(self):
-        return self
+        return _IdentityAssertion(self)
 
-    @assertionproperty
-    def being(self):
-        return self
-
-    @assertionproperty
-    def not_being(self):
-        return self.should_not
+    being = be
 
     @assertionproperty
     def not_be(self):
-        return self.should_not
+        return _IdentityAssertion(self.should_not)
+
+    not_being = not_be
 
     @assertionproperty
     def not_have(self):
@@ -524,7 +534,7 @@ class AssertionBuilder(object):
             assert length > 0, (
                 u"expected `{0}` to not be empty".format(representation))
         else:
-            assert length is 0, (
+            assert length == 0, (
                 u"expected `{0}` to be empty but it has {1} items".format(representation, length))
 
         return True

@@ -294,6 +294,21 @@ def test_lower_than_or_equal_to():
         "expected `1` to not be lower than or equal to `2`")
 
 
+def test_be():
+    (u"this(X).should.be(X) when X is a reference to the same object")
+
+    d1 = {}
+    d2 = d1
+    d3 = {}
+
+    assert isinstance(this(d2).should.be(d1), bool)
+    assert this(d2).should.be(d1)
+    assert this(d3).should_not.be(d1)
+
+    (this(d2).should_not.be).when.called_with(d1).should.throw(AssertionError)
+    (this(d3).should.be).when.called_with(d1).should.throw(AssertionError)
+
+
 def test_have_property():
     (u"this(instance).should.have.property(property_name)")
 

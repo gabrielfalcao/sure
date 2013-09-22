@@ -15,10 +15,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+<<<<<<< HEAD
 from __future__ import unicode_literals
 from datetime import datetime
 from sure import this, these, those, it, expect, AssertionBuilder
 from sure.six import PY3, compat_repr
+=======
+from sure import this, these, those, it, that, anything, AssertionBuilder
+>>>>>>> 35e78bec5113be399022c64da70204fac4cc9c16
 
 
 def test_assertion_builder_synonyms():
@@ -454,6 +458,7 @@ def test_equal_with_repr_of_complex_types_and_unicode():
     ))
 
 
+<<<<<<< HEAD
 def test_equal_with_repr_of_complex_types_and_repr():
     (u"test usage of repr() inside expect(complex1).to.equal(complex2)")
 
@@ -571,3 +576,23 @@ def test_catching_exceptions():
     # When I call it testing which exception it's raising, Then it should be
     # successful
     expect(blah).when.called_with().should.throw(SystemExit)
+=======
+    assert that(opposite_not).raises(AssertionError)
+    assert that(opposite_not).raises(
+        "X is 'John Doe' whereas Y is 'Foo'")
+
+
+def test_equals_anything():
+
+    val = 1
+    assert this(val).should.equal(anything)
+
+    val = {'key': 1, 'other_key': 4}
+    assert this(val).should.equal({'key': 1, 'other_key': anything})
+
+    val = {'key': 1, 'other_key': 'yo!'}
+    assert this(val).should.equal({'key': 1, 'other_key': anything})
+
+    val = [1, 2, 3, 4]
+    assert this(val).should.equal([1, anything, 3, anything])
+>>>>>>> 35e78bec5113be399022c64da70204fac4cc9c16

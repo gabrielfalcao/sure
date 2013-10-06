@@ -33,7 +33,7 @@ def get_packages():
 setup(name='sure',
     version=version,
     description='utility belt for automated testing in python for python',
-    author=u'Gabriel Falcao',
+    author='Gabriel Falcao',
     author_email='gabriel@nacaolivre.org',
     url='http://github.com/gabrielfalcao/sure',
     packages=get_packages(),

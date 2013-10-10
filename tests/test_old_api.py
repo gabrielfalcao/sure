@@ -524,7 +524,7 @@ def test_that_contains_none():
 
     assert that(assertions).raises(
         TypeError,
-        u"'in <string>' requires string as left operand, not NoneType",
+        "'in <string>' requires string as left operand, not NoneType",
     )
 
 
@@ -537,7 +537,7 @@ def test_that_none_contains_string():
     except Exception as e:
         assert_equals(
             text_type(e),
-            u"argument of type 'NoneType' is not iterable",
+            "argument of type 'NoneType' is not iterable",
         )
 
 
@@ -621,7 +621,7 @@ def test_within_fail():
     import time
     from sure import within, miliseconds
 
-    def sleepy():
+    def sleepy(unused):
         time.sleep(0.7)
 
     failed = False
@@ -727,7 +727,7 @@ def test_within_pass_utc():
 
 
 def test_that_is_a_matcher_should_absorb_callables_to_be_used_as_matcher():
-    u"that.is_a_matcher should absorb callables to be used as matcher"
+    "that.is_a_matcher should absorb callables to be used as matcher"
     @that.is_a_matcher
     def is_truthful(what):
         assert bool(what), '%s is so untrue' % (what)
@@ -1439,15 +1439,15 @@ def test_deep_equals_dict_level3_fails_different_key():
     "that() deep_equals(dict) failing on level 3 when has an extra key"
 
     something = {
-        u'my::all_users': [
-            {u'name': u'John', u'age': 33, u'foo': u'bar'},
+        'my::all_users': [
+            {'name': 'John', 'age': 33, 'foo': 'bar'},
         ],
     }
 
     def assertions():
         assert that(something).deep_equals({
-            u'my::all_users': [
-            {u'name': u'John', u'age': 33, u'bar': u'foo'},
+            'my::all_users': [
+            {'name': 'John', 'age': 33, 'bar': 'foo'},
             ],
         })
 
@@ -1482,7 +1482,7 @@ def test_deep_equals_list_level2_fail_by_length_x_gt_y():
 def test_deep_equals_list_level2_fail_by_length_y_gt_x():
     "that(list) deep_equals(list) failing by length (len(Y) > len(X))"
 
-    something = [u'one', u'yeah']
+    something = ['one', 'yeah']
 
     def assertions():
         assert that(something).deep_equals(['one', 'yeah', 'damn'])
@@ -1513,10 +1513,10 @@ def test_function_decorated_with_wip_should_set_a_flag():
 def test_that_equals_fails():
     "that() equals(string) when it's supposed to fail"
 
-    something = u"else"
+    something = "else"
 
     def fail():
-        assert that(u'something').equals(something)
+        assert that('something').equals(something)
 
     assert that(fail).raises(
         AssertionError, compat_repr(
@@ -1549,9 +1549,9 @@ def test_deep_equals_weird():
     part1 = [
         ('Bootstraping Redis role', []),
         ('Restart scalarizr', []),
-        ('Rebundle server', [u'rebundle']),
-        ('Use new role', [u'rebundle']),
-        ('Restart scalarizr after bundling', [u'rebundle']),
+        ('Rebundle server', ['rebundle']),
+        ('Use new role', ['rebundle']),
+        ('Restart scalarizr after bundling', ['rebundle']),
         ('Bundling data', []),
         ('Modifying data', []),
         ('Reboot server', []),
@@ -1559,19 +1559,19 @@ def test_deep_equals_weird():
         ('Setup replication', []),
         ('Restart scalarizr in slave', []),
         ('Slave force termination', []),
-        ('Slave delete EBS', [u'ec2']),
-        ('Setup replication for EBS test', [u'ec2']),
+        ('Slave delete EBS', ['ec2']),
+        ('Setup replication for EBS test', ['ec2']),
         ('Writing on Master, reading on Slave', []),
         ('Slave -> Master promotion', []),
-        ('Restart farm', [u'restart_farm']),
+        ('Restart farm', ['restart_farm']),
     ]
 
     part2 = [
-        ('Bootstraping Redis role', [u'rebundle', u'rebundle', u'rebundle']),
+        ('Bootstraping Redis role', ['rebundle', 'rebundle', 'rebundle']),
         ('Restart scalarizr', []),
-        ('Rebundle server', [u'rebundle']),
-        ('Use new role', [u'rebundle']),
-        ('Restart scalarizr after bundling', [u'rebundle']),
+        ('Rebundle server', ['rebundle']),
+        ('Use new role', ['rebundle']),
+        ('Restart scalarizr after bundling', ['rebundle']),
         ('Bundling data', []),
         ('Modifying data', []),
         ('Reboot server', []),
@@ -1579,11 +1579,11 @@ def test_deep_equals_weird():
         ('Setup replication', []),
         ('Restart scalarizr in slave', []),
         ('Slave force termination', []),
-        ('Slave delete EBS', [u'ec2']),
-        ('Setup replication for EBS test', [u'ec2']),
+        ('Slave delete EBS', ['ec2']),
+        ('Setup replication for EBS test', ['ec2']),
         ('Writing on Master, reading on Slave', []),
         ('Slave -> Master promotion', []),
-        ('Restart farm', [u'restart_farm']),
+        ('Restart farm', ['restart_farm']),
     ]
 
     expect(that(part1).equals).when.called_with(part2).should.throw("")

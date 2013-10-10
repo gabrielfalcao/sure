@@ -46,7 +46,7 @@ from sure.six.moves import reduce
 if PY3:
     basestring = str
 
-version = '1.2.2'
+version = '1.2.3'
 
 
 not_here_error = \
@@ -89,7 +89,7 @@ class VariablesBag(dict):
 
 
 class CallBack(object):
-    context_error = u"the function %s defined at %s line %d, is being "\
+    context_error = "the function %s defined at %s line %d, is being "\
         "decorated by either @that_with_context or @scenario, so it should " \
         "take at least 1 parameter, which is the test context"
 
@@ -178,9 +178,9 @@ def within(**units):
             except TypeError as e:
                 if PY3:
                     # PY3 has different error message
-                    fmt = u'{0}() takes 0 positional arguments but 1 was given'
+                    fmt = '{0}() takes 0 positional arguments but 1 was given'
                 else:
-                    fmt = u'{0}() takes no arguments'
+                    fmt = '{0}() takes no arguments'
                 err = text_type(e)
                 if fmt.format(func.__name__) in err:
                     func(*args, **kw)
@@ -225,10 +225,10 @@ UNITS = {
     ),
 }
 
-milisecond = miliseconds = u'miliseconds'
-microsecond = microseconds = u'microseconds'
-second = seconds = u'seconds'
-minute = minutes = u'minutes'
+milisecond = miliseconds = 'miliseconds'
+microsecond = microseconds = 'microseconds'
+second = seconds = 'seconds'
+minute = minutes = 'minutes'
 
 
 def word_to_number(word):
@@ -299,12 +299,12 @@ def action_for(context, provides=None, depends_on=None):
             'into the context, but it did not. Please double check its ' \
             'implementation' % (func.__name__, attr)
 
-    dependency_error_lonely = u'the action "%s" defined at %s:%d ' \
+    dependency_error_lonely = 'the action "%s" defined at %s:%d ' \
         'depends on the attribute "%s" to be available in the' \
         ' context. It turns out that there are no actions providing ' \
         'that. Please double-check the implementation'
 
-    dependency_error_hints = u'the action "%s" defined at %s:%d ' \
+    dependency_error_hints = 'the action "%s" defined at %s:%d ' \
         'depends on the attribute "%s" to be available in the context.'\
         ' You need to call one of the following actions beforehand:\n'
 
@@ -532,20 +532,20 @@ class AssertionBuilder(object):
         length = len(self.obj)
         if self.negative:
             assert length > 0, (
-                u"expected `{0}` to not be empty".format(representation))
+                "expected `{0}` to not be empty".format(representation))
         else:
             assert length == 0, (
-                u"expected `{0}` to be empty but it has {1} items".format(representation, length))
+                "expected `{0}` to be empty but it has {1} items".format(representation, length))
 
         return True
 
     @assertionproperty
     def ok(self):
         if self.negative:
-            msg = u'expected `{0}` to be falsy'.format(self.obj)
+            msg = 'expected `{0}` to be falsy'.format(self.obj)
             assert not bool(self.obj), msg
         else:
-            msg = u'expected `{0}` to be truthy'.format(self.obj)
+            msg = 'expected `{0}` to be truthy'.format(self.obj)
             assert bool(self.obj), msg
 
         return True
@@ -556,10 +556,10 @@ class AssertionBuilder(object):
     @assertionproperty
     def falsy(self):
         if self.negative:
-            msg = u'expected `{0}` to be truthy'.format(self.obj)
+            msg = 'expected `{0}` to be truthy'.format(self.obj)
             assert bool(self.obj), msg
         else:
-            msg = u'expected `{0}` to be falsy'.format(self.obj)
+            msg = 'expected `{0}` to be falsy'.format(self.obj)
             assert not bool(self.obj), msg
 
         return True
@@ -638,9 +638,9 @@ class AssertionBuilder(object):
                     first = '_abcoll'
             else:
                 if sys.version_info <= (3, 0, 0):
-                    first = u'__builtin__'
+                    first = '__builtin__'
                 else:
-                    first = u'builtins'
+                    first = 'builtins'
                 items = [klass]
 
             klass = reduce(getattr, items, __import__(first))
@@ -663,13 +663,13 @@ class AssertionBuilder(object):
     @assertionmethod
     def greater_than(self, dest):
         if self.negative:
-            msg = u"expected `{0}` to not be greater than `{1}`".format(
+            msg = "expected `{0}` to not be greater than `{1}`".format(
                 self.obj, dest)
 
             assert not self.obj > dest, msg
 
         else:
-            msg = u"expected `{0}` to be greater than `{1}`".format(
+            msg = "expected `{0}` to be greater than `{1}`".format(
                 self.obj, dest)
             assert self.obj > dest, msg
 
@@ -678,13 +678,13 @@ class AssertionBuilder(object):
     @assertionmethod
     def greater_than_or_equal_to(self, dest):
         if self.negative:
-            msg = u"expected `{0}` to not be greater than or equal to `{1}`".format(
+            msg = "expected `{0}` to not be greater than or equal to `{1}`".format(
                 self.obj, dest)
 
             assert not self.obj >= dest, msg
 
         else:
-            msg = u"expected `{0}` to be greater than or equal to `{1}`".format(
+            msg = "expected `{0}` to be greater than or equal to `{1}`".format(
                 self.obj, dest)
             assert self.obj >= dest, msg
 
@@ -693,13 +693,13 @@ class AssertionBuilder(object):
     @assertionmethod
     def lower_than(self, dest):
         if self.negative:
-            msg = u"expected `{0}` to not be lower than `{1}`".format(
+            msg = "expected `{0}` to not be lower than `{1}`".format(
                 self.obj, dest)
 
             assert not self.obj < dest, msg
 
         else:
-            msg = u"expected `{0}` to be lower than `{1}`".format(
+            msg = "expected `{0}` to be lower than `{1}`".format(
                 self.obj, dest)
             assert self.obj < dest, msg
 
@@ -708,13 +708,13 @@ class AssertionBuilder(object):
     @assertionmethod
     def lower_than_or_equal_to(self, dest):
         if self.negative:
-            msg = u"expected `{0}` to not be lower than or equal to `{1}`".format(
+            msg = "expected `{0}` to not be lower than or equal to `{1}`".format(
                 self.obj, dest)
 
             assert not self.obj <= dest, msg
 
         else:
-            msg = u"expected `{0}` to be lower than or equal to `{1}`".format(
+            msg = "expected `{0}` to be lower than or equal to `{1}`".format(
                 self.obj, dest)
             assert self.obj <= dest, msg
 
@@ -723,10 +723,10 @@ class AssertionBuilder(object):
     @assertionmethod
     def below(self, num):
         if self.negative:
-            msg = u"{0} should not be below {1}".format(self.obj, num)
+            msg = "{0} should not be below {1}".format(self.obj, num)
             assert not self.obj < num, msg
         else:
-            msg = u"{0} should be below {1}".format(self.obj, num)
+            msg = "{0} should be below {1}".format(self.obj, num)
             assert self.obj < num, msg
 
         return True
@@ -734,10 +734,10 @@ class AssertionBuilder(object):
     @assertionmethod
     def above(self, num):
         if self.negative:
-            msg = u"{0} should not be above {1}".format(self.obj, num)
+            msg = "{0} should not be above {1}".format(self.obj, num)
             assert not self.obj > num, msg
         else:
-            msg = u"{0} should be above {1}".format(self.obj, num)
+            msg = "{0} should be above {1}".format(self.obj, num)
             assert self.obj > num, msg
         return True
 
@@ -763,7 +763,7 @@ class AssertionBuilder(object):
                      and_kwargs=self._callable_kw)
 
         if self.negative:
-            msg = (u"{0} called with args {1} and kwargs {2} should "
+            msg = ("{0} called with args {1} and kwargs {2} should "
                    "not raise {3} but raised {4}")
 
             exc = args and args[0] or Exception

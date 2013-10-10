@@ -10,7 +10,7 @@ from sure.six import compat_repr, PY3
 
 def test_basic_list():
     "safe_repr should display a simple list"
-    X = [u'one', u'yeah']
+    X = ['one', 'yeah']
     expect(safe_repr(X)).should.equal(compat_repr(
         "['one', 'yeah']"
     ))
@@ -18,7 +18,7 @@ def test_basic_list():
 
 def test_basic_dict():
     "safe_repr should return a sorted repr"
-    X = {u'b': u'd', u'a': u'c'}
+    X = {'b': 'd', 'a': 'c'}
     expect(safe_repr(X)).should.equal(compat_repr(
         "{'a': 'c', 'b': 'd'}"
     ))
@@ -26,7 +26,7 @@ def test_basic_dict():
 
 def test_nested_dict():
     "dicts nested inside values should also get sorted"
-    X = {u'my::all_users': [{u'age': 33, u'name': u'John', u'foo': u'bar'}]}
+    X = {'my::all_users': [{'age': 33, 'name': 'John', 'foo': 'bar'}]}
     expect(safe_repr(X)).should.equal(compat_repr(
         '''{'my::all_users': [{'age': 33, 'foo': 'bar', 'name': 'John'}]}'''
     ))
@@ -50,10 +50,10 @@ def test_unicode():
 
     y1 = {
         'a': 2,
-        'b': Y(u'Gabriel Falcão'),
-        'c': u'Foo',
+        'b': Y('Gabriel Falcão'),
+        'c': 'Foo',
     }
-    name = u'Gabriel Falcão' if PY3 else u'Gabriel Falc\xe3o'
+    name = 'Gabriel Falcão' if PY3 else 'Gabriel Falc\xe3o'
 
     expect(safe_repr(y1)).should.equal(compat_repr(
         "{'a': 2, 'b': %s, 'c': 'Foo'}" % name

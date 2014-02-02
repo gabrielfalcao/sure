@@ -6,7 +6,7 @@ export PYTHONPATH := ${PWD}:${PYTHONPATH}
 export SURE_NO_COLORS := true
 
 install_deps:
-	@pip install -r requirements.pip
+	@curd install -r requirements.txt
 
 test:
 	@nosetests -s --verbosity=2 tests

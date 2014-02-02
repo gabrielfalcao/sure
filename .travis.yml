@@ -8,6 +8,6 @@ python:
 # command to install dependencies
 install:
   - python setup.py build sdist
-  - pip install -r requirements.pip
+  - curd install -r requirements.txt
 # command to run tests
 script: nosetests --verbosity 2

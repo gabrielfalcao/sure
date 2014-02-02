@@ -30,6 +30,7 @@ def get_packages():
 
     return packages
 
+
 setup(name='sure',
     version=version,
     description='utility belt for automated testing in python for python',
@@ -38,5 +39,6 @@ setup(name='sure',
     url='http://github.com/gabrielfalcao/sure',
     packages=get_packages(),
     install_requires=[
+          'curdling',
     ],
 )

@@ -27,5 +27,40 @@ You can also build the documentation locally using markment:
     pip install markment
     markment --server --theme=rtd ./spec/
 
+Here is a tease
+---------------
+
+Equality
+~~~~~~~~
+
+(number).should.equal(number)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+    import sure
+
+    (4).should.be.equal(2 + 2)
+    (7.5).should.eql(3.5 + 4)
+    (2).should.equal(8 / 4)
+
+    (3).shouldnt.be.equal(5)
+
+{'a': 'collection'}.should.equal({'a': 'collection'}) does deep comparison
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+    {'foo': 'bar'}.should.equal({'foo': 'bar'})
+    {'foo': 'bar'}.should.eql({'foo': 'bar'})
+    {'foo': 'bar'}.must.be.equal({'foo': 'bar'})
+
+"A string".lower().should.equal("a string") also works
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+    "Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])
+
 .. |Build Status| image:: https://travis-ci.org/gabrielfalcao/sure.png?branch=master
    :target: https://travis-ci.org/gabrielfalcao/sure

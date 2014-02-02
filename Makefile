@@ -9,7 +9,7 @@ install_deps:
 	@curd install -r requirements.txt
 
 test:
-	@nosetests -s --verbosity=2 tests
+	@nosetests -s --verbosity=2 tests --rednose
 	@steadymark OLD_API.md
 	@steadymark README.md
 

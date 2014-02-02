@@ -18,6 +18,7 @@
 from __future__ import unicode_literals
 
 import re
+import traceback
 import inspect
 from copy import deepcopy
 from pprint import pformat
@@ -118,14 +119,14 @@ class AssertionHelper(object):
             if isinstance(exc, string_types):
                 msg = exc
                 exc = type(e)
-            
+
             err = text_type(e)
 
             if isinstance(exc, type) and issubclass(exc, BaseException):
                 if not isinstance(e, exc):
                     raise AssertionError(
-                        '%r should raise %r, but raised %r' % (
-                            self._src, exc, e.__class__))
+                        '%r should raise %r, but raised %r:\nORIGINAL EXCEPTION:\n\n%s' % (
+                            self._src, exc, e.__class__, traceback.format_exc(e)))
 
                 if isinstance(msg, string_types) and msg not in err:
                     raise AssertionError('''

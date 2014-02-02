@@ -409,7 +409,8 @@ NEGATIVES = [
     'shouldnot',
 ]
 
-class _IdentityAssertion(object):
+
+class IdentityAssertion(object):
     def __init__(self, assertion_builder):
         self._ab = assertion_builder
 
@@ -466,13 +467,18 @@ class AssertionBuilder(object):
 
     @assertionproperty
     def be(self):
-        return _IdentityAssertion(self)
+        import os
+        if os.getenv("DEBUG"):
+            import ipdb;ipdb.set_trace()
+
+
+        return IdentityAssertion(self)
 
     being = be
 
     @assertionproperty
     def not_be(self):
-        return _IdentityAssertion(self.should_not)
+        return IdentityAssertion(self.should_not)
 
     not_being = not_be
 
@@ -870,10 +876,10 @@ if is_cpython and allows_new_syntax:
         def method(self):
             builder = AssertionBuilder(name, negative=False)
             instance = builder(self)
-            callable_args = getattr(self, '_callable_args', None)
+            callable_args = getattr(instance, '_callable_args', ())
             if callable_args:
                 instance._callable_args = callable_args
-            callable_kw = getattr(self, '_callable_kw', None)
+            callable_kw = getattr(instance, '_callable_kw', {})
             if callable_kw:
                 instance._callable_kw = callable_kw
             return instance
@@ -885,10 +891,10 @@ if is_cpython and allows_new_syntax:
         def method(self):
             builder = AssertionBuilder(name, negative=True)
             instance = builder(self)
-            callable_args = getattr(self, '_callable_args', None)
+            callable_args = getattr(instance, '_callable_args', ())
             if callable_args:
                 instance._callable_args = callable_args
-            callable_kw = getattr(self, '_callable_kw', None)
+            callable_kw = getattr(instance, '_callable_kw', {})
             if callable_kw:
                 instance._callable_kw = callable_kw
             return instance

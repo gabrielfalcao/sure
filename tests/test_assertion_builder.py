@@ -305,8 +305,20 @@ def test_be():
     assert this(d2).should.be(d1)
     assert this(d3).should_not.be(d1)
 
-    (this(d2).should_not.be).when.called_with(d1).should.throw(AssertionError)
-    (this(d3).should.be).when.called_with(d1).should.throw(AssertionError)
+    def wrong_should():
+        return this(d3).should.be(d1)
+
+    def wrong_should_not():
+        return this(d2).should_not.be(d1)
+
+    wrong_should_not.when.called.should.throw(
+        AssertionError,
+        '{} should not be the same object as {}, but it is',
+    )
+    wrong_should.when.called.should.throw(
+        AssertionError,
+        '{} should be the same object as {}, but it is not',
+    )
 
 
 def test_have_property():

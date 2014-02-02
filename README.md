@@ -3,7 +3,6 @@
 A testing library for python with powerful and flexible assertions. Sure is heavily inspired by [should.js](https://github.com/visionmedia/should.js/)
 
 [![Build Status](https://travis-ci.org/gabrielfalcao/sure.png?branch=master)](https://travis-ci.org/gabrielfalcao/sure)
-[![instanc.es Badge](https://instanc.es/bin/gabrielfalcao/sure.png)](http://instanc.es)
 
 # Installing
 
@@ -18,5 +17,5 @@ You can also build the documentation locally using markment:
 
 ```bash
 pip install markment
-markment --server --theme=merlot ./spec/
+markment --server --theme=rtd ./spec/
 ```

@@ -7,3 +7,4 @@ sure.egg-info/
 .tox
 *.sublime-project
 *.sublime-workspace
+sure-*.tar.gz

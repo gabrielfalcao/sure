@@ -82,7 +82,7 @@ if __name__ == '__main__':
           long_description=local_file('readme.rst'),
           author_email='gabriel@nacaolivre.org',
           url='http://github.com/gabrielfalcao/sure',
-          packages=get_packages(),
+          packages=find_packages(exclude=['*tests*']),
           install_requires=install_requires,
           dependency_links=dependency_links,
     )

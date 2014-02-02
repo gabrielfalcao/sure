@@ -28,14 +28,17 @@ class VersionFinder(ast.NodeVisitor):
         self.version = None
 
     def visit_Assign(self, node):
-        if node.targets[0].id == '__version__':
-            self.version = node.value.s
+        try:
+            if node.targets[0].id == 'version':
+                self.version = node.value.s
+        except:
+            pass
 
 
 def read_version():
-    """Read version from lineup/version.py without loading any files"""
+    """Read version from sure/version.py without loading any files"""
     finder = VersionFinder()
-    finder.visit(ast.parse(local_file('lineup', '__init__.py')))
+    finder.visit(ast.parse(local_file('sure', '__init__.py')))
     return finder.version
 
 
@@ -81,6 +84,7 @@ if __name__ == '__main__':
           author='Gabriel Falcao',
           long_description=local_file('readme.rst'),
           author_email='gabriel@nacaolivre.org',
+          include_package_data=True,
           url='http://github.com/gabrielfalcao/sure',
           packages=find_packages(exclude=['*tests*']),
           install_requires=install_requires,

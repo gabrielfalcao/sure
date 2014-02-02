@@ -16,5 +16,13 @@ project:
   logo_path: images/logo.png
   logo_inline_css: "display: block"
   full_index: true
+
+
 documentation:
   index: intro.md
+
+toc:
+  - intro.md
+  - getting-started.md
+  - reference.md
+  - how-it-works.md

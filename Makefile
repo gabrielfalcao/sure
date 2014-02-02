@@ -6,7 +6,7 @@ export PYTHONPATH := ${PWD}:${PYTHONPATH}
 export SURE_NO_COLORS := true
 
 install_deps:
-	@curd install -r requirements.txt
+	@curd install -r development.txt
 
 test:
 	@nosetests -s --verbosity=2 tests --rednose
@@ -29,14 +29,14 @@ publish:
 
 docstests: clean
 	@steadymark README.md
-	@steadymark spec/*.md
+
 
 docs: docstests
-	@markment --server -o . --sitemap-for="http://falcao.it/sure" spec
+	@markment -t rtd -o . --sitemap-for="http://falcao.it/sure" spec
 	@git co master && \
 		(git br -D gh-pages || printf "") && \
 		git checkout --orphan gh-pages && \
-		markment -o . --sitemap-for="http://falcao.it/sure" spec && \
+		markment -o -t rtd . --sitemap-for="http://falcao.it/sure" spec && \
 		git add . && \
 		git commit -am 'documentation' && \
 		git push --force origin gh-pages && \

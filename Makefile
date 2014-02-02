@@ -36,7 +36,7 @@ docs: docstests
 	@git co master && \
 		(git br -D gh-pages || printf "") && \
 		git checkout --orphan gh-pages && \
-		markment -o -t rtd . --sitemap-for="http://falcao.it/sure" spec && \
+		markment -t rtd -o . --sitemap-for="http://falcao.it/sure" spec && \
 		git add . && \
 		git commit -am 'documentation' && \
 		git push --force origin gh-pages && \

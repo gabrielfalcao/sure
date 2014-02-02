@@ -12,6 +12,7 @@ test:
 	@nosetests -s --verbosity=2 tests --rednose
 	@steadymark OLD_API.md
 	@steadymark README.md
+	@pandoc -o readme.rst README.md
 
 clean:
 	@printf "Cleaning up files that are already in .gitignore... "
@@ -31,11 +32,11 @@ docstests: clean
 	@steadymark spec/*.md
 
 docs: docstests
-	@markment --server -o . -t modernist --sitemap-for="http://falcao.it/sure" spec
+	@markment --server -o . --sitemap-for="http://falcao.it/sure" spec
 	@git co master && \
 		(git br -D gh-pages || printf "") && \
 		git checkout --orphan gh-pages && \
-		markment -o . -t modernist --sitemap-for="http://falcao.it/sure" spec && \
+		markment -o . --sitemap-for="http://falcao.it/sure" spec && \
 		git add . && \
 		git commit -am 'documentation' && \
 		git push --force origin gh-pages && \

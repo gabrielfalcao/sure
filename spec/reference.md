@@ -52,7 +52,7 @@ THIS IS MY loose string
 
 "goosfraba".should_not.contain('anger')
 
-[1.2.4].should.contain(2)
+[1.2.5].should.contain(2)
 ```
 
 ## should.match and should_not.match matches regular expression

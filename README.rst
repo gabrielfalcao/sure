@@ -1,4 +1,4 @@
-sure ``1.2.4``
+sure ``1.2.5``
 ==============
 
 A testing library for python with powerful and flexible assertions. Sure

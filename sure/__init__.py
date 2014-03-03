@@ -46,7 +46,7 @@ from sure.six.moves import reduce
 if PY3:
     basestring = str
 
-version = '1.2.5'
+version = '1.2.6'
 
 
 not_here_error = \
@@ -876,10 +876,10 @@ if is_cpython and allows_new_syntax:
         def method(self):
             builder = AssertionBuilder(name, negative=False)
             instance = builder(self)
-            callable_args = getattr(instance, '_callable_args', ())
+            callable_args = getattr(self, '_callable_args', ())
             if callable_args:
                 instance._callable_args = callable_args
-            callable_kw = getattr(instance, '_callable_kw', {})
+            callable_kw = getattr(self, '_callable_kw', {})
             if callable_kw:
                 instance._callable_kw = callable_kw
             return instance
@@ -891,10 +891,10 @@ if is_cpython and allows_new_syntax:
         def method(self):
             builder = AssertionBuilder(name, negative=True)
             instance = builder(self)
-            callable_args = getattr(instance, '_callable_args', ())
+            callable_args = getattr(self, '_callable_args', ())
             if callable_args:
                 instance._callable_args = callable_args
-            callable_kw = getattr(instance, '_callable_kw', {})
+            callable_kw = getattr(self, '_callable_kw', {})
             if callable_kw:
                 instance._callable_kw = callable_kw
             return instance

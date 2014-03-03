@@ -598,3 +598,27 @@ def test_catching_exceptions():
     # When I call it testing which exception it's raising, Then it should be
     # successful
     expect(blah).when.called_with().should.throw(SystemExit)
+
+
+def test_catching_exceptions_with_params():
+
+    # Given that I have a function that raises an exceptiont that does *not*
+    # inherit from the `Exception` class
+    def blah(foo):
+        raise SystemExit(2)
+
+    # When I call it testing which exception it's raising, Then it should be
+    # successful
+    expect(blah).when.called_with(0).should.throw(SystemExit)
+
+
+def test_success_with_params():
+    def blah(foo):
+        pass
+
+    expect(blah).when.called_with(0).should_not.throw(TypeError)
+
+def test_success_with_params_exception():
+    def blah():
+        pass
+    expect(blah).when.called_with(0).should.throw(TypeError)

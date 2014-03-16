@@ -474,6 +474,23 @@ def test_that_looks_like():
     assert that('String\n with BREAKLINE').looks_like('string with breakline')
 
 
+def test_that_raises_raises_for_wrong_exception_type():
+    "that(callable(RuntimeError)).raises(TypeError)"
+
+    error = 'should raise <class \'TypeError\'>, but raised <class ' \
+            '\'RuntimeError\'>:\nORIGINAL EXCEPTION:\n\nTraceback (most ' \
+            'recent call last):\n'
+
+    def my_function():
+        raise RuntimeError('OOps')
+
+    try:
+        assert that(my_function).raises(TypeError, 'OOps')
+        raise RuntimeError('should not reach here')
+    except AssertionError as e:
+        assert that(text_type(e)).contains(error)
+
+
 def test_that_raises_with_args():
     "that(callable, with_args=['foo']).raises(FooError)"
 
@@ -889,7 +906,7 @@ def test_depends_on_failing_due_nothing_found():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "lonely_action" defined at %s:898 ' \
+    error = 'the action "lonely_action" defined at %s:915 ' \
         'depends on the attribute "something" to be available in the' \
         ' context. It turns out that there are no actions providing ' \
         'that. Please double-check the implementation' % fullpath
@@ -915,10 +932,10 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "my_action" defined at {0}:928 ' \
+    error = 'the action "my_action" defined at {0}:945 ' \
         'depends on the attribute "some_attr" to be available in the context.'\
         ' You need to call one of the following actions beforehand:\n' \
-        ' -> dependency_action at {0}:924'.replace('{0}', fullpath)
+        ' -> dependency_action at {0}:941'.replace('{0}', fullpath)
 
     def with_setup(context):
         @action_for(context, provides=['some_attr'])

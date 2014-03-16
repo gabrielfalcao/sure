@@ -126,7 +126,7 @@ class AssertionHelper(object):
                 if not isinstance(e, exc):
                     raise AssertionError(
                         '%r should raise %r, but raised %r:\nORIGINAL EXCEPTION:\n\n%s' % (
-                            self._src, exc, e.__class__, traceback.format_exc(e)))
+                            self._src, exc, e.__class__, traceback.format_exc()))
 
                 if isinstance(msg, string_types) and msg not in err:
                     raise AssertionError('''

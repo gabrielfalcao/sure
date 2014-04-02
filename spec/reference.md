@@ -243,7 +243,7 @@ exception:
 
 ```python
 import sure
-from sure.six import PY3
+from six import PY3
 
 if PY3:
     range.when.called_with(10, step=20).should.throw(TypeError, "range() does not take keyword arguments")
@@ -296,7 +296,7 @@ this takes the class (type) itself and checks if the object is an instance of it
 
 ```python
 import sure
-from sure.six import PY3
+from six import PY3
 
 if PY3:
     u"".should.be.an(str)

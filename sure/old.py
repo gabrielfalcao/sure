@@ -33,11 +33,12 @@ try:
 except ImportError:
     import builtins
 
+from six import string_types, text_type
+
 from sure.core import DeepComparison
 from sure.core import _get_file_name
 from sure.core import _get_line_number
 from sure.core import itemize_length
-from sure.six import string_types, text_type
 
 
 def is_iterable(obj):

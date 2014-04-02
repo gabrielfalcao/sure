@@ -129,7 +129,7 @@ class DeepComparison(object):
         if X == Y:
             return True
         else:
-            m = u'X%s != Y%s' % (red(c.current_X_keys), green(c.current_Y_keys))
+            m = 'X%s != Y%s' % (red(c.current_X_keys), green(c.current_Y_keys))
             return DeepExplanation(m)
 
     def compare_dicts(self, X, Y):
@@ -141,14 +141,14 @@ class DeepComparison(object):
         diff_x = list(set(x_keys).difference(set(y_keys)))
         diff_y = list(set(y_keys).difference(set(x_keys)))
         if diff_x:
-            msg = u"X%s has the key %%r whereas Y%s does not" % (
+            msg = "X%s has the key %%r whereas Y%s does not" % (
                 red(c.current_X_keys),
                 green(c.current_Y_keys),
             ) % diff_x[0]
             return DeepExplanation(msg)
 
         elif diff_y:
-            msg = u"X%s does not have the key %%r whereas Y%s has it" % (
+            msg = "X%s does not have the key %%r whereas Y%s has it" % (
                 red(c.current_X_keys),
                 green(c.current_Y_keys),
             ) % diff_y[0]
@@ -201,10 +201,10 @@ class DeepComparison(object):
     def compare_iterables(self, X, Y):
         len_X, len_Y = map(len, (X, Y))
         if len_X > len_Y:
-            msg = u"X has %d items whereas Y has only %d" % (len_X, len_Y)
+            msg = "X has %d items whereas Y has only %d" % (len_X, len_Y)
             return DeepExplanation(msg)
         elif len_X < len_Y:
-            msg = u"Y has %d items whereas X has only %d" % (len_Y, len_X)
+            msg = "Y has %d items whereas X has only %d" % (len_Y, len_X)
             return DeepExplanation(msg)
         elif X == Y:
             return True
@@ -226,13 +226,13 @@ class DeepComparison(object):
             if X == Y:
                 return True
             c = self.get_context()
-            m = u"X%s is %%r whereas Y%s is %%r"
+            m = "X%s is %%r whereas Y%s is %%r"
             msg = m % (red(c.current_X_keys), green(c.current_Y_keys)) % (X, Y)
             return DeepExplanation(msg)
 
         elif type(X) is not type(Y):  # different types
             xname, yname = map(lambda _: type(_).__name__, (X, Y))
-            msg = u'X%s is a %%s and Y%s is a %%s instead' % (
+            msg = 'X%s is a %%s and Y%s is a %%s instead' % (
                 red(c.current_X_keys),
                 green(c.current_Y_keys),
             ) % (xname, yname)

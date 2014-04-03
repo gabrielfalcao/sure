@@ -3,9 +3,11 @@
 
 from __future__ import unicode_literals
 
+from six import  PY3
+
 from sure import expect
 from sure.core import safe_repr
-from sure.six import compat_repr, PY3
+from sure.compat_py3 import compat_repr
 
 
 def test_basic_list():

@@ -17,8 +17,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
 from datetime import datetime
+from six import PY3
 from sure import this, these, those, it, expect, AssertionBuilder
-from sure.six import PY3, compat_repr
+from sure.compat_py3 import compat_repr
 
 
 def test_assertion_builder_synonyms():

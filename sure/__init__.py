@@ -27,6 +27,9 @@ import traceback
 from functools import wraps
 from datetime import datetime
 
+from six import string_types, text_type, PY3, get_function_code
+from six.moves import reduce
+
 from sure.old import AssertionHelper
 from sure.old import Iterable
 from sure.old import builtins
@@ -39,8 +42,6 @@ from sure.core import safe_repr
 
 from sure.magic import is_cpython, patchable_builtin
 from sure.registry import context as _registry
-from sure.six import string_types, text_type, PY3, get_function_code
-from sure.six.moves import reduce
 
 
 if PY3:

@@ -177,7 +177,7 @@ class AssertionHelper(object):
 
     def equals(self, dst):
         if self._attribute and is_iterable(self._src):
-            msg = u'%r[%d].%s should be %r, but is %r'
+            msg = '%r[%d].%s should be %r, but is %r'
 
             for index, item in enumerate(self._src):
                 if self._range:
@@ -199,12 +199,12 @@ class AssertionHelper(object):
         old_dst = pformat(dst)
         self._src = re.sub(r'\s', '', self._src).lower()
         dst = re.sub(r'\s', '', dst).lower()
-        error = u'%s does not look like %s' % (old_src, old_dst)
+        error = '%s does not look like %s' % (old_src, old_dst)
         assert self._src == dst, error
         return self._src == dst
 
     def every_one_is(self, dst):
-        msg = u'all members of %r should be %r, but the %dth is %r'
+        msg = 'all members of %r should be %r, but the %dth is %r'
         for index, item in enumerate(self._src):
             if self._range:
                 if index < self._range[0] or index > self._range[1]:
@@ -248,7 +248,7 @@ class AssertionHelper(object):
         length = len(self._src)
 
         if length <= that:
-            error = u'the length of the %s should be greater then %d, but is %d' % (
+            error = 'the length of the %s should be greater then %d, but is %d' % (
                 type(self._src).__name__,
                 that,
                 length,
@@ -263,7 +263,7 @@ class AssertionHelper(object):
         length = len(self._src)
 
         if length < that:
-            error = u'the length of %r should be greater then or equals %d, but is %d' % (
+            error = 'the length of %r should be greater then or equals %d, but is %d' % (
                 self._src,
                 that,
                 length,
@@ -281,7 +281,7 @@ class AssertionHelper(object):
         length = len(self._src)
 
         if length >= that:
-            error = u'the length of %r should be lower then %r, but is %d' % (
+            error = 'the length of %r should be lower then %r, but is %d' % (
                 self._src,
                 original_that,
                 length,
@@ -294,7 +294,7 @@ class AssertionHelper(object):
         that = self._get_that(that)
 
         length = len(self._src)
-        error = u'the length of %r should be lower then or equals %d, but is %d'
+        error = 'the length of %r should be lower then or equals %d, but is %d'
 
         if length > that:
             msg = error % (
@@ -311,7 +311,7 @@ class AssertionHelper(object):
         length = len(self._src)
 
         if length != that:
-            error = u'the length of %r should be %d, but is %d' % (
+            error = 'the length of %r should be %d, but is %d' % (
                 self._src,
                 that,
                 length,
@@ -325,7 +325,7 @@ class AssertionHelper(object):
         length = len(self._src)
 
         if length == that:
-            error = u'the length of %r should not be %d' % (
+            error = 'the length of %r should not be %d' % (
                 self._src,
                 that,
             )
@@ -345,7 +345,7 @@ class AssertionHelper(object):
         return self
 
     def matches(self, items):
-        msg = u'%r[%d].%s should be %r, but is %r'
+        msg = '%r[%d].%s should be %r, but is %r'
         get_eval = lambda item: eval(
             "%s.%s" % ('current', self._eval), {}, {'current': item},
         )

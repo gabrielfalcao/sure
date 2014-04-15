@@ -47,7 +47,7 @@ from sure.six.moves import reduce
 if PY3:
     basestring = str
 
-version = '1.2.6'
+version = '1.2.7'
 
 
 not_here_error = \

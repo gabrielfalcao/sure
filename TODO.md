@@ -43,35 +43,3 @@ maintainable and easily understood automated tests.
 
 You will find assertions that can have totally different behaviors
 depending on the kind of objects they are comparing.
-
-
-### Compare diffs
-
-
-some shortcut to this:
-
-```python
-import difflib
-diff = difflib.Differ()
-from mymodels import Note
-
-note_instance = Note(
-    string_to="Tove",
-    string_from="Jani",
-    heading="Reminder",
-    body="Don't forget me this weekend!"
-)
-
-result = diff.compare(
-    note_instance.to_xml().splitlines(True),
-    '''
-<note>
-  <to>Tove</to>
-  <from>Jani</from>
-  <heading>Reminder</heading>
-  <body>Don't forget me this weekend!</body>
-</note>
-    '''.strip().splitlines(True))
-
-assert not result, "".join(result)
-```

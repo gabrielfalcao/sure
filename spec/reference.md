@@ -14,6 +14,41 @@ import sure
 (3).shouldnt.be.equal(5)
 ```
 
+## Compare strings with diff
+
+### (string).should_not.be.different_of(string)
+
+```python
+import sure
+
+XML1 = '''<root>
+  <a-tag with-attribute="one">AND A VALUE</a-tag>
+</root>'''
+
+
+XML1.should_not.be.different_of(XML1)
+
+XML2 = '''<root>
+  <a-tag with-attribute="two">AND A VALUE</a-tag>
+</root>'''
+
+XML2.should.be.different_of(XML1)
+```
+
+this will give you and output like
+
+
+```bash
+Difference:
+
+  <root>
+-   <a-tag with-attribute="one">AND A VALUE</a-tag>
+?                           --
++   <a-tag with-attribute="two">AND A VALUE</a-tag>
+?                          ++
+  </root>'''
+```
+
 ### {'a': 'collection'}.should.equal({'a': 'collection'}) does deep comparison
 
 ```python

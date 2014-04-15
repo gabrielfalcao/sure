@@ -618,7 +618,47 @@ def test_success_with_params():
 
     expect(blah).when.called_with(0).should_not.throw(TypeError)
 
+
 def test_success_with_params_exception():
     def blah():
         pass
+
     expect(blah).when.called_with(0).should.throw(TypeError)
+
+
+def test_should_not_be_different():
+    ("'something'.should_not.be.different('SOMETHING'.lower())")
+
+    part1 = '''<root>
+  <a-tag with-attribute="one">AND A VALUE</a-tag>
+</root>'''
+
+    part2 = '''<root>
+  <a-tag with-attribute="two">AND A VALUE</a-tag>
+</root>'''
+
+    assert this(part1).should.be.different_of(part2)
+    assert this(part2).should_not.be.different_of(part2)
+
+    def opposite():
+        assert this(part2).should.be.different_of(part2)
+
+    def opposite_not():
+        assert this(part1).should_not.be.different_of(part2)
+
+    expect(opposite).when.called.to.throw(AssertionError)
+    expect(opposite).when.called.to.throw('''<root>
+  <a-tag with-attribute="two">AND A VALUE</a-tag>
+</root> should be different of <root>
+  <a-tag with-attribute="two">AND A VALUE</a-tag>
+</root>''')
+
+    expect(opposite_not).when.called.to.throw(AssertionError)
+    expect(opposite_not).when.called.to.throw('''Difference:
+
+  <root>
+-   <a-tag with-attribute="one">AND A VALUE</a-tag>
+?                           --
++   <a-tag with-attribute="two">AND A VALUE</a-tag>
+?                          ++
+  </root>''')

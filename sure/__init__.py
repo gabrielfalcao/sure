@@ -21,6 +21,7 @@ import re
 import os
 import sys
 
+import difflib
 import inspect
 import traceback
 
@@ -623,6 +624,23 @@ class AssertionBuilder(object):
     eql = equal
     equals = equal
     equal_to = equal
+
+    @assertionmethod
+    def different_of(self, what):
+        differ = difflib.Differ()
+
+        source = self.obj.strip().splitlines(True)
+        destination = what.strip().splitlines(True)
+        result = differ.compare(source, destination)
+        difference = "".join(result)
+        if self.negative:
+            if self.obj != what:
+                assert not difference, "Difference:\n\n{0}".format(difference)
+        else:
+            if self.obj == what:
+                raise AssertionError("{0} should be different of {1}".format(self.obj, what))
+
+        return True
 
     @assertionmethod
     def an(self, klass):

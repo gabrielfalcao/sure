@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
+import mock
 from datetime import datetime
 from sure import this, these, those, it, expect, AssertionBuilder
 from six import PY3
@@ -663,3 +664,22 @@ def test_should_not_be_different():
 +   <a-tag with-attribute="two">AND A VALUE</a-tag>
 ?                          ++
   </root>''')
+
+
+def test_equals_handles_mock_call_list():
+    ".equal() Should convert mock._CallList instances to lists"
+
+    # Given the following mocked callback
+    callback = mock.Mock()
+
+    # When I call the callback with a few parameters twice
+    callback(a=1, b=2)
+    callback(a=3, b=4)
+
+    # Then I see I can compare the call list without manually
+    # converting anything
+
+    callback.call_args_list.should.equal([
+        mock.call(a=1, b=2),
+        mock.call(a=3, b=4),
+    ])

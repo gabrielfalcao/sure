@@ -45,7 +45,7 @@ local_file = lambda *f: \
     open(os.path.join(os.path.dirname(__file__), *f)).read()
 
 
-tests_require = ['nose']
+tests_require = ['nose', 'mock']
 
 
 if __name__ == '__main__':

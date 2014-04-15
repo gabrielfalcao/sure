@@ -431,6 +431,7 @@ class AssertionBuilder(object):
     def __init__(self, name=None, negative=False, obj=None):
         self._name = name
         self.negative = negative
+
         self.obj = obj
         self._callable_args = []
         self._callable_kw = {}
@@ -469,11 +470,6 @@ class AssertionBuilder(object):
 
     @assertionproperty
     def be(self):
-        import os
-        if os.getenv("DEBUG"):
-            import ipdb;ipdb.set_trace()
-
-
         return IdentityAssertion(self)
 
     being = be

@@ -18,7 +18,8 @@
 from __future__ import unicode_literals
 from datetime import datetime
 from sure import this, these, those, it, expect, AssertionBuilder
-from sure.six import PY3, compat_repr
+from six import PY3
+from sure.compat_py3 import compat_repr
 
 
 def test_assertion_builder_synonyms():

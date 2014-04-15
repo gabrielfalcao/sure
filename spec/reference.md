@@ -1,6 +1,8 @@
-# Equality
+# Reference
 
-## (number).should.equal(number)
+## Equality
+
+### (number).should.equal(number)
 
 ```python
 import sure
@@ -12,7 +14,7 @@ import sure
 (3).shouldnt.be.equal(5)
 ```
 
-## {'a': 'collection'}.should.equal({'a': 'collection'}) does deep comparison
+### {'a': 'collection'}.should.equal({'a': 'collection'}) does deep comparison
 
 ```python
 {'foo': 'bar'}.should.equal({'foo': 'bar'})
@@ -21,15 +23,15 @@ import sure
 
 ```
 
-## "A string".lower().should.equal("a string") also works
+### "A string".lower().should.equal("a string") also works
 
 ```python
 "Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])
 ```
 
-# Similarity
+## Similarity
 
-## should.look_like and should_not.look_like
+### should.look_like and should_not.look_like
 
 ```python
 
@@ -41,9 +43,9 @@ THIS IS MY loose string
 """this one is different""".should_not.look_like('this is my loose string')
 ```
 
-# Iterables
+## Iterables
 
-## should.contain and should_not.contain
+### should.contain and should_not.contain
 
 `expect(collection).to.contain(item)` is a shorthand to `expect(item).to.be.within(collection)`
 
@@ -55,7 +57,7 @@ THIS IS MY loose string
 [1.2.5].should.contain(2)
 ```
 
-## should.match and should_not.match matches regular expression
+### should.match and should_not.match matches regular expression
 
 You can also use the modifiers:
 
@@ -75,7 +77,7 @@ import re
 ```
 
 
-## {iterable}.should.be.empty applies to any iterable of length 0
+### {iterable}.should.be.empty applies to any iterable of length 0
 
 ```python
 
@@ -86,7 +88,7 @@ set().should.be.empty;
 ().should.be.empty
 range(0).should.be.empty;
 
-# negate with:
+## negate with:
 
 [1, 2, 3].shouldnt.be.empty;
 "Lincoln de Sousa".shouldnt.be.empty;
@@ -95,32 +97,32 @@ range(0).should.be.empty;
 ```
 
 
-## {number}.should.be.within(0, 10) asserts inclusive numeric range:
+### {number}.should.be.within(0, 10) asserts inclusive numeric range:
 
 ```python
 (1).should.be.within(0, 2)
 (5).should.be.within(10)
 
-# negate with:
+## negate with:
 
 (1).shouldnt.be.within(5, 6)
 ```
 
-## {member}.should.be.within({iterable}) asserts that a member is part of the iterable:
+### {member}.should.be.within({iterable}) asserts that a member is part of the iterable:
 
 ```python
 "g".should.be.within("gabriel")
 'name'.should.be.within({'name': 'Gabriel'})
 'Lincoln'.should.be.within(['Lincoln', 'Gabriel'])
 
-# negate with:
+## negate with:
 
 'Bug'.shouldnt.be.within(['Sure 1.0'])
 'Bug'.should_not.be.within(['Sure 1.0'])
 
 ```
 
-## should.be.none and should_not.be.none
+### should.be.none and should_not.be.none
 
 Assert whether an object is or not `None`:
 
@@ -135,7 +137,7 @@ None.should.be.none
 
 ```
 
-## should.be.ok and shouldnt.be.ok
+### should.be.ok and shouldnt.be.ok
 
 Assert truthfulness:
 
@@ -158,7 +160,7 @@ False.shouldnt.be.ok
 {}.shouldnot.be.ok
 ```
 
-## Assert existence of properties and their values
+### Assert existence of properties and their values
 
 ```python
 
@@ -171,7 +173,7 @@ basket1 = Basket()
 basket1.should.have.property("fruits")
 ```
 
-### .have.property().being allows chaining up
+#### .have.property().being allows chaining up
 
 If the programmer calls `have.property()` it returns an assertion
 builder of the property if it exists, so that you can chain up
@@ -189,14 +191,14 @@ basket2.should.have.property("fruits").with_value.being.equal(["apple", "banana"
 ```
 
 
-## Assert existence of keys and its values
+### Assert existence of keys and its values
 
 ```python
 basket3 = dict(fruits=["apple", "banana"])
 basket3.should.have.key("fruits")
 ```
 
-### .have.key().being allows chaining up
+#### .have.key().being allows chaining up
 
 If the programmer calls `have.key()` it returns an assertion
 builder of the key if it exists, so that you can chain up
@@ -211,7 +213,7 @@ person.should.have.key("name").being.none
 person.should.have.key("name").being.equal(None)
 ```
 
-## Assert the length of objects with {iterable}.should.have.length_of(N)
+### Assert the length of objects with {iterable}.should.have.length_of(N)
 
 ```python
 
@@ -222,7 +224,7 @@ person.should.have.key("name").being.equal(None)
 {'john': 'person'}.should_not.have.length_of(2)
 ```
 
-## Assert the magnitude of objects with {X}.should.be.greater_than(Y) and {Y}.should.be.lower_than(X) as well as {X}.should.be.greater_than_or_equal_to(Y) and {Y}.should.be.lower_than_or_equal_to(X)
+### Assert the magnitude of objects with {X}.should.be.greater_than(Y) and {Y}.should.be.lower_than(X) as well as {X}.should.be.greater_than_or_equal_to(Y) and {Y}.should.be.lower_than_or_equal_to(X)
 
 ```python
 (5).should.be.greater_than(4)
@@ -236,7 +238,7 @@ person.should.have.key("name").being.equal(None)
 (1).should_not.be.lower_than_or_equal_to(0)
 ```
 
-## callable.when.called_with(arg1, kwarg1=2).should.throw(Exception)
+### callable.when.called_with(arg1, kwarg1=2).should.throw(Exception)
 
 You can use this feature to assert that a callable raises an
 exception:
@@ -255,7 +257,7 @@ range.when.called_with("chuck norris").should.throw(TypeError)
 range.when.called_with(10).should_not.throw(TypeError)
 ```
 
-## function.when.called_with(arg1, kwarg1=2).should.return_value(value)
+### function.when.called_with(arg1, kwarg1=2).should.return_value(value)
 
 This is a shorthand for testing that a callable returns the expected
 result
@@ -275,7 +277,7 @@ value.should.equal([0, 1])
 
 there are no differences between those 2 possibilities, use at will
 
-## instance.should.be.a('typename') and instance.should.be.an('typename')
+### instance.should.be.a('typename') and instance.should.be.an('typename')
 
 this takes a type name and checks if the class matches that name
 
@@ -285,12 +287,12 @@ import sure
 {}.should.be.a('dict')
 (5).should.be.an('int')
 
-# also works with paths to modules
+## also works with paths to modules
 
 range(10).should.be.a('collections.Iterable')
 ```
 
-## instance.should.be.a(type) and instance.should.be.an(type)
+### instance.should.be.a(type) and instance.should.be.an(type)
 
 this takes the class (type) itself and checks if the object is an instance of it
 
@@ -305,7 +307,7 @@ else:
 [].should.be.a(list)
 ```
 
-## instance.should.be.above(num) and instance.should.be.below(num)
+### instance.should.be.above(num) and instance.should.be.below(num)
 
 assert the instance value above and below `num`
 
@@ -319,7 +321,7 @@ import sure
 ```
 
 
-# Static assertions with it, this, those and these
+## Static assertions with it, this, those and these
 
 Whether you don't like the `object.should` syntax or you are simply
 not running CPython, sure still allows you to use any of the
@@ -327,9 +329,9 @@ assertions above, all you need to do is wrap the object that is being
 compared in one of the following options: `it`, `this`, `those` and
 `these`.
 
-## Too long, don't read
+### Too long, don't read
 
-### All those possibilities below work just as the same
+#### All those possibilities below work just as the same
 
 ```python
 from sure import it, this, those, these
@@ -345,7 +347,7 @@ these(10).should.be.equal(5 + 5)
 those(10).should.be.equal(5 + 5)
 ```
 
-### Also if you prefer using the assert keyword in your tests just go ahead an do it!
+#### Also if you prefer using the assert keyword in your tests just go ahead an do it!
 
 ```python
 from sure import it, this, those, these, expect
@@ -364,7 +366,7 @@ expect(10).to.be.equal(5 + 5)
 expect(10).to.not_be.equal(8)
 ```
 
-## (lambda: None).should.be.callable
+### (lambda: None).should.be.callable
 
 Test if something is or not callable
 
@@ -376,7 +378,7 @@ range.should.be.callable
 (123).should_not.be.callable
 ```
 
-### A note about the assert keyword
+#### A note about the assert keyword
 
 _you can use or not the_ `assert` _keyword, sure internally already
 raises an appropriate_ `AssertionError` _with an assertion message so
@@ -390,17 +392,17 @@ import sure
 
 "Name".lower().should.equal('name')
 
-# or you can also use
+## or you can also use
 
 assert "Name".lower().should.equal('name')
 
-# or still
+## or still
 
 from sure import this
 
 assert this("Name".lower()).should.equal('name')
 
-# also without the assert
+## also without the assert
 
 this("Name".lower()).should.equal('name')
 
@@ -409,7 +411,7 @@ this("Name".lower()).should.equal('name')
 Any of the examples above will raise their own `AssertionError` with a
 meaningful error message.
 
-# Synonyms
+## Synonyms
 
 Sure provides you with a lot of synonyms so that you can pick the ones
 that makes more sense for your tests.
@@ -418,7 +420,7 @@ Note that the examples below are merely illustrative, they work not
 only with numbers but with any of the assertions you read early in
 this documentation.
 
-## Positive synonyms
+### Positive synonyms
 
 ```python
 
@@ -428,7 +430,7 @@ this documentation.
 (2 + 2).do.equals(4)
 ```
 
-## Negative synonyms
+### Negative synonyms
 
 ```python
 from sure import expect
@@ -444,7 +446,7 @@ from sure import expect
 expect(3).to.not_be.equal(1)
 ```
 
-## Chain-up synonyms
+### Chain-up synonyms
 
 Any of those synonyms work as an alias to the assertion builder:
 
@@ -462,7 +464,7 @@ from sure import expect
 {"foo": 1}.does.have.key("foo").being.with_value.equal(1)
 ```
 
-## Equality synonyms
+### Equality synonyms
 
 ```python
 
@@ -471,7 +473,7 @@ from sure import expect
 (2).should.eql(2)
 ```
 
-## Positive boolean synonyms
+### Positive boolean synonyms
 
 ```python
 
@@ -480,7 +482,7 @@ from sure import expect
 (not None).should.be.true
 ```
 
-## Negative boolean synonyms
+### Negative boolean synonyms
 
 ```python
 False.should.be.falsy
@@ -492,7 +494,7 @@ None.should_not.be.ok
 ```
 
 
-### Holy guacamole, how did you implement that feature ?
+#### Holy guacamole, how did you implement that feature ?
 
 Differently of [ruby](http://www.ruby-lang.org) python doesn't have
 [open classes](http://blog.aizatto.com/2007/06/01/ruby-and-open-classes/),

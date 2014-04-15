@@ -24,11 +24,11 @@ except ImportError:
 
 import os
 import inspect
-from sure.terminal import red, green, yellow
-from sure.six import (
+from six import (
     text_type, integer_types, string_types, binary_type,
     PY3, get_function_code
 )
+from sure.terminal import red, green, yellow
 
 
 class FakeOrderedDict(OrderedDict):

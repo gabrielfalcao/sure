@@ -60,4 +60,7 @@ if __name__ == '__main__':
           packages=find_packages(exclude=['*tests*']),
           tests_require=tests_require,
           test_suite='nose.collector',
+          classifiers=[
+              'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+          ],
     )

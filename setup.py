@@ -45,7 +45,8 @@ local_file = lambda *f: \
     open(os.path.join(os.path.dirname(__file__), *f)).read()
 
 
-tests_require = ['nose', 'mock']
+install_requires = ['mock', 'six']
+tests_require = ['nose']
 
 
 if __name__ == '__main__':
@@ -58,6 +59,7 @@ if __name__ == '__main__':
           include_package_data=True,
           url='http://github.com/gabrielfalcao/sure',
           packages=find_packages(exclude=['*tests*']),
+          install_requires=install_requires,
           tests_require=tests_require,
           test_suite='nose.collector',
           classifiers=[

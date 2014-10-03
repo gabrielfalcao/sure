@@ -43,3 +43,20 @@ maintainable and easily understood automated tests.
 
 You will find assertions that can have totally different behaviors
 depending on the kind of objects they are comparing.
+
+
+## create a context manager that enforces a certain assertion error
+
+
+```python
+# ...
+
+name = myapi.do_something_that_returns_string()
+
+with sure.ensure('the return value actually looks like: {0}', name):
+    name.should.contain('whatever')
+```
+
+the `ensure` context manager should identify whether the raised
+exception as an assertion error and if so, replace the assertion error
+witha custom message passed to the ensure context manager.

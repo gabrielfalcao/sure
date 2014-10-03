@@ -19,7 +19,7 @@ project:
 
 
 documentation:
-  index: intro.md
+  index: reference.md
 
 toc:
   - intro.md

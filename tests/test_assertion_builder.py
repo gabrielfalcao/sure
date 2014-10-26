@@ -683,3 +683,24 @@ def test_equals_handles_mock_call_list():
         mock.call(a=1, b=2),
         mock.call(a=3, b=4),
     ])
+
+
+def test_equals_handles_float_with_epsilon():
+    ".equal(what, epsilon=XXX) should check for equality with an epsilon for float values"
+    float1 = 4.242423
+    float2 = 4.242420
+
+    expect(float1).should_not.be.equal(float2)
+    expect(float1).should.be.equal(float2, epsilon=0.000005)
+
+    float_list1 = [4.242421, 4.242422, 4.242423, 4.242424, 4.242425]
+    float_list2 = [4.242420, 4.242420, 4.242420, 4.242420, 4.242420]
+
+    expect(float_list1).should_not.be.equal(float_list2)
+    expect(float_list1).should.be.equal(float_list2, epsilon=0.000005)
+
+    float_dict1 = {"f1": 4.242421, "f2": 4.242422, "f3": 4.242423, "f4": 4.242424, "f5": 4.242425}
+    float_dict2 = {"f1": 4.242420, "f2": 4.242420, "f3": 4.242420, "f4": 4.242420, "f5": 4.242420}
+
+    expect(float_dict1).should_not.be.equal(float_dict2)
+    expect(float_dict1).should.be.equal(float_dict2, epsilon=0.000005)

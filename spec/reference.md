@@ -14,6 +14,18 @@ import sure
 (3).shouldnt.be.equal(5)
 ```
 
+### (float).should.equal(float, epsilon)
+
+```python
+import sure
+
+(4.242423).should.be.equal(4.242420, epsilon=0.000005)
+(4.01).should.be.eql(4.00, epsilon=0.01)
+(6.3699999).should.equal(6.37, epsilon=0.001)
+
+(4.242423).shouldnt.be.equal(4.249000, epsilon=0.000005)
+```
+
 ## Compare strings with diff
 
 ### (string).should_not.be.different_of(string)

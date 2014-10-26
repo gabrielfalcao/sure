@@ -93,7 +93,7 @@ def safe_repr(val):
 
 class DeepExplanation(text_type):
     def get_header(self, X, Y, suffix):
-        params = (safe_repr(X), safe_repr(Y), str(suffix))
+        params = (safe_repr(X), safe_repr(Y), text_type(suffix))
         header = "given\nX = %s\n    and\nY = %s\n%s" % params
 
         return yellow(header).strip()

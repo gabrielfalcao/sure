@@ -6,7 +6,7 @@ export PYTHONPATH := ${PWD}:${PYTHONPATH}
 export SURE_NO_COLORS := true
 
 install_deps:
-	@curd install -r development.txt
+	@pip install -r development.txt
 
 test:
 	@nosetests -s --verbosity=2 tests --rednose

@@ -292,6 +292,15 @@ range.when.called_with("chuck norris").should.throw(TypeError)
 range.when.called_with(10).should_not.throw(TypeError)
 ```
 
+You can also match regular expressions with to the expected exception messages:
+
+```python
+import re
+range.when.called_with(10, step=20).should.throw(TypeError, re.compile(r'(does not take|takes no) keyword arguments'))
+range.when.called_with("chuck norris").should.throw(TypeError, re.compile(r'(cannot be interpreted as an integer|integer end argument expected)'))
+```
+
+
 ### function.when.called_with(arg1, kwarg1=2).should.return_value(value)
 
 This is a shorthand for testing that a callable returns the expected

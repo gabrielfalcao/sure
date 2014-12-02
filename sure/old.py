@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
-
+import os
 import re
 import traceback
 import inspect
@@ -39,6 +39,13 @@ from sure.core import DeepComparison
 from sure.core import _get_file_name
 from sure.core import _get_line_number
 from sure.core import itemize_length
+
+
+def identify_callable_location(callable_object):
+    filename = os.path.relpath(callable_object.func_code.co_filename)
+    lineno = callable_object.func_code.co_firstlineno
+    callable_name = callable_object.func_code.co_name
+    return b'{0} [{1} line {2}]'.format(callable_name, filename, lineno)
 
 
 def is_iterable(obj):
@@ -121,6 +128,10 @@ class AssertionHelper(object):
                 msg = exc
                 exc = type(e)
 
+            elif isinstance(exc, re._pattern_type):
+                msg = exc
+                exc = type(e)
+
             err = text_type(e)
 
             if isinstance(exc, type) and issubclass(exc, BaseException):
@@ -137,10 +148,20 @@ class AssertionHelper(object):
                             type(e).__name__,
                             msg, err))
 
+                elif isinstance(msg, re._pattern_type) and not msg.search(err):
+                    raise AssertionError(
+                        'When calling %r the exception message does not match. ' \
+                        'Expected to match regex: %r\n against:\n %r' % (identify_callable_location(self._src), msg.pattern, err))
+
             elif isinstance(msg, string_types) and msg not in err:
                 raise AssertionError(
                     'When calling %r the exception message does not match. ' \
                     'Expected: %r\n got:\n %r' % (self._src, msg, err))
+
+            elif isinstance(msg, re._pattern_type) and not msg.search(err):
+                raise AssertionError(
+                    'When calling %r the exception message does not match. ' \
+                    'Expected to match regex: %r\n against:\n %r' % (identify_callable_location(self._src), msg.pattern, err))
 
             else:
                 raise e

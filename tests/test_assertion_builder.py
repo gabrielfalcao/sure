@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
+import re
 import mock
 from datetime import datetime
 from sure import this, these, those, it, expect, AssertionBuilder
@@ -627,6 +628,33 @@ def test_success_with_params_exception():
 
     expect(blah).when.called_with(0).should.throw(TypeError)
 
+
+def test_throw_matching_regex():
+    def blah(num):
+        if num == 1:
+            msg = 'this message'
+        else:
+            msg = 'another thing'
+
+        raise ValueError(msg)
+
+    expect(blah).when.called_with(1).should.throw(ValueError, 'this message')
+    expect(blah).when.called_with(1).should.throw(re.compile(r'(this message|another thing)'))
+    expect(blah).when.called_with(2).should.throw(ValueError, 'another thing')
+    expect(blah).when.called_with(2).should.throw(ValueError, re.compile(r'(this message|another thing)'))
+
+    try:
+        expect(blah).when.called_with(1).should.throw(re.compile(r'invalid regex'))
+        raise RuntimeError('should not have reached here')
+
+    except AssertionError as e:
+        expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
+
+    try:
+        expect(blah).when.called_with(1).should.throw(ValueError, re.compile(r'invalid regex'))
+        raise RuntimeError('should not have reached here')
+    except AssertionError as e:
+        expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
 
 def test_should_not_be_different():
     ("'something'.should_not.be.different('SOMETHING'.lower())")

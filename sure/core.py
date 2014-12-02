@@ -93,7 +93,7 @@ def safe_repr(val):
 
 class DeepExplanation(text_type):
     def get_header(self, X, Y, suffix):
-        params = (safe_repr(X), safe_repr(Y), str(suffix))
+        params = (safe_repr(X), safe_repr(Y), text_type(suffix))
         header = "given\nX = %s\n    and\nY = %s\n%s" % params
 
         return yellow(header).strip()
@@ -106,19 +106,21 @@ class DeepExplanation(text_type):
 
 
 class DeepComparison(object):
-    def __init__(self, X, Y, parent=None):
+    def __init__(self, X, Y, epsilon=None, parent=None):
         self.operands = X, Y
+        self.epsilon = epsilon
         self.parent = parent
         self._context = None
 
     def is_simple(self, obj):
         return isinstance(obj, (
-            float, string_types, integer_types
+            string_types, integer_types
         ))
 
     def compare_complex_stuff(self, X, Y):
         kind = type(X)
         mapping = {
+            float: self.compare_floats,
             dict: self.compare_dicts,
             list: self.compare_iterables,
             tuple: self.compare_iterables,
@@ -131,6 +133,17 @@ class DeepComparison(object):
             return True
         else:
             m = 'X%s != Y%s' % (red(c.current_X_keys), green(c.current_Y_keys))
+            return DeepExplanation(m)
+
+    def compare_floats(self, X, Y):
+        c = self.get_context()
+        if self.epsilon is None:
+            return self.compare_generic(X, Y)
+
+        if abs(X - Y) <= self.epsilon:
+            return True
+        else:
+            m = 'X%s±%s != Y%s±%s' % (red(c.current_X_keys), self.epsilon, green(c.current_Y_keys), self.epsilon)
             return DeepExplanation(m)
 
     def compare_dicts(self, X, Y):
@@ -167,6 +180,7 @@ class DeepComparison(object):
                 child = DeepComparison(
                     value_X,
                     value_Y,
+                    epsilon=self.epsilon,
                     parent=self,
                 ).compare()
                 if isinstance(child, DeepExplanation):
@@ -215,6 +229,7 @@ class DeepComparison(object):
                 child = DeepComparison(
                     value_X,
                     value_Y,
+                    epsilon=self.epsilon,
                     parent=self,
                 ).compare()
                 if isinstance(child, DeepExplanation):

@@ -595,9 +595,9 @@ class AssertionBuilder(object):
             return collection_should.contains(self.obj)
 
     @assertionmethod
-    def equal(self, what):
+    def equal(self, what, epsilon=None):
         try:
-            comparison = DeepComparison(self.obj, what).compare()
+            comparison = DeepComparison(self.obj, what, epsilon).compare()
             error = False
         except AssertionError as e:
             error = e

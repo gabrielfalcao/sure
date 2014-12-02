@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Sure by gabrielfalcao</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="python requests for filesystem, api for humans">
+  <meta property="og:site_name" content="Plant" />
+  <meta property="og:type" content="WeedLabs" />
+  <meta property="og:title" content="Plant, python filesystem for humans">
+  <meta property="og:url" content="http://falcao.it/plant" />
+  <meta property="og:image" content="http://falcao.it/plant/logo.png" />
+  <meta property="og:description" content="python requests for filesystem, api for humans" />
+
+  <link href='http://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+  <script type="text/javascript" src="./assets/js/jquery-2.0.3.min.js"></script>
+  <script type="text/javascript" src="./assets/js/jquery-migrate-1.2.1.min.js"></script>
+
+  <link rel="stylesheet" href="./assets/css/sphinx_rtd_theme.css" type="text/css" />
+  <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+</head>
+
+    <body class="wy-body-for-nav">
+      <div class="wy-grid-for-nav">
+        <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+          <div class="wy-side-nav-search" style="padding-bottom:0;">
+            <a style="font-size: 22px" href="./reference.html">Sure 1.2.8</a>
+          </div>
+
+          <div class="wy-menu wy-menu-vertical" data-spy="affix">
+            <ul>
+          
+            
+            
+  <li class="toctree-l1 "><a class="reference internal" href="./intro.html#introduction">Introduction</a>
+  
+      
+  
+    </li>
+  
+            
+          
+            
+            
+  <li class="toctree-l1 "><a class="reference internal" href="./getting-started.html#getting-started">Getting Started</a>
+  
+      
+       <ul class="">
+        
+          
+  <li class="toctree-l2"><a class="reference internal" href="./getting-started.html#installing">Installing</a></li>
+  
+      
+  
+        
+          
+  <li class="toctree-l2"><a class="reference internal" href="./getting-started.html#activating">Activating</a></li>
+  
+      
+  
+        
+       </ul>
+      
+  
+    </li>
+  
+            
+            
+  <li class="toctree-l1 "><a class="reference internal" href="./getting-started.html#python-version-compatibility">Python version compatibility</a>
+  
+      
+  
+    </li>
+  
+            
+            
+  <li class="toctree-l1 "><a class="reference internal" href="./getting-started.html#disabling-the-monkey-patching">Disabling the monkey patching</a>
+  
+      
+  
+    </li>
+  
+            
+          
+            
+            
+  <li class="toctree-l1  current "><a class="reference internal" href="./reference.html#reference">Reference</a>
+  
+      
+       <ul class="current">
+        
+          
+  <li class="toctree-l2"><a class="reference internal" href="./reference.html#equality">Equality</a></li>
+  
+      
+       <ul class="current">
+        
+          
+      
+  
+        
+          
+      
+  
+        
+       </ul>
+      
+  
+        
+          
+  <li class="toctree-l2"><a class="reference internal" href="./reference.html#compare-strings-with-diff">Compare strings with diff</a></li>
+  
+      
+       <ul class="current">
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+       </ul>
+      
+  
+        
+          
+  <li class="toctree-l2"><a class="reference internal" href="./reference.html#similarity">Similarity</a></li>
+  
+      
+       <ul class="current">
+        
+          
+      
+  
+        
+       </ul>
+      
+  
+        
+          
+  <li class="toctree-l2"><a class="reference internal" href="./reference.html#iterables">Iterables</a></li>
+  
+      
+       <ul class="current">
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+       <ul class="current">
+        
+          
+      
+  
+        
+       </ul>
+      
+  
+        
+          
+      
+       <ul class="current">
+        
+          
+      
+  
+        
+       </ul>
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+       </ul>
+      
+  
+        
+          
+  <li class="toctree-l2"><a class="reference internal" href="./reference.html#static-assertions-with-it--this--those-and-these">Static assertions with it, this, those and these</a></li>
+  
+      
+       <ul class="current">
+        
+          
+      
+       <ul class="current">
+        
+          
+      
+  
+        
+          
+      
+  
+        
+       </ul>
+      
+  
+        
+          
+      
+       <ul class="current">
+        
+          
+      
+  
+        
+       </ul>
+      
+  
+        
+       </ul>
+      
+  
+        
+          
+  <li class="toctree-l2"><a class="reference internal" href="./reference.html#synonyms">Synonyms</a></li>
+  
+      
+       <ul class="current">
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+  
+        
+          
+      
+       <ul class="current">
+        
+          
+      
+  
+        
+       </ul>
+      
+  
+        
+       </ul>
+      
+  
+        
+       </ul>
+      
+  
+    </li>
+  
+            
+            
+  <li class="toctree-l1  current "><a class="reference internal" href="./reference.html#about-sure-1-0">About sure 1.0</a>
+  
+      
+  
+    </li>
+  
+            
+          
+            
+            
+  <li class="toctree-l1 "><a class="reference internal" href="./how-it-works.html#how-sure-works">How sure works</a>
+  
+      
+       <ul class="">
+        
+          
+  <li class="toctree-l2"><a class="reference internal" href="./how-it-works.html#chainability">Chainability</a></li>
+  
+      
+  
+        
+       </ul>
+      
+  
+    </li>
+  
+            
+            
+  <li class="toctree-l1 "><a class="reference internal" href="./how-it-works.html#monkey-patching">Monkey-patching</a>
+  
+      
+       <ul class="">
+        
+          
+  <li class="toctree-l2"><a class="reference internal" href="./how-it-works.html#why-cpython-only--">Why CPython-only ?</a></li>
+  
+      
+  
+        
+       </ul>
+      
+  
+    </li>
+  
+            
+          
+            </ul>
+          </div>
+      &nbsp;
+        </nav>
+
+        <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+          <nav class="wy-nav-top">
+            <i data-toggle="wy-nav-top" class="icon icon-reorder"></i>
+            <a href="./reference.html">Sure</a>
+          </nav>
+
+          <div class="wy-nav-content">
+            <div class="rst-content">
+              <ul class="wy-breadcrumbs">
+                <li><a href="/">Docs</a> &raquo;</li>
+                
+                   <li><a href="#reference">Reference</a></li>
+                
+                   <li><a href="#about-sure-1-0">About sure 1.0</a></li>
+                
+              </ul>
+              <hr/>
+              <div class="section"><h1 id="reference" name="reference"><a href="#reference">Reference</a></h1><h2 id="equality" name="equality"><a href="#equality">Equality</a></h2><h3 id="-number--should-equal-number-" name="-number--should-equal-number-"><a href="#-number--should-equal-number-">(number).should.equal(number)</a></h3><div class="highlight"><pre name="reference-example-1"><span class="kn">import</span> <span class="nn">sure</span>
+
+<span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="mf">7.5</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">eql</span><span class="p">(</span><span class="mf">3.5</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">8</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
+
+<span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">shouldnt</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+<h3 id="-float--should-equal-float--epsilon-" name="-float--should-equal-float--epsilon-"><a href="#-float--should-equal-float--epsilon-">(float).should.equal(float, epsilon)</a></h3><div class="highlight"><pre name="reference-example-2"><span class="kn">import</span> <span class="nn">sure</span>
+
+<span class="p">(</span><span class="mf">4.242423</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mf">4.242420</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.000005</span><span class="p">)</span>
+<span class="p">(</span><span class="mf">4.01</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">eql</span><span class="p">(</span><span class="mf">4.00</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="p">(</span><span class="mf">6.3699999</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mf">6.37</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+
+<span class="p">(</span><span class="mf">4.242423</span><span class="p">)</span><span class="o">.</span><span class="n">shouldnt</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mf">4.249000</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.000005</span><span class="p">)</span>
+</pre></div>
+<h2 id="compare-strings-with-diff" name="compare-strings-with-diff"><a href="#compare-strings-with-diff">Compare strings with diff</a></h2><h3 id="-string--should_not-be-different_of-string-" name="-string--should_not-be-different_of-string-"><a href="#-string--should_not-be-different_of-string-">(string).should_not.be.different_of(string)</a></h3><div class="highlight"><pre name="reference-example-3"><span class="kn">import</span> <span class="nn">sure</span>
+
+<span class="n">XML1</span> <span class="o">=</span> <span class="s">'''&lt;root&gt;</span>
+<span class="s">  &lt;a-tag with-attribute="one"&gt;AND A VALUE&lt;/a-tag&gt;</span>
+<span class="s">&lt;/root&gt;'''</span>
+
+
+<span class="n">XML1</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">different_of</span><span class="p">(</span><span class="n">XML1</span><span class="p">)</span>
+
+<span class="n">XML2</span> <span class="o">=</span> <span class="s">'''&lt;root&gt;</span>
+<span class="s">  &lt;a-tag with-attribute="two"&gt;AND A VALUE&lt;/a-tag&gt;</span>
+<span class="s">&lt;/root&gt;'''</span>
+
+<span class="n">XML2</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">different_of</span><span class="p">(</span><span class="n">XML1</span><span class="p">)</span>
+</pre></div>
+
+<p>this will give you and output like</p>
+<div class="highlight"><pre name="reference-example-4">Difference:
+
+  &lt;root&gt;
+-   &lt;a-tag with-attribute<span class="o">=</span><span class="s2">"one"</span>&gt;AND A VALUE&lt;/a-tag&gt;
+?                           --
++   &lt;a-tag with-attribute<span class="o">=</span><span class="s2">"two"</span>&gt;AND A VALUE&lt;/a-tag&gt;
+?                          ++
+  &lt;/root&gt;<span class="s1">''</span><span class="err">'</span>
+</pre></div>
+<h3 id="---39-a--39-----39-collection--39---should-equal----39-a--39-----39-collection--39----does-deep-comparison" name="---39-a--39-----39-collection--39---should-equal----39-a--39-----39-collection--39----does-deep-comparison"><a href="#---39-a--39-----39-collection--39---should-equal----39-a--39-----39-collection--39----does-deep-comparison">{&#39;a&#39;: &#39;collection&#39;}.should.equal({&#39;a&#39;: &#39;collection&#39;}) does deep comparison</a></h3><div class="highlight"><pre name="reference-example-5"><span class="p">{</span><span class="s">'foo'</span><span class="p">:</span> <span class="s">'bar'</span><span class="p">}</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">equal</span><span class="p">({</span><span class="s">'foo'</span><span class="p">:</span> <span class="s">'bar'</span><span class="p">})</span>
+<span class="p">{</span><span class="s">'foo'</span><span class="p">:</span> <span class="s">'bar'</span><span class="p">}</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">eql</span><span class="p">({</span><span class="s">'foo'</span><span class="p">:</span> <span class="s">'bar'</span><span class="p">})</span>
+<span class="p">{</span><span class="s">'foo'</span><span class="p">:</span> <span class="s">'bar'</span><span class="p">}</span><span class="o">.</span><span class="n">must</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">({</span><span class="s">'foo'</span><span class="p">:</span> <span class="s">'bar'</span><span class="p">})</span>
+</pre></div>
+<h3 id="-quot-a-string-quot--lower---should-equal--quot-a-string-quot---also-works" name="-quot-a-string-quot--lower---should-equal--quot-a-string-quot---also-works"><a href="#-quot-a-string-quot--lower---should-equal--quot-a-string-quot---also-works">&ldquo;A string&rdquo;.lower().should.equal(&ldquo;a string&rdquo;) also works</a></h3><div class="highlight"><pre name="reference-example-6"><span class="s">"Awesome ASSERTIONS"</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">equal</span><span class="p">([</span><span class="s">'awesome'</span><span class="p">,</span> <span class="s">'assertions'</span><span class="p">])</span>
+</pre></div>
+<h2 id="similarity" name="similarity"><a href="#similarity">Similarity</a></h2><h3 id="should-look_like-and-should_not-look_like" name="should-look_like-and-should_not-look_like"><a href="#should-look_like-and-should_not-look_like">should.look_like and should_not.look_like</a></h3><div class="highlight"><pre name="reference-example-7"><span class="sd">"""</span>
+
+<span class="sd">THIS IS MY loose string</span>
+<span class="sd">"""</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">look_like</span><span class="p">(</span><span class="s">'this is my loose string'</span><span class="p">)</span>
+
+<span class="sd">"""this one is different"""</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">look_like</span><span class="p">(</span><span class="s">'this is my loose string'</span><span class="p">)</span>
+</pre></div>
+<h2 id="iterables" name="iterables"><a href="#iterables">Iterables</a></h2><h3 id="should-contain-and-should_not-contain" name="should-contain-and-should_not-contain"><a href="#should-contain-and-should_not-contain">should.contain and should_not.contain</a></h3>
+<p><code>expect(collection).to.contain(item)</code> is a shorthand to <code>expect(item).to.be.within(collection)</code></p>
+<div class="highlight"><pre name="reference-example-8"><span class="s">"My bucket of text"</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">contain</span><span class="p">(</span><span class="s">'bucket'</span><span class="p">)</span>
+
+<span class="s">"goosfraba"</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">contain</span><span class="p">(</span><span class="s">'anger'</span><span class="p">)</span>
+
+<span class="p">[</span><span class="mf">1.2</span><span class="o">.</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">contain</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+<h3 id="should-match-and-should_not-match-matches-regular-expression" name="should-match-and-should_not-match-matches-regular-expression"><a href="#should-match-and-should_not-match-matches-regular-expression">should.match and should_not.match matches regular expression</a></h3>
+<p>You can also use the modifiers:</p>
+
+<ul>
+<li><a href="http://docs.python.org/2/library/re.html#re.DEBUG"><code>re.DEBUG</code></a></li>
+<li><a href="http://docs.python.org/2/library/re.html#re.IGNORECASE"><code>re.I</code> and <code>re.IGNORECASE</code></a></li>
+<li><a href="http://docs.python.org/2/library/re.html#re.MULTILINE"><code>re.M</code> and <code>re.MULTILINE</code></a></li>
+<li><a href="http://docs.python.org/2/library/re.html#re.DOTALL"><code>re.S</code> and <code>re.DOTALL</code></a></li>
+<li><a href="http://docs.python.org/2/library/re.html#re.UNICODE"><code>re.U</code> and <code>re.UNICODE</code></a></li>
+<li><a href="http://docs.python.org/2/library/re.html#re.VERBOSE"><code>re.X</code> and <code>re.VERBOSE</code></a></li>
+</ul>
+<div class="highlight"><pre name="reference-example-9"><span class="kn">import</span> <span class="nn">re</span>
+
+<span class="s">"SOME STRING"</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">r'some \w+'</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">I</span><span class="p">)</span>
+
+<span class="s">"FOO BAR CHUCK NORRIS"</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">r'some \w+'</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">M</span><span class="p">)</span>
+</pre></div>
+<h3 id="-iterable--should-be-empty-applies-to-any-iterable-of-length-0" name="-iterable--should-be-empty-applies-to-any-iterable-of-length-0"><a href="#-iterable--should-be-empty-applies-to-any-iterable-of-length-0">{iterable}.should.be.empty applies to any iterable of length 0</a></h3><div class="highlight"><pre name="reference-example-10"><span class="p">[]</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">empty</span><span class="p">;</span>
+<span class="p">{}</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">empty</span><span class="p">;</span>
+<span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">empty</span><span class="p">;</span>
+<span class="s">""</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">empty</span><span class="p">;</span>
+<span class="p">()</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">empty</span>
+<span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">empty</span><span class="p">;</span>
+
+<span class="c">## negate with:</span>
+
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">shouldnt</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">empty</span><span class="p">;</span>
+<span class="s">"Lincoln de Sousa"</span><span class="o">.</span><span class="n">shouldnt</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">empty</span><span class="p">;</span>
+<span class="s">"Lincoln de Sousa"</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">empty</span><span class="p">;</span>
+</pre></div>
+<h3 id="-number--should-be-within-0--10--asserts-inclusive-numeric-range-" name="-number--should-be-within-0--10--asserts-inclusive-numeric-range-"><a href="#-number--should-be-within-0--10--asserts-inclusive-numeric-range-">{number}.should.be.within(0, 10) asserts inclusive numeric range:</a></h3><div class="highlight"><pre name="reference-example-11"><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c">## negate with:</span>
+
+<span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">shouldnt</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+</pre></div>
+<h3 id="-member--should-be-within--iterable---asserts-that-a-member-is-part-of-the-iterable-" name="-member--should-be-within--iterable---asserts-that-a-member-is-part-of-the-iterable-"><a href="#-member--should-be-within--iterable---asserts-that-a-member-is-part-of-the-iterable-">{member}.should.be.within({iterable}) asserts that a member is part of the iterable:</a></h3><div class="highlight"><pre name="reference-example-12"><span class="s">"g"</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">within</span><span class="p">(</span><span class="s">"gabriel"</span><span class="p">)</span>
+<span class="s">'name'</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">within</span><span class="p">({</span><span class="s">'name'</span><span class="p">:</span> <span class="s">'Gabriel'</span><span class="p">})</span>
+<span class="s">'Lincoln'</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">within</span><span class="p">([</span><span class="s">'Lincoln'</span><span class="p">,</span> <span class="s">'Gabriel'</span><span class="p">])</span>
+
+<span class="c">## negate with:</span>
+
+<span class="s">'Bug'</span><span class="o">.</span><span class="n">shouldnt</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">within</span><span class="p">([</span><span class="s">'Sure 1.0'</span><span class="p">])</span>
+<span class="s">'Bug'</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">within</span><span class="p">([</span><span class="s">'Sure 1.0'</span><span class="p">])</span>
+</pre></div>
+<h3 id="should-be-none-and-should_not-be-none" name="should-be-none-and-should_not-be-none"><a href="#should-be-none-and-should_not-be-none">should.be.none and should_not.be.none</a></h3>
+<p>Assert whether an object is or not <code>None</code>:</p>
+<div class="highlight"><pre name="reference-example-13"><span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">value</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">none</span>
+<span class="bp">None</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">none</span>
+
+<span class="s">""</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">none</span>
+<span class="p">(</span><span class="ow">not</span> <span class="bp">None</span><span class="p">)</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">none</span>
+</pre></div>
+<h3 id="should-be-ok-and-shouldnt-be-ok" name="should-be-ok-and-shouldnt-be-ok"><a href="#should-be-ok-and-shouldnt-be-ok">should.be.ok and shouldnt.be.ok</a></h3>
+<p>Assert truthfulness:</p>
+<div class="highlight"><pre name="reference-example-14"><span class="kn">from</span> <span class="nn">sure</span> <span class="kn">import</span> <span class="n">this</span>
+
+<span class="bp">True</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">ok</span>
+<span class="s">'truthy string'</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">ok</span>
+<span class="p">{</span><span class="s">'truthy'</span><span class="p">:</span> <span class="s">'dictionary'</span><span class="p">}</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">ok</span>
+</pre></div>
+
+<p>And negate truthfulness:</p>
+<div class="highlight"><pre name="reference-example-15"><span class="kn">from</span> <span class="nn">sure</span> <span class="kn">import</span> <span class="n">this</span>
+
+<span class="bp">False</span><span class="o">.</span><span class="n">shouldnt</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">ok</span>
+<span class="s">''</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">ok</span>
+<span class="p">{}</span><span class="o">.</span><span class="n">shouldnot</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">ok</span>
+</pre></div>
+<h3 id="assert-existence-of-properties-and-their-values" name="assert-existence-of-properties-and-their-values"><a href="#assert-existence-of-properties-and-their-values">Assert existence of properties and their values</a></h3><div class="highlight"><pre name="reference-example-16"><span class="k">class</span> <span class="nc">Basket</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">fruits</span> <span class="o">=</span> <span class="p">[</span><span class="s">"apple"</span><span class="p">,</span> <span class="s">"banana"</span><span class="p">]</span>
+
+
+<span class="n">basket1</span> <span class="o">=</span> <span class="n">Basket</span><span class="p">()</span>
+
+<span class="n">basket1</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">have</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="s">"fruits"</span><span class="p">)</span>
+</pre></div>
+<h4 id="-have-property---being-allows-chaining-up" name="-have-property---being-allows-chaining-up"><a href="#-have-property---being-allows-chaining-up">.have.property().being allows chaining up</a></h4>
+<p>If the programmer calls <code>have.property()</code> it returns an assertion
+builder of the property if it exists, so that you can chain up
+assertions for the property value itself.</p>
+<div class="highlight"><pre name="reference-example-17"><span class="k">class</span> <span class="nc">Basket</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">fruits</span> <span class="o">=</span> <span class="p">[</span><span class="s">"apple"</span><span class="p">,</span> <span class="s">"banana"</span><span class="p">]</span>
+
+<span class="n">basket2</span> <span class="o">=</span> <span class="n">Basket</span><span class="p">()</span>
+<span class="n">basket2</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">have</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="s">"fruits"</span><span class="p">)</span><span class="o">.</span><span class="n">being</span><span class="o">.</span><span class="n">equal</span><span class="p">([</span><span class="s">"apple"</span><span class="p">,</span> <span class="s">"banana"</span><span class="p">])</span>
+<span class="n">basket2</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">have</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="s">"fruits"</span><span class="p">)</span><span class="o">.</span><span class="n">with_value</span><span class="o">.</span><span class="n">equal</span><span class="p">([</span><span class="s">"apple"</span><span class="p">,</span> <span class="s">"banana"</span><span class="p">])</span>
+<span class="n">basket2</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">have</span><span class="o">.</span><span class="n">property</span><span class="p">(</span><span class="s">"fruits"</span><span class="p">)</span><span class="o">.</span><span class="n">with_value</span><span class="o">.</span><span class="n">being</span><span class="o">.</span><span class="n">equal</span><span class="p">([</span><span class="s">"apple"</span><span class="p">,</span> <span class="s">"banana"</span><span class="p">])</span>
+</pre></div>
+<h3 id="assert-existence-of-keys-and-its-values" name="assert-existence-of-keys-and-its-values"><a href="#assert-existence-of-keys-and-its-values">Assert existence of keys and its values</a></h3><div class="highlight"><pre name="reference-example-18"><span class="n">basket3</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">fruits</span><span class="o">=</span><span class="p">[</span><span class="s">"apple"</span><span class="p">,</span> <span class="s">"banana"</span><span class="p">])</span>
+<span class="n">basket3</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">have</span><span class="o">.</span><span class="n">key</span><span class="p">(</span><span class="s">"fruits"</span><span class="p">)</span>
+</pre></div>
+<h4 id="-have-key---being-allows-chaining-up" name="-have-key---being-allows-chaining-up"><a href="#-have-key---being-allows-chaining-up">.have.key().being allows chaining up</a></h4>
+<p>If the programmer calls <code>have.key()</code> it returns an assertion
+builder of the key if it exists, so that you can chain up
+assertions for the dictionary key value itself.</p>
+<div class="highlight"><pre name="reference-example-19"><span class="n">person</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+<span class="n">person</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">have</span><span class="o">.</span><span class="n">key</span><span class="p">(</span><span class="s">"name"</span><span class="p">)</span><span class="o">.</span><span class="n">being</span><span class="o">.</span><span class="n">none</span>
+<span class="n">person</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">have</span><span class="o">.</span><span class="n">key</span><span class="p">(</span><span class="s">"name"</span><span class="p">)</span><span class="o">.</span><span class="n">being</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+</pre></div>
+<h3 id="assert-the-length-of-objects-with--iterable--should-have-length_of-n-" name="assert-the-length-of-objects-with--iterable--should-have-length_of-n-"><a href="#assert-the-length-of-objects-with--iterable--should-have-length_of-n-">Assert the length of objects with {iterable}.should.have.length_of(N)</a></h3><div class="highlight"><pre name="reference-example-20"><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">have</span><span class="o">.</span><span class="n">length_of</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="s">"Python"</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">have</span><span class="o">.</span><span class="n">length_of</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+<span class="p">{</span><span class="s">'john'</span><span class="p">:</span> <span class="s">'person'</span><span class="p">}</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">have</span><span class="o">.</span><span class="n">length_of</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+<h3 id="assert-the-magnitude-of-objects-with--x--should-be-greater_than-y--and--y--should-be-lower_than-x--as-well-as--x--should-be-greater_than_or_equal_to-y--and--y--should-be-lower_than_or_equal_to-x-" name="assert-the-magnitude-of-objects-with--x--should-be-greater_than-y--and--y--should-be-lower_than-x--as-well-as--x--should-be-greater_than_or_equal_to-y--and--y--should-be-lower_than_or_equal_to-x-"><a href="#assert-the-magnitude-of-objects-with--x--should-be-greater_than-y--and--y--should-be-lower_than-x--as-well-as--x--should-be-greater_than_or_equal_to-y--and--y--should-be-lower_than_or_equal_to-x-">Assert the magnitude of objects with {X}.should.be.greater_than(Y) and {Y}.should.be.lower_than(X) as well as {X}.should.be.greater_than_or_equal_to(Y) and {Y}.should.be.lower_than_or_equal_to(X)</a></h3><div class="highlight"><pre name="reference-example-21"><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">greater_than</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">greater_than</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">lower_than</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">lower_than</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">greater_than_or_equal_to</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">greater_than_or_equal_to</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">lower_than_or_equal_to</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">lower_than_or_equal_to</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+<h3 id="callable-when-called_with-arg1--kwarg1-2--should-throw-exception-" name="callable-when-called_with-arg1--kwarg1-2--should-throw-exception-"><a href="#callable-when-called_with-arg1--kwarg1-2--should-throw-exception-">callable.when.called_with(arg1, kwarg1=2).should.throw(Exception)</a></h3>
+<p>You can use this feature to assert that a callable raises an
+exception:</p>
+<div class="highlight"><pre name="reference-example-22"><span class="kn">import</span> <span class="nn">sure</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">PY3</span>
+
+<span class="k">if</span> <span class="n">PY3</span><span class="p">:</span>
+    <span class="nb">range</span><span class="o">.</span><span class="n">when</span><span class="o">.</span><span class="n">called_with</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">throw</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="s">"range() does not take keyword arguments"</span><span class="p">)</span>
+    <span class="nb">range</span><span class="o">.</span><span class="n">when</span><span class="o">.</span><span class="n">called_with</span><span class="p">(</span><span class="s">"chuck norris"</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">throw</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="s">"'str' object cannot be interpreted as an integer"</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">range</span><span class="o">.</span><span class="n">when</span><span class="o">.</span><span class="n">called_with</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="s">"20"</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">throw</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="s">"range() takes no keyword arguments"</span><span class="p">)</span>
+    <span class="nb">range</span><span class="o">.</span><span class="n">when</span><span class="o">.</span><span class="n">called_with</span><span class="p">(</span><span class="n">b</span><span class="s">"chuck norris"</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">throw</span><span class="p">(</span><span class="s">"range() integer end argument expected, got str."</span><span class="p">)</span>
+<span class="nb">range</span><span class="o">.</span><span class="n">when</span><span class="o">.</span><span class="n">called_with</span><span class="p">(</span><span class="s">"chuck norris"</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">throw</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">)</span>
+<span class="nb">range</span><span class="o">.</span><span class="n">when</span><span class="o">.</span><span class="n">called_with</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">throw</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">)</span>
+</pre></div>
+
+<p>You can also match regular expressions with to the expected exception messages:</p>
+<div class="highlight"><pre name="reference-example-23"><span class="kn">import</span> <span class="nn">re</span>
+<span class="nb">range</span><span class="o">.</span><span class="n">when</span><span class="o">.</span><span class="n">called_with</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">throw</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r'(does not take|takes no) keyword arguments'</span><span class="p">))</span>
+<span class="nb">range</span><span class="o">.</span><span class="n">when</span><span class="o">.</span><span class="n">called_with</span><span class="p">(</span><span class="s">"chuck norris"</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">throw</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r'(cannot be interpreted as an integer|integer end argument expected)'</span><span class="p">))</span>
+</pre></div>
+<h3 id="function-when-called_with-arg1--kwarg1-2--should-return_value-value-" name="function-when-called_with-arg1--kwarg1-2--should-return_value-value-"><a href="#function-when-called_with-arg1--kwarg1-2--should-return_value-value-">function.when.called_with(arg1, kwarg1=2).should.return_value(value)</a></h3>
+<p>This is a shorthand for testing that a callable returns the expected
+result</p>
+<div class="highlight"><pre name="reference-example-24"><span class="kn">import</span> <span class="nn">sure</span>
+
+<span class="nb">list</span><span class="o">.</span><span class="n">when</span><span class="o">.</span><span class="n">called_with</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">return_value</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+
+<p>this is the same as</p>
+<div class="highlight"><pre name="reference-example-25"><span class="n">value</span> <span class="o">=</span> <span class="n">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">value</span><span class="p">.</span><span class="n">should</span><span class="p">.</span><span class="n">equal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+
+<p>there are no differences between those 2 possibilities, use at will</p>
+<h3 id="instance-should-be-a---39-typename--39---and-instance-should-be-an---39-typename--39--" name="instance-should-be-a---39-typename--39---and-instance-should-be-an---39-typename--39--"><a href="#instance-should-be-a---39-typename--39---and-instance-should-be-an---39-typename--39--">instance.should.be.a(&#39;typename&#39;) and instance.should.be.an(&#39;typename&#39;)</a></h3>
+<p>this takes a type name and checks if the class matches that name</p>
+<div class="highlight"><pre name="reference-example-26"><span class="kn">import</span> <span class="nn">sure</span>
+
+<span class="p">{}</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">a</span><span class="p">(</span><span class="s">'dict'</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">an</span><span class="p">(</span><span class="s">'int'</span><span class="p">)</span>
+
+<span class="c">## also works with paths to modules</span>
+
+<span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">a</span><span class="p">(</span><span class="s">'collections.Iterable'</span><span class="p">)</span>
+</pre></div>
+<h3 id="instance-should-be-a-type--and-instance-should-be-an-type-" name="instance-should-be-a-type--and-instance-should-be-an-type-"><a href="#instance-should-be-a-type--and-instance-should-be-an-type-">instance.should.be.a(type) and instance.should.be.an(type)</a></h3>
+<p>this takes the class (type) itself and checks if the object is an instance of it</p>
+<div class="highlight"><pre name="reference-example-27"><span class="kn">import</span> <span class="nn">sure</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">PY3</span>
+
+<span class="k">if</span> <span class="n">PY3</span><span class="p">:</span>
+    <span class="s">u""</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">an</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="s">u""</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">an</span><span class="p">(</span><span class="nb">unicode</span><span class="p">)</span>
+<span class="p">[]</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">a</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+</pre></div>
+<h3 id="instance-should-be-above-num--and-instance-should-be-below-num-" name="instance-should-be-above-num--and-instance-should-be-below-num-"><a href="#instance-should-be-above-num--and-instance-should-be-below-num-">instance.should.be.above(num) and instance.should.be.below(num)</a></h3>
+<p>assert the instance value above and below <code>num</code></p>
+<div class="highlight"><pre name="reference-example-28"><span class="kn">import</span> <span class="nn">sure</span>
+
+<span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">below</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">above</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">above</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">below</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+</pre></div>
+<h2 id="static-assertions-with-it--this--those-and-these" name="static-assertions-with-it--this--those-and-these"><a href="#static-assertions-with-it--this--those-and-these">Static assertions with it, this, those and these</a></h2>
+<p>Whether you don&#39;t like the <code>object.should</code> syntax or you are simply
+not running CPython, sure still allows you to use any of the
+assertions above, all you need to do is wrap the object that is being
+compared in one of the following options: <code>it</code>, <code>this</code>, <code>those</code> and
+<code>these</code>.</p>
+<h3 id="too-long--don--39-t-read" name="too-long--don--39-t-read"><a href="#too-long--don--39-t-read">Too long, don&#39;t read</a></h3><h4 id="all-those-possibilities-below-work-just-as-the-same" name="all-those-possibilities-below-work-just-as-the-same"><a href="#all-those-possibilities-below-work-just-as-the-same">All those possibilities below work just as the same</a></h4><div class="highlight"><pre name="reference-example-29"><span class="kn">from</span> <span class="nn">sure</span> <span class="kn">import</span> <span class="n">it</span><span class="p">,</span> <span class="n">this</span><span class="p">,</span> <span class="n">those</span><span class="p">,</span> <span class="n">these</span>
+
+<span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="n">this</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="n">it</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="n">these</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="n">those</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+</pre></div>
+<h4 id="also-if-you-prefer-using-the-assert-keyword-in-your-tests-just-go-ahead-an-do-it-" name="also-if-you-prefer-using-the-assert-keyword-in-your-tests-just-go-ahead-an-do-it-"><a href="#also-if-you-prefer-using-the-assert-keyword-in-your-tests-just-go-ahead-an-do-it-">Also if you prefer using the assert keyword in your tests just go ahead an do it!</a></h4><div class="highlight"><pre name="reference-example-30"><span class="kn">from</span> <span class="nn">sure</span> <span class="kn">import</span> <span class="n">it</span><span class="p">,</span> <span class="n">this</span><span class="p">,</span> <span class="n">those</span><span class="p">,</span> <span class="n">these</span><span class="p">,</span> <span class="n">expect</span>
+
+<span class="k">assert</span> <span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">this</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">it</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">these</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">those</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">expect</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">not_be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+</pre></div>
+<h3 id="-lambda--none--should-be-callable" name="-lambda--none--should-be-callable"><a href="#-lambda--none--should-be-callable">(lambda: None).should.be.callable</a></h3>
+<p>Test if something is or not callable</p>
+<div class="highlight"><pre name="reference-example-31"><span class="kn">import</span> <span class="nn">sure</span>
+
+<span class="nb">range</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">callable</span>
+<span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">None</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">callable</span><span class="p">;</span>
+<span class="p">(</span><span class="mi">123</span><span class="p">)</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">callable</span>
+</pre></div>
+<h4 id="a-note-about-the-assert-keyword" name="a-note-about-the-assert-keyword"><a href="#a-note-about-the-assert-keyword">A note about the assert keyword</a></h4>
+<p><em>you can use or not the</em> <code>assert</code> <em>keyword, sure internally already
+raises an appropriate</em> <code>AssertionError</code> <em>with an assertion message so
+that you don&#39;t have to specify your own, but you can still use</em>
+<code>assert</code> <em>if you find it more semantic</em></p>
+
+<p>Example:</p>
+<div class="highlight"><pre name="reference-example-32"><span class="kn">import</span> <span class="nn">sure</span>
+
+<span class="s">"Name"</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="s">'name'</span><span class="p">)</span>
+
+<span class="c">## or you can also use</span>
+
+<span class="k">assert</span> <span class="s">"Name"</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="s">'name'</span><span class="p">)</span>
+
+<span class="c">## or still</span>
+
+<span class="kn">from</span> <span class="nn">sure</span> <span class="kn">import</span> <span class="n">this</span>
+
+<span class="k">assert</span> <span class="n">this</span><span class="p">(</span><span class="s">"Name"</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="s">'name'</span><span class="p">)</span>
+
+<span class="c">## also without the assert</span>
+
+<span class="n">this</span><span class="p">(</span><span class="s">"Name"</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="s">'name'</span><span class="p">)</span>
+</pre></div>
+
+<p>Any of the examples above will raise their own <code>AssertionError</code> with a
+meaningful error message.</p>
+<h2 id="synonyms" name="synonyms"><a href="#synonyms">Synonyms</a></h2>
+<p>Sure provides you with a lot of synonyms so that you can pick the ones
+that makes more sense for your tests.</p>
+
+<p>Note that the examples below are merely illustrative, they work not
+only with numbers but with any of the assertions you read early in
+this documentation.</p>
+<h3 id="positive-synonyms" name="positive-synonyms"><a href="#positive-synonyms">Positive synonyms</a></h3><div class="highlight"><pre name="reference-example-33"><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">must</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">does</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">do</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+<h3 id="negative-synonyms" name="negative-synonyms"><a href="#negative-synonyms">Negative synonyms</a></h3><div class="highlight"><pre name="reference-example-34"><span class="kn">from</span> <span class="nn">sure</span> <span class="kn">import</span> <span class="n">expect</span>
+
+<span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">shouldnt</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">doesnt</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">does_not</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">doesnot</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">dont</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">do_not</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">expect</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="o">.</span><span class="n">not_be</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+<h3 id="chain-up-synonyms" name="chain-up-synonyms"><a href="#chain-up-synonyms">Chain-up synonyms</a></h3>
+<p>Any of those synonyms work as an alias to the assertion builder:</p>
+
+<ul>
+<li><code>be</code></li>
+<li><code>being</code></li>
+<li><code>to</code></li>
+<li><code>when</code></li>
+<li><code>have</code></li>
+<li><code>with_value</code></li>
+</ul>
+<div class="highlight"><pre name="reference-example-35"><span class="kn">from</span> <span class="nn">sure</span> <span class="kn">import</span> <span class="n">expect</span>
+
+<span class="p">{</span><span class="s">"foo"</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span><span class="o">.</span><span class="n">must</span><span class="o">.</span><span class="n">with_value</span><span class="o">.</span><span class="n">being</span><span class="o">.</span><span class="n">equal</span><span class="p">({</span><span class="s">"foo"</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+<span class="p">{</span><span class="s">"foo"</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span><span class="o">.</span><span class="n">does</span><span class="o">.</span><span class="n">have</span><span class="o">.</span><span class="n">key</span><span class="p">(</span><span class="s">"foo"</span><span class="p">)</span><span class="o">.</span><span class="n">being</span><span class="o">.</span><span class="n">with_value</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+<h3 id="equality-synonyms" name="equality-synonyms"><a href="#equality-synonyms">Equality synonyms</a></h3><div class="highlight"><pre name="reference-example-36"><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">eql</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+<h3 id="positive-boolean-synonyms" name="positive-boolean-synonyms"><a href="#positive-boolean-synonyms">Positive boolean synonyms</a></h3><div class="highlight"><pre name="reference-example-37"><span class="p">(</span><span class="ow">not</span> <span class="bp">None</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">ok</span>
+<span class="p">(</span><span class="ow">not</span> <span class="bp">None</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">truthy</span>
+<span class="p">(</span><span class="ow">not</span> <span class="bp">None</span><span class="p">)</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">true</span>
+</pre></div>
+<h3 id="negative-boolean-synonyms" name="negative-boolean-synonyms"><a href="#negative-boolean-synonyms">Negative boolean synonyms</a></h3><div class="highlight"><pre name="reference-example-38"><span class="bp">False</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">falsy</span>
+<span class="bp">False</span><span class="o">.</span><span class="n">should</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">false</span>
+<span class="bp">False</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">true</span>
+<span class="bp">False</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">ok</span>
+<span class="bp">None</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">true</span>
+<span class="bp">None</span><span class="o">.</span><span class="n">should_not</span><span class="o">.</span><span class="n">be</span><span class="o">.</span><span class="n">ok</span>
+</pre></div>
+<h4 id="holy-guacamole--how-did-you-implement-that-feature--" name="holy-guacamole--how-did-you-implement-that-feature--"><a href="#holy-guacamole--how-did-you-implement-that-feature--">Holy guacamole, how did you implement that feature ?</a></h4>
+<p>Differently of <a href="http://www.ruby-lang.org">ruby</a> python doesn&#39;t have
+<a href="http://blog.aizatto.com/2007/06/01/ruby-and-open-classes/">open classes</a>,
+but <a href="https://github.com/clarete/">Lincoln de Sousa</a> came out with a
+super <a href="https://github.com/gabrielfalcao/sure/blob/master/sure/magic.py">sick code</a> that uses the ctypes module to create a pointer to the
+<code>__dict__</code> of builtin types.</p>
+
+<p>Yes, it is dangerous, non-pythonic and should not be used in production code.</p>
+
+<p>Although <code>sure</code> is here to be used <strong>ONLY</strong> in test code, therefore it
+should be running in <strong>ONLY</strong> possible environments: your local
+machine or your continuous-integration server.</p>
+<h1 id="about-sure-1-0" name="about-sure-1-0"><a href="#about-sure-1-0">About sure 1.0</a></h1>
+<p>The assertion library is 100% inspired be the awesomeness of
+<a href="https://github.com/visionmedia/should.js">should.js</a> which is simple,
+declarative and fluent.</p>
+
+<p>Sure strives to provide everything a python developer needs in an assertion:</p>
+
+<ul>
+<li><p>Assertion messages are easy to understand</p></li>
+<li><p>When comparing iterables the comparation is recursive and shows
+exactly where is the error</p></li>
+<li><p>Fluency: the builtin types are changed in order to provide awesome
+simple assertions</p></li>
+</ul>
+</div>
+              <footer>
+                <hr/>
+                <a href="http://github.com/gabrielfalcao/sure">&copy; Sure</a>
+                <a href="http://github.com/gabrielfalcao">gabrielfalcao</a>
+                <a href="https://pypi.python.org/pypi/sphinx_rtd_theme">Original Theme</a>
+              </footer>
+            </div>
+          </div>
+        </section>
+      </div>
+    </body>
+</html>

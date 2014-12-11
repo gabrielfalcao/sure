@@ -32,7 +32,6 @@ import sure
 
 (4).should.be.equal(2 + 2)
 (7.5).should.eql(3.5 + 4)
-(2).should.equal(8 / 4)
 
 (3).shouldnt.be.equal(5)
 ```

@@ -803,10 +803,15 @@ class AssertionBuilder(object):
 
         return _that.raises(*args, **kw)
 
+    thrown = throw
+    raised = thrown
+
     @assertionmethod
     def return_value(self, value):
         return_value = self.obj(*self._callable_args, **self._callable_kw)
         return this(return_value).should.equal(value)
+
+    returned_the_value = return_value
 
     @assertionmethod
     def look_like(self, value):

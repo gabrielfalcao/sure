@@ -300,6 +300,33 @@ if PY3:
 else:
     range.when.called_with(10, step="20").should.throw(TypeError, "range() takes no keyword arguments")
     range.when.called_with(b"chuck norris").should.throw("range() integer end argument expected, got str.")
+range.when.called_with("chuck norris").should.have.raised(TypeError)
+range.when.called_with(10).should_not.have.raised(TypeError)
+```
+
+You can also match regular expressions with to the expected exception messages:
+
+```python
+import re
+range.when.called_with(10, step=20).should.throw(TypeError, re.compile(r'(does not take|takes no) keyword arguments'))
+range.when.called_with("chuck norris").should.throw(TypeError, re.compile(r'(cannot be interpreted as an integer|integer end argument expected)'))
+```
+
+### callable.when.called_with(arg1, kwarg1=2).should.throw(Exception)
+
+You can use this feature to assert that a callable raises an
+exception:
+
+```python
+import sure
+from six import PY3
+
+if PY3:
+    range.when.called_with(10, step=20).should.throw(TypeError, "range() does not take keyword arguments")
+    range.when.called_with("chuck norris").should.throw(TypeError, "'str' object cannot be interpreted as an integer")
+else:
+    range.when.called_with(10, step="20").should.throw(TypeError, "range() takes no keyword arguments")
+    range.when.called_with(b"chuck norris").should.throw("range() integer end argument expected, got str.")
 range.when.called_with("chuck norris").should.throw(TypeError)
 range.when.called_with(10).should_not.throw(TypeError)
 ```
@@ -321,7 +348,7 @@ result
 ```python
 import sure
 
-list.when.called_with([0, 1]).should.return_value([0, 1])
+list.when.called_with([0, 1]).should.have.returned_the_value([0, 1])
 ```
 
 this is the same as

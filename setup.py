@@ -18,6 +18,7 @@
 
 import ast
 import os
+import sys
 from setuptools import setup, find_packages
 
 
@@ -42,7 +43,8 @@ def read_version():
 
 
 local_file = lambda *f: \
-    open(os.path.join(os.path.dirname(__file__), *f)).read()
+    open(os.path.join(os.path.dirname(__file__), *f)).read() if sys.version_info < (3, 0, 0) else \
+    open(os.path.join(os.path.dirname(__file__), *f), encoding='utf-8').read()
 
 
 install_requires = ['mock', 'six']

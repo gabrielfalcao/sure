@@ -90,6 +90,13 @@ class VariablesBag(dict):
                 ))
 
 
+def ensure_type(caller_name, cast, obj):
+    try:
+        return cast(obj)
+    except TypeError:
+        raise AssertionError('{0} tried to  ')
+
+
 class CallBack(object):
     context_error = "the function %s defined at %s line %d, is being "\
         "decorated by either @that_with_context or @scenario, so it should " \
@@ -582,17 +589,45 @@ class AssertionBuilder(object):
         return True
 
     @assertionmethod
+    def within_range(self, start, end):
+        start = ensure_type('within_range', int, start)
+        end = ensure_type('within_range', int, end)
+        subject = ensure_type('within_range', int, self.obj)
+        is_within_range = subject >= start and subject <= end
+
+        if self.negative:
+            if is_within_range:
+                raise AssertionError('expected {0} to NOT be within {1} and {2}'.format(subject, start, end))
+            return not is_within_range
+
+        else:
+            if not is_within_range:
+                raise AssertionError('expected {0} to be within {1} and {2}'.format(subject, start, end))
+            return is_within_range
+
+    @assertionmethod
     def within(self, first, *rest):
         if isinstance(first, Iterable):
             collection_should = AssertionHelper(first)
-        else:
-            args = [first] + list(rest)
-            collection_should = AssertionHelper(list(range(*args)))
+            if self.negative:
+                return collection_should.does_not_contain(self.obj)
+            else:
+                return collection_should.contains(self.obj)
 
-        if self.negative:
-            return collection_should.does_not_contain(self.obj)
+        elif len(rest) == 1:
+            return self.within_range(first, rest[0])
         else:
-            return collection_should.contains(self.obj)
+            if self.negative:
+                ppath = '{0}.should_not.be.within'.format(self.obj)
+            else:
+                ppath = '{0}.should.be.within'.format(self.obj)
+
+            raise AssertionError((
+                '{0}({1}, {2}) must be called with either a iterable:\n'
+                '{0}([1, 2, 3, 4])\n'
+                'or with a range of numbers:'
+                '{0}(1, 3000)'
+            ).format(ppath, first, ", ".join([repr(x) for x in rest])))
 
     @assertionmethod
     def equal(self, what, epsilon=None):

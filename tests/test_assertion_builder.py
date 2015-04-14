@@ -68,10 +68,10 @@ def test_2_within_0a2():
         assert this(1).should_not.be.within(0, 2)
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw("1 should be in [2, 3]")
+    expect(opposite).when.called.to.throw("expected 1 to be within 2 and 4")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw("1 should NOT be in [0, 1]")
+    expect(opposite_not).when.called.to.throw("expected 1 to NOT be within 0 and 2")
 
 
 def test_true_be_ok():

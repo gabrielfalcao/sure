@@ -1,4 +1,4 @@
-sure ``1.2.10``
+sure ``1.2.11``
 ===============
 
 A testing library for python with powerful and flexible assertions. Sure
@@ -46,14 +46,13 @@ Equality
 
     (3).shouldnt.be.equal(5)
 
-{'a': 'collection'}.should.equal({'a': 'collection'}) does deep comparison
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Assert dictionary and its contents
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
     {'foo': 'bar'}.should.equal({'foo': 'bar'})
-    {'foo': 'bar'}.should.eql({'foo': 'bar'})
-    {'foo': 'bar'}.must.be.equal({'foo': 'bar'})
+    {'foo': 'bar'}.should.have.key('foo').which.should.equal('bar')
 
 "A string".lower().should.equal("a string") also works
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

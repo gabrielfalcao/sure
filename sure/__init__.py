@@ -480,7 +480,6 @@ class AssertionBuilder(object):
         return IdentityAssertion(self)
 
     being = be
-    which = be
 
     @assertionproperty
     def not_be(self):
@@ -499,6 +498,8 @@ class AssertionBuilder(object):
     @assertionproperty
     def to(self):
         return self
+
+    which = to
 
     @assertionproperty
     def when(self):
@@ -536,6 +537,7 @@ class AssertionBuilder(object):
         assert has_it, (
             "%r should have the key `%s` but does not" % (
                 self.obj, name))
+
         return expect(self.obj[name])
 
     @assertionproperty

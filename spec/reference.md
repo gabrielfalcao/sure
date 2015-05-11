@@ -148,7 +148,7 @@ range(0).should.be.empty;
 
 ```python
 (1).should.be.within(0, 2)
-(5).should.be.within(10)
+(5).should.be.within(0, 10)
 
 ## negate with:
 

@@ -37,13 +37,11 @@ import sure
 (3).shouldnt.be.equal(5)
 ```
 
-#### {'a': 'collection'}.should.equal({'a': 'collection'}) does deep comparison
+#### Assert dictionary and its contents
 
 ```python
 {'foo': 'bar'}.should.equal({'foo': 'bar'})
-{'foo': 'bar'}.should.eql({'foo': 'bar'})
-{'foo': 'bar'}.must.be.equal({'foo': 'bar'})
-
+{'foo': 'bar'}.should.have.key('foo').which.should.equal('bar')
 ```
 
 #### "A string".lower().should.equal("a string") also works

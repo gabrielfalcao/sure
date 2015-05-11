@@ -480,6 +480,7 @@ class AssertionBuilder(object):
         return IdentityAssertion(self)
 
     being = be
+    which = be
 
     @assertionproperty
     def not_be(self):

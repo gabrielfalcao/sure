@@ -1,4 +1,4 @@
 -r requirements.txt
-steadymark==0.5.3
+steadymark==0.5.5
 markment==0.2.21
 curdling==0.4.0

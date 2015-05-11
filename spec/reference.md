@@ -101,7 +101,7 @@ THIS IS MY loose string
 
 "goosfraba".should_not.contain('anger')
 
-[1.2.5].should.contain(2)
+['1.2.5'].should.contain(2)
 ```
 
 ### should.match and should_not.match matches regular expression
@@ -232,6 +232,7 @@ class Basket(object):
     fruits = ["apple", "banana"]
 
 basket2 = Basket()
+basket2.should.have.property("fruits").which.should.be.equal(["apple", "banana"])
 basket2.should.have.property("fruits").being.equal(["apple", "banana"])
 basket2.should.have.property("fruits").with_value.equal(["apple", "banana"])
 basket2.should.have.property("fruits").with_value.being.equal(["apple", "banana"])
@@ -559,7 +560,7 @@ from sure import expect
 ### Positive boolean synonyms
 
 ```python
-
+import sure
 (not None).should.be.ok
 (not None).should.be.truthy
 (not None).should.be.true
@@ -568,6 +569,7 @@ from sure import expect
 ### Negative boolean synonyms
 
 ```python
+import sure
 False.should.be.falsy
 False.should.be.false
 False.should_not.be.true

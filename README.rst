@@ -1,5 +1,5 @@
-sure ``1.2.9``
-==============
+sure ``1.2.10``
+===============
 
 A testing library for python with powerful and flexible assertions. Sure
 is heavily inspired by

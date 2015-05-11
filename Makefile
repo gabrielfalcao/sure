@@ -30,6 +30,7 @@ publish:
 
 docstests: clean
 	@steadymark README.md
+	@steadymark spec/reference.md
 
 
 docs: docstests

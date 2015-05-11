@@ -1,6 +1,6 @@
 project:
   name: "Sure"
-  version: 1.2.10
+  version: 1.2.11
   description: testing library for python
 
   github_maintainer: gabrielfalcao

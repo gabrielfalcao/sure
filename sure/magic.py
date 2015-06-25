@@ -31,7 +31,7 @@ if is_cpython:
 
     Py_ssize_t = \
         hasattr(ctypes.pythonapi, 'Py_InitModule4_64') \
-            and ctypes.c_int64 or ctypes.c_int
+        and ctypes.c_int64 or ctypes.c_int
 
     class PyObject(ctypes.Structure):
         pass

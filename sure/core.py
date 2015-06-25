@@ -33,10 +33,12 @@ from sure.terminal import red, green, yellow
 
 
 class FakeOrderedDict(OrderedDict):
+
     """ OrderedDict that has the repr of a normal dict
 
     We must return a string whether in py2 or py3.
     """
+
     def __unicode__(self):
         if not self:
             return '{}'
@@ -92,6 +94,7 @@ def safe_repr(val):
 
 
 class DeepExplanation(text_type):
+
     def get_header(self, X, Y, suffix):
         params = (safe_repr(X), safe_repr(Y), text_type(suffix))
         header = "given\nX = %s\n    and\nY = %s\n%s" % params
@@ -106,6 +109,7 @@ class DeepExplanation(text_type):
 
 
 class DeepComparison(object):
+
     def __init__(self, X, Y, epsilon=None, parent=None):
         self.operands = X, Y
         self.epsilon = epsilon
@@ -143,7 +147,8 @@ class DeepComparison(object):
         if abs(X - Y) <= self.epsilon:
             return True
         else:
-            m = 'X%s±%s != Y%s±%s' % (red(c.current_X_keys), self.epsilon, green(c.current_Y_keys), self.epsilon)
+            m = 'X%s±%s != Y%s±%s' % (
+                red(c.current_X_keys), self.epsilon, green(c.current_Y_keys), self.epsilon)
             return DeepExplanation(m)
 
     def compare_dicts(self, X, Y):

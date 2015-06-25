@@ -107,7 +107,8 @@ class CallBack(object):
         self.args = args or []
         self.kwargs = kwargs or {}
         self.callback_name = cb.__name__
-        self.callback_filename = os.path.split(get_function_code(cb).co_filename)[-1]
+        self.callback_filename = os.path.split(
+            get_function_code(cb).co_filename)[-1]
         self.callback_lineno = get_function_code(cb).co_firstlineno + 1
 
     def apply(self, *optional_args):
@@ -122,12 +123,12 @@ class CallBack(object):
 
             if err.startswith(self.callback_name) and \
                ('takes no arguments (1 given)' in err or
-                'takes 0 positional arguments but 1 was given' in err):
+                    'takes 0 positional arguments but 1 was given' in err):
                 raise TypeError(self.context_error % (
                     self.callback_name,
                     self.callback_filename,
                     self.callback_lineno,
-                    )
+                )
                 )
             raise
 
@@ -204,7 +205,7 @@ def within(**units):
             took = convert_to(delta.microseconds)
             print(took, timeout)
             assert took < timeout, \
-                   '%s did not run within %s %s' % (func.__name__, word, unit)
+                '%s did not run within %s %s' % (func.__name__, word, unit)
             if exc:
                 raise AssertionError(exc.pop(0))
 
@@ -259,7 +260,7 @@ def word_to_number(word):
         return basic[word]
     except KeyError:
         raise AssertionError(
-            'sure supports only literal numbers from one to twelve, ' \
+            'sure supports only literal numbers from one to twelve, '
             'you tried the word "twenty"')
 
 
@@ -420,14 +421,17 @@ NEGATIVES = [
 
 
 class IdentityAssertion(object):
+
     def __init__(self, assertion_builder):
         self._ab = assertion_builder
 
     def __call__(self, other):
         if self._ab.negative:
-            assert self._ab.obj is not other, "{0} should not be the same object as {1}, but it is".format(self._ab.obj, other)
+            assert self._ab.obj is not other, "{0} should not be the same object as {1}, but it is".format(
+                self._ab.obj, other)
             return True
-        assert self._ab.obj is other, "{0} should be the same object as {1}, but it is not".format(self._ab.obj, other)
+        assert self._ab.obj is other, "{0} should be the same object as {1}, but it is not".format(
+            self._ab.obj, other)
         return True
 
     def __getattr__(self, name):
@@ -435,6 +439,7 @@ class IdentityAssertion(object):
 
 
 class AssertionBuilder(object):
+
     def __init__(self, name=None, negative=False, obj=None):
         self._name = name
         self.negative = negative
@@ -600,12 +605,14 @@ class AssertionBuilder(object):
 
         if self.negative:
             if is_within_range:
-                raise AssertionError('expected {0} to NOT be within {1} and {2}'.format(subject, start, end))
+                raise AssertionError(
+                    'expected {0} to NOT be within {1} and {2}'.format(subject, start, end))
             return not is_within_range
 
         else:
             if not is_within_range:
-                raise AssertionError('expected {0} to be within {1} and {2}'.format(subject, start, end))
+                raise AssertionError(
+                    'expected {0} to be within {1} and {2}'.format(subject, start, end))
             return is_within_range
 
     @assertionmethod
@@ -673,7 +680,8 @@ class AssertionBuilder(object):
                 assert not difference, "Difference:\n\n{0}".format(difference)
         else:
             if self.obj == what:
-                raise AssertionError("{0} should be different of {1}".format(self.obj, what))
+                raise AssertionError(
+                    "{0} should be different of {1}".format(self.obj, what))
 
         return True
 
@@ -818,8 +826,8 @@ class AssertionBuilder(object):
     @assertionmethod
     def throw(self, *args, **kw):
         _that = AssertionHelper(self.obj,
-                     with_args=self._callable_args,
-                     and_kwargs=self._callable_kw)
+                                with_args=self._callable_args,
+                                and_kwargs=self._callable_kw)
 
         if self.negative:
             msg = ("{0} called with args {1} and kwargs {2} should "
@@ -875,7 +883,8 @@ class AssertionBuilder(object):
     def match(self, regex, *args):
         obj_repr = repr(self.obj)
         assert isinstance(self.obj, basestring), (
-            "{0} should be a string in order to compare using .match()".format(obj_repr)
+            "{0} should be a string in order to compare using .match()".format(
+                obj_repr)
         )
         matched = re.search(regex, self.obj, *args)
 

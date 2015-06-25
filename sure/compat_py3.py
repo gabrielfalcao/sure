@@ -13,7 +13,7 @@ else:
         curr_quote = None
         for char in object_repr:
             if char in ['"', "'"] and (
-                not curr_quote or char == curr_quote):
+                    not curr_quote or char == curr_quote):
                 if in_quote:
                     # Closing quote
                     curr_quote = None

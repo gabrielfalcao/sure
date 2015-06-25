@@ -77,6 +77,7 @@ def explanation(msg):
 
 
 class AssertionHelper(object):
+
     def __init__(self, src,
                  within_range=None,
                  with_args=None,
@@ -144,23 +145,23 @@ class AssertionHelper(object):
                     raise AssertionError('''
                     %r raised %s, but the exception message does not
                     match.\n\nEXPECTED:\n%s\n\nGOT:\n%s'''.strip() % (
-                            self._src,
-                            type(e).__name__,
-                            msg, err))
+                        self._src,
+                        type(e).__name__,
+                        msg, err))
 
                 elif isinstance(msg, re._pattern_type) and not msg.search(err):
                     raise AssertionError(
-                        'When calling %r the exception message does not match. ' \
+                        'When calling %r the exception message does not match. '
                         'Expected to match regex: %r\n against:\n %r' % (identify_callable_location(self._src), msg.pattern, err))
 
             elif isinstance(msg, string_types) and msg not in err:
                 raise AssertionError(
-                    'When calling %r the exception message does not match. ' \
+                    'When calling %r the exception message does not match. '
                     'Expected: %r\n got:\n %r' % (self._src, msg, err))
 
             elif isinstance(msg, re._pattern_type) and not msg.search(err):
                 raise AssertionError(
-                    'When calling %r the exception message does not match. ' \
+                    'When calling %r the exception message does not match. '
                     'Expected to match regex: %r\n against:\n %r' % (identify_callable_location(self._src), msg.pattern, err))
 
             else:
@@ -407,8 +408,8 @@ class AssertionHelper(object):
             lst = list(self._src)
             length = len(lst)
             assert length == 0, \
-                   '%r is not empty, it has %s' % (self._src,
-                                                   itemize_length(self._src))
+                '%r is not empty, it has %s' % (self._src,
+                                                itemize_length(self._src))
             return True
 
         except TypeError:

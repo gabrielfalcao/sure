@@ -24,9 +24,9 @@ import platform
 SUPPORTS_ANSI = False
 for handle in [sys.stdout, sys.stderr]:
     if (hasattr(handle, "isatty") and handle.isatty()) or \
-        ('TERM' in os.environ and os.environ['TERM'] == 'ANSI'):
+            ('TERM' in os.environ and os.environ['TERM'] == 'ANSI'):
         if platform.system() == 'Windows' and not (
-            'TERM' in os.environ and os.environ['TERM'] == 'ANSI'):
+                'TERM' in os.environ and os.environ['TERM'] == 'ANSI'):
             SUPPORTS_ANSI = False
         else:
             SUPPORTS_ANSI = True

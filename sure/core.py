@@ -31,6 +31,10 @@ from six import (
 )
 from sure.terminal import red, green, yellow
 
+MocksCallList = getattr(mock, '_CallList', None)
+if not MocksCallList:
+    MocksCallList = mock.mock._CallList
+    
 
 class FakeOrderedDict(OrderedDict):
     """ OrderedDict that has the repr of a normal dict
@@ -238,10 +242,10 @@ class DeepComparison(object):
     def compare(self):
         X, Y = self.operands
 
-        if isinstance(X, mock._CallList):
+        if isinstance(X, MocksCallList):
             X = list(X)
 
-        if isinstance(Y, mock._CallList):
+        if isinstance(Y, MocksCallList):
             X = list(Y)
 
         c = self.get_context()

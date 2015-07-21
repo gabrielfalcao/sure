@@ -45,8 +45,8 @@ local_file = lambda *f: \
     open(os.path.join(os.path.dirname(__file__), *f)).read()
 
 
-install_requires = ['mock', 'six']
-tests_require = ['nose']
+install_requires = ['mock==1.0.1', 'six==1.9.0']
+tests_require = ['nose==1.3.7']
 
 
 if __name__ == '__main__':

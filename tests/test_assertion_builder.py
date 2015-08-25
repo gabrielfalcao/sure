@@ -52,7 +52,7 @@ def test_4_equal_2p2():
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
-        "4 should differ to 4, but is the same thing")
+        "4 should differ from 4, but is the same thing")
 
 
 def test_2_within_0a2():
@@ -378,7 +378,7 @@ def test_have_property_with_value():
 
     expect(opposite).when.called.to.throw(AssertionError)
     expect(opposite).when.called.to.throw(compat_repr(
-        "'John Doe' should differ to 'John Doe', but is the same thing"))
+        "'John Doe' should differ from 'John Doe', but is the same thing"))
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(compat_repr(
@@ -428,7 +428,7 @@ def test_have_key_with_value():
 
     expect(opposite).when.called.to.throw(AssertionError)
     expect(opposite).when.called.to.throw(compat_repr(
-        "'John Doe' should differ to 'John Doe', but is the same thing"))
+        "'John Doe' should differ from 'John Doe', but is the same thing"))
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(compat_repr(
@@ -538,7 +538,7 @@ def test_equal_with_repr_of_complex_types_and_repr():
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(compat_repr(
-        "{'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'} should differ to {'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'}, but is the same thing"))
+        "{'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'} should differ from {'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'}, but is the same thing"))
 
 
 def test_match_regex():

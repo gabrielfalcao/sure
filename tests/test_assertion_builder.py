@@ -648,13 +648,19 @@ def test_throw_matching_regex():
         raise RuntimeError('should not have reached here')
 
     except AssertionError as e:
-        expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
+        if PY3:
+            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
+        else:
+            expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
 
     try:
         expect(blah).when.called_with(1).should.throw(ValueError, re.compile(r'invalid regex'))
         raise RuntimeError('should not have reached here')
     except AssertionError as e:
-        expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
+        if PY3:
+            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
+        else:
+            expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
 
 def test_should_not_be_different():
     ("'something'.should_not.be.different('SOMETHING'.lower())")

@@ -42,10 +42,10 @@ from sure.core import itemize_length
 
 
 def identify_callable_location(callable_object):
-    filename = os.path.relpath(callable_object.func_code.co_filename)
-    lineno = callable_object.func_code.co_firstlineno
-    callable_name = callable_object.func_code.co_name
-    return b'{0} [{1} line {2}]'.format(callable_name, filename, lineno)
+    filename = os.path.relpath(callable_object.__code__.co_filename)
+    lineno = callable_object.__code__.co_firstlineno
+    callable_name = callable_object.__code__.co_name
+    return '{0} [{1} line {2}]'.format(callable_name, filename, lineno).encode()
 
 
 def is_iterable(obj):

@@ -23,7 +23,12 @@ except ImportError:
     from sure.ordereddict import OrderedDict
 
 import os
-import mock
+
+try:
+    from mock import _CallList
+except ImportError:
+    from mock.mock import _CallList
+    
 import inspect
 from six import (
     text_type, integer_types, string_types, binary_type,
@@ -238,10 +243,10 @@ class DeepComparison(object):
     def compare(self):
         X, Y = self.operands
 
-        if isinstance(X, mock._CallList):
+        if isinstance(X, _CallList):
             X = list(X)
 
-        if isinstance(Y, mock._CallList):
+        if isinstance(Y, _CallList):
             X = list(Y)
 
         c = self.get_context()

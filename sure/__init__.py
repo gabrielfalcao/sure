@@ -445,10 +445,13 @@ class AssertionBuilder(object):
         self._that = AssertionHelper(self.obj)
 
     def __call__(self, obj):
+
         self.obj = obj
 
         if isinstance(obj, self.__class__):
             self.obj = obj.obj
+            self._callable_args = obj._callable_args
+            self._callable_kw = obj._callable_kw
 
         self._that = AssertionHelper(self.obj)
         return self
@@ -807,7 +810,6 @@ class AssertionBuilder(object):
 
         return self._that.len_is(num)
 
-    @assertionmethod
     def called_with(self, *args, **kw):
         self._callable_args = args
         self._callable_kw = kw

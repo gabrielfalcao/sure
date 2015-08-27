@@ -19,6 +19,7 @@
 import ast
 import os
 import sys
+import codecs
 from setuptools import setup, find_packages
 
 
@@ -42,10 +43,9 @@ def read_version():
     return finder.version
 
 
-def local_file( *f):
-    if sys.version_info < (3, 0, 0):
-        return open(os.path.join(os.path.dirname(__file__), *f)).read()
-    return open(os.path.join(os.path.dirname(__file__), *f), encoding="utf-8").read()
+def local_file(*f):
+    path = os.path.join(os.path.dirname(__file__), *f)
+    return codecs.open(path, 'r', encoding='utf-8').read()
 
 
 install_requires = ['mock', 'six']

@@ -1,4 +1,4 @@
-# sure `1.2.23`
+# sure `1.2.24`
 
 A testing library for python with powerful and flexible assertions. Sure is heavily inspired by [should.js](https://github.com/visionmedia/should.js/)
 

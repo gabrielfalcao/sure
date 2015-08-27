@@ -648,7 +648,7 @@ class AssertionBuilder(object):
             if error:
                 return True
 
-            msg = '%s should differ to %s, but is the same thing'
+            msg = '%s should differ from %s, but is the same thing'
             raise AssertionError(msg % (safe_repr(self.obj), safe_repr(what)))
 
         else:

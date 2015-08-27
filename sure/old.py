@@ -238,7 +238,7 @@ class AssertionHelper(object):
 
         return True
 
-    @explanation('%r should differ to %r, but is the same thing')
+    @explanation('%r should differ from %r, but is the same thing')
     def differs(self, dst):
         return self._src != dst
 

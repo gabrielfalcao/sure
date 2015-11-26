@@ -314,11 +314,11 @@ def test_be():
     def wrong_should_not():
         return this(d2).should_not.be(d1)
 
-    wrong_should_not.when.called.should.throw(
+    expect(wrong_should_not).when.called.should.throw(
         AssertionError,
         '{} should not be the same object as {}, but it is',
     )
-    wrong_should.when.called.should.throw(
+    expect(wrong_should).when.called.should.throw(
         AssertionError,
         '{} should be the same object as {}, but it is not',
     )
@@ -713,7 +713,7 @@ def test_equals_handles_mock_call_list():
     # Then I see I can compare the call list without manually
     # converting anything
 
-    callback.call_args_list.should.equal([
+    expect(callback.call_args_list).should.equal([
         mock.call(a=1, b=2),
         mock.call(a=3, b=4),
     ])
@@ -751,5 +751,5 @@ def test_equals_dictionaries_with_tuple_keys():
         ("0.0.0.0", 400): "chuck norris",
     }
 
-    X.should_not.equal(Y)
-    Y.should_not.equal(X)
+    expect(X).should_not.equal(Y)
+    expect(Y).should_not.equal(X)

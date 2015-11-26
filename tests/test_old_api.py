@@ -22,6 +22,7 @@ from six.moves import xrange
 
 import sure
 from sure.deprecated import that
+from sure.magic import is_cpython
 from sure import VariablesBag, expect
 from nose.tools import assert_equals, assert_raises
 from sure.compat import compat_repr, safe_repr, text_type_name
@@ -57,7 +58,7 @@ def test_context_is_not_optional():
 
     assert that(it_crashes).raises(
         TypeError, (
-        "the function it_crashes defined at test_old_api.py line 55, is being "
+        "the function it_crashes defined at test_old_api.py line 56, is being "
         "decorated by either @that_with_context or @scenario, so it should "
         "take at least 1 parameter, which is the test context"),
     )
@@ -524,9 +525,11 @@ def test_that_contains_none():
         # We can't use unicode in Py2, otherwise it will try to coerce
         assert that('foobar' if PY3 else b'foobar').contains(None)
 
+    error_msg = "'in <string>' requires string as left operand, not NoneType" if is_cpython else "'NoneType' does not have the buffer interface"
+
     assert that(assertions).raises(
         TypeError,
-        "'in <string>' requires string as left operand, not NoneType",
+        error_msg
     )
 
 
@@ -537,9 +540,10 @@ def test_that_none_contains_string():
         assert that(None).contains('bungalow')
         assert False, 'should not reach here'
     except Exception as e:
+        error_msg = "argument of type 'NoneType' is not iterable" if is_cpython else "'NoneType' object is not iterable"
         assert_equals(
             text_type(e),
-            "argument of type 'NoneType' is not iterable",
+            error_msg
         )
 
 
@@ -891,7 +895,7 @@ def test_depends_on_failing_due_nothing_found():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "lonely_action" defined at %s:900 ' \
+    error = 'the action "lonely_action" defined at %s:904 ' \
         'depends on the attribute "something" to be available in the' \
         ' context. It turns out that there are no actions providing ' \
         'that. Please double-check the implementation' % fullpath
@@ -917,10 +921,10 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "my_action" defined at {0}:930 ' \
+    error = 'the action "my_action" defined at {0}:934 ' \
         'depends on the attribute "some_attr" to be available in the context.'\
         ' You need to call one of the following actions beforehand:\n' \
-        ' -> dependency_action at {0}:926'.replace('{0}', fullpath)
+        ' -> dependency_action at {0}:930'.replace('{0}', fullpath)
 
     def with_setup(context):
         @action_for(context, provides=['some_attr'])

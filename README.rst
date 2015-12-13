@@ -1,4 +1,4 @@
-sure ``1.2.23``
+sure ``1.2.24``
 ===============
 
 A testing library for python with powerful and flexible assertions. Sure
@@ -20,12 +20,12 @@ Documentation
 Available in the `website <http://falcao.it/sure>`__ or under the
 ``spec`` directory.
 
-You can also build the documentation locally using markment:
+You can also build the documentation locally:
 
 .. code:: bash
 
-    pip install markment
-    markment --server --theme=rtd ./spec/
+    pip install -r development.txt
+    make docs
 
 Here is a tease
 ---------------

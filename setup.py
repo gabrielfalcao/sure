@@ -45,7 +45,7 @@ def read_version():
 
 def local_file(*f):
     path = os.path.join(os.path.dirname(__file__), *f)
-    return codecs.open(path, 'r', encoding='utf-8').read()
+    return codecs.open(path, 'r', encoding='utf-8').read().encode('utf-8')
 
 
 install_requires = ['mock', 'six']

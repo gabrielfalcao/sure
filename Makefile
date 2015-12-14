@@ -9,10 +9,10 @@ install_deps:
 	@pip install -r development.txt
 
 test:
+	@python setup.py build
 	@nosetests -s --verbosity=2 tests --rednose
 	@steadymark OLD_API.md
 	@steadymark README.md
-	@pandoc -o readme.rst README.md
 
 clean:
 	@printf "Cleaning up files that are already in .gitignore... "

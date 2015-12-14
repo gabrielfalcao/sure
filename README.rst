@@ -20,12 +20,12 @@ Documentation
 Available in the `website <http://falcao.it/sure>`__ or under the
 ``spec`` directory.
 
-You can also build the documentation locally:
+You can also build the documentation locally using markment:
 
 .. code:: bash
 
-    pip install -r development.txt
-    make docs
+    pip install markment
+    markment --server --theme=rtd ./spec/
 
 Here is a tease
 ---------------

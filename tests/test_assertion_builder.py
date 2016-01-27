@@ -18,6 +18,8 @@
 from __future__ import unicode_literals
 import re
 import mock
+from collections import OrderedDict
+
 from datetime import datetime
 from sure import this, these, those, it, expect, AssertionBuilder
 from six import PY3
@@ -649,18 +651,18 @@ def test_throw_matching_regex():
 
     except AssertionError as e:
         if PY3:
-            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
+            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
         else:
-            expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
+            expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
 
     try:
         expect(blah).when.called_with(1).should.throw(ValueError, re.compile(r'invalid regex'))
         raise RuntimeError('should not have reached here')
     except AssertionError as e:
         if PY3:
-            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
+            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
         else:
-            expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
+            expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
 
 def test_should_not_be_different():
     ("'something'.should_not.be.different('SOMETHING'.lower())")
@@ -753,3 +755,42 @@ def test_equals_dictionaries_with_tuple_keys():
 
     expect(X).should_not.equal(Y)
     expect(Y).should_not.equal(X)
+
+
+def test_ordereddict_comparison():
+    ".equal(OrderedDict) should check if two ordered dicts are the same"
+    result = {
+        "fields": OrderedDict([
+            ("name", "John"),
+            ("age", "22"),
+        ]),
+        "children": OrderedDict([]),
+    }
+
+    expectation = {
+        "fields": OrderedDict([
+            ("age", "22"),
+            ("name", "John"),
+        ]),
+        "children": OrderedDict([]),
+    }
+
+    expect(result).shouldnt.be.equal(expectation)
+    expect(result).should.be.equal(result)
+
+    try:
+        expect(result).should.equal(expectation)
+        raise RuntimeError("should not have reached here")
+    except AssertionError as error:
+        if PY3:
+            expect(str(error)).should.be.equal("""given
+X = {'children': {}, 'fields': {'age': '22', 'name': 'John'}}
+    and
+Y = {'children': {}, 'fields': {'age': '22', 'name': 'John'}}
+X['fields'] and Y['fields'] are in a different order""")
+        else:
+            expect(str(error)).should.be.equal("""given
+X = {u'children': {}, u'fields': {u'age': u'22', u'name': u'John'}}
+    and
+Y = {u'children': {}, u'fields': {u'age': u'22', u'name': u'John'}}
+X[u'fields'] and Y[u'fields'] are in a different order""")

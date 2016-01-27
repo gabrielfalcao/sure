@@ -1,9 +1,6 @@
 import six
 
-if six.PY3:
-    def compat_repr(object_repr):
-        return object_repr
-else:
+if six.PY2:
     def compat_repr(object_repr):
         # compat_repr is designed to return all reprs with leading 'u's
         # inserted to make all strings look like unicode strings.
@@ -25,5 +22,8 @@ else:
                     in_quote = True
             result += char
         return result
+else:
+    def compat_repr(object_repr):
+        return object_repr
 
 text_type_name = six.text_type().__class__.__name__

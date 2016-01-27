@@ -28,11 +28,11 @@ try:
     from mock import _CallList
 except ImportError:
     from mock.mock import _CallList
-    
+
 import inspect
 from six import (
     text_type, integer_types, string_types, binary_type,
-    PY3, get_function_code
+    PY2, get_function_code
 )
 from sure.terminal import red, green, yellow
 
@@ -48,18 +48,18 @@ class FakeOrderedDict(OrderedDict):
         key_values = []
         for key, value in self.items():
             key, value = repr(key), repr(value)
-            if isinstance(value, binary_type) and not PY3:
+            if isinstance(value, binary_type) and PY2:
                 value = value.decode("utf-8")
             key_values.append("{0}: {1}".format(key, value))
         res = "{{{0}}}".format(", ".join(key_values))
         return res
 
-    if PY3:
-        def __repr__(self):
-            return self.__unicode__()
-    else:
+    if PY2:
         def __repr__(self):
             return self.__unicode__().encode('utf-8')
+    else:
+        def __repr__(self):
+            return self.__unicode__()
 
 
 def _obj_with_safe_repr(obj):
@@ -86,7 +86,7 @@ def safe_repr(val):
             # significantly easier
             val = _obj_with_safe_repr(val)
         ret = repr(val)
-        if not PY3:
+        if PY2:
             ret = ret.decode('utf-8')
     except UnicodeEncodeError:
         ret = red('a %r that cannot be represented' % type(val))

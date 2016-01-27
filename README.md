@@ -1,6 +1,6 @@
 # sure `1.2.24`
 
-A testing library for python with powerful and flexible assertions. Sure is heavily inspired by [should.js](https://github.com/visionmedia/should.js/)
+A testing library for python with powerful and flexible assertions. Sure is heavily inspired by [should.js](https://github.com/shouldjs/should.js)
 
 [![Build Status](https://travis-ci.org/gabrielfalcao/sure.png?branch=master)](https://travis-ci.org/gabrielfalcao/sure)
 

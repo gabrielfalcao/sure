@@ -51,6 +51,18 @@ if PY3:
 version = '1.2.24'
 
 
+def print_py26_deprecation_warn():
+    # warn the user if sure is used with python 2.6.
+    # sure will remove python 2.6 support in the next version.
+    # make sure to remove this code as soon as the python 2.6 support is removed
+    if sys.version_info.major == 2 and sys.version_info.minor == 6:
+        import warnings
+        warnings.simplefilter("always", PendingDeprecationWarning)
+        warnings.warn("The next version of sure will NO LONGER support python 2.6", PendingDeprecationWarning)
+
+print_py26_deprecation_warn()
+
+
 not_here_error = \
     'you have tried to access the attribute %r from the context ' \
     '(aka VariablesBag), but there is no such attribute assigned to it. ' \

@@ -41,7 +41,8 @@ acceptance: clean
 	@steadymark README.md
 	@steadymark spec/reference.md
 
+.PHONY: docs
 
-docs: acceptance
+docs:
 	@(cd docs && make html)
-	$(OPEN_COMMAND) docs/build/html/index.html
+	#$(OPEN_COMMAND) docs/build/html/index.html

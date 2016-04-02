@@ -1,13 +1,30 @@
-.. _Reference:
+.. _Matchers:
 
-Reference
-=========
+Built-in Matchers
+=================
 
-Equality
+Negation
+~~~~~~~~
+
+**aliases**:
+
+* ``.should_not``
+* ``.shouldnt``
+* ``.to_not``
+
+
+Equivalence
+~~~~~~~~~~~
+
+.equal()
 --------
 
-(number).should.equal(number)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**aliases**:
+
+* ``.should.equal()``
+* ``.should.eql()``
+
+**example**:
 
 .. code:: python
 
@@ -18,9 +35,15 @@ Equality
     (2).should.equal(8 / 4)
 
     (3).shouldnt.be.equal(5)
+    (2).should_not.be.equal(5)
 
-(float).should.equal(float, epsilon)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+especial case for floats
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+``float`` objects can be given an *epsilon* argument so that you
+can assert with the closest possible decimal precision.
+
+To use it, just add the ``epsilon`` keyword-argument to the equality assertion:
 
 .. code:: python
 
@@ -32,11 +55,13 @@ Equality
 
     (4.242423).shouldnt.be.equal(4.249000, epsilon=0.000005)
 
-Compare strings with diff
--------------------------
 
-(string).should\_not.be.different\_of(string)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.different_of()
+---------------
+
+**aliases**:
+
+* ``.should_not.be.different_of()``
 
 .. code:: python
 
@@ -69,7 +94,7 @@ this will give you and output like
       </root>'''
 
 {'a': 'collection'}.should.equal({'a': 'collection'}) does deep comparison
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------------------------------------------
 
 .. code:: python
 
@@ -78,7 +103,7 @@ this will give you and output like
     {'foo': 'bar'}.must.be.equal({'foo': 'bar'})
 
 "A string".lower().should.equal("a string") also works
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------
 
 .. code:: python
 
@@ -88,7 +113,7 @@ Similarity
 ----------
 
 should.look\_like and should\_not.look\_like
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------------
 
 .. code:: python
 
@@ -104,7 +129,7 @@ Iterables
 ---------
 
 should.contain and should\_not.contain
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 
 ``expect(collection).to.contain(item)`` is a shorthand to
 ``expect(item).to.be.within(collection)``
@@ -119,7 +144,7 @@ should.contain and should\_not.contain
     '1.2.3'.should.contain('2')
 
 should.match and should\_not.match matches regular expression
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------------------------
 
 You can also use the modifiers:
 
@@ -144,7 +169,7 @@ You can also use the modifiers:
     "FOO BAR CHUCK NORRIS".should_not.match(r'some \w+', re.M)
 
 {iterable}.should.be.empty applies to any iterable of length 0
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------------------------------
 
 .. code:: python
 
@@ -163,7 +188,7 @@ You can also use the modifiers:
     "Lincoln de Sousa".should_not.be.empty;
 
 {number}.should.be.within(0, 10) asserts inclusive numeric range:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------------------------
 
 .. code:: python
 
@@ -175,7 +200,7 @@ You can also use the modifiers:
     (1).shouldnt.be.within(5, 6)
 
 {member}.should.be.within({iterable}) asserts that a member is part of the iterable:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------------------------------------
 
 .. code:: python
 
@@ -189,7 +214,7 @@ You can also use the modifiers:
     'Bug'.should_not.be.within(['Sure 1.0'])
 
 should.be.none and should\_not.be.none
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 
 Assert whether an object is or not ``None``:
 
@@ -204,7 +229,7 @@ Assert whether an object is or not ``None``:
     (not None).should_not.be.none
 
 should.be.ok and shouldnt.be.ok
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 
 Assert truthfulness:
 
@@ -228,7 +253,7 @@ And negate truthfulness:
     {}.shouldnot.be.ok
 
 Assert existence of properties and their values
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------
 
 .. code:: python
 
@@ -261,7 +286,7 @@ assertions for the property value itself.
     basket2.should.have.property("fruits").with_value.being.equal(["apple", "banana"])
 
 Assert existence of keys and its values
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------------
 
 .. code:: python
 
@@ -284,7 +309,7 @@ dictionary key value itself.
     person.should.have.key("name").being.equal(None)
 
 Assert the length of objects with {iterable}.should.have.length\_of(N)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------------
 
 .. code:: python
 
@@ -296,7 +321,7 @@ Assert the length of objects with {iterable}.should.have.length\_of(N)
     {'john': 'person'}.should_not.have.length_of(2)
 
 Assert the magnitude of objects with {X}.should.be.greater\_than(Y) and {Y}.should.be.lower\_than(X) as well as {X}.should.be.greater\_than\_or\_equal\_to(Y) and {Y}.should.be.lower\_than\_or\_equal\_to(X)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 .. code:: python
 
@@ -311,7 +336,7 @@ Assert the magnitude of objects with {X}.should.be.greater\_than(Y) and {Y}.shou
     (1).should_not.be.lower_than_or_equal_to(0)
 
 callable.when.called\_with(arg1, kwarg1=2).should.throw(Exception)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------------------
 
 You can use this feature to assert that a callable raises an exception:
 
@@ -339,7 +364,7 @@ messages:
     range.when.called_with("chuck norris").should.throw(TypeError, re.compile(r'(cannot be interpreted as an integer|integer end argument expected)'))
 
 callable.when.called\_with(arg1, kwarg1=2).should.throw(Exception)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------------------
 
 You can use this feature to assert that a callable raises an exception:
 
@@ -367,7 +392,7 @@ messages:
     range.when.called_with("chuck norris").should.throw(TypeError, re.compile(r'(cannot be interpreted as an integer|integer end argument expected)'))
 
 function.when.called\_with(arg1, kwarg1=2).should.return\_value(value)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------------
 
 This is a shorthand for testing that a callable returns the expected
 result
@@ -388,7 +413,7 @@ this is the same as
 there are no differences between those 2 possibilities, use at will
 
 instance.should.be.a('typename') and instance.should.be.an('typename')
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------------------
 
 this takes a type name and checks if the class matches that name
 
@@ -404,7 +429,7 @@ this takes a type name and checks if the class matches that name
     range(10).should.be.a('collections.Iterable')
 
 instance.should.be.a(type) and instance.should.be.an(type)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------------------
 
 this takes the class (type) itself and checks if the object is an
 instance of it
@@ -421,7 +446,7 @@ instance of it
     [].should.be.a(list)
 
 instance.should.be.above(num) and instance.should.be.below(num)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------------------------------------
 
 assert the instance value above and below ``num``
 
@@ -443,7 +468,7 @@ above, all you need to do is wrap the object that is being compared in
 one of the following options: ``it``, ``this``, ``those`` and ``these``.
 
 Too long, don't read
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 All those possibilities below work just as the same
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -483,7 +508,7 @@ Also if you prefer using the assert keyword in your tests just go ahead an do it
     expect(10).to.not_be.equal(8)
 
 (lambda: None).should.be.callable
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------
 
 Test if something is or not callable
 
@@ -539,7 +564,7 @@ with numbers but with any of the assertions you read early in this
 documentation.
 
 Positive synonyms
-~~~~~~~~~~~~~~~~~
+-----------------
 
 .. code:: python
 
@@ -550,7 +575,7 @@ Positive synonyms
     (2 + 2).do.equals(4)
 
 Negative synonyms
-~~~~~~~~~~~~~~~~~
+-----------------
 
 .. code:: python
 
@@ -567,7 +592,7 @@ Negative synonyms
     expect(3).to.not_be.equal(1)
 
 Chain-up synonyms
-~~~~~~~~~~~~~~~~~
+-----------------
 
 Any of those synonyms work as an alias to the assertion builder:
 
@@ -586,7 +611,7 @@ Any of those synonyms work as an alias to the assertion builder:
     {"foo": 1}.does.have.key("foo").being.with_value.equal(1)
 
 Equality synonyms
-~~~~~~~~~~~~~~~~~
+-----------------
 
 .. code:: python
 
@@ -596,7 +621,7 @@ Equality synonyms
     (2).should.eql(2)
 
 Positive boolean synonyms
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
 .. code:: python
 
@@ -606,7 +631,7 @@ Positive boolean synonyms
     (not None).should.be.true
 
 Negative boolean synonyms
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
 .. code:: python
 

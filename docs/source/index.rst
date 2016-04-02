@@ -9,7 +9,7 @@ sure - assertion tools for python testing
 .. toctree::
    :maxdepth: 2
 
-   matcher-expressions
+   builtin-matchers
    api-reference
 
 

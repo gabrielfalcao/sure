@@ -48,7 +48,11 @@ from sure.registry import context as _registry
 if PY3:
     basestring = str
 
-version = '1.2.24'
+__VERSION__ = "1.2.24"
+__LICENSE__ = "GPLv3"
+__DESCRIPTION__ = "utility belt for automated testing in python for python"
+__AUTHOR__ = "Gabriel Falcao"
+__AUTHOR_EMAIL__ = "gabriel@nacaolivre.org"
 
 
 not_here_error = \

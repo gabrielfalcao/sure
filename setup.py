@@ -16,36 +16,32 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import ast
+import re
 import os
-import sys
 import codecs
 from setuptools import setup, find_packages
 
 
-class VersionFinder(ast.NodeVisitor):
-
-    def __init__(self):
-        self.version = None
-
-    def visit_Assign(self, node):
-        try:
-            if node.targets[0].id == 'version':
-                self.version = node.value.s
-        except:
-            pass
+def read_metafile(path):
+    """Read the contents from the given metafile."""
+    with codecs.open(path, "rb", encoding="utf-8") as meta_f:
+        return meta_f.read()
 
 
-def read_version():
-    """Read version from sure/version.py without loading any files"""
-    finder = VersionFinder()
-    finder.visit(ast.parse(local_file('sure', '__init__.py')))
-    return finder.version
+def get_meta(name):
+    """Get a metadata field from the metafiles data"""
+    meta_match = re.search(
+        r"^__{meta}__ = ['\"]([^'\"]*)['\"]".format(meta=name.upper()),
+        __META_DATA__, re.M
+    )
+
+    if not meta_match:
+        raise RuntimeError("Unable to find __{0}__ string.".format(name))
+    return meta_match.group(1)
 
 
-def local_file(*f):
-    path = os.path.join(os.path.dirname(__file__), *f)
-    return codecs.open(path, 'r', encoding='utf-8').read().encode('utf-8')
+__META_FILE__ = os.path.join("sure", "__init__.py")
+__META_DATA__ = read_metafile(__META_FILE__)
 
 
 install_requires = ['mock', 'six']
@@ -54,11 +50,12 @@ tests_require = ['nose']
 
 if __name__ == '__main__':
     setup(name='sure',
-          version=read_version(),
-          description='utility belt for automated testing in python for python',
-          author='Gabriel Falcao',
-          long_description=local_file('README.rst'),
-          author_email='gabriel@nacaolivre.org',
+          version=get_meta("version"),
+          license=get_meta("license"),
+          description=get_meta("description"),
+          long_description=read_metafile("README.rst"),
+          author=get_meta("author"),
+          author_email=get_meta("author_email"),
           include_package_data=True,
           url='http://github.com/gabrielfalcao/sure',
           packages=find_packages(exclude=['*tests*']),
@@ -67,5 +64,5 @@ if __name__ == '__main__':
           test_suite='nose.collector',
           classifiers=[
               'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-          ],
+          ]
     )

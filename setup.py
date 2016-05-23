@@ -23,6 +23,9 @@ import codecs
 from setuptools import setup, find_packages
 
 
+PROJECT_ROOT = os.path.dirname(__file__)
+
+
 class VersionFinder(ast.NodeVisitor):
 
     def __init__(self):
@@ -37,15 +40,22 @@ class VersionFinder(ast.NodeVisitor):
 
 
 def read_version():
-    """Read version from sure/version.py without loading any files"""
+    """Read version from sure/__init__.py without loading any files"""
     finder = VersionFinder()
-    finder.visit(ast.parse(local_file('sure', '__init__.py')))
+    path = os.path.join(PROJECT_ROOT, 'sure', '__init__.py')
+    with codecs.open(path, 'r', encoding='utf-8') as fp:
+        file_data = fp.read().encode('utf-8')
+        finder.visit(ast.parse(file_data))
+
     return finder.version
 
 
-def local_file(*f):
-    path = os.path.join(os.path.dirname(__file__), *f)
-    return codecs.open(path, 'r', encoding='utf-8').read().encode('utf-8')
+def local_text_file(*f):
+    path = os.path.join(PROJECT_ROOT, *f)
+    with open(path, 'rt') as fp:
+        file_data = fp.read()
+
+    return file_data
 
 
 install_requires = ['mock', 'six']
@@ -57,7 +67,7 @@ if __name__ == '__main__':
           version=read_version(),
           description='utility belt for automated testing in python for python',
           author='Gabriel Falcao',
-          long_description=local_file('README.rst'),
+          long_description=local_text_file('README.rst'),
           author_email='gabriel@nacaolivre.org',
           include_package_data=True,
           url='http://github.com/gabrielfalcao/sure',

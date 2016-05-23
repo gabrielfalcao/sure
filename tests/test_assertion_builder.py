@@ -738,3 +738,18 @@ def test_equals_handles_float_with_epsilon():
 
     expect(float_dict1).should_not.be.equal(float_dict2)
     expect(float_dict1).should.be.equal(float_dict2, epsilon=0.000005)
+
+
+def test_equals_dictionaries_with_tuple_keys():
+    ('.equal() with dict containing tuples as keys should work')
+
+    X = {
+        ("0.0.0.0", 3478): "chuck norris",
+    }
+
+    Y = {
+        ("0.0.0.0", 400): "chuck norris",
+    }
+
+    X.should_not.equal(Y)
+    Y.should_not.equal(X)

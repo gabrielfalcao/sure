@@ -1113,12 +1113,13 @@ def test_deep_equals_list_level1_fail_by_length_y_gt_x():
 
     assert that(assertions).raises(
         AssertionError, compat_repr(
-        "given\n" \
-        "X = ['one', 'yeah']\n" \
-        "    and\n" \
-        "Y = ['one', 'yeah', 'damn']\n" \
-        "Y has 3 items whereas X has only 2",
-    ))
+            "given\n"
+            "X = ['one', 'yeah']\n"
+            "    and\n"
+            "Y = ['one', 'yeah', 'damn']\n"
+            "Y has 3 items whereas X has only 2"
+        )
+    )
 
 
 def test_deep_equals_dict_level1_fails_missing_key_on_y():
@@ -1135,12 +1136,13 @@ def test_deep_equals_dict_level1_fails_missing_key_on_y():
 
     assert that(assertions).raises(
         AssertionError, compat_repr(
-        "given\n" \
-        "X = {'one': 'yeah'}\n" \
-        "    and\n" \
-        "Y = {'two': 'yeah'}\n" \
-        "X has the key 'one' whereas Y does not",
-    ))
+            "given\n"
+            "X = {'one': 'yeah'}\n"
+            "    and\n"
+            "Y = {'two': 'yeah'}\n"
+            "X has the key \"u'one'\" whereas Y does not"
+        )
+    )
 
 
 def test_deep_equals_failing_basic_vs_complex():
@@ -1403,12 +1405,13 @@ def test_deep_equals_dict_level3_fails_missing_key():
 
     assert that(assertions).raises(
         AssertionError, compat_repr(
-        "given\n" \
-        "X = {'my::all_users': [{'age': 33, 'name': 'John'}]}\n" \
-        "    and\n" \
-        "Y = {'my::all_users': [{'age': 30, 'foo': 'bar', 'name': 'John'}]}\n" \
-        "X['my::all_users'][0] does not have the key 'foo' whereas Y['my::all_users'][0] has it",
-    ))
+            "given\n"
+            "X = {'my::all_users': [{'age': 33, 'name': 'John'}]}\n"
+            "    and\n"
+            "Y = {'my::all_users': [{'age': 30, 'foo': 'bar', 'name': 'John'}]}\n"
+            "X['my::all_users'][0] does not have the key \"u'foo'\" whereas Y['my::all_users'][0] has it"
+        )
+    )
 
 
 def test_deep_equals_dict_level3_fails_extra_key():
@@ -1433,7 +1436,7 @@ def test_deep_equals_dict_level3_fails_extra_key():
         "X = {'my::all_users': [{'age': 33, 'foo': 'bar', 'name': 'John'}]}\n" \
         "    and\n" \
         "Y = {'my::all_users': [{'age': 30, 'name': 'John'}]}\n" \
-        "X['my::all_users'][0] has the key 'foo' whereas Y['my::all_users'][0] does not",
+        "X['my::all_users'][0] has the key \"u'foo'\" whereas Y['my::all_users'][0] does not",
     ))
 
 
@@ -1455,11 +1458,11 @@ def test_deep_equals_dict_level3_fails_different_key():
 
     assert that(assertions).raises(
         AssertionError, compat_repr(
-        "given\n" \
-        "X = {'my::all_users': [{'age': 33, 'foo': 'bar', 'name': 'John'}]}\n" \
-        "    and\n" \
-        "Y = {'my::all_users': [{'age': 33, 'bar': 'foo', 'name': 'John'}]}\n" \
-        "X['my::all_users'][0] has the key 'foo' whereas Y['my::all_users'][0] does not",
+        "given\n"
+        "X = {'my::all_users': [{'age': 33, 'foo': 'bar', 'name': 'John'}]}\n"
+        "    and\n"
+        "Y = {'my::all_users': [{'age': 33, 'bar': 'foo', 'name': 'John'}]}\n"
+        "X['my::all_users'][0] has the key \"u'foo'\" whereas Y['my::all_users'][0] does not"
     ))
 
 

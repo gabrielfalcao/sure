@@ -8,3 +8,4 @@ sure.egg-info/
 *.sublime-project
 *.sublime-workspace
 sure-*.tar.gz
+*.swp

@@ -881,10 +881,11 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def contain(self, what):
+        obj = self.obj
         if self.negative:
-            return expect(what).to.not_be.within(self.obj)
+            return expect(what).to.not_be.within(obj)
         else:
-            return expect(what).to.be.within(self.obj)
+            return expect(what).to.be.within(obj)
 
     @assertionmethod
     def match(self, regex, *args):

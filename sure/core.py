@@ -17,11 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
 
-try:
-    from collections import OrderedDict
-except ImportError:
-    from sure.ordereddict import OrderedDict
-
 import os
 
 try:
@@ -31,69 +26,12 @@ except ImportError:
 
 import inspect
 from six import (
-    text_type, integer_types, string_types, binary_type,
-    PY3, get_function_code
+    text_type, integer_types, string_types,
+    get_function_code
 )
+
 from sure.terminal import red, green, yellow
-
-
-class FakeOrderedDict(OrderedDict):
-    """ OrderedDict that has the repr of a normal dict
-
-    We must return a string whether in py2 or py3.
-    """
-    def __unicode__(self):
-        if not self:
-            return '{}'
-        key_values = []
-        for key, value in self.items():
-            key, value = repr(key), repr(value)
-            if isinstance(value, binary_type) and not PY3:
-                value = value.decode("utf-8")
-            key_values.append("{0}: {1}".format(key, value))
-        res = "{{{0}}}".format(", ".join(key_values))
-        return res
-
-    if PY3:
-        def __repr__(self):
-            return self.__unicode__()
-    else:
-        def __repr__(self):
-            return self.__unicode__().encode('utf-8')
-
-
-def _obj_with_safe_repr(obj):
-    if isinstance(obj, dict):
-        ret = FakeOrderedDict()
-        for key in sorted(obj.keys()):
-            ret[_obj_with_safe_repr(key)] = _obj_with_safe_repr(obj[key])
-    elif isinstance(obj, list):
-        ret = []
-        for x in obj:
-            if isinstance(x, dict):
-                ret.append(_obj_with_safe_repr(x))
-            else:
-                ret.append(x)
-    else:
-        ret = obj
-    return ret
-
-
-def safe_repr(val):
-    try:
-        if isinstance(val, dict):
-            # We special case dicts to have a sorted repr. This makes testing
-            # significantly easier
-            val = _obj_with_safe_repr(val)
-        ret = repr(val)
-        if not PY3:
-            ret = ret.decode('utf-8')
-    except UnicodeEncodeError:
-        ret = red('a %r that cannot be represented' % type(val))
-    else:
-        ret = green(ret)
-
-    return ret
+from sure.compat import safe_repr
 
 
 class DeepExplanation(text_type):

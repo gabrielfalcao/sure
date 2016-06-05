@@ -4,7 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- Python 3.4 and 3.5 support
+- Python 3.3, 3.4 and 3.5 support
 - pypy support
 - Support comparison of OrderedDict. Refs #55
 

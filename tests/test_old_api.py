@@ -24,7 +24,7 @@ import sure
 from sure.deprecated import that
 from sure import VariablesBag, expect
 from nose.tools import assert_equals, assert_raises
-from sure.compat_py3 import compat_repr, text_type_name
+from sure.compat import compat_repr, text_type_name
 
 
 def test_setup_with_context():

@@ -21,7 +21,7 @@ import mock
 from datetime import datetime
 from sure import this, these, those, it, expect, AssertionBuilder
 from six import PY3
-from sure.compat_py3 import compat_repr
+from sure.compat import compat_repr
 
 
 def test_assertion_builder_synonyms():

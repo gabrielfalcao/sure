@@ -8,6 +8,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - pypy support
 - Support comparison of OrderedDict. Refs #55
 
+### Fixed
+- `contain` assertion. Refs #104
+
 
 ## No previous changelog history.
 

@@ -435,13 +435,13 @@ class IdentityAssertion(object):
 
 
 class AssertionBuilder(object):
-    def __init__(self, name=None, negative=False, obj=None):
+    def __init__(self, name=None, negative=False, obj=None, callable_args=None, callable_kw=None):
         self._name = name
         self.negative = negative
 
         self.obj = obj
-        self._callable_args = []
-        self._callable_kw = {}
+        self._callable_args = callable_args or []
+        self._callable_kw = callable_kw or {}
         self._that = AssertionHelper(self.obj)
 
     def __call__(self, obj):
@@ -463,7 +463,8 @@ class AssertionBuilder(object):
         negative = attr in NEGATIVES
 
         if special_case:
-            return AssertionBuilder(attr, negative=negative, obj=self.obj)
+            return AssertionBuilder(attr, negative=negative, obj=self.obj,
+                 callable_args=self._callable_args, callable_kw=self._callable_kw)
 
         return super(AssertionBuilder, self).__getattribute__(attr)
 

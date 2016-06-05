@@ -31,7 +31,7 @@ from six import (
 )
 
 from sure.terminal import red, green, yellow
-from sure.compat import safe_repr
+from sure.compat import safe_repr, OrderedDict
 
 
 class DeepExplanation(text_type):
@@ -67,6 +67,7 @@ class DeepComparison(object):
             dict: self.compare_dicts,
             list: self.compare_iterables,
             tuple: self.compare_iterables,
+            OrderedDict: self.compare_ordereddict
         }
         return mapping.get(kind, self.compare_generic)(X, Y)
 
@@ -128,6 +129,24 @@ class DeepComparison(object):
                 ).compare()
                 if isinstance(child, DeepExplanation):
                     return child
+
+    def compare_ordereddict(self, X, Y):
+        """Compares two instances of an OrderedDict."""
+
+        # check if OrderedDict instances have the same keys and values
+        child = self.compare_dicts(X, Y)
+        if isinstance(child, DeepExplanation):
+            return child
+
+        # check if the order of the keys is the same
+        for i, j in zip(X.items(), Y.items()):
+            if i[0] != j[0]:
+                c = self.get_context()
+                msg = "X{0} and Y{1} are in a different order".format(
+                    red(c.current_X_keys), green(c.current_Y_keys)
+                )
+                return DeepExplanation(msg)
+        return True
 
     def get_context(self):
         if self._context:

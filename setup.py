@@ -23,6 +23,18 @@ import codecs
 from setuptools import setup, find_packages
 
 
+# These python versions of explicitly not supported
+# by sure. This is nostly because of the incompatiblities
+# with unicode strings. If there is an urgent reason why
+# to support it after all or if you have a quick fix
+# please open an issue on GitHub.
+EXPL_NOT_SUPPORTED_VERSIONS = ((3, 0), (3, 1), (3, 2))
+
+if sys.version_info[0:2] in EXPL_NOT_SUPPORTED_VERSIONS:
+    raise SystemExit("sure does explicitly not support the following python versions "
+                     "due to big incompatibilities: {0}".format(EXPL_NOT_SUPPORTED_VERSIONS))
+
+
 PROJECT_ROOT = os.path.dirname(__file__)
 
 

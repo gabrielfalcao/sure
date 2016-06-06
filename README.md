@@ -1,12 +1,11 @@
 # sure
 
-[![Join the chat at https://gitter.im/gabrielfalcao/sure](https://badges.gitter.im/gabrielfalcao/sure.svg)](https://gitter.im/gabrielfalcao/sure?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 A testing library for python with powerful and flexible assertions. Sure is heavily inspired by [should.js](https://github.com/shouldjs/should.js)
 
 [![Build Status](https://travis-ci.org/gabrielfalcao/sure.png?branch=master)](https://travis-ci.org/gabrielfalcao/sure)
 [![PyPI package version](https://badge.fury.io/py/sure.svg)](https://badge.fury.io/py/sure)
 [![PyPI python versions](https://img.shields.io/pypi/pyversions/sure.svg)](https://pypi.python.org/pypi/sure)
+[![Join the chat at https://gitter.im/gabrielfalcao/sure](https://badges.gitter.im/gabrielfalcao/sure.svg)](https://gitter.im/gabrielfalcao/sure?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # Installing
 

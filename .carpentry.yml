@@ -1,5 +1,0 @@
-shell: |
-  python setup.py build sdist
-  pip install -r requirements.txt
-  pip install rednose
-  nosetests --rednose --verbosity 2

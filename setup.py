@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"utility belt for automated testing in python for python"
+
 import ast
 import os
 import sys
@@ -70,6 +72,18 @@ def local_text_file(*f):
     return file_data
 
 
+def read_readme():
+    """Read README content.
+    If the README.rst file does not exist yet
+    (this is the case when not releasing)
+    only the short description is returned.
+    """
+    try:
+        return local_text_file('README.rst')
+    except IOError:
+        return __doc__
+
+
 install_requires = ['mock', 'six']
 tests_require = ['nose']
 
@@ -77,8 +91,8 @@ tests_require = ['nose']
 if __name__ == '__main__':
     setup(name='sure',
           version=read_version(),
-          description='utility belt for automated testing in python for python',
-          long_description=local_text_file('README.rst'),
+          description=__doc__,
+          long_description=read_readme(),
           url='http://github.com/gabrielfalcao/sure',
           author='Gabriel Falcao',
           author_email='gabriel@nacaolivre.org',

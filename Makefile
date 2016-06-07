@@ -17,9 +17,9 @@ export SURE_NO_COLORS := true
 install_deps:
 	@pip install -r development.txt
 
-test:
+test: readme
 	@python setup.py build
-	@nosetests -s --verbosity=2 tests --rednose
+	@tox
 	@steadymark OLD_API.md
 	@steadymark README.md
 
@@ -28,14 +28,17 @@ clean:
 	@for pattern in `cat .gitignore`; do rm -rf $$pattern; find . -name "$$pattern" -exec rm -rf {} \;; done
 	@echo "OK!"
 
+
+readme:
+	@pandoc README.md --from markdown --to rst -o README.rst
+
+publish: readme
+	@python setup.py sdist register upload
+
 release: clean test publish
 	@printf "Exporting to $(filename)... "
-	@tar czf $(filename) sure setup.py README.md COPYING
+	@tar czf $(filename) sure setup.py README.md README.rst COPYING
 	@echo "DONE!"
-
-publish:
-	@./.release
-	@python setup.py sdist register upload
 
 acceptance: clean
 	@steadymark README.md

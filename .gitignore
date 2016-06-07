@@ -1,11 +1,20 @@
+# python bytecode
 *.pyc
-.coverage
+__pycache__
+
+# pip and setuptools
 docs/_build
 build/
 dist/
-sure.egg-info/
+*.egg-info/
+sure-*.tar.gz
+README.rst
+
+# temporary test files and dirs
+.coverage
 .tox
+
+# temporary editor files
 *.sublime-project
 *.sublime-workspace
-sure-*.tar.gz
 *.swp

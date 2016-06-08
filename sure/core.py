@@ -33,6 +33,13 @@ from sure.terminal import red, green, yellow
 from sure.compat import safe_repr, OrderedDict
 
 
+class Anything(object):
+    """Represents any possible value."""
+    pass
+
+anything = Anything()
+
+
 class DeepExplanation(text_type):
     def get_header(self, X, Y, suffix):
         params = (safe_repr(X), safe_repr(Y), text_type(suffix))
@@ -56,7 +63,7 @@ class DeepComparison(object):
 
     def is_simple(self, obj):
         return isinstance(obj, (
-            string_types, integer_types
+            string_types, integer_types, Anything
         ))
 
     def compare_complex_stuff(self, X, Y):
@@ -207,7 +214,7 @@ class DeepComparison(object):
 
         c = self.get_context()
         if self.is_simple(X) and self.is_simple(Y):  # both simple
-            if X == Y:
+            if X == Y or anything in (X, Y):
                 return True
             c = self.get_context()
             m = "X%s is %%r whereas Y%s is %%r"

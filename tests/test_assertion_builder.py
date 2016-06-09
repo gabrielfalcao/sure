@@ -18,10 +18,12 @@
 from __future__ import unicode_literals
 import re
 import mock
+from collections import OrderedDict
+
 from datetime import datetime
 from sure import this, these, those, it, expect, AssertionBuilder
 from six import PY3
-from sure.compat_py3 import compat_repr
+from sure.compat import compat_repr
 
 
 def test_assertion_builder_synonyms():
@@ -52,7 +54,7 @@ def test_4_equal_2p2():
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
-        "4 should differ to 4, but is the same thing")
+        "4 should differ from 4, but is the same thing")
 
 
 def test_2_within_0a2():
@@ -314,11 +316,11 @@ def test_be():
     def wrong_should_not():
         return this(d2).should_not.be(d1)
 
-    wrong_should_not.when.called.should.throw(
+    expect(wrong_should_not).when.called.should.throw(
         AssertionError,
         '{} should not be the same object as {}, but it is',
     )
-    wrong_should.when.called.should.throw(
+    expect(wrong_should).when.called.should.throw(
         AssertionError,
         '{} should be the same object as {}, but it is not',
     )
@@ -378,7 +380,7 @@ def test_have_property_with_value():
 
     expect(opposite).when.called.to.throw(AssertionError)
     expect(opposite).when.called.to.throw(compat_repr(
-        "'John Doe' should differ to 'John Doe', but is the same thing"))
+        "'John Doe' should differ from 'John Doe', but is the same thing"))
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(compat_repr(
@@ -428,7 +430,7 @@ def test_have_key_with_value():
 
     expect(opposite).when.called.to.throw(AssertionError)
     expect(opposite).when.called.to.throw(compat_repr(
-        "'John Doe' should differ to 'John Doe', but is the same thing"))
+        "'John Doe' should differ from 'John Doe', but is the same thing"))
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(compat_repr(
@@ -538,7 +540,7 @@ def test_equal_with_repr_of_complex_types_and_repr():
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(compat_repr(
-        "{'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'} should differ to {'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'}, but is the same thing"))
+        "{'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'} should differ from {'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'}, but is the same thing"))
 
 
 def test_match_regex():
@@ -648,13 +650,19 @@ def test_throw_matching_regex():
         raise RuntimeError('should not have reached here')
 
     except AssertionError as e:
-        expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
+        if PY3:
+            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
+        else:
+            expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
 
     try:
         expect(blah).when.called_with(1).should.throw(ValueError, re.compile(r'invalid regex'))
         raise RuntimeError('should not have reached here')
     except AssertionError as e:
-        expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 633]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
+        if PY3:
+            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
+        else:
+            expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
 
 def test_should_not_be_different():
     ("'something'.should_not.be.different('SOMETHING'.lower())")
@@ -707,7 +715,7 @@ def test_equals_handles_mock_call_list():
     # Then I see I can compare the call list without manually
     # converting anything
 
-    callback.call_args_list.should.equal([
+    expect(callback.call_args_list).should.equal([
         mock.call(a=1, b=2),
         mock.call(a=3, b=4),
     ])
@@ -732,3 +740,57 @@ def test_equals_handles_float_with_epsilon():
 
     expect(float_dict1).should_not.be.equal(float_dict2)
     expect(float_dict1).should.be.equal(float_dict2, epsilon=0.000005)
+
+
+def test_equals_dictionaries_with_tuple_keys():
+    ('.equal() with dict containing tuples as keys should work')
+
+    X = {
+        ("0.0.0.0", 3478): "chuck norris",
+    }
+
+    Y = {
+        ("0.0.0.0", 400): "chuck norris",
+    }
+
+    expect(X).should_not.equal(Y)
+    expect(Y).should_not.equal(X)
+
+
+def test_ordereddict_comparison():
+    ".equal(OrderedDict) should check if two ordered dicts are the same"
+    result = {
+        "fields": OrderedDict([
+            ("name", "John"),
+            ("age", "22"),
+        ]),
+        "children": OrderedDict([]),
+    }
+
+    expectation = {
+        "fields": OrderedDict([
+            ("age", "22"),
+            ("name", "John"),
+        ]),
+        "children": OrderedDict([]),
+    }
+
+    expect(result).shouldnt.be.equal(expectation)
+    expect(result).should.be.equal(result)
+
+    try:
+        expect(result).should.equal(expectation)
+        raise RuntimeError("should not have reached here")
+    except AssertionError as error:
+        if PY3:
+            expect(str(error)).should.be.equal("""given
+X = {'children': {}, 'fields': {'age': '22', 'name': 'John'}}
+    and
+Y = {'children': {}, 'fields': {'age': '22', 'name': 'John'}}
+X['fields'] and Y['fields'] are in a different order""")
+        else:
+            expect(str(error)).should.be.equal("""given
+X = {u'children': {}, u'fields': {u'age': u'22', u'name': u'John'}}
+    and
+Y = {u'children': {}, u'fields': {u'age': u'22', u'name': u'John'}}
+X[u'fields'] and Y[u'fields'] are in a different order""")

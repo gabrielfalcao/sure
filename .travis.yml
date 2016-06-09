@@ -1,13 +1,11 @@
 language: python
+sudo: false
 python:
-  - "2.6"
   - "2.7"
+  - "pypy"
   - "3.3"
-
-
-matrix:
-  allow_failures:
-    - python: "3.3"
+  - "3.4"
+  - "3.5"
 
 # command to install dependencies
 install:

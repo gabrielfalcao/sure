@@ -19,24 +19,25 @@ from __future__ import unicode_literals
 
 import sure
 from sure import expect
+from sure.magic import is_cpython
+
+if is_cpython:
+    if sure.allows_new_syntax:
+        def test_it_works_with_objects():
+            ("anything that inherits from object should be patched")
+
+            (4).should.equal(2 + 2)
+            "foo".should.equal("f" + ("o" * 2))
+            {}.should.be.empty
 
 
-if sure.allows_new_syntax:
-    def test_it_works_with_objects():
-        ("anything that inherits from object should be patched")
+    def test_dir_conceals_sure_specific_attributes():
+        ("dir(obj) should conceal names of methods that were grafted by sure")
 
-        (4).should.equal(2 + 2)
-        "foo".should.equal("f" + ("o" * 2))
-        {}.should.be.empty
+        x = 123
 
-
-def test_dir_conceals_sure_specific_attributes():
-    ("dir(obj) should conceal names of methods that were grafted by sure")
-
-    x = 123
-
-    expect(set(dir(x)).intersection(set(sure.POSITIVES))).to.be.empty
-    expect(set(dir(x)).intersection(set(sure.NEGATIVES))).to.be.empty
+        expect(set(dir(x)).intersection(set(sure.POSITIVES))).to.be.empty
+        expect(set(dir(x)).intersection(set(sure.NEGATIVES))).to.be.empty
 
 
 # TODO

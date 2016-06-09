@@ -22,9 +22,10 @@ from six.moves import xrange
 
 import sure
 from sure.deprecated import that
+from sure.magic import is_cpython
 from sure import VariablesBag, expect
 from nose.tools import assert_equals, assert_raises
-from sure.compat_py3 import compat_repr, text_type_name
+from sure.compat import compat_repr, safe_repr, text_type_name
 
 
 def test_setup_with_context():
@@ -57,7 +58,7 @@ def test_context_is_not_optional():
 
     assert that(it_crashes).raises(
         TypeError, (
-        "the function it_crashes defined at test_old_api.py line 55, is being "
+        "the function it_crashes defined at test_old_api.py line 56, is being "
         "decorated by either @that_with_context or @scenario, so it should "
         "take at least 1 parameter, which is the test context"),
     )
@@ -524,9 +525,11 @@ def test_that_contains_none():
         # We can't use unicode in Py2, otherwise it will try to coerce
         assert that('foobar' if PY3 else b'foobar').contains(None)
 
+    error_msg = "'in <string>' requires string as left operand, not NoneType" if is_cpython else "'NoneType' does not have the buffer interface"
+
     assert that(assertions).raises(
         TypeError,
-        "'in <string>' requires string as left operand, not NoneType",
+        error_msg
     )
 
 
@@ -537,9 +540,10 @@ def test_that_none_contains_string():
         assert that(None).contains('bungalow')
         assert False, 'should not reach here'
     except Exception as e:
+        error_msg = "argument of type 'NoneType' is not iterable" if is_cpython else "'NoneType' object is not iterable"
         assert_equals(
             text_type(e),
-            "argument of type 'NoneType' is not iterable",
+            error_msg
         )
 
 
@@ -891,7 +895,7 @@ def test_depends_on_failing_due_nothing_found():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "lonely_action" defined at %s:900 ' \
+    error = 'the action "lonely_action" defined at %s:904 ' \
         'depends on the attribute "something" to be available in the' \
         ' context. It turns out that there are no actions providing ' \
         'that. Please double-check the implementation' % fullpath
@@ -917,10 +921,10 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "my_action" defined at {0}:930 ' \
+    error = 'the action "my_action" defined at {0}:934 ' \
         'depends on the attribute "some_attr" to be available in the context.'\
         ' You need to call one of the following actions beforehand:\n' \
-        ' -> dependency_action at {0}:926'.replace('{0}', fullpath)
+        ' -> dependency_action at {0}:930'.replace('{0}', fullpath)
 
     def with_setup(context):
         @action_for(context, provides=['some_attr'])
@@ -1113,12 +1117,13 @@ def test_deep_equals_list_level1_fail_by_length_y_gt_x():
 
     assert that(assertions).raises(
         AssertionError, compat_repr(
-        "given\n" \
-        "X = ['one', 'yeah']\n" \
-        "    and\n" \
-        "Y = ['one', 'yeah', 'damn']\n" \
-        "Y has 3 items whereas X has only 2",
-    ))
+            "given\n"
+            "X = ['one', 'yeah']\n"
+            "    and\n"
+            "Y = ['one', 'yeah', 'damn']\n"
+            "Y has 3 items whereas X has only 2"
+        )
+    )
 
 
 def test_deep_equals_dict_level1_fails_missing_key_on_y():
@@ -1135,12 +1140,13 @@ def test_deep_equals_dict_level1_fails_missing_key_on_y():
 
     assert that(assertions).raises(
         AssertionError, compat_repr(
-        "given\n" \
-        "X = {'one': 'yeah'}\n" \
-        "    and\n" \
-        "Y = {'two': 'yeah'}\n" \
-        "X has the key 'one' whereas Y does not",
-    ))
+            "given\n"
+            "X = {{'one': 'yeah'}}\n"
+            "    and\n"
+            "Y = {{'two': 'yeah'}}\n"
+            "X has the key \"{0}\" whereas Y does not"
+        ).format(safe_repr('one'))
+    )
 
 
 def test_deep_equals_failing_basic_vs_complex():
@@ -1403,12 +1409,13 @@ def test_deep_equals_dict_level3_fails_missing_key():
 
     assert that(assertions).raises(
         AssertionError, compat_repr(
-        "given\n" \
-        "X = {'my::all_users': [{'age': 33, 'name': 'John'}]}\n" \
-        "    and\n" \
-        "Y = {'my::all_users': [{'age': 30, 'foo': 'bar', 'name': 'John'}]}\n" \
-        "X['my::all_users'][0] does not have the key 'foo' whereas Y['my::all_users'][0] has it",
-    ))
+            "given\n"
+            "X = {{'my::all_users': [{{'age': 33, 'name': 'John'}}]}}\n"
+            "    and\n"
+            "Y = {{'my::all_users': [{{'age': 30, 'foo': 'bar', 'name': 'John'}}]}}\n"
+            "X['my::all_users'][0] does not have the key \"{0}\" whereas Y['my::all_users'][0] has it"
+        ).format(safe_repr('foo'))
+    )
 
 
 def test_deep_equals_dict_level3_fails_extra_key():
@@ -1429,12 +1436,12 @@ def test_deep_equals_dict_level3_fails_extra_key():
 
     assert that(assertions).raises(
         AssertionError, compat_repr(
-        "given\n" \
-        "X = {'my::all_users': [{'age': 33, 'foo': 'bar', 'name': 'John'}]}\n" \
-        "    and\n" \
-        "Y = {'my::all_users': [{'age': 30, 'name': 'John'}]}\n" \
-        "X['my::all_users'][0] has the key 'foo' whereas Y['my::all_users'][0] does not",
-    ))
+        "given\n"
+        "X = {{'my::all_users': [{{'age': 33, 'foo': 'bar', 'name': 'John'}}]}}\n"
+        "    and\n"
+        "Y = {{'my::all_users': [{{'age': 30, 'name': 'John'}}]}}\n"
+        "X['my::all_users'][0] has the key \"{0}\" whereas Y['my::all_users'][0] does not"
+    ).format(safe_repr('foo')))
 
 
 def test_deep_equals_dict_level3_fails_different_key():
@@ -1455,12 +1462,12 @@ def test_deep_equals_dict_level3_fails_different_key():
 
     assert that(assertions).raises(
         AssertionError, compat_repr(
-        "given\n" \
-        "X = {'my::all_users': [{'age': 33, 'foo': 'bar', 'name': 'John'}]}\n" \
-        "    and\n" \
-        "Y = {'my::all_users': [{'age': 33, 'bar': 'foo', 'name': 'John'}]}\n" \
-        "X['my::all_users'][0] has the key 'foo' whereas Y['my::all_users'][0] does not",
-    ))
+        "given\n"
+        "X = {{'my::all_users': [{{'age': 33, 'foo': 'bar', 'name': 'John'}}]}}\n"
+        "    and\n"
+        "Y = {{'my::all_users': [{{'age': 33, 'bar': 'foo', 'name': 'John'}}]}}\n"
+        "X['my::all_users'][0] has the key \"{0}\" whereas Y['my::all_users'][0] does not"
+    ).format(safe_repr('foo')))
 
 
 def test_deep_equals_list_level2_fail_by_length_x_gt_y():

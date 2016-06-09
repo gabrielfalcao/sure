@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
 # Copyright (C) <2010-2013>  Gabriel Falcão <gabriel@nacaolivre.org>
@@ -48,7 +47,19 @@ from sure.registry import context as _registry
 if PY3:
     basestring = str
 
-version = '1.2.13'
+version = '1.3.0'
+
+
+def print_py26_deprecation_warn():
+    # warn the user if sure is used with python 2.6.
+    # sure will remove python 2.6 support in the next version.
+    # make sure to remove this code as soon as the python 2.6 support is removed
+    if sys.version_info[0] == 2 and sys.version_info[1] == 6:
+        import warnings
+        warnings.simplefilter("always", PendingDeprecationWarning)
+        warnings.warn("The next version of sure will NO LONGER support python 2.6", PendingDeprecationWarning)
+
+print_py26_deprecation_warn()
 
 
 not_here_error = \
@@ -435,20 +446,23 @@ class IdentityAssertion(object):
 
 
 class AssertionBuilder(object):
-    def __init__(self, name=None, negative=False, obj=None):
+    def __init__(self, name=None, negative=False, obj=None, callable_args=None, callable_kw=None):
         self._name = name
         self.negative = negative
 
         self.obj = obj
-        self._callable_args = []
-        self._callable_kw = {}
+        self._callable_args = callable_args or []
+        self._callable_kw = callable_kw or {}
         self._that = AssertionHelper(self.obj)
 
     def __call__(self, obj):
+
         self.obj = obj
 
         if isinstance(obj, self.__class__):
             self.obj = obj.obj
+            self._callable_args = obj._callable_args
+            self._callable_kw = obj._callable_kw
 
         self._that = AssertionHelper(self.obj)
         return self
@@ -460,7 +474,8 @@ class AssertionBuilder(object):
         negative = attr in NEGATIVES
 
         if special_case:
-            return AssertionBuilder(attr, negative=negative, obj=self.obj)
+            return AssertionBuilder(attr, negative=negative, obj=self.obj,
+                 callable_args=self._callable_args, callable_kw=self._callable_kw)
 
         return super(AssertionBuilder, self).__getattribute__(attr)
 
@@ -648,7 +663,7 @@ class AssertionBuilder(object):
             if error:
                 return True
 
-            msg = '%s should differ to %s, but is the same thing'
+            msg = '%s should differ from %s, but is the same thing'
             raise AssertionError(msg % (safe_repr(self.obj), safe_repr(what)))
 
         else:
@@ -807,7 +822,6 @@ class AssertionBuilder(object):
 
         return self._that.len_is(num)
 
-    @assertionmethod
     def called_with(self, *args, **kw):
         self._callable_args = args
         self._callable_kw = kw
@@ -866,10 +880,11 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def contain(self, what):
+        obj = self.obj
         if self.negative:
-            return expect(what).to.not_be.within(self.obj)
+            return expect(what).to.not_be.within(obj)
         else:
-            return expect(what).to.be.within(self.obj)
+            return expect(what).to.be.within(obj)
 
     @assertionmethod
     def match(self, regex, *args):

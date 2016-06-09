@@ -1,4 +1,3 @@
 -r requirements.txt
-steadymark==0.5.5
-markment==0.2.21
-curdling==0.4.0
+Sphinx==1.4.3
+steadymark==0.7.3

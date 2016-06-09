@@ -1,4 +1,4 @@
-sure ``1.2.12``
+sure ``1.2.24``
 ===============
 
 A testing library for python with powerful and flexible assertions. Sure
@@ -42,7 +42,6 @@ Equality
 
     (4).should.be.equal(2 + 2)
     (7.5).should.eql(3.5 + 4)
-    (2).should.equal(8 / 4)
 
     (3).shouldnt.be.equal(5)
 

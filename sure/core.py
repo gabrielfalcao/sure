@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
 # Copyright (C) <2010-2013>  Gabriel Falcão <gabriel@nacaolivre.org>
@@ -17,82 +16,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
 
-try:
-    from collections import OrderedDict
-except ImportError:
-    from sure.ordereddict import OrderedDict
-
 import os
-import mock
+
+try:
+    from mock import _CallList
+except ImportError:
+    from mock.mock import _CallList
+
 import inspect
 from six import (
-    text_type, integer_types, string_types, binary_type,
-    PY3, get_function_code
+    text_type, integer_types, string_types,
+    get_function_code
 )
+
 from sure.terminal import red, green, yellow
-
-MocksCallList = getattr(mock, '_CallList', None)
-if not MocksCallList:
-    MocksCallList = mock.mock._CallList
-    
-
-class FakeOrderedDict(OrderedDict):
-    """ OrderedDict that has the repr of a normal dict
-
-    We must return a string whether in py2 or py3.
-    """
-    def __unicode__(self):
-        if not self:
-            return '{}'
-        key_values = []
-        for key, value in self.items():
-            key, value = repr(key), repr(value)
-            if isinstance(value, binary_type) and not PY3:
-                value = value.decode("utf-8")
-            key_values.append("{0}: {1}".format(key, value))
-        res = "{{{0}}}".format(", ".join(key_values))
-        return res
-
-    if PY3:
-        def __repr__(self):
-            return self.__unicode__()
-    else:
-        def __repr__(self):
-            return self.__unicode__().encode('utf-8')
-
-
-def _obj_with_safe_repr(obj):
-    if isinstance(obj, dict):
-        ret = FakeOrderedDict()
-        for key in sorted(obj.keys()):
-            ret[_obj_with_safe_repr(key)] = _obj_with_safe_repr(obj[key])
-    elif isinstance(obj, list):
-        ret = []
-        for x in obj:
-            if isinstance(x, dict):
-                ret.append(_obj_with_safe_repr(x))
-            else:
-                ret.append(x)
-    else:
-        ret = obj
-    return ret
-
-
-def safe_repr(val):
-    try:
-        if isinstance(val, dict):
-            # We special case dicts to have a sorted repr. This makes testing
-            # significantly easier
-            val = _obj_with_safe_repr(val)
-        ret = repr(val)
-        if not PY3:
-            ret = ret.decode('utf-8')
-    except UnicodeEncodeError:
-        ret = red('a %r that cannot be represented' % type(val))
-    else:
-        ret = green(ret)
-
-    return ret
+from sure.compat import safe_repr, OrderedDict
 
 
 class DeepExplanation(text_type):
@@ -128,6 +66,7 @@ class DeepComparison(object):
             dict: self.compare_dicts,
             list: self.compare_iterables,
             tuple: self.compare_iterables,
+            OrderedDict: self.compare_ordereddict
         }
         return mapping.get(kind, self.compare_generic)(X, Y)
 
@@ -162,14 +101,14 @@ class DeepComparison(object):
             msg = "X%s has the key %%r whereas Y%s does not" % (
                 red(c.current_X_keys),
                 green(c.current_Y_keys),
-            ) % diff_x[0]
+            ) % safe_repr(diff_x[0])
             return DeepExplanation(msg)
 
         elif diff_y:
             msg = "X%s does not have the key %%r whereas Y%s has it" % (
                 red(c.current_X_keys),
                 green(c.current_Y_keys),
-            ) % diff_y[0]
+            ) % safe_repr(diff_y[0])
             return DeepExplanation(msg)
 
         elif X == Y:
@@ -189,6 +128,24 @@ class DeepComparison(object):
                 ).compare()
                 if isinstance(child, DeepExplanation):
                     return child
+
+    def compare_ordereddict(self, X, Y):
+        """Compares two instances of an OrderedDict."""
+
+        # check if OrderedDict instances have the same keys and values
+        child = self.compare_dicts(X, Y)
+        if isinstance(child, DeepExplanation):
+            return child
+
+        # check if the order of the keys is the same
+        for i, j in zip(X.items(), Y.items()):
+            if i[0] != j[0]:
+                c = self.get_context()
+                msg = "X{0} and Y{1} are in a different order".format(
+                    red(c.current_X_keys), green(c.current_Y_keys)
+                )
+                return DeepExplanation(msg)
+        return True
 
     def get_context(self):
         if self._context:
@@ -242,10 +199,10 @@ class DeepComparison(object):
     def compare(self):
         X, Y = self.operands
 
-        if isinstance(X, MocksCallList):
+        if isinstance(X, _CallList):
             X = list(X)
 
-        if isinstance(Y, MocksCallList):
+        if isinstance(Y, _CallList):
             X = list(Y)
 
         c = self.get_context()

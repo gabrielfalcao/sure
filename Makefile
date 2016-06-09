@@ -1,3 +1,12 @@
+# Config
+OSNAME			:= $(shell uname)
+
+ifeq ($(OSNAME), Linux)
+OPEN_COMMAND		:= gnome-open
+else
+OPEN_COMMAND		:= open
+endif
+
 all: install_deps test
 
 filename=sure-`python -c 'import sure;print sure.version'`.tar.gz
@@ -9,10 +18,10 @@ install_deps:
 	@pip install -r development.txt
 
 test:
+	@python setup.py build
 	@nosetests -s --verbosity=2 tests --rednose
 	@steadymark OLD_API.md
 	@steadymark README.md
-	@pandoc -o readme.rst README.md
 
 clean:
 	@printf "Cleaning up files that are already in .gitignore... "
@@ -28,18 +37,12 @@ publish:
 	@./.release
 	@python setup.py sdist register upload
 
-docstests: clean
+acceptance: clean
 	@steadymark README.md
 	@steadymark spec/reference.md
 
+.PHONY: docs
 
-docs: docstests
-	@markment -t rtd -o . --sitemap-for="http://falcao.it/sure" spec
-	@git co master && \
-		(git br -D gh-pages || printf "") && \
-		git checkout --orphan gh-pages && \
-		markment -t rtd -o . --sitemap-for="http://falcao.it/sure" spec && \
-		git add . && \
-		git commit -am 'documentation' && \
-		git push --force origin gh-pages && \
-		git checkout master
+docs:
+	@(cd docs && make html)
+	#$(OPEN_COMMAND) docs/build/html/index.html

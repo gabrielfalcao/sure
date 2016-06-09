@@ -1,8 +1,10 @@
-# sure `1.2.13`
+# sure
 
-A testing library for python with powerful and flexible assertions. Sure is heavily inspired by [should.js](https://github.com/visionmedia/should.js/)
+A testing library for python with powerful and flexible assertions. Sure is heavily inspired by [should.js](https://github.com/shouldjs/should.js)
 
 [![Build Status](https://travis-ci.org/gabrielfalcao/sure.png?branch=master)](https://travis-ci.org/gabrielfalcao/sure)
+[![PyPI package version](https://badge.fury.io/py/sure.svg)](https://badge.fury.io/py/sure)
+[![PyPI python versions](https://img.shields.io/pypi/pyversions/sure.svg)](https://pypi.python.org/pypi/sure)
 
 # Installing
 
@@ -32,7 +34,6 @@ import sure
 
 (4).should.be.equal(2 + 2)
 (7.5).should.eql(3.5 + 4)
-(2).should.equal(8 / 4)
 
 (3).shouldnt.be.equal(5)
 ```

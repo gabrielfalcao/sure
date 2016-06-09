@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
 # Copyright (C) <2010-2013>  Gabriel Falcão <gabriel@nacaolivre.org>
@@ -42,10 +41,10 @@ from sure.core import itemize_length
 
 
 def identify_callable_location(callable_object):
-    filename = os.path.relpath(callable_object.func_code.co_filename)
-    lineno = callable_object.func_code.co_firstlineno
-    callable_name = callable_object.func_code.co_name
-    return b'{0} [{1} line {2}]'.format(callable_name, filename, lineno)
+    filename = os.path.relpath(callable_object.__code__.co_filename)
+    lineno = callable_object.__code__.co_firstlineno
+    callable_name = callable_object.__code__.co_name
+    return '{0} [{1} line {2}]'.format(callable_name, filename, lineno).encode()
 
 
 def is_iterable(obj):
@@ -238,7 +237,7 @@ class AssertionHelper(object):
 
         return True
 
-    @explanation('%r should differ to %r, but is the same thing')
+    @explanation('%r should differ from %r, but is the same thing')
     def differs(self, dst):
         return self._src != dst
 

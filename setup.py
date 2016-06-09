@@ -18,7 +18,24 @@
 
 import ast
 import os
+import sys
+import codecs
 from setuptools import setup, find_packages
+
+
+# These python versions of explicitly not supported
+# by sure. This is nostly because of the incompatiblities
+# with unicode strings. If there is an urgent reason why
+# to support it after all or if you have a quick fix
+# please open an issue on GitHub.
+EXPL_NOT_SUPPORTED_VERSIONS = ((3, 0), (3, 1), (3, 2))
+
+if sys.version_info[0:2] in EXPL_NOT_SUPPORTED_VERSIONS:
+    raise SystemExit("sure does explicitly not support the following python versions "
+                     "due to big incompatibilities: {0}".format(EXPL_NOT_SUPPORTED_VERSIONS))
+
+
+PROJECT_ROOT = os.path.dirname(__file__)
 
 
 class VersionFinder(ast.NodeVisitor):
@@ -35,14 +52,22 @@ class VersionFinder(ast.NodeVisitor):
 
 
 def read_version():
-    """Read version from sure/version.py without loading any files"""
+    """Read version from sure/__init__.py without loading any files"""
     finder = VersionFinder()
-    finder.visit(ast.parse(local_file('sure', '__init__.py')))
+    path = os.path.join(PROJECT_ROOT, 'sure', '__init__.py')
+    with codecs.open(path, 'r', encoding='utf-8') as fp:
+        file_data = fp.read().encode('utf-8')
+        finder.visit(ast.parse(file_data))
+
     return finder.version
 
 
-local_file = lambda *f: \
-    open(os.path.join(os.path.dirname(__file__), *f)).read()
+def local_text_file(*f):
+    path = os.path.join(PROJECT_ROOT, *f)
+    with open(path, 'rt') as fp:
+        file_data = fp.read()
+
+    return file_data
 
 
 install_requires = ['mock==1.0.1', 'six==1.9.0']
@@ -53,16 +78,34 @@ if __name__ == '__main__':
     setup(name='sure',
           version=read_version(),
           description='utility belt for automated testing in python for python',
-          author='Gabriel Falcao',
-          long_description=local_file('README.rst'),
-          author_email='gabriel@nacaolivre.org',
-          include_package_data=True,
+          long_description=local_text_file('README.rst'),
           url='http://github.com/gabrielfalcao/sure',
+          author='Gabriel Falcao',
+          author_email='gabriel@nacaolivre.org',
+          maintainer='Timo Furrer',
+          maintainer_email='tuxtimo@gmail.com',
+          include_package_data=True,
           packages=find_packages(exclude=['*tests*']),
           install_requires=install_requires,
           tests_require=tests_require,
           test_suite='nose.collector',
           classifiers=[
+              'Development Status :: 5 - Production/Stable',
+              'Environment :: Console',
               'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-          ],
+              'Operating System :: MacOS :: MacOS X',
+              'Operating System :: POSIX',
+              'Operating System :: POSIX :: Linux',
+              'Programming Language :: Python',
+              'Programming Language :: Python :: 2',
+              'Programming Language :: Python :: 2.7',
+              'Programming Language :: Python :: 3',
+              'Programming Language :: Python :: 3.3',
+              'Programming Language :: Python :: 3.4',
+              'Programming Language :: Python :: 3.5',
+              'Programming Language :: Python :: Implementation',
+              'Programming Language :: Python :: Implementation :: CPython',
+              'Programming Language :: Python :: Implementation :: PyPy',
+              'Topic :: Software Development :: Testing'
+          ]
     )

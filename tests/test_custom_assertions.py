@@ -4,7 +4,8 @@
 Test custom assertions.
 """
 
-from sure import expect, assertion
+from sure import expect, assertion, chain
+from sure.magic import is_cpython
 
 
 def test_custom_assertion():
@@ -28,3 +29,28 @@ def test_custom_assertion():
 
     expect(Response(200)).should.have.return_code(200)
     expect(Response(200)).shouldnt.have.return_code(201)
+
+
+def test_custom_chain_method():
+    "test extending sure with a custom chain method."
+
+    class Response(object):
+        def __init__(self, headers, return_code):
+            self.headers = headers
+            self.return_code = return_code
+
+
+    @chain
+    def header(self, header_name):
+        expect(self.obj.headers).should.have.key(header_name)
+        return self.obj.headers[header_name]
+
+
+    # FIXME(TF): 'must' does not sound right in this method chain.
+    #            it should rather be ...header("foo").which.equals("bar")
+    #            however, which is an assertionproperty in AssertionBuilder
+    #            and is not a monkey patched property.
+    if is_cpython:
+        Response({"foo": "bar", "bar": "foo"}, 200).should.have.header("foo").must.be.equal("bar")
+    else:
+        expect(expect(Response({"foo": "bar", "bar": "foo"}, 200)).should.have.header("foo")).must.be.equal("bar")

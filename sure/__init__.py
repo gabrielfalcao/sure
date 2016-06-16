@@ -928,6 +928,12 @@ def assertion(func):
     return func
 
 
+def chain(func):
+    """Extend sure with a custom chaining method."""
+    setattr(AssertionBuilder, func.__name__, func)
+    return func
+
+
 allows_new_syntax = not os.getenv('SURE_DISABLE_NEW_SYNTAX')
 
 

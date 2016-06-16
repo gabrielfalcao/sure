@@ -921,6 +921,13 @@ those = AssertionBuilder('those')
 expect = AssertionBuilder('expect')
 
 
+def assertion(func):
+    """Extend sure with a custom assertion method."""
+    func = assertionmethod(func)
+    setattr(AssertionBuilder, func.__name__, func)
+    return func
+
+
 allows_new_syntax = not os.getenv('SURE_DISABLE_NEW_SYNTAX')
 
 

@@ -18,7 +18,7 @@ Installing
 Documentation
 =============
 
-Available in the `website <http://falcao.it/sure>`__ or under the
+Available in the `website <https://sure.readthedocs.io>`__ or under the
 ``spec`` directory.
 
 You can also build the documentation locally using markment:

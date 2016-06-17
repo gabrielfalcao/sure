@@ -29,9 +29,6 @@ clean:
 	@echo "OK!"
 
 
-readme:
-	@pandoc README.md --from markdown --to rst -o README.rst
-
 publish: readme
 	@python setup.py sdist register upload
 
@@ -48,4 +45,4 @@ acceptance: clean
 
 docs:
 	@(cd docs && make html)
-	#$(OPEN_COMMAND) docs/build/html/index.html
+	$(OPEN_COMMAND) docs/build/html/index.html

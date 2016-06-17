@@ -1,3 +1,4 @@
 -r requirements.txt
 Sphinx==1.4.3
 steadymark==0.7.3
+sphinx-rtd-theme==0.1.9

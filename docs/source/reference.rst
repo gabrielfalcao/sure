@@ -1,9 +1,5 @@
-.. _API Reference:
-
-.. highlight:: python
-
-API Reference
-=============
+Reference
+=========
 
 Equality
 --------
@@ -639,8 +635,8 @@ Although ``sure`` is here to be used **ONLY** in test code, therefore it
 should be running in **ONLY** possible environments: your local machine
 or your continuous-integration server.
 
-About sure
-==========
+About sure 1.0
+==============
 
 The assertion library is 100% inspired be the awesomeness of
 `should.js <https://github.com/visionmedia/should.js>`__ which is
@@ -656,22 +652,3 @@ assertion:
 
 -  Fluency: the builtin types are changed in order to provide awesome
    simple assertions
-
-
-.. automodule:: sure
-   :members:
-
-.. automodule:: sure.core
-   :members:
-
-.. automodule:: sure.old
-   :members:
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

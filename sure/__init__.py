@@ -650,6 +650,14 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def equal(self, what, epsilon=None):
+        """compares given object ``X``  with an expected ``Y`` object.
+
+        It primarily assures that the compared objects are absolute equal ``==``.
+
+        :param what: the expected value
+        :param epsilon: a delta to leverage upper-bound floating point permissiveness
+        """
+
         try:
             comparison = DeepComparison(self.obj, what, epsilon).compare()
             error = False

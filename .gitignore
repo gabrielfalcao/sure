@@ -8,7 +8,6 @@ build/
 dist/
 *.egg-info/
 sure-*.tar.gz
-README.rst
 
 # temporary test files and dirs
 .coverage

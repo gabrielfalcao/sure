@@ -15,7 +15,7 @@ Contents:
    getting-started
    how-it-works
    api-reference
-   builtin-matchers
+   about
 
 Indices and tables
 ==================

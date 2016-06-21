@@ -9,24 +9,23 @@ is heavily inspired by
 chat at https://gitter.im/gabrielfalcao/sure|
 
 Installing
-==========
+----------
 
 ::
 
     user@machine:~$ [sudo] pip install sure
 
 Documentation
-=============
+-------------
 
 Available in the `website <https://sure.readthedocs.io>`__ or under the
 ``spec`` directory.
 
-You can also build the documentation locally using markment:
+You can also build the documentation locally using sphinx:
 
 .. code:: bash
 
-    pip install markment
-    markment --server --theme=rtd ./spec/
+    make docs
 
 Here is a tease
 ---------------

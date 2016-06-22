@@ -17,12 +17,12 @@ a assertion toolbox that works fine with [nose](http://code.google.com/p/python-
 
 ```python
 from sure.deprecated import that
-from six import PY3
+from six import PY2
 
-if PY3:
-    assert that("something").is_a(str)
-else:
+if PY2:
     assert that(b"something").is_a(str)
+else:
+    assert that("something").is_a(str)
 assert that("something").like("some")
 assert "thing" in that("something")
 

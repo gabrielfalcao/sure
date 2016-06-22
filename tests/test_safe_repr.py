@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-from six import  PY3
+from six import  PY2
 
 from sure import expect
 from sure.core import safe_repr
@@ -41,11 +41,11 @@ def test_unicode():
             self.x = x
 
         def __repr__(self):
-            if PY3:
-                # PY3K should return the regular (unicode) string
-                return self.x
-            else:
+            if PY2:
+                # PY2 should return the regular (unicode) string
                 return self.x.encode('utf-8')
+            else:
+                return self.x
 
         def __eq__(self, other):
             return self.x == other.x
@@ -55,7 +55,7 @@ def test_unicode():
         'b': Y('Gabriel Falcão'),
         'c': 'Foo',
     }
-    name = 'Gabriel Falcão' if PY3 else 'Gabriel Falc\xe3o'
+    name = 'Gabriel Falc\xe3o' if PY2 else 'Gabriel Falcão'
 
     expect(safe_repr(y1)).should.equal(compat_repr(
         "{'a': 2, 'b': %s, 'c': 'Foo'}" % name

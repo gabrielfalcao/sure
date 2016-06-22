@@ -22,7 +22,7 @@ from collections import OrderedDict
 
 from datetime import datetime, timedelta
 from sure import this, these, those, it, expect, anything, AssertionBuilder
-from six import PY3
+from six import PY2
 from sure.compat import compat_repr
 
 
@@ -464,11 +464,11 @@ def test_equal_with_repr_of_complex_types_and_unicode():
             self.x = x
 
         def __repr__(self):
-            if PY3:
-                # PY3K should return the regular (unicode) string
-                return self.x
-            else:
+            if PY2:
+                # PY2 should return the regular (unicode) string
                 return self.x.encode('utf-8')
+            else:
+                return self.x
 
         def __eq__(self, other):
             return self.x == other.x
@@ -494,11 +494,11 @@ def test_equal_with_repr_of_complex_types_and_repr():
             self.x = x
 
         def __repr__(self):
-            if PY3:
-                # PY3K should return the regular (unicode) string
-                return self.x
-            else:
+            if PY2:
+                # PY2 should return the regular (unicode) string
                 return self.x.encode('utf-8')
+            else:
+                return self.x
 
         def __eq__(self, other):
             return self.x == other.x
@@ -577,20 +577,20 @@ def test_match_contain():
         assert this("some string").should_not.contain(r"string")
 
     expect(opposite).when.called.to.throw(AssertionError)
-    if PY3:
-        expect(opposite).when.called.to.throw(
-            "'bar' should be in 'some string'")
-    else:
+    if PY2:
         expect(opposite).when.called.to.throw(
             "u'bar' should be in u'some string'")
+    else:
+        expect(opposite).when.called.to.throw(
+            "'bar' should be in 'some string'")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    if PY3:
-        expect(opposite_not).when.called.to.throw(
-            "'string' should NOT be in 'some string'")
-    else:
+    if PY2:
         expect(opposite_not).when.called.to.throw(
             "u'string' should NOT be in u'some string'")
+    else:
+        expect(opposite_not).when.called.to.throw(
+            "'string' should NOT be in 'some string'")
 
 
 def test_catching_exceptions():
@@ -650,19 +650,19 @@ def test_throw_matching_regex():
         raise RuntimeError('should not have reached here')
 
     except AssertionError as e:
-        if PY3:
-            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
-        else:
+        if PY2:
             expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
+        else:
+            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
 
     try:
         expect(blah).when.called_with(1).should.throw(ValueError, re.compile(r'invalid regex'))
         raise RuntimeError('should not have reached here')
     except AssertionError as e:
-        if PY3:
-            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
-        else:
+        if PY2:
             expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
+        else:
+            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
 
 def test_should_not_be_different():
     ("'something'.should_not.be.different('SOMETHING'.lower())")
@@ -782,18 +782,18 @@ def test_ordereddict_comparison():
         expect(result).should.equal(expectation)
         raise RuntimeError("should not have reached here")
     except AssertionError as error:
-        if PY3:
-            expect(str(error)).should.be.equal("""given
-X = {'children': {}, 'fields': {'age': '22', 'name': 'John'}}
-    and
-Y = {'children': {}, 'fields': {'age': '22', 'name': 'John'}}
-X['fields'] and Y['fields'] are in a different order""")
-        else:
+        if PY2:
             expect(str(error)).should.be.equal("""given
 X = {u'children': {}, u'fields': {u'age': u'22', u'name': u'John'}}
     and
 Y = {u'children': {}, u'fields': {u'age': u'22', u'name': u'John'}}
 X[u'fields'] and Y[u'fields'] are in a different order""")
+        else:
+            expect(str(error)).should.be.equal("""given
+X = {'children': {}, 'fields': {'age': '22', 'name': 'John'}}
+    and
+Y = {'children': {}, 'fields': {'age': '22', 'name': 'John'}}
+X['fields'] and Y['fields'] are in a different order""")
 
 
 def test_equals_anything():

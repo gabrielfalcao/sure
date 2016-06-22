@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
 
-from six import text_type, PY3
+from six import text_type, PY2
 from six.moves import xrange
 
 import sure
@@ -545,7 +545,7 @@ def test_that_contains_none():
 
     def assertions():
         # We can't use unicode in Py2, otherwise it will try to coerce
-        assert that('foobar' if PY3 else b'foobar').contains(None)
+        assert that(b'foobar' if PY2 else 'foobar').contains(None)
 
     error_msg = "'in <string>' requires string as left operand, not NoneType" if is_cpython else "'NoneType' does not have the buffer interface"
 
@@ -605,8 +605,8 @@ def test_that_something_iterable_matches_another():
     "that(something_iterable).matches(another_iterable)"
 
     # types must be unicode in py3, bute bytestrings in py2
-    KlassOne = type('KlassOne' if PY3 else b'KlassOne', (object,), {})
-    KlassTwo = type('KlassTwo' if PY3 else b'KlassTwo', (object,), {})
+    KlassOne = type(b'KlassOne' if PY2 else 'KlassOne', (object,), {})
+    KlassTwo = type(b'KlassTwo' if PY2 else 'KlassTwo', (object,), {})
     one = [
         ("/1", KlassOne),
         ("/2", KlassTwo),

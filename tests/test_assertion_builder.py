@@ -808,3 +808,8 @@ def test_equals_anything():
 
     val = [1, 2, 3, 4]
     expect(val).to.be.equal([1, anything, 3, anything])
+
+def test_equals_crosstype():
+    class MyFloat(float):
+        pass
+    expect(MyFloat(1.23)).to.be.equal(1.23)

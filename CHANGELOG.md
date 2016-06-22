@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - anything object which is accessible with `sure.anything`
 
+### Removed
+- Last traces of Python 2.6 support
+
+### Fixed
+- Assertions for raises
+
 ## [v1.3.0]
 ### Added
 - Python 3.3, 3.4 and 3.5 support

@@ -27,7 +27,7 @@ import traceback
 from functools import wraps
 from datetime import datetime
 
-from six import string_types, text_type, PY3, get_function_code
+from six import string_types, text_type, PY2, get_function_code
 from six.moves import reduce
 
 from sure.old import AssertionHelper
@@ -45,7 +45,7 @@ from sure.magic import is_cpython, patchable_builtin
 from sure.registry import context as _registry
 
 
-if PY3:
+if not PY2:
     basestring = str
 
 version = '1.3.0'
@@ -185,11 +185,11 @@ def within(**units):
             try:
                 func(start, *args, **kw)
             except TypeError as e:
-                if PY3:
-                    # PY3 has different error message
-                    fmt = '{0}() takes 0 positional arguments but 1 was given'
-                else:
+                if PY2:
+                    # PY2 has different error message
                     fmt = '{0}() takes no arguments'
+                else:
+                    fmt = '{0}() takes 0 positional arguments but 1 was given'
                 err = text_type(e)
                 if fmt.format(func.__name__) in err:
                     func(*args, **kw)
@@ -387,7 +387,7 @@ def assertionmethod(func):
             ", ".join(map(safe_repr, args)),
             ", ".join(["{0}={1}".format(k, safe_repr(kw[k])) for k in kw]),
         )
-        if not PY3:
+        if PY2:
             msg = text_type(msg)
 
         assert value, msg

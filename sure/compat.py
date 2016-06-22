@@ -8,10 +8,7 @@ from collections import OrderedDict
 from sure.terminal import red, green, yellow
 
 
-if six.PY3:
-    def compat_repr(object_repr):
-        return object_repr
-else:
+if six.PY2:
     def compat_repr(object_repr):
         # compat_repr is designed to return all reprs with leading 'u's
         # inserted to make all strings look like unicode strings.
@@ -33,6 +30,9 @@ else:
                     in_quote = True
             result += char
         return result
+else:
+    def compat_repr(object_repr):
+        return object_repr
 
 # FIXME: move FakeOrderedDict to another module since it
 #        does not have anything todo with compat.
@@ -51,18 +51,18 @@ class FakeOrderedDict(OrderedDict):
         key_values = []
         for key, value in self.items():
             key, value = repr(key), repr(value)
-            if isinstance(value, six.binary_type) and not six.PY3:
+            if isinstance(value, six.binary_type) and six.PY2:
                 value = value.decode("utf-8")
             key_values.append("{0}: {1}".format(key, value))
         res = "{{{0}}}".format(", ".join(key_values))
         return res
 
-    if six.PY3:
-        def __repr__(self):
-            return self.__unicode__()
-    else:
+    if six.PY2:
         def __repr__(self):
             return self.__unicode__().encode('utf-8')
+    else:
+        def __repr__(self):
+            return self.__unicode__()
 
 
 def _obj_with_safe_repr(obj):
@@ -89,7 +89,7 @@ def safe_repr(val):
             # significantly easier
             val = _obj_with_safe_repr(val)
         ret = repr(val)
-        if not six.PY3:
+        if six.PY2:
             ret = ret.decode('utf-8')
     except UnicodeEncodeError:
         ret = red('a %r that cannot be represented' % type(val))

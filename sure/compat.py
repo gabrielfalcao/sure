@@ -1,10 +1,9 @@
-from __future__ import unicode_literals
-import six
+# -*- coding: utf-8 -*-
 
-try:
-    from collections import OrderedDict
-except ImportError:
-    from sure.ordereddict import OrderedDict
+from __future__ import unicode_literals
+
+import six
+from collections import OrderedDict
 
 from sure.terminal import red, green, yellow
 

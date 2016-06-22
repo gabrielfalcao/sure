@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Last traces of Python 2.6 support
 
 ### Fixed
+- Allow overwriting of monkey-patched properties by sure. Refs #19
 - Assertions for raises
 
 ## [v1.3.0]

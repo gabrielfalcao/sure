@@ -24,7 +24,7 @@ import difflib
 import inspect
 import traceback
 
-from functools import wraps
+from functools import wraps, partial
 from datetime import datetime
 
 from six import string_types, text_type, PY3, get_function_code
@@ -925,25 +925,28 @@ allows_new_syntax = not os.getenv('SURE_DISABLE_NEW_SYNTAX')
 
 
 if is_cpython and allows_new_syntax:
-
     def make_safe_property(method, name, should_be_property=True):
         if not should_be_property:
             return method(None)
 
-        def deleter(self, *args, **kw):
-            pass
+        def deleter(method, self, *args, **kw):
+            del overwritten_object_handlers[(id(self), method.__name__)]
 
-        def setter(self, other):
-            pass
+        def setter(method, self, other):
+            overwritten_object_handlers[(id(self), method.__name__)] = other
 
         return builtins.property(
             fget=method,
-            fset=setter,
-            fdel=deleter,
+            fset=partial(setter, method),
+            fdel=partial(deleter, method),
         )
 
     def positive_assertion(name, prop=True):
         def method(self):
+            overwritten_object_handler = overwritten_object_handlers.get((id(self), name), None)
+            if overwritten_object_handler:
+                return overwritten_object_handler
+
             builder = AssertionBuilder(name, negative=False)
             instance = builder(self)
             callable_args = getattr(self, '_callable_args', ())
@@ -959,6 +962,10 @@ if is_cpython and allows_new_syntax:
 
     def negative_assertion(name, prop=True):
         def method(self):
+            overwritten_object_handler = overwritten_object_handlers.get((id(self), name), None)
+            if overwritten_object_handler:
+                return overwritten_object_handler
+
             builder = AssertionBuilder(name, negative=True)
             instance = builder(self)
             callable_args = getattr(self, '_callable_args', ())
@@ -973,6 +980,12 @@ if is_cpython and allows_new_syntax:
         return make_safe_property(method, name, prop)
 
     object_handler = patchable_builtin(object)
+    # We have to keep track of all objects which
+    # should overwrite a ``POSITIVES`` or ``NEGATIVES``
+    # property. If we wouldn't do that in the
+    # make_safe_property.setter method we would loose
+    # the newly assigned object reference.
+    overwritten_object_handlers = {}
 
     # None does not have a tp_dict associated to its PyObject, so this
     # is the only way we could make it work like we expected.

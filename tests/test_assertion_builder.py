@@ -20,7 +20,7 @@ import re
 import mock
 from collections import OrderedDict
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from sure import this, these, those, it, expect, anything, AssertionBuilder
 from six import PY3
 from sure.compat import compat_repr
@@ -38,7 +38,7 @@ def test_assertion_builder_synonyms():
 def test_4_equal_2p2():
     ("this(4).should.equal(2 + 2)")
 
-    time = datetime.now()
+    time = datetime.now() - timedelta(0, 60)
 
     assert this(4).should.equal(2 + 2)
     assert this(time).should_not.equal(datetime.now())

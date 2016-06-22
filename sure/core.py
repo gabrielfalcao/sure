@@ -35,8 +35,8 @@ from sure.compat import safe_repr, OrderedDict
 
 class Anything(object):
     """Represents any possible value."""
-    def __cmp__(self, _):
-        return 0
+    def __eq__(self, _):
+        return True
 
 anything = Anything()
 

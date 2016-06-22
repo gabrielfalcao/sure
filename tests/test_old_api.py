@@ -477,7 +477,7 @@ def test_that_looks_like():
     assert that('String\n with BREAKLINE').looks_like('string with breakline')
 
 
-def test_that_raises_raises_for_wrong_exception_type():
+def test_that_raises_does_raise_for_exception_type_mismatch():
     "that(callable(RuntimeError)).raises(TypeError)"
 
     error = r'.*should raise <class .*FooError.*, but raised <class .*BarError.*'
@@ -493,7 +493,7 @@ def test_that_raises_raises_for_wrong_exception_type():
 
     try:
         assert that(my_function).raises(FooError, 'OOps')
-        assert False    # should never reach here
+        assert False, 'should never reach here'
     except AssertionError as e:
         import re
         assert re.match(error, text_type(e))

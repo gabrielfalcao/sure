@@ -35,7 +35,8 @@ from sure.compat import safe_repr, OrderedDict
 
 class Anything(object):
     """Represents any possible value."""
-    pass
+    def __eq__(self, _):
+        return True
 
 anything = Anything()
 
@@ -56,6 +57,14 @@ class DeepExplanation(text_type):
 
 class DeepComparison(object):
     def __init__(self, X, Y, epsilon=None, parent=None):
+        self.complex_cmp_funcs = {
+            float: self.compare_floats,
+            dict: self.compare_dicts,
+            list: self.compare_iterables,
+            tuple: self.compare_iterables,
+            OrderedDict: self.compare_ordereddict
+        }
+
         self.operands = X, Y
         self.epsilon = epsilon
         self.parent = parent
@@ -66,23 +75,18 @@ class DeepComparison(object):
             string_types, integer_types, Anything
         ))
 
-    def compare_complex_stuff(self, X, Y):
-        kind = type(X)
-        mapping = {
-            float: self.compare_floats,
-            dict: self.compare_dicts,
-            list: self.compare_iterables,
-            tuple: self.compare_iterables,
-            OrderedDict: self.compare_ordereddict
-        }
-        return mapping.get(kind, self.compare_generic)(X, Y)
+    def is_complex(self, obj):
+        return isinstance(obj, tuple(self.complex_cmp_funcs.keys()))
 
-    def compare_generic(self, X, Y):
+    def compare_complex_stuff(self, X, Y):
+        return self.complex_cmp_funcs.get(type(X), self.compare_generic)(X, Y)
+
+    def compare_generic(self, X, Y, msg_format='X%s != Y%s'):
         c = self.get_context()
         if X == Y:
             return True
         else:
-            m = 'X%s != Y%s' % (red(c.current_X_keys), green(c.current_Y_keys))
+            m = msg_format % (red(c.current_X_keys), green(c.current_Y_keys))
             return DeepExplanation(m)
 
     def compare_floats(self, X, Y):
@@ -213,27 +217,19 @@ class DeepComparison(object):
             X = list(Y)
 
         c = self.get_context()
-        if self.is_simple(X) and self.is_simple(Y):  # both simple
-            if X == Y or anything in (X, Y):
-                return True
-            c = self.get_context()
-            m = "X%s is %%r whereas Y%s is %%r"
-            msg = m % (red(c.current_X_keys), green(c.current_Y_keys)) % (X, Y)
-            return DeepExplanation(msg)
+        if self.is_complex(X) and type(X) is type(Y):
+            return self.compare_complex_stuff(X, Y)
 
-        elif type(X) is not type(Y):  # different types
-            xname, yname = map(lambda _: type(_).__name__, (X, Y))
-            msg = 'X%s is a %%s and Y%s is a %%s instead' % (
-                red(c.current_X_keys),
-                green(c.current_Y_keys),
-            ) % (xname, yname)
-            exp = DeepExplanation(msg)
-
-        else:
-            exp = self.compare_complex_stuff(X, Y)
+        # maintaining backwards compatability between error messages
+        kwargs = {}
+        if self.is_simple(X) and self.is_simple(Y):
+            kwargs['msg_format'] = 'X%%s is %r whereas Y%%s is %r' % (X, Y)
+        elif type(X) is not type(Y):
+            kwargs['msg_format'] = 'X%%s is a %s and Y%%s is a %s instead' % (
+                type(X).__name__, type(Y).__name__)
+        exp = self.compare_generic(X, Y, **kwargs)
 
         if isinstance(exp, DeepExplanation):
-
             original_X, original_Y = c.parent.operands
             raise exp.as_assertion(original_X, original_Y)
 

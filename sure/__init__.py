@@ -933,6 +933,12 @@ def chain(func):
     setattr(AssertionBuilder, func.__name__, func)
     return func
 
+def chainproperty(func):
+    """Extend sure with a custom chain property."""
+    func = assertionproperty(func)
+    setattr(AssertionBuilder, func.fget.__name__, func)
+    return func
+
 
 allows_new_syntax = not os.getenv('SURE_DISABLE_NEW_SYNTAX')
 

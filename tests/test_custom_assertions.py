@@ -4,7 +4,7 @@
 Test custom assertions.
 """
 
-from sure import expect, assertion, chain
+from sure import expect, assertion, chain, chainproperty
 from sure.magic import is_cpython
 
 
@@ -54,3 +54,35 @@ def test_custom_chain_method():
         Response({"foo": "bar", "bar": "foo"}, 200).should.have.header("foo").must.be.equal("bar")
     else:
         expect(expect(Response({"foo": "bar", "bar": "foo"}, 200)).should.have.header("foo")).must.be.equal("bar")
+
+
+def test_custom_chain_property():
+    "test extending sure with a custom chain property."
+
+    class Response(object):
+        magic = 41
+
+    @chainproperty
+    def having(self):
+        return self
+
+    @chainproperty
+    def implement(self):
+        return self
+
+
+    @assertion
+    def attribute(self, name):
+        has_it = hasattr(self.obj, name)
+        if self.negative:
+            assert not has_it, "Expected was that object {0} does not have attribute {1}".format(
+                self.obj, name)
+        else:
+            assert has_it, "Expected was that object {0} has attribute {1}".format(
+                self.obj, name)
+
+        return True
+
+
+    expect(Response).having.attribute("magic")
+    expect(Response).doesnt.implement.attribute("nomagic")

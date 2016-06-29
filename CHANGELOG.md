@@ -3,8 +3,13 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+*Nothing here yet*
+
+## [v1.4.0]
 ### Added
 - anything object which is accessible with `sure.anything`
+- interface to extend sure. Refs #31
 
 ### Removed
 - Last traces of Python 2.6 support
@@ -27,7 +32,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 Please see `git log`
 
-[Unreleased]: https://github.com/gabrielfalcao/sure/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/gabrielfalcao/sure/compare/v1.4.0...HEAD
+[v1.4.0]: https://github.com/gabrielfalcao/sure/compare/1.3.0...v1.4.0
 [v1.3.0]: https://github.com/gabrielfalcao/sure/compare/1.2.9...v1.3.0
 [1.2.9]: https://github.com/gabrielfalcao/sure/compare/1.2.5...1.2.9
 [1.2.5]: https://github.com/gabrielfalcao/sure/compare/1.2.4...1.2.5

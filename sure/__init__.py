@@ -921,6 +921,25 @@ those = AssertionBuilder('those')
 expect = AssertionBuilder('expect')
 
 
+def assertion(func):
+    """Extend sure with a custom assertion method."""
+    func = assertionmethod(func)
+    setattr(AssertionBuilder, func.__name__, func)
+    return func
+
+
+def chain(func):
+    """Extend sure with a custom chaining method."""
+    setattr(AssertionBuilder, func.__name__, func)
+    return func
+
+def chainproperty(func):
+    """Extend sure with a custom chain property."""
+    func = assertionproperty(func)
+    setattr(AssertionBuilder, func.fget.__name__, func)
+    return func
+
+
 allows_new_syntax = not os.getenv('SURE_DISABLE_NEW_SYNTAX')
 
 

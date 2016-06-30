@@ -20,7 +20,7 @@ install_deps:
 test:
 	@python setup.py develop
 	@nosetests --rednose -vv --with-coverage --cover-package=sure
-	@steadymark OLD_API.md
+
 
 clean:
 	@printf "Cleaning up files that are already in .gitignore... "
@@ -38,6 +38,7 @@ release: clean test publish
 
 acceptance: clean
 	@steadymark spec/reference.md
+	@steadymark OLD_API.md
 
 .PHONY: docs
 

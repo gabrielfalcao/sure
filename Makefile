@@ -17,11 +17,10 @@ export SURE_NO_COLORS := true
 install_deps:
 	@pip install -r development.txt
 
-test: readme
-	@python setup.py build
-	@tox
+test:
+	@python setup.py develop
+	@nosetests --rednose -vv --with-coverage --cover-package=sure
 	@steadymark OLD_API.md
-	@steadymark README.md
 
 clean:
 	@printf "Cleaning up files that are already in .gitignore... "
@@ -29,16 +28,15 @@ clean:
 	@echo "OK!"
 
 
-publish: readme
+publish:
 	@python setup.py sdist register upload
 
 release: clean test publish
 	@printf "Exporting to $(filename)... "
-	@tar czf $(filename) sure setup.py README.md README.rst COPYING
+	@tar czf $(filename) sure setup.py README.rst COPYING
 	@echo "DONE!"
 
 acceptance: clean
-	@steadymark README.md
 	@steadymark spec/reference.md
 
 .PHONY: docs

@@ -9,6 +9,7 @@ It is available in PyPi, so you can install through pip:
 .. code:: bash
 
     pip install sure
+    pip3 install sure
 
 Activating
 ----------
@@ -40,7 +41,7 @@ Python version compatibility
 
 Sure is `continuously tested
 against <https://travis-ci.org/gabrielfalcao/sure/>`__ python versions
-2.6, 2.7 and 3.3, but its assertion API is most likely to work anywhere.
+2.7, 3.3, 3.4 and 3.5, but its assertion API is most likely to work anywhere.
 The only real big difference of sure in cpython and even other
 implementations such as `PyPy <http://pypy.org/>`__ is that the
 `monkey-patching <how-it-works.md#monkey-patching>`__ only happens in

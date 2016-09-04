@@ -38,7 +38,6 @@ release: clean test publish
 
 acceptance: clean
 	@steadymark spec/reference.md
-	@steadymark OLD_API.md
 
 .PHONY: docs
 

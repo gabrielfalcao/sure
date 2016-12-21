@@ -36,8 +36,6 @@ release: clean test publish
 	@tar czf $(filename) sure setup.py README.rst COPYING
 	@echo "DONE!"
 
-acceptance: clean
-	@steadymark spec/reference.md
 
 .PHONY: docs
 

@@ -1022,7 +1022,7 @@ if is_cpython and allows_new_syntax:
 old_dir = dir
 
 
-if allows_new_syntax:
+def enable():
     @wraps(builtins.dir)
     def _new_dir(obj=None):
         if obj is None:
@@ -1032,3 +1032,7 @@ if allows_new_syntax:
             return sorted(set(old_dir(obj)).difference(POSITIVES + NEGATIVES))
 
     builtins.dir = _new_dir
+
+
+if allows_new_syntax:
+    enable()

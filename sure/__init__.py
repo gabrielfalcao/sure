@@ -1024,12 +1024,15 @@ old_dir = dir
 
 def enable():
     @wraps(builtins.dir)
-    def _new_dir(obj=None):
-        if obj is None:
+    def _new_dir(*obj):
+        if not obj:
             frame = inspect.currentframe()
             return sorted(frame.f_back.f_locals.keys())
-        else:
-            return sorted(set(old_dir(obj)).difference(POSITIVES + NEGATIVES))
+
+        if len(obj) > 1:
+            raise TypeError('dir expected at most 1 arguments, got {0}'.format(len(obj)))
+
+        return sorted(set(old_dir(obj[0])).difference(POSITIVES + NEGATIVES))
 
     builtins.dir = _new_dir
 

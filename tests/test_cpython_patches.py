@@ -31,6 +31,22 @@ if is_cpython:
             {}.should.be.empty
 
 
+        def test_shouldnt_overwrite_attributes():
+            """do not patch already existing attributes with same name"""
+            class Foo:
+                when = 42
+                shouldnt = 43
+                bar = 'bar'
+
+            Foo.when.should.be.equal(42)
+            Foo.shouldnt.should.be.equal(43)
+            Foo.bar.should.be.equal('bar')
+
+            dir(Foo).should.contain('when')
+            dir(Foo).should.contain('shouldnt')
+            dir(Foo).shouldnt.contain('should')
+
+
     def test_dir_conceals_sure_specific_attributes():
         ("dir(obj) should conceal names of methods that were grafted by sure")
 

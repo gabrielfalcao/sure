@@ -979,7 +979,13 @@ if is_cpython and allows_new_syntax:
             fdel=partial(deleter, method),
         )
 
-    def positive_assertion(name, prop=True):
+
+    def build_assertion_property(name, is_negative, prop=True):
+        """Build assertion property
+
+        This is the assertion property which is usually patched
+        to the built-in ``object`` and ``NoneType``.
+        """
         def method(self):
             # check if the given object already has an attribute with the
             # given name. If yes return it instead of patching it.
@@ -995,7 +1001,7 @@ if is_cpython and allows_new_syntax:
             if overwritten_object_handler:
                 return overwritten_object_handler
 
-            builder = AssertionBuilder(name, negative=False)
+            builder = AssertionBuilder(name, negative=is_negative)
             instance = builder(self)
             callable_args = getattr(self, '_callable_args', ())
             if callable_args:
@@ -1008,34 +1014,6 @@ if is_cpython and allows_new_syntax:
         method.__name__ = str(name)
         return make_safe_property(method, name, prop)
 
-    def negative_assertion(name, prop=True):
-        def method(self):
-            # check if the given object already has an attribute with the
-            # given name. If yes return it instead of patching it.
-            try:
-                if name in self.__dict__:
-                    return self.__dict__[name]
-            except AttributeError:
-                # we do not have an object with __dict__, thus
-                # it's safe to just continue and patch the `name`.
-                pass
-
-            overwritten_object_handler = overwritten_object_handlers.get((id(self), name), None)
-            if overwritten_object_handler:
-                return overwritten_object_handler
-
-            builder = AssertionBuilder(name, negative=True)
-            instance = builder(self)
-            callable_args = getattr(self, '_callable_args', ())
-            if callable_args:
-                instance._callable_args = callable_args
-            callable_kw = getattr(self, '_callable_kw', {})
-            if callable_kw:
-                instance._callable_kw = callable_kw
-            return instance
-
-        method.__name__ = str(name)
-        return make_safe_property(method, name, prop)
 
     object_handler = patchable_builtin(object)
     # We have to keep track of all objects which
@@ -1050,12 +1028,12 @@ if is_cpython and allows_new_syntax:
     none = patchable_builtin(None.__class__)
 
     for name in POSITIVES:
-        object_handler[name] = positive_assertion(name)
-        none[name] = positive_assertion(name, False)
+        object_handler[name] = build_assertion_property(name, is_negative=False)
+        none[name] = build_assertion_property(name, is_negative=False, prop=False)
 
     for name in NEGATIVES:
-        object_handler[name] = negative_assertion(name)
-        none[name] = negative_assertion(name, False)
+        object_handler[name] = build_assertion_property(name, is_negative=True)
+        none[name] = build_assertion_property(name, is_negative=True, prop=False)
 
 
 old_dir = dir

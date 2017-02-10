@@ -647,3 +647,125 @@ or your continuous-integration server.
 .. automodule:: sure.old
    :members:
 
+Add custom assertions, chains and chain properties
+--------------------------------------------------
+
+``sure`` allows to add custom assertion methods, chain methods and chain properties.
+
+Custom assertion methods
+------------------------
+
+By default ``sure`` comes with a good amount of *assertion methods*. For example:
+
+- ``equals()``
+- ``within()``
+- ``contains()``
+
+And plenty more.
+
+However, in some cases it makes sense to add custom *assertion methods* to improve the test experience.
+
+Let's assume you want to test your web application. Somewhere there is a ``Response`` class with a ``return_code`` property. We could do the following:
+
+.. code:: python
+
+   response = Response(...)
+   response.return_code.should.be.equal(200)
+
+This is already quiet readable, but wouldn't it be awesome do to something like this:
+
+.. code:: python
+
+   response = Response(...)
+   response.should.have.return_code(200)
+
+To achieve this the custom assertion methods come into play:
+
+.. code:: python
+
+   from sure import assertion
+
+   @assertion
+   def return_code(self, expected_return_code):
+       if self.negative:
+           assert expected_return_code != self.obj.return_code, \
+               'Expected return code matches'
+       else:
+           assert expected_return_code == self.obj.return_code, \
+               'Expected return code does not match'
+
+
+   response = Response(...)
+   response.should.have.return_code(200)
+
+
+I'll admit you have to write the assertion method yourself, but the result is a great experience you don't want to miss.
+
+
+Chain methods
+-------------
+
+*chain methods* are similar to *assertion methods*. The only difference is that the *chain methods*, as the name implies, can be chained with further chains or assertions:
+
+.. code:: python
+
+   from sure import chain
+
+   @chain
+   def header(self, header_name):
+       # check if header name actually exists
+       self.obj.headers.should.have.key(header_name)
+       # return header value
+       return self.obj.headers[header_name]
+
+
+   response = Response(200, headers={'Content-Type': 'text/python'})
+   response.should.have.header('Content-Type').equals('text/python')
+
+
+Chain properties
+----------------
+
+*chain properties* are simple properties which are available to build an assertion.
+Some of the default chain properties are:
+
+- ``be``
+- ``to``
+- ``when``
+- ``have``
+- ...
+
+Use the ``chainproperty`` decorator like the following to build your own *chain*:
+
+.. code:: python
+
+   from sure import chainproperty, assertion
+
+
+   class Foo:
+       magic = 42
+
+
+   @chainproperty
+   def having(self):
+       return self
+
+
+   @chainproperty
+   def implement(self):
+       return self
+
+
+   @assertion
+   def attribute(self, name):
+       has_it = hasattr(self.obj, name)
+       if self.negative:
+           assert not has_it, 'Expected was that object {0} does not have attr {1}'.format(
+               self.obj, name)
+       else:
+           assert has_it, 'Expected was that object {0} has attr {1}'.format(
+               self.obj, name)
+
+   # Build awesome assertion chains
+   expect(Foo).having.attribute('magic')
+   Foo.doesnt.implement.attribute('nomagic')

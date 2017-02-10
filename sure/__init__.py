@@ -933,6 +933,7 @@ def chain(func):
     setattr(AssertionBuilder, func.__name__, func)
     return func
 
+
 def chainproperty(func):
     """Extend sure with a custom chain property."""
     func = assertionproperty(func)
@@ -949,10 +950,28 @@ if is_cpython and allows_new_syntax:
             return method(None)
 
         def deleter(method, self, *args, **kw):
-            del overwritten_object_handlers[(id(self), method.__name__)]
+            if isinstance(self, type):
+                # if the attribute has to be deleted from a class object
+                # we cannot use ``del self.__dict__[name]`` directly because we cannot
+                # modify a mappingproxy object. Thus, we have to delete it in our
+                # proxy __dict__.
+                del overwritten_object_handlers[(id(self), method.__name__)]
+            else:
+                # if the attribute has to be deleted from an instance object
+                # we are able to directly delete it from the object's __dict__.
+                del self.__dict__[name]
 
         def setter(method, self, other):
-            overwritten_object_handlers[(id(self), method.__name__)] = other
+            if isinstance(self, type):
+                # if the attribute has to be set to a class object
+                # we cannot use ``self.__dict__[name] = other`` directly because we cannot
+                # modify a mappingproxy object. Thus, we have to set it in our
+                # proxy __dict__.
+                overwritten_object_handlers[(id(self), method.__name__)] = other
+            else:
+                # if the attribute has to be set to an instance object
+                # we are able to directly set it in the object's __dict__.
+                self.__dict__[name] = other
 
         return builtins.property(
             fget=method,
@@ -962,6 +981,16 @@ if is_cpython and allows_new_syntax:
 
     def positive_assertion(name, prop=True):
         def method(self):
+            # check if the given object already has an attribute with the
+            # given name. If yes return it instead of patching it.
+            try:
+                if name in self.__dict__:
+                    return self.__dict__[name]
+            except AttributeError:
+                # we do not have an object with __dict__, thus
+                # it's safe to just continue and patch the `name`.
+                pass
+
             overwritten_object_handler = overwritten_object_handlers.get((id(self), name), None)
             if overwritten_object_handler:
                 return overwritten_object_handler
@@ -981,6 +1010,16 @@ if is_cpython and allows_new_syntax:
 
     def negative_assertion(name, prop=True):
         def method(self):
+            # check if the given object already has an attribute with the
+            # given name. If yes return it instead of patching it.
+            try:
+                if name in self.__dict__:
+                    return self.__dict__[name]
+            except AttributeError:
+                # we do not have an object with __dict__, thus
+                # it's safe to just continue and patch the `name`.
+                pass
+
             overwritten_object_handler = overwritten_object_handlers.get((id(self), name), None)
             if overwritten_object_handler:
                 return overwritten_object_handler
@@ -1032,7 +1071,8 @@ def enable():
         if len(obj) > 1:
             raise TypeError('dir expected at most 1 arguments, got {0}'.format(len(obj)))
 
-        return sorted(set(old_dir(obj[0])).difference(POSITIVES + NEGATIVES))
+        patched = [x for x in old_dir(obj[0]) if isinstance(getattr(obj[0], x), AssertionBuilder)]
+        return sorted(set(old_dir(obj[0])).difference(patched))
 
     builtins.dir = _new_dir
 

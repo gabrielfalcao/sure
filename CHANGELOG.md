@@ -8,7 +8,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Python 3.7-dev support (allowed to fail)
 
 ### Fixed
-- Do not overwrite existing attributes of objects with sure properties (when. should, ...). Refs #124, #128
+- Do not overwrite existing class and instance attributes with sure properties (when. should, ...). Refs #127, #129
+- Fix patched built-in `dir()` method. Refs #124, #128
 
 ## [v1.4.0]
 ### Added

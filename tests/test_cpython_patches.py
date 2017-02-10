@@ -31,9 +31,9 @@ if is_cpython:
             {}.should.be.empty
 
 
-        def test_shouldnt_overwrite_attributes():
-            """do not patch already existing attributes with same name"""
-            class Foo:
+        def test_shouldnt_overwrite_class_attributes():
+            """do not patch already existing class attributes with same name"""
+            class Foo(object):
                 when = 42
                 shouldnt = 43
                 bar = 'bar'
@@ -42,9 +42,38 @@ if is_cpython:
             Foo.shouldnt.should.be.equal(43)
             Foo.bar.should.be.equal('bar')
 
+            Foo.__dict__.should.contain('when')
+            Foo.__dict__.should.contain('shouldnt')
+            Foo.__dict__.should.contain('bar')
+
             dir(Foo).should.contain('when')
             dir(Foo).should.contain('shouldnt')
+            dir(Foo).should.contain('bar')
             dir(Foo).shouldnt.contain('should')
+
+
+        def test_shouldnt_overwrite_instance_attributes():
+            """do not patch already existing instance attributes with same name"""
+            class Foo(object):
+                def __init__(self, when, shouldnt, bar):
+                    self.when = when
+                    self.shouldnt = shouldnt
+                    self.bar = bar
+
+            f = Foo(42, 43, 'bar')
+
+            f.when.should.be.equal(42)
+            f.shouldnt.should.be.equal(43)
+            f.bar.should.be.equal('bar')
+
+            f.__dict__.should.contain('when')
+            f.__dict__.should.contain('shouldnt')
+            f.__dict__.should.contain('bar')
+
+            dir(f).should.contain('when')
+            dir(f).should.contain('shouldnt')
+            dir(f).should.contain('bar')
+            dir(f).shouldnt.contain('should')
 
 
     def test_dir_conceals_sure_specific_attributes():

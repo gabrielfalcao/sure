@@ -1071,7 +1071,7 @@ def enable():
         if len(obj) > 1:
             raise TypeError('dir expected at most 1 arguments, got {0}'.format(len(obj)))
 
-        patched = [x for x in old_dir(obj[0]) if isinstance(getattr(obj[0], x), AssertionBuilder)]
+        patched = [x for x in old_dir(obj[0]) if isinstance(getattr(obj[0], x, None), AssertionBuilder)]
         return sorted(set(old_dir(obj[0])).difference(patched))
 
     builtins.dir = _new_dir

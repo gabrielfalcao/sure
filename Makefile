@@ -29,13 +29,13 @@ clean:
 
 
 publish:
-	@python setup.py sdist register upload
+	@python setup.py sdist
+	@twine upload dist/*.tar.gz
 
 release: clean test publish
 	@printf "Exporting to $(filename)... "
 	@tar czf $(filename) sure setup.py README.rst COPYING
 	@echo "DONE!"
-
 
 .PHONY: docs
 

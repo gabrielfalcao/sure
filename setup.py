@@ -25,8 +25,8 @@ import codecs
 from setuptools import setup, find_packages
 
 
-# These python versions of explicitly not supported
-# by sure. This is nostly because of the incompatiblities
+# These python versions are explicitly not supported
+# by sure. This is mostly because of the incompatiblities
 # with unicode strings. If there is an urgent reason why
 # to support it after all or if you have a quick fix
 # please open an issue on GitHub.

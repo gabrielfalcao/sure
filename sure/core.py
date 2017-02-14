@@ -34,7 +34,9 @@ from sure.compat import safe_repr, OrderedDict
 
 
 class Anything(object):
-    """Represents any possible value."""
+    """Represents any possible value. Its existence is solely for
+    idiomatic purposes.
+    """
     def __eq__(self, _):
         return True
 

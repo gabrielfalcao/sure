@@ -1,19 +1,18 @@
 sure
 ====
 
-A testing library for python with powerful and flexible assertions. Sure
-is heavily inspired by
-`should.js <https://github.com/shouldjs/should.js>`__
+An idiomatic testing library for python with powerful and flexible assertions. Sure
+is heavily inspired in `RSpec Expectations <http://rspec.info/documentation/3.5/rspec-expectations/>`_ and `should.js <https://github.com/shouldjs/should.js>`_
 
-|Build Status| |PyPI package version| |PyPI python versions| |Join the
-chat at https://gitter.im/gabrielfalcao/sure|
+|Build Status| |PyPI package version| |PyPI python versions| |Join the chat at https://gitter.im/gabrielfalcao/sure|
+
 
 Installing
 ----------
 
-::
+.. code:: bash
 
-    user@machine:~$ [sudo] pip install sure
+    $ pip install sure
 
 Documentation
 -------------

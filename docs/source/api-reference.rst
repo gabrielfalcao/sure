@@ -803,7 +803,7 @@ Add custom assertions, chains and chain properties
 ``sure`` allows to add custom assertion methods, chain methods and chain properties.
 
 Custom assertion methods
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 By default ``sure`` comes with a good amount of *assertion methods*. For example:
 
@@ -853,7 +853,7 @@ I'll admit you have to write the assertion method yourself, but the result is a 
 
 
 Chain methods
--------------
+~~~~~~~~~~~~~
 
 *chain methods* are similar to *assertion methods*. The only difference is that the *chain methods*, as the name implies, can be chained with further chains or assertions:
 
@@ -874,7 +874,7 @@ Chain methods
 
 
 Chain properties
-----------------
+~~~~~~~~~~~~~~~~
 
 *chain properties* are simple properties which are available to build an assertion.
 Some of the default chain properties are:

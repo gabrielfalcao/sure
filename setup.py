@@ -24,6 +24,8 @@ import sys
 import codecs
 from setuptools import setup, find_packages
 
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 # These python versions are explicitly not supported
 # by sure. This is mostly because of the incompatiblities

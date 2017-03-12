@@ -919,3 +919,23 @@ Use the ``chainproperty`` decorator like the following to build your own *chain*
    # Build awesome assertion chains
    expect(Foo).having.attribute('magic')
    Foo.doesnt.implement.attribute('nomagic')
+
+Use custom assertion messages with ``ensure``
+---------------------------------------------
+
+With the ``ensure`` context manager *sure* provides an easy to use way to override the ``AssertionError`` message raised by ``sure``'s assertion methods. See the following example:
+
+.. code:: python
+
+    import sure
+
+    name = myapi.do_something_that_returns_string()
+
+    with sure.ensure('the return value actually looks like: {0}', name):
+        name.should.contain('whatever')
+
+
+In case ``name`` does not contain the string ``whatever`` it will raise an ``AssertionError`` exception
+with the message *the return value actually looks like: <NAME>* (where *<NAME>* would be the actual value of the variable ``name``) instead of *sure*'s default error message in that particular case.
+
+Only ``AssertionError`` exceptions are re-raised by ``sure.ensure()`` with the custom provided message. Every other exception will be ignored and handled as expected.

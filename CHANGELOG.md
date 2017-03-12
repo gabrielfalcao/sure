@@ -3,8 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
-
-*Nothing to release yet*
+### Added
+- `ensure` context manager to provide custom assertion messages. Refs #125
 
 ## [v1.4.1]
 ### Added

@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+*Nothing here yet.*
+
+## [v1.4.2]
 ### Added
 - `ensure` context manager to provide custom assertion messages. Refs #125
 
@@ -41,7 +45,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 Please see `git log`
 
-[Unreleased]: https://github.com/gabrielfalcao/sure/compare/v1.4.1...HEAD
+[Unreleased]: https://github.com/gabrielfalcao/sure/compare/v1.4.2...HEAD
+[v1.4.2]: https://github.com/gabrielfalcao/sure/compare/1.4.1...v1.4.2
 [v1.4.1]: https://github.com/gabrielfalcao/sure/compare/1.4.0...v1.4.1
 [v1.4.0]: https://github.com/gabrielfalcao/sure/compare/1.3.0...v1.4.0
 [v1.3.0]: https://github.com/gabrielfalcao/sure/compare/1.2.9...v1.3.0

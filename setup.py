@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2013>  Gabriel Falcão <gabriel@nacaolivre.org>
+# Copyright (C) <2010-2017>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,15 +23,6 @@ import os
 import sys
 import codecs
 from setuptools import setup, find_packages
-try:
-    # python 3
-    from importlib import reload
-except ImportError:
-    pass
-    # python 2
-
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 # These python versions are explicitly not supported
 # by sure. This is mostly because of the incompatiblities

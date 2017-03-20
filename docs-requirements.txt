@@ -1,2 +1,2 @@
 -r development.txt
-sure==1.4.1
+sure==1.4.2

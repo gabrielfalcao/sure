@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 *Nothing here yet.*
 
+## [v1.4.3]
+### Fixed
+- Bug in setup.py that would break in python > 2
+
 ## [v1.4.2]
 ### Added
 - `ensure` context manager to provide custom assertion messages. Refs #125
@@ -45,7 +49,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 Please see `git log`
 
-[Unreleased]: https://github.com/gabrielfalcao/sure/compare/v1.4.2...HEAD
+[Unreleased]: https://github.com/gabrielfalcao/sure/compare/v1.4.3...HEAD
+[v1.4.2]: https://github.com/gabrielfalcao/sure/compare/1.4.2...v1.4.3
 [v1.4.2]: https://github.com/gabrielfalcao/sure/compare/1.4.1...v1.4.2
 [v1.4.1]: https://github.com/gabrielfalcao/sure/compare/1.4.0...v1.4.1
 [v1.4.0]: https://github.com/gabrielfalcao/sure/compare/1.3.0...v1.4.0

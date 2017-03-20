@@ -23,6 +23,12 @@ import os
 import sys
 import codecs
 from setuptools import setup, find_packages
+try:
+    # python 3
+    from importlib import reload
+except ImportError:
+    pass
+    # python 2
 
 reload(sys)
 sys.setdefaultencoding('utf-8')

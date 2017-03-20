@@ -17,7 +17,7 @@ Installing
 Documentation
 -------------
 
-Available in the `website <https://sure.readthedocs.io>`__ or under the
+Available in the `website <https://sure.readthedocs.io/en/latest/>`__ or under the
 ``docs`` directory.
 
 You can also build the documentation locally using sphinx:

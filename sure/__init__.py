@@ -48,7 +48,7 @@ from sure.registry import context as _registry
 if not PY2:
     basestring = str
 
-version = '1.4.1'
+version = '1.4.2'
 
 
 not_here_error = \
@@ -939,6 +939,34 @@ def chainproperty(func):
     func = assertionproperty(func)
     setattr(AssertionBuilder, func.fget.__name__, func)
     return func
+
+
+class ensure(object):
+    """
+    Contextmanager to ensure that the given assertion message
+    is printed upon a raised ``AssertionError`` exception.
+
+    The ``args`` and ``kwargs`` are used to format
+    the message using ``format()``.
+    """
+    def __init__(self, msg, *args, **kwargs):
+        self.msg = msg
+        self.args = args
+        self.kwargs = kwargs
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """
+        Catch all ``AsertionError`` exceptions and reraise
+        them with the message provided to the context manager.
+        """
+        if exc_type is not AssertionError:
+            return
+
+        msg = self.msg.format(*self.args, **self.kwargs)
+        raise AssertionError(msg)
 
 
 allows_new_syntax = not os.getenv('SURE_DISABLE_NEW_SYNTAX')

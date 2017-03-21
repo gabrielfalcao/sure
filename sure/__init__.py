@@ -39,7 +39,7 @@ from sure.core import DeepExplanation
 from sure.core import _get_file_name
 from sure.core import _get_line_number
 from sure.core import safe_repr
-from sure.core import anything
+from sure.core import anything  # noqa
 
 from sure.magic import is_cpython, patchable_builtin
 from sure.registry import context as _registry
@@ -48,7 +48,7 @@ from sure.registry import context as _registry
 if not PY2:
     basestring = str
 
-version = '1.4.3'
+version = '1.4.4'
 
 
 not_here_error = \

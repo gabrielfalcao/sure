@@ -6,12 +6,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 *Nothing here yet.*
 
+## [v1.4.5]
+### Fixed
+- Correctly escape special character for `str.format()` for assertion messages. Refs #134
+
 ## [v1.4.4]
 
 *Nothing to mention here.*
 
 ## [v1.4.3]
-
 ### Fixed
 - Bug in setup.py that would break in python > 2
 
@@ -54,7 +57,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 Please see `git log`
 
-[Unreleased]: https://github.com/gabrielfalcao/sure/compare/v1.4.4...HEAD
+[Unreleased]: https://github.com/gabrielfalcao/sure/compare/v1.4.5...HEAD
+[v1.4.5]: https://github.com/gabrielfalcao/sure/compare/1.4.4...v1.4.5
 [v1.4.4]: https://github.com/gabrielfalcao/sure/compare/1.4.3...v1.4.4
 [v1.4.3]: https://github.com/gabrielfalcao/sure/compare/1.4.2...v1.4.3
 [v1.4.2]: https://github.com/gabrielfalcao/sure/compare/1.4.1...v1.4.2

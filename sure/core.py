@@ -46,7 +46,7 @@ anything = Anything()
 class DeepExplanation(text_type):
     def get_header(self, X, Y, suffix):
         params = (safe_repr(X), safe_repr(Y), text_type(suffix))
-        header = "given\nX = %s\n    and\nY = %s\n%s" % params
+        header = "given\nX = {0}\n    and\nY = {1}\n{2}".format(*params)
 
         return yellow(header).strip()
 
@@ -83,12 +83,12 @@ class DeepComparison(object):
     def compare_complex_stuff(self, X, Y):
         return self.complex_cmp_funcs.get(type(X), self.compare_generic)(X, Y)
 
-    def compare_generic(self, X, Y, msg_format='X%s != Y%s'):
+    def compare_generic(self, X, Y, msg_format='X{0} != Y{1}'):
         c = self.get_context()
         if X == Y:
             return True
         else:
-            m = msg_format % (red(c.current_X_keys), green(c.current_Y_keys))
+            m = msg_format.format(red(c.current_X_keys), green(c.current_Y_keys))
             return DeepExplanation(m)
 
     def compare_floats(self, X, Y):
@@ -99,7 +99,8 @@ class DeepComparison(object):
         if abs(X - Y) <= self.epsilon:
             return True
         else:
-            m = 'X%s±%s != Y%s±%s' % (red(c.current_X_keys), self.epsilon, green(c.current_Y_keys), self.epsilon)
+            m = 'X{0}±{1} != Y{2}±{3}'.format(
+                (red(c.current_X_keys), self.epsilon, green(c.current_Y_keys), self.epsilon))
             return DeepExplanation(m)
 
     def compare_dicts(self, X, Y):
@@ -111,17 +112,17 @@ class DeepComparison(object):
         diff_x = list(set(x_keys).difference(set(y_keys)))
         diff_y = list(set(y_keys).difference(set(x_keys)))
         if diff_x:
-            msg = "X%s has the key %%r whereas Y%s does not" % (
+            msg = "X{0} has the key {1!r} whereas Y{2} does not".format(
                 red(c.current_X_keys),
-                green(c.current_Y_keys),
-            ) % safe_repr(diff_x[0])
+                safe_repr(diff_x[0]),
+                green(c.current_Y_keys))
             return DeepExplanation(msg)
 
         elif diff_y:
-            msg = "X%s does not have the key %%r whereas Y%s has it" % (
+            msg = "X{0} does not have the key {1!r} whereas Y{2} has it".format(
                 red(c.current_X_keys),
-                green(c.current_Y_keys),
-            ) % safe_repr(diff_y[0])
+                safe_repr(diff_y[0]),
+                green(c.current_Y_keys))
             return DeepExplanation(msg)
 
         elif X == Y:
@@ -177,7 +178,7 @@ class DeepComparison(object):
             if not i:
                 return ''
 
-            return '[%s]' % ']['.join(map(safe_repr, i))
+            return '[{0}]'.format(']['.join(map(safe_repr, i)))
 
         class ComparisonContext:
             current_X_keys = get_keys(X_keys)
@@ -190,10 +191,10 @@ class DeepComparison(object):
     def compare_iterables(self, X, Y):
         len_X, len_Y = map(len, (X, Y))
         if len_X > len_Y:
-            msg = "X has %d items whereas Y has only %d" % (len_X, len_Y)
+            msg = "X has {0} items whereas Y has only {1}".format(len_X, len_Y)
             return DeepExplanation(msg)
         elif len_X < len_Y:
-            msg = "Y has %d items whereas X has only %d" % (len_Y, len_X)
+            msg = "Y has {0} items whereas X has only {1}".format(len_Y, len_X)
             return DeepExplanation(msg)
         elif X == Y:
             return True
@@ -222,12 +223,26 @@ class DeepComparison(object):
         if self.is_complex(X) and type(X) is type(Y):
             return self.compare_complex_stuff(X, Y)
 
+        def safe_format_repr(string):
+            "Escape '{' and '}' in string for use with str.format()"
+            if not isinstance(string, string_types):
+                return string
+
+            orig_str_type = type(string)
+            safe_repr = string.replace('{', '{{').replace('}', '}}')
+
+            # NOTE: str.replace() automatically converted the 'string' to 'unicode' in Python 2
+            return orig_str_type(safe_repr)
+
+        # get safe representation for X and Y
+        safe_X, safe_Y = safe_format_repr(X), safe_format_repr(Y)
+
         # maintaining backwards compatability between error messages
         kwargs = {}
         if self.is_simple(X) and self.is_simple(Y):
-            kwargs['msg_format'] = 'X%%s is %r whereas Y%%s is %r' % (X, Y)
+            kwargs['msg_format'] = 'X{{0}} is {0!r} whereas Y{{1}} is {1!r}'.format(safe_X, safe_Y)
         elif type(X) is not type(Y):
-            kwargs['msg_format'] = 'X%%s is a %s and Y%%s is a %s instead' % (
+            kwargs['msg_format'] = 'X{{0}} is a {0} and Y{{1}} is a {1} instead'.format(
                 type(X).__name__, type(Y).__name__)
         exp = self.compare_generic(X, Y, **kwargs)
 
@@ -259,4 +274,4 @@ def _get_line_number(func):
 
 def itemize_length(items):
     length = len(items)
-    return '%d item%s' % (length, length > 1 and "s" or "")
+    return '{0} item{1}'.format(length, length > 1 and "s" or "")

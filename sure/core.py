@@ -25,7 +25,7 @@ except ImportError:
 
 import inspect
 from six import (
-    text_type, integer_types, string_types,
+    text_type, integer_types, string_types, binary_type,
     get_function_code
 )
 
@@ -74,7 +74,7 @@ class DeepComparison(object):
 
     def is_simple(self, obj):
         return isinstance(obj, (
-            string_types, integer_types, Anything
+            string_types, integer_types, binary_type, Anything
         ))
 
     def is_complex(self, obj):
@@ -225,11 +225,14 @@ class DeepComparison(object):
 
         def safe_format_repr(string):
             "Escape '{' and '}' in string for use with str.format()"
-            if not isinstance(string, string_types):
+            if not isinstance(string, (string_types, binary_type)):
                 return string
 
             orig_str_type = type(string)
-            safe_repr = string.replace('{', '{{').replace('}', '}}')
+            if isinstance(string, binary_type):
+                safe_repr = string.replace(b'{', b'{{').replace(b'}', b'}}')
+            else:
+                safe_repr = string.replace('{', '{{').replace('}', '}}')
 
             # NOTE: str.replace() automatically converted the 'string' to 'unicode' in Python 2
             return orig_str_type(safe_repr)

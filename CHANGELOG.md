@@ -6,6 +6,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 *Nothing here yet.*
 
+## [v1.4.6]
+### Added
+- Support and test against PyPy 3
+
+### Fixed
+- Fix safe representation in exception messages for bytes and unicode objects. Refs #136
+
 ## [v1.4.5]
 ### Fixed
 - Correctly escape special character for `str.format()` for assertion messages. Refs #134
@@ -57,7 +64,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 Please see `git log`
 
-[Unreleased]: https://github.com/gabrielfalcao/sure/compare/v1.4.5...HEAD
+[Unreleased]: https://github.com/gabrielfalcao/sure/compare/v1.4.6...HEAD
+[v1.4.6]: https://github.com/gabrielfalcao/sure/compare/1.4.5...v1.4.6
 [v1.4.5]: https://github.com/gabrielfalcao/sure/compare/1.4.4...v1.4.5
 [v1.4.4]: https://github.com/gabrielfalcao/sure/compare/1.4.3...v1.4.4
 [v1.4.3]: https://github.com/gabrielfalcao/sure/compare/1.4.2...v1.4.3

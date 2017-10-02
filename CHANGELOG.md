@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 *Nothing here yet.*
 
+## [v1.4.7]
+### Fixed
+- Remove wrong parens for format call. Refs #139
+
 ## [v1.4.6]
 ### Added
 - Support and test against PyPy 3
@@ -64,7 +68,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 Please see `git log`
 
-[Unreleased]: https://github.com/gabrielfalcao/sure/compare/v1.4.6...HEAD
+[Unreleased]: https://github.com/gabrielfalcao/sure/compare/v1.4.7...HEAD
+[v1.4.7]: https://github.com/gabrielfalcao/sure/compare/1.4.6...v1.4.7
 [v1.4.6]: https://github.com/gabrielfalcao/sure/compare/1.4.5...v1.4.6
 [v1.4.5]: https://github.com/gabrielfalcao/sure/compare/1.4.4...v1.4.5
 [v1.4.4]: https://github.com/gabrielfalcao/sure/compare/1.4.3...v1.4.4

@@ -100,7 +100,7 @@ class DeepComparison(object):
             return True
         else:
             m = 'X{0}±{1} != Y{2}±{3}'.format(
-                (red(c.current_X_keys), self.epsilon, green(c.current_Y_keys), self.epsilon))
+                red(c.current_X_keys), self.epsilon, green(c.current_Y_keys), self.epsilon)
             return DeepExplanation(m)
 
     def compare_dicts(self, X, Y):

@@ -18,7 +18,6 @@
 
 "utility belt for automated testing in python for python"
 
-import ast
 import os
 import sys
 import codecs
@@ -39,28 +38,16 @@ if sys.version_info[0:2] in EXPL_NOT_SUPPORTED_VERSIONS:
 PROJECT_ROOT = os.path.dirname(__file__)
 
 
-class VersionFinder(ast.NodeVisitor):
-
-    def __init__(self):
-        self.version = None
-
-    def visit_Assign(self, node):
-        try:
-            if node.targets[0].id == 'version':
-                self.version = node.value.s
-        except:
-            pass
-
-
 def read_version():
     """Read version from sure/__init__.py without loading any files"""
-    finder = VersionFinder()
+
     path = os.path.join(PROJECT_ROOT, 'sure', '__init__.py')
+    context = {}
     with codecs.open(path, 'r', encoding='utf-8') as fp:
         file_data = fp.read().encode('utf-8')
-        finder.visit(ast.parse(file_data))
+        exec(file_data, context)
 
-    return finder.version
+    return context['version']
 
 
 def local_text_file(*f):

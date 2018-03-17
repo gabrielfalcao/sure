@@ -48,7 +48,7 @@ from sure.registry import context as _registry
 if not PY2:
     basestring = str
 
-version = '1.4.7'
+version = '1.4.8'
 
 
 not_here_error = \

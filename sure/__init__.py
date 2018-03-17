@@ -381,7 +381,11 @@ def work_in_progress(func):
 def assertionmethod(func):
     @wraps(func)
     def wrapper(self, *args, **kw):
-        value = func(self, *args, **kw)
+        try:
+            value = func(self, *args, **kw)
+        except AssertionError as e:
+            raise AssertionError(e)
+
         msg = "{0}({1}) failed".format(
             func.__name__,
             ", ".join(map(safe_repr, args)),

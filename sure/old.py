@@ -32,6 +32,11 @@ try:
 except ImportError:
     import builtins
 
+try:
+    from re import Pattern
+except ImportError:
+    Pattern = re._pattern_type
+
 from six import string_types, text_type
 
 from sure.core import DeepComparison
@@ -127,7 +132,7 @@ class AssertionHelper(object):
                 msg = exc
                 exc = type(e)
 
-            elif isinstance(exc, re._pattern_type):
+            elif isinstance(exc, Pattern):
                 msg = exc
                 exc = type(e)
 
@@ -147,7 +152,7 @@ class AssertionHelper(object):
                             type(e).__name__,
                             msg, err))
 
-                elif isinstance(msg, re._pattern_type) and not msg.search(err):
+                elif isinstance(msg, Pattern) and not msg.search(err):
                     raise AssertionError(
                         'When calling %r the exception message does not match. ' \
                         'Expected to match regex: %r\n against:\n %r' % (identify_callable_location(self._src), msg.pattern, err))
@@ -157,7 +162,7 @@ class AssertionHelper(object):
                     'When calling %r the exception message does not match. ' \
                     'Expected: %r\n got:\n %r' % (self._src, msg, err))
 
-            elif isinstance(msg, re._pattern_type) and not msg.search(err):
+            elif isinstance(msg, Pattern) and not msg.search(err):
                 raise AssertionError(
                     'When calling %r the exception message does not match. ' \
                     'Expected to match regex: %r\n against:\n %r' % (identify_callable_location(self._src), msg.pattern, err))

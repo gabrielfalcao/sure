@@ -9,7 +9,7 @@ endif
 
 all: install_deps test
 
-filename=sure-`python -c 'import sure;print sure.version'`.tar.gz
+filename=sure-`python -c 'import sure;print(sure.version)'`.tar.gz
 
 export PYTHONPATH := ${PWD}:${PYTHONPATH}
 export SURE_NO_COLORS := true
@@ -33,9 +33,6 @@ publish:
 	@twine upload dist/*.tar.gz
 
 release: clean test publish
-	@printf "Exporting to $(filename)... "
-	@tar czf $(filename) sure setup.py README.rst COPYING
-	@echo "DONE!"
 
 .PHONY: docs
 

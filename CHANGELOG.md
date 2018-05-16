@@ -2,9 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
-
-*Nothing here yet.*
+## [v1.4.11]
+### Fixed
+- Reading the version dinamically was causing import errors that caused error when installing package. Refs #144
 
 ## [v1.4.7]
 ### Fixed

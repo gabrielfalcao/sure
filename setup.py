@@ -38,18 +38,6 @@ if sys.version_info[0:2] in EXPL_NOT_SUPPORTED_VERSIONS:
 PROJECT_ROOT = os.path.dirname(__file__)
 
 
-def read_version():
-    """Read version from sure/__init__.py without loading any files"""
-
-    path = os.path.join(PROJECT_ROOT, 'sure', '__init__.py')
-    context = {}
-    with codecs.open(path, 'r', encoding='utf-8') as fp:
-        file_data = fp.read().encode('utf-8')
-        exec(file_data, context)
-
-    return context['version']
-
-
 def local_text_file(*f):
     path = os.path.join(PROJECT_ROOT, *f)
     with open(path, 'rt') as fp:
@@ -76,7 +64,7 @@ tests_require = ['nose']
 
 if __name__ == '__main__':
     setup(name='sure',
-          version=read_version(),
+          version='1.4.11',
           description=__doc__,
           long_description=read_readme(),
           url='http://github.com/gabrielfalcao/sure',

@@ -240,7 +240,7 @@ class DeepComparison(object):
         # get safe representation for X and Y
         safe_X, safe_Y = safe_format_repr(X), safe_format_repr(Y)
 
-        # maintaining backwards compatability between error messages
+        # maintaining backwards compatibility between error messages
         kwargs = {}
         if self.is_simple(X) and self.is_simple(Y):
             kwargs['msg_format'] = 'X{{0}} is {0!r} whereas Y{{1}} is {1!r}'.format(safe_X, safe_Y)

@@ -21,4 +21,4 @@ so you can write assertions like this:
 
     some_bratty_function.when.called_with("Scooby").should.throw(ValueError, "Me no likey Scooby")
 
-Let's `get it started <getting-started.md>`__
+Let's `get it started <getting-started.html>`__

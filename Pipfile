@@ -4,16 +4,16 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-mock = "==2.0.0"
-six = "==1.10.0"
+mock = "*"
+six = "*"
 
 [dev-packages]
-nose = "*"
 rednose = "*"
-coverage = "*"
-mock = "*"
+sphinx-rtd-theme = "*"
+sphinx = "*"
+tox = "*"
 twine = "*"
-"flake8" = "*"
+ipdb = "*"
 
 [requires]
 python_version = "3.6"

@@ -15,11 +15,11 @@ export PYTHONPATH := ${PWD}:${PYTHONPATH}
 export SURE_NO_COLORS := true
 
 install_deps:
-	@pip install -r development.txt
+	@pipenv install --dev
 
 test:
-	@python setup.py develop
-	@nosetests --rednose -vv --with-coverage --cover-package=sure
+	@pipenv run python setup.py develop
+	@pipenv run nosetests --rednose --immediate -vv --with-coverage --cover-package=sure
 
 
 clean:

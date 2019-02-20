@@ -5,6 +5,11 @@ from __future__ import unicode_literals
 import six
 from collections import OrderedDict
 
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
 from sure.terminal import red, green, yellow
 
 

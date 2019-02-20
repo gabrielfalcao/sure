@@ -22,10 +22,6 @@ import inspect
 from copy import deepcopy
 from pprint import pformat
 from functools import wraps
-try:
-    from collections import Iterable
-except ImportError:
-    Iterable = (list, dict, tuple, set)
 
 try:
     import __builtin__ as builtins
@@ -43,6 +39,7 @@ from sure.core import DeepComparison
 from sure.core import _get_file_name
 from sure.core import _get_line_number
 from sure.core import itemize_length
+from sure.compat import Iterable
 
 
 def identify_callable_location(callable_object):

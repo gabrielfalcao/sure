@@ -137,7 +137,7 @@ def test_should_be_a():
     ("this(None).should.be.none")
 
     assert this(1).should.be.an(int)
-    assert this([]).should.be.a('collections.Iterable')
+    assert this([]).should.be.a('sure.compat.Iterable')
     assert this({}).should_not.be.a(list)
 
     def opposite():

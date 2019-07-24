@@ -298,18 +298,18 @@ Works with:
 .. code:: python
 
 
-    [].should.be.empty;
-    {}.should.be.empty;
-    set().should.be.empty;
-    "".should.be.empty;
+    [].should.be.empty
+    {}.should.be.empty
+    set().should.be.empty
+    "".should.be.empty
     ().should.be.empty
-    range(0).should.be.empty;
+    range(0).should.be.empty
 
     ## negate with:
 
-    [1, 2, 3].shouldnt.be.empty;
-    "Dummy String".shouldnt.be.empty;
-    "Dummy String".should_not.be.empty;
+    [1, 2, 3].shouldnt.be.empty
+    "Dummy String".shouldnt.be.empty
+    "Dummy String".should_not.be.empty
 
 
 ``{number}.should.be.within(0, 10)``
@@ -637,7 +637,7 @@ Test if something is or not callable
     import sure
 
     range.should.be.callable
-    (lambda: None).should.be.callable;
+    (lambda: None).should.be.callable
     (123).should_not.be.callable
 
 

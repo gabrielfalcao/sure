@@ -106,8 +106,8 @@ class DeepComparison(object):
     def compare_dicts(self, X, Y):
         c = self.get_context()
 
-        x_keys = list(sorted(X.keys()))
-        y_keys = list(sorted(Y.keys()))
+        x_keys = list(X.keys())
+        y_keys = list(Y.keys())
 
         diff_x = list(set(x_keys).difference(set(y_keys)))
         diff_y = list(set(y_keys).difference(set(x_keys)))
@@ -129,11 +129,11 @@ class DeepComparison(object):
             return True
 
         else:
-            for key_X, key_Y in zip(x_keys, y_keys):
+            for key_X in x_keys:
                 self.key_X = key_X
-                self.key_Y = key_Y
+                self.key_Y = key_X
                 value_X = X[key_X]
-                value_Y = Y[key_Y]
+                value_Y = Y[key_X]
                 child = DeepComparison(
                     value_X,
                     value_Y,

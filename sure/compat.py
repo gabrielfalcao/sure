@@ -73,7 +73,11 @@ class FakeOrderedDict(OrderedDict):
 def _obj_with_safe_repr(obj):
     if isinstance(obj, dict):
         ret = FakeOrderedDict()
-        for key in sorted(obj.keys()):
+        try:
+            keys = sorted(obj.keys())
+        except TypeError:  # happens for obj types which are not orderable, like ``Enum``
+            keys = obj.keys()
+        for key in keys:
             ret[_obj_with_safe_repr(key)] = _obj_with_safe_repr(obj[key])
     elif isinstance(obj, list):
         ret = []

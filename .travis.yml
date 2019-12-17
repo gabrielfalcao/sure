@@ -6,9 +6,6 @@ python:
   - "3.7"
   - "3.8"
 
-matrix:
-    allow_failures:
-
 # command to install dependencies
 install:
   - python setup.py build sdist

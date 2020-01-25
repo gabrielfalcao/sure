@@ -12,7 +12,9 @@ install:
   - pip install -r development.txt
 
 # command to run tests
-script: nosetests --verbosity 2
+script:
+  - nosetests --verbosity 2
+  - pytest -vv
 
 
 after_success:

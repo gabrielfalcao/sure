@@ -21,7 +21,10 @@ import os
 try:
     from mock import _CallList
 except ImportError:
-    from mock.mock import _CallList
+    try:
+        from mock.mock import _CallList
+    except ImportError:
+        from unittest.mock import _CallList
 
 import inspect
 from six import (
@@ -39,6 +42,7 @@ class Anything(object):
     """
     def __eq__(self, _):
         return True
+
 
 anything = Anything()
 

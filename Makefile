@@ -20,16 +20,16 @@ $(VENV):
 $(VENV)/bin/pip: | $(VENV)
 	$(VENV)/bin/pip install -U setuptools pip
 
-$(VENV)/bin/twine $(VENV)/bin/nosetests: | $(VENV)/bin/pip
+$(VENV)/bin/twine $(VENV)/bin/pytest $(VENV)/bin/nosetests: | $(VENV)/bin/pip
 	$(VENV)/bin/pip install -r development.txt
 
 
-install_deps: | $(VENV)/bin/nosetests
+sure.egg-info/PKG-INFO: | $(VENV)/bin/nosetests  $(VENV)/bin/pytest
 	@$(VENV)/bin/python setup.py develop
 
-test: install_deps
+test: sure.egg-info/PKG-INFO
+	@$(VENV)/bin/pytest
 	@$(VENV)/bin/nosetests --rednose --immediate -vv --with-coverage --cover-package=sure
-	@$(VENV)/bin/pytest -vv
 
 clean:
 	@printf "Cleaning up files that are already in .gitignore... "

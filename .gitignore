@@ -17,3 +17,4 @@ sure-*.tar.gz
 *.sublime-project
 *.sublime-workspace
 *.swp
+.venv/

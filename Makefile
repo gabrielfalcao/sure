@@ -19,6 +19,7 @@ $(VENV):
 
 $(VENV)/bin/pip: | $(VENV)
 	$(VENV)/bin/pip install -U setuptools pip
+	$(VENV)/bin/pip install -r development.txt
 
 $(VENV)/bin/twine $(VENV)/bin/nosetests: | $(VENV)/bin/pip
 	$(VENV)/bin/pip install -r development.txt

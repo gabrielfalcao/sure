@@ -1,18 +1,16 @@
 dist: xenial
 language: python
 python:
-  - "2.7"
   - "3.6"
   - "3.7"
   - "3.8"
 
 # command to install dependencies
 install:
-  - python setup.py build sdist
-  - pip install -r development.txt
+  - make .venv
 
 # command to run tests
-script: nosetests --verbosity 2
+script: make test
 
 
 after_success:

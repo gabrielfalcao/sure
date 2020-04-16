@@ -17,10 +17,13 @@ jobs:
       uses: gabrielfalcao/pyenv-action@v4
       with:
         default: "${{ matrix.python }}"
-        command: pip install -U pip
+        command: pip install -U pip setuptools
 
     - name: Install dependencies
       run: pip install -r development.txt
+
+    - name: Install sure
+      run: pip install -e .
 
     - name: Run tests with nose
       run: nosetests --verbosity 2

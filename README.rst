@@ -9,8 +9,8 @@ sure
 .. image:: https://img.shields.io/codecov/c/github/gabrielfalcao/sure
    :target: https://codecov.io/gh/gabrielfalcao/sure
 
-.. image:: https://img.shields.io/github/workflow/status/gabrielfalcao/sure/pythonapp?label=python%203.6%20and%203.7
-   :target: https://github.com/gabrielfalcao/sure/actions
+.. image:: https://github.com/gabrielfalcao/sure/workflows/Sure%20Tests/badge.svg
+   :target: https://github.com/gabrielfalcao/sure/actions?query=workflow%3A%22Sure+Tests%22
 
 .. image:: https://img.shields.io/readthedocs/sure
    :target: https://sure.readthedocs.io/

@@ -6,9 +6,6 @@ sure
 .. image:: https://img.shields.io/pypi/dm/sure
    :target: https://pypi.org/project/sure
 
-.. image:: https://img.shields.io/codecov/c/github/gabrielfalcao/sure
-   :target: https://codecov.io/gh/gabrielfalcao/sure
-
 .. image:: https://github.com/gabrielfalcao/sure/workflows/Sure%20Tests/badge.svg
    :target: https://github.com/gabrielfalcao/sure/actions?query=workflow%3A%22Sure+Tests%22
 
@@ -35,9 +32,6 @@ sure
 
 .. image:: https://img.shields.io/pypi/implementation/sure
    :target: https://pypi.org/project/sure
-
-.. image:: https://img.shields.io/snyk/vulnerabilities/github/gabrielfalcao/sure
-   :target: https://github.com/gabrielfalcao/sure/network/alerts
 
 .. image:: https://img.shields.io/github/v/tag/gabrielfalcao/sure
    :target: https://github.com/gabrielfalcao/sure/releases

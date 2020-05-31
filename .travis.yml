@@ -1,17 +1,7 @@
 dist: xenial
 language: python
 python:
-  - "3.6"
   - "3.7"
-  - "3.8"
-
-# command to install dependencies
-install:
-  - make .venv
 
 # command to run tests
-script: make test
-
-
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+script: echo "moved to github actions: https://github.com/gabrielfalcao/sure/actions"

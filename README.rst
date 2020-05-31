@@ -1,14 +1,47 @@
 sure
 ====
 
-.. |Build Status| image:: https://travis-ci.org/gabrielfalcao/sure.png?branch=master
-   :target: https://travis-ci.org/gabrielfalcao/sure
-.. |PyPI package version| image:: https://badge.fury.io/py/sure.svg
-   :target: https://badge.fury.io/py/sure
-.. |PyPI python versions| image:: https://img.shields.io/pypi/pyversions/sure.svg
-   :target: https://pypi.python.org/pypi/sure
-.. |Join the chat at https://gitter.im/gabrielfalcao/sure| image:: https://badges.gitter.im/gabrielfalcao/sure.svg
-   :target: https://gitter.im/gabrielfalcao/sure?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
+
+.. image:: https://img.shields.io/pypi/dm/sure
+   :target: https://pypi.org/project/sure
+
+.. image:: https://img.shields.io/codecov/c/github/gabrielfalcao/sure
+   :target: https://codecov.io/gh/gabrielfalcao/sure
+
+.. image:: https://img.shields.io/github/workflow/status/gabrielfalcao/sure/pythonapp?label=python%203.6%20and%203.7
+   :target: https://github.com/gabrielfalcao/sure/actions
+
+.. image:: https://img.shields.io/readthedocs/sure
+   :target: https://sure.readthedocs.io/
+
+.. image:: https://img.shields.io/github/license/gabrielfalcao/sure?label=Github%20License
+   :target: https://github.com/gabrielfalcao/sure/blob/master/LICENSE
+
+.. image:: https://img.shields.io/pypi/v/sure
+   :target: https://pypi.org/project/sure
+
+.. image:: https://img.shields.io/pypi/l/sure?label=PyPi%20License
+   :target: https://pypi.org/project/sure
+
+.. image:: https://img.shields.io/pypi/format/sure
+   :target: https://pypi.org/project/sure
+
+.. image:: https://img.shields.io/pypi/status/sure
+   :target: https://pypi.org/project/sure
+
+.. image:: https://img.shields.io/pypi/pyversions/sure
+   :target: https://pypi.org/project/sure
+
+.. image:: https://img.shields.io/pypi/implementation/sure
+   :target: https://pypi.org/project/sure
+
+.. image:: https://img.shields.io/snyk/vulnerabilities/github/gabrielfalcao/sure
+   :target: https://github.com/gabrielfalcao/sure/network/alerts
+
+.. image:: https://img.shields.io/github/v/tag/gabrielfalcao/sure
+   :target: https://github.com/gabrielfalcao/sure/releases
+
 .. image:: https://img.shields.io/badge/pydoc-web-ff69b4.svg
    :target: http://pydoc.net/sure
 

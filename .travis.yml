@@ -1,7 +1,0 @@
-dist: xenial
-language: python
-python:
-  - "3.7"
-
-# command to run tests
-script: echo "moved to github actions: https://github.com/gabrielfalcao/sure/actions"

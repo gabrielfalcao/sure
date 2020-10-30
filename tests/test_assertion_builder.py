@@ -544,7 +544,7 @@ def test_equal_with_repr_of_complex_types_and_repr():
 
 
 def test_match_regex():
-    ("expect('some string').to.match(r'\w{4} \w{6}') matches regex")
+    (r"expect('some string').to.match(r'\w{4} \w{6}') matches regex")
 
     assert this("some string").should.match(r"\w{4} \w{6}")
     assert this("some string").should_not.match(r"^\d*$")
@@ -557,7 +557,7 @@ def test_match_regex():
 
     expect(opposite).when.called.to.throw(
         AssertionError,
-        "'some string' doesn't match the regular expression /\d{2} \d{4}/")
+        r"'some string' doesn't match the regular expression /\d{2} \d{4}/")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(

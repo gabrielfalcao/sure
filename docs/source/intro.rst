@@ -2,7 +2,7 @@ Introduction
 ============
 
 Sure is a python library for python that leverages a DSL for writing
-assertions.
+assertions created by `Gabriel Falcão <https://github.com/gabrielfalcao>`_.
 
 In CPython it monkey-patches the ``object`` type, adding some methods
 and properties purely for test purposes.

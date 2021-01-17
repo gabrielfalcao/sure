@@ -39,8 +39,10 @@ sure
 .. image:: https://img.shields.io/badge/pydoc-web-ff69b4.svg
    :target: http://pydoc.net/sure
 
-An idiomatic testing library for python with powerful and flexible assertions. Sure
-is heavily inspired in `RSpec Expectations <http://rspec.info/documentation/3.5/rspec-expectations/>`_ and `should.js <https://github.com/shouldjs/should.js>`_
+An idiomatic testing library for python with powerful and flexible created by `Gabriel Falcão <https://github.com/gabrielfalcao>`_.
+Sure's developer experience is inspired and modeled after `RSpec Expectations
+<http://rspec.info/documentation/3.5/rspec-expectations/>`_ and
+`should.js <https://github.com/shouldjs/should.js>`_.
 
 Installing
 ----------

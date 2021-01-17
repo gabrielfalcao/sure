@@ -272,21 +272,21 @@ def action_for(context, provides=None, depends_on=None):
 
     def register_providers(func, attr):
         if re.search(r'^[{]\d+[}]$', attr):
-            return  # ignore dinamically declared provides
+            return  # ignore dynamically declared provides
 
         if not attr in context.__sure_providers_of__:
             context.__sure_providers_of__[attr] = []
 
         context.__sure_providers_of__[attr].append(func)
 
-    def register_dinamic_providers(func, attr, args, kwargs):
+    def register_dynamic_providers(func, attr, args, kwargs):
         found = re.search(r'^[{](\d+)[}]$', attr)
         if not found:
-            return  # ignore dinamically declared provides
+            return  # ignore dynamically declared provides
 
         index = int(found.group(1))
         assert index < len(args), \
-            'the dinamic provider index: {%d} is bigger than %d, which is ' \
+            'the dynamic provider index: {%d} is bigger than %d, which is ' \
             'the length of the positional arguments passed to %s' % (
             index, len(args), func.__name__)
 
@@ -352,7 +352,7 @@ def action_for(context, provides=None, depends_on=None):
 
         @wraps(func)
         def wrapper(*args, **kw):
-            [register_dinamic_providers(func, attr, args, kw)
+            [register_dynamic_providers(func, attr, args, kw)
              for attr in provides]
             context.__sure_actions_ran__.append((func, args, kw))
             check_dependencies(func)
@@ -1048,11 +1048,10 @@ if is_cpython and allows_new_syntax:
 
 
     object_handler = patchable_builtin(object)
-    # We have to keep track of all objects which
-    # should overwrite a ``POSITIVES`` or ``NEGATIVES``
-    # property. If we wouldn't do that in the
-    # make_safe_property.setter method we would loose
-    # the newly assigned object reference.
+    # We have to keep track of all objects which should overwrite a
+    # ``POSITIVES`` or ``NEGATIVES`` property. If we wouldn't do that
+    # in the make_safe_property.setter method we would lose the newly
+    # assigned object reference.
     overwritten_object_handlers = {}
 
     # None does not have a tp_dict associated to its PyObject, so this

@@ -48,13 +48,14 @@ from sure.registry import context as _registry
 if not PY2:
     basestring = str
 
-version = '1.4.11'
+version = "1.4.11"
 
 
-not_here_error = \
-    'you have tried to access the attribute %r from the context ' \
-    '(aka VariablesBag), but there is no such attribute assigned to it. ' \
-    'Maybe you misspelled it ? Well, here are the options: %s'
+not_here_error = (
+    "you have tried to access the attribute %r from the context "
+    "(aka VariablesBag), but there is no such attribute assigned to it. "
+    "Maybe you misspelled it ? Well, here are the options: %s"
+)
 
 
 original_obj_attrs = dir(object)
@@ -84,23 +85,28 @@ class VariablesBag(dict):
             return super(VariablesBag, self).__getattribute__(attr)
         except AttributeError:
             if attr not in dir(VariablesBag):
-                raise AssertionError(not_here_error % (
-                    attr,
-                    safe_repr(self.__varnames__),
-                ))
+                raise AssertionError(
+                    not_here_error
+                    % (
+                        attr,
+                        safe_repr(self.__varnames__),
+                    )
+                )
 
 
 def ensure_type(caller_name, cast, obj):
     try:
         return cast(obj)
     except TypeError:
-        raise AssertionError('{0} tried to  ')
+        raise AssertionError("{0} tried to  ")
 
 
 class CallBack(object):
-    context_error = "the function %s defined at %s line %d, is being "\
-        "decorated by either @that_with_context or @scenario, so it should " \
+    context_error = (
+        "the function %s defined at %s line %d, is being "
+        "decorated by either @that_with_context or @scenario, so it should "
         "take at least 1 parameter, which is the test context"
+    )
 
     def __init__(self, cb, args, kwargs):
         self.callback = cb
@@ -118,15 +124,18 @@ class CallBack(object):
         except Exception:
             exc_klass, exc_value, tb = sys.exc_info()
             err = traceback.format_exc().splitlines()[-1]
-            err = err.replace('{0}:'.format(exc_klass.__name__), '').strip()
+            err = err.replace("{0}:".format(exc_klass.__name__), "").strip()
 
-            if err.startswith(self.callback_name) and \
-               ('takes no arguments (1 given)' in err or
-                'takes 0 positional arguments but 1 was given' in err):
-                raise TypeError(self.context_error % (
-                    self.callback_name,
-                    self.callback_filename,
-                    self.callback_lineno,
+            if err.startswith(self.callback_name) and (
+                "takes no arguments (1 given)" in err
+                or "takes 0 positional arguments but 1 was given" in err
+            ):
+                raise TypeError(
+                    self.context_error
+                    % (
+                        self.callback_name,
+                        self.callback_filename,
+                        self.callback_lineno,
                     )
                 )
             raise
@@ -161,15 +170,17 @@ def that_with_context(setup=None, teardown=None):
                         cb.apply(context)
 
             return res
+
         return wrap
 
     return dec
+
 
 scenario = that_with_context
 
 
 def within(**units):
-    assert len(units) == 1, 'use within(number=unit). e.g.: within(one=second)'
+    assert len(units) == 1, "use within(number=unit). e.g.: within(one=second)"
 
     word, unit = list(units.items())[0]
     value = word_to_number(word)
@@ -187,9 +198,9 @@ def within(**units):
             except TypeError as e:
                 if PY2:
                     # PY2 has different error message
-                    fmt = '{0}() takes no arguments'
+                    fmt = "{0}() takes no arguments"
                 else:
-                    fmt = '{0}() takes 0 positional arguments but 1 was given'
+                    fmt = "{0}() takes 0 positional arguments but 1 was given"
                 err = text_type(e)
                 if fmt.format(func.__name__) in err:
                     func(*args, **kw)
@@ -200,11 +211,14 @@ def within(**units):
                 exc.append(traceback.format_exc())
 
             end = datetime.utcnow()
-            delta = (end - start)
+            delta = end - start
             took = convert_to(delta.microseconds)
             print(took, timeout)
-            assert took < timeout, \
-                   '%s did not run within %s %s' % (func.__name__, word, unit)
+            assert took < timeout, "%s did not run within %s %s" % (
+                func.__name__,
+                word,
+                unit,
+            )
             if exc:
                 raise AssertionError(exc.pop(0))
 
@@ -215,52 +229,54 @@ def within(**units):
 
     return dec
 
+
 UNITS = {
-    'minutes': (
+    "minutes": (
         lambda from_num: from_num / 60.0,
         lambda to_num: to_num * 6000000,
     ),
-    'seconds': (
+    "seconds": (
         lambda from_num: from_num,
         lambda to_num: to_num / 100000,
     ),
-    'miliseconds': (
+    "miliseconds": (
         lambda from_num: from_num * 1000,
         lambda to_num: to_num / 100,
     ),
-    'microseconds': (
+    "microseconds": (
         lambda from_num: from_num * 100000,
         lambda to_num: to_num,
     ),
 }
 
-milisecond = miliseconds = 'miliseconds'
-microsecond = microseconds = 'microseconds'
-second = seconds = 'seconds'
-minute = minutes = 'minutes'
+milisecond = miliseconds = "miliseconds"
+microsecond = microseconds = "microseconds"
+second = seconds = "seconds"
+minute = minutes = "minutes"
 
 
 def word_to_number(word):
     basic = {
-        'one': 1,
-        'two': 2,
-        'three': 3,
-        'four': 4,
-        'five': 5,
-        'six': 6,
-        'seven': 7,
-        'eight': 8,
-        'nine': 9,
-        'ten': 10,
-        'eleven': 11,
-        'twelve': 12,
+        "one": 1,
+        "two": 2,
+        "three": 3,
+        "four": 4,
+        "five": 5,
+        "six": 6,
+        "seven": 7,
+        "eight": 8,
+        "nine": 9,
+        "ten": 10,
+        "eleven": 11,
+        "twelve": 12,
     }
     try:
         return basic[word]
     except KeyError:
         raise AssertionError(
-            'sure supports only literal numbers from one to twelve, ' \
-            'you tried the word "twenty"')
+            "sure supports only literal numbers from one to twelve, "
+            'you tried the word "twenty"'
+        )
 
 
 def action_for(context, provides=None, depends_on=None):
@@ -271,7 +287,7 @@ def action_for(context, provides=None, depends_on=None):
         depends_on = []
 
     def register_providers(func, attr):
-        if re.search(r'^[{]\d+[}]$', attr):
+        if re.search(r"^[{]\d+[}]$", attr):
             return  # ignore dynamically declared provides
 
         if not attr in context.__sure_providers_of__:
@@ -280,15 +296,16 @@ def action_for(context, provides=None, depends_on=None):
         context.__sure_providers_of__[attr].append(func)
 
     def register_dynamic_providers(func, attr, args, kwargs):
-        found = re.search(r'^[{](\d+)[}]$', attr)
+        found = re.search(r"^[{](\d+)[}]$", attr)
         if not found:
             return  # ignore dynamically declared provides
 
         index = int(found.group(1))
-        assert index < len(args), \
-            'the dynamic provider index: {%d} is bigger than %d, which is ' \
-            'the length of the positional arguments passed to %s' % (
-            index, len(args), func.__name__)
+        assert index < len(args), (
+            "the dynamic provider index: {%d} is bigger than %d, which is "
+            "the length of the positional arguments passed to %s"
+            % (index, len(args), func.__name__)
+        )
 
         attr = args[index]
 
@@ -298,24 +315,29 @@ def action_for(context, provides=None, depends_on=None):
         context.__sure_providers_of__[attr].append(func)
 
     def ensure_providers(func, attr, args, kwargs):
-        found = re.search(r'^[{](\d+)[}]$', attr)
+        found = re.search(r"^[{](\d+)[}]$", attr)
         if found:
             index = int(found.group(1))
             attr = args[index]
 
-        assert attr in context, \
-            'the action "%s" was supposed to provide the attribute "%s" ' \
-            'into the context, but it did not. Please double check its ' \
-            'implementation' % (func.__name__, attr)
+        assert attr in context, (
+            'the action "%s" was supposed to provide the attribute "%s" '
+            "into the context, but it did not. Please double check its "
+            "implementation" % (func.__name__, attr)
+        )
 
-    dependency_error_lonely = 'the action "%s" defined at %s:%d ' \
-        'depends on the attribute "%s" to be available in the' \
-        ' context. It turns out that there are no actions providing ' \
-        'that. Please double-check the implementation'
+    dependency_error_lonely = (
+        'the action "%s" defined at %s:%d '
+        'depends on the attribute "%s" to be available in the'
+        " context. It turns out that there are no actions providing "
+        "that. Please double-check the implementation"
+    )
 
-    dependency_error_hints = 'the action "%s" defined at %s:%d ' \
-        'depends on the attribute "%s" to be available in the context.'\
-        ' You need to call one of the following actions beforehand:\n'
+    dependency_error_hints = (
+        'the action "%s" defined at %s:%d '
+        'depends on the attribute "%s" to be available in the context.'
+        " You need to call one of the following actions beforehand:\n"
+    )
 
     def check_dependencies(func):
         action = func.__name__
@@ -331,11 +353,13 @@ def action_for(context, provides=None, depends_on=None):
                     lineno,
                     dependency,
                 )
-                err += '\n'.join([
-                    ' -> %s at %s:%d' % (
-                        p.__name__,
-                        _get_file_name(p),
-                        _get_line_number(p)) for p in providers])
+                err += "\n".join(
+                    [
+                        " -> %s at %s:%d"
+                        % (p.__name__, _get_file_name(p), _get_line_number(p))
+                        for p in providers
+                    ]
+                )
 
             else:
                 err = dependency_error_lonely % (
@@ -352,8 +376,7 @@ def action_for(context, provides=None, depends_on=None):
 
         @wraps(func)
         def wrapper(*args, **kw):
-            [register_dynamic_providers(func, attr, args, kw)
-             for attr in provides]
+            [register_dynamic_providers(func, attr, args, kw) for attr in provides]
             context.__sure_actions_ran__.append((func, args, kw))
             check_dependencies(func)
             result = func(*args, **kw)
@@ -370,9 +393,9 @@ def action_for(context, provides=None, depends_on=None):
 def work_in_progress(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        _registry['is_running'] = True
+        _registry["is_running"] = True
         ret = func(*args, **kwargs)
-        _registry['is_running'] = False
+        _registry["is_running"] = False
         return ret
 
     return wrapper
@@ -403,23 +426,24 @@ def assertionmethod(func):
 def assertionproperty(func):
     return builtins.property(assertionmethod(func))
 
+
 POSITIVES = [
-    'should',
-    'does',
-    'do',
-    'must',
-    'when',
+    "should",
+    "does",
+    "do",
+    "must",
+    "when",
 ]
 
 NEGATIVES = [
-    'shouldnt',
-    'dont',
-    'do_not',
-    'doesnt',
-    'does_not',
-    'doesnot',
-    'should_not',
-    'shouldnot',
+    "shouldnt",
+    "dont",
+    "do_not",
+    "doesnt",
+    "does_not",
+    "doesnot",
+    "should_not",
+    "shouldnot",
 ]
 
 
@@ -429,9 +453,17 @@ class IdentityAssertion(object):
 
     def __call__(self, other):
         if self._ab.negative:
-            assert self._ab.obj is not other, "{0} should not be the same object as {1}, but it is".format(self._ab.obj, other)
+            assert (
+                self._ab.obj is not other
+            ), "{0} should not be the same object as {1}, but it is".format(
+                self._ab.obj, other
+            )
             return True
-        assert self._ab.obj is other, "{0} should be the same object as {1}, but it is not".format(self._ab.obj, other)
+        assert (
+            self._ab.obj is other
+        ), "{0} should be the same object as {1}, but it is not".format(
+            self._ab.obj, other
+        )
         return True
 
     def __getattr__(self, name):
@@ -439,7 +471,9 @@ class IdentityAssertion(object):
 
 
 class AssertionBuilder(object):
-    def __init__(self, name=None, negative=False, obj=None, callable_args=None, callable_kw=None):
+    def __init__(
+        self, name=None, negative=False, obj=None, callable_args=None, callable_kw=None
+    ):
         self._name = name
         self.negative = negative
 
@@ -467,19 +501,26 @@ class AssertionBuilder(object):
         negative = attr in NEGATIVES
 
         if special_case:
-            return AssertionBuilder(attr, negative=negative, obj=self.obj,
-                 callable_args=self._callable_args, callable_kw=self._callable_kw)
+            return AssertionBuilder(
+                attr,
+                negative=negative,
+                obj=self.obj,
+                callable_args=self._callable_args,
+                callable_kw=self._callable_kw,
+            )
 
         return super(AssertionBuilder, self).__getattribute__(attr)
 
     @assertionproperty
     def callable(self):
         if self.negative:
-            assert not callable(self.obj), (
-                'expected `{0}` to not be callable but it is'.format(safe_repr(self.obj)))
+            assert not callable(
+                self.obj
+            ), "expected `{0}` to not be callable but it is".format(safe_repr(self.obj))
         else:
-            assert callable(self.obj), (
-                'expected {0} to be callable'.format(safe_repr(self.obj)))
+            assert callable(self.obj), "expected {0} to be callable".format(
+                safe_repr(self.obj)
+            )
 
         return True
 
@@ -524,27 +565,32 @@ class AssertionBuilder(object):
     def property(self, name):
         has_it = hasattr(self.obj, name)
         if self.negative:
-            assert not has_it, (
-                '%r should not have the property `%s`, '
-                'but it is %r' % (self.obj, name, getattr(self.obj, name)))
+            assert (
+                not has_it
+            ), "%r should not have the property `%s`, " "but it is %r" % (
+                self.obj,
+                name,
+                getattr(self.obj, name),
+            )
             return True
 
-        assert has_it, (
-            "%r should have the property `%s` but does not" % (
-                self.obj, name))
+        assert has_it, "%r should have the property `%s` but does not" % (
+            self.obj,
+            name,
+        )
         return expect(getattr(self.obj, name))
 
     def key(self, name):
         has_it = name in self.obj
         if self.negative:
-            assert not has_it, (
-                '%r should not have the key `%s`, '
-                'but it is %r' % (self.obj, name, self.obj[name]))
+            assert not has_it, "%r should not have the key `%s`, " "but it is %r" % (
+                self.obj,
+                name,
+                self.obj[name],
+            )
             return True
 
-        assert has_it, (
-            "%r should have the key `%s` but does not" % (
-                self.obj, name))
+        assert has_it, "%r should have the key `%s` but does not" % (self.obj, name)
 
         return expect(self.obj[name])
 
@@ -553,21 +599,23 @@ class AssertionBuilder(object):
         representation = safe_repr(self.obj)
         length = len(self.obj)
         if self.negative:
-            assert length > 0, (
-                "expected `{0}` to not be empty".format(representation))
+            assert length > 0, "expected `{0}` to not be empty".format(representation)
         else:
-            assert length == 0, (
-                "expected `{0}` to be empty but it has {1} items".format(representation, length))
+            assert (
+                length == 0
+            ), "expected `{0}` to be empty but it has {1} items".format(
+                representation, length
+            )
 
         return True
 
     @assertionproperty
     def ok(self):
         if self.negative:
-            msg = 'expected `{0}` to be falsy'.format(self.obj)
+            msg = "expected `{0}` to be falsy".format(self.obj)
             assert not bool(self.obj), msg
         else:
-            msg = 'expected `{0}` to be truthy'.format(self.obj)
+            msg = "expected `{0}` to be truthy".format(self.obj)
             assert bool(self.obj), msg
 
         return True
@@ -578,10 +626,10 @@ class AssertionBuilder(object):
     @assertionproperty
     def falsy(self):
         if self.negative:
-            msg = 'expected `{0}` to be truthy'.format(self.obj)
+            msg = "expected `{0}` to be truthy".format(self.obj)
             assert bool(self.obj), msg
         else:
-            msg = 'expected `{0}` to be falsy'.format(self.obj)
+            msg = "expected `{0}` to be falsy".format(self.obj)
             assert not bool(self.obj), msg
 
         return True
@@ -591,29 +639,35 @@ class AssertionBuilder(object):
     @assertionproperty
     def none(self):
         if self.negative:
-            assert self.obj is not None, (
-                r"expected `{0}` to not be None".format(self.obj))
+            assert self.obj is not None, r"expected `{0}` to not be None".format(
+                self.obj
+            )
         else:
-            assert self.obj is None, (
-                r"expected `{0}` to be None".format(self.obj))
+            assert self.obj is None, r"expected `{0}` to be None".format(self.obj)
 
         return True
 
     @assertionmethod
     def within_range(self, start, end):
-        start = ensure_type('within_range', int, start)
-        end = ensure_type('within_range', int, end)
-        subject = ensure_type('within_range', int, self.obj)
+        start = ensure_type("within_range", int, start)
+        end = ensure_type("within_range", int, end)
+        subject = ensure_type("within_range", int, self.obj)
         is_within_range = subject >= start and subject <= end
 
         if self.negative:
             if is_within_range:
-                raise AssertionError('expected {0} to NOT be within {1} and {2}'.format(subject, start, end))
+                raise AssertionError(
+                    "expected {0} to NOT be within {1} and {2}".format(
+                        subject, start, end
+                    )
+                )
             return not is_within_range
 
         else:
             if not is_within_range:
-                raise AssertionError('expected {0} to be within {1} and {2}'.format(subject, start, end))
+                raise AssertionError(
+                    "expected {0} to be within {1} and {2}".format(subject, start, end)
+                )
             return is_within_range
 
     @assertionmethod
@@ -629,16 +683,18 @@ class AssertionBuilder(object):
             return self.within_range(first, rest[0])
         else:
             if self.negative:
-                ppath = '{0}.should_not.be.within'.format(self.obj)
+                ppath = "{0}.should_not.be.within".format(self.obj)
             else:
-                ppath = '{0}.should.be.within'.format(self.obj)
+                ppath = "{0}.should.be.within".format(self.obj)
 
-            raise AssertionError((
-                '{0}({1}, {2}) must be called with either a iterable:\n'
-                '{0}([1, 2, 3, 4])\n'
-                'or with a range of numbers:'
-                '{0}(1, 3000)'
-            ).format(ppath, first, ", ".join([repr(x) for x in rest])))
+            raise AssertionError(
+                (
+                    "{0}({1}, {2}) must be called with either a iterable:\n"
+                    "{0}([1, 2, 3, 4])\n"
+                    "or with a range of numbers:"
+                    "{0}(1, 3000)"
+                ).format(ppath, first, ", ".join([repr(x) for x in rest]))
+            )
 
     @assertionmethod
     def equal(self, what, epsilon=None):
@@ -664,7 +720,7 @@ class AssertionBuilder(object):
             if error:
                 return True
 
-            msg = '%s should differ from %s, but is the same thing'
+            msg = "%s should differ from %s, but is the same thing"
             raise AssertionError(msg % (safe_repr(self.obj), safe_repr(what)))
 
         else:
@@ -689,7 +745,9 @@ class AssertionBuilder(object):
                 assert not difference, "Difference:\n\n{0}".format(difference)
         else:
             if self.obj == what:
-                raise AssertionError("{0} should be different of {1}".format(self.obj, what))
+                raise AssertionError(
+                    "{0} should be different of {1}".format(self.obj, what)
+                )
 
         return True
 
@@ -702,20 +760,20 @@ class AssertionBuilder(object):
         else:
             class_name = text_type(klass)
 
-        is_vowel = class_name[0] in 'aeiou'
+        is_vowel = class_name[0] in "aeiou"
 
         if isinstance(klass, string_types):
-            if '.' in klass:
-                items = klass.split('.')
+            if "." in klass:
+                items = klass.split(".")
                 first = items.pop(0)
                 if not items:
                     items = [first]
-                    first = '_abcoll'
+                    first = "_abcoll"
             else:
                 if sys.version_info <= (3, 0, 0):
-                    first = '__builtin__'
+                    first = "__builtin__"
                 else:
-                    first = 'builtins'
+                    first = "builtins"
                 items = [klass]
 
             klass = reduce(getattr, items, __import__(first))
@@ -723,14 +781,14 @@ class AssertionBuilder(object):
         suffix = is_vowel and "n" or ""
 
         if self.negative:
-            assert not isinstance(self.obj, klass), (
-                'expected `{0}` to not be a{1} {2}'.format(
-                    self.obj, suffix, class_name))
+            assert not isinstance(
+                self.obj, klass
+            ), "expected `{0}` to not be a{1} {2}".format(self.obj, suffix, class_name)
 
         else:
-            assert isinstance(self.obj, klass), (
-                'expected `{0}` to be a{1} {2}'.format(
-                    self.obj, suffix, class_name))
+            assert isinstance(self.obj, klass), "expected `{0}` to be a{1} {2}".format(
+                self.obj, suffix, class_name
+            )
         return True
 
     a = an
@@ -738,14 +796,12 @@ class AssertionBuilder(object):
     @assertionmethod
     def greater_than(self, dest):
         if self.negative:
-            msg = "expected `{0}` to not be greater than `{1}`".format(
-                self.obj, dest)
+            msg = "expected `{0}` to not be greater than `{1}`".format(self.obj, dest)
 
             assert not self.obj > dest, msg
 
         else:
-            msg = "expected `{0}` to be greater than `{1}`".format(
-                self.obj, dest)
+            msg = "expected `{0}` to be greater than `{1}`".format(self.obj, dest)
             assert self.obj > dest, msg
 
         return True
@@ -754,13 +810,15 @@ class AssertionBuilder(object):
     def greater_than_or_equal_to(self, dest):
         if self.negative:
             msg = "expected `{0}` to not be greater than or equal to `{1}`".format(
-                self.obj, dest)
+                self.obj, dest
+            )
 
             assert not self.obj >= dest, msg
 
         else:
             msg = "expected `{0}` to be greater than or equal to `{1}`".format(
-                self.obj, dest)
+                self.obj, dest
+            )
             assert self.obj >= dest, msg
 
         return True
@@ -768,14 +826,12 @@ class AssertionBuilder(object):
     @assertionmethod
     def lower_than(self, dest):
         if self.negative:
-            msg = "expected `{0}` to not be lower than `{1}`".format(
-                self.obj, dest)
+            msg = "expected `{0}` to not be lower than `{1}`".format(self.obj, dest)
 
             assert not self.obj < dest, msg
 
         else:
-            msg = "expected `{0}` to be lower than `{1}`".format(
-                self.obj, dest)
+            msg = "expected `{0}` to be lower than `{1}`".format(self.obj, dest)
             assert self.obj < dest, msg
 
         return True
@@ -784,13 +840,15 @@ class AssertionBuilder(object):
     def lower_than_or_equal_to(self, dest):
         if self.negative:
             msg = "expected `{0}` to not be lower than or equal to `{1}`".format(
-                self.obj, dest)
+                self.obj, dest
+            )
 
             assert not self.obj <= dest, msg
 
         else:
             msg = "expected `{0}` to be lower than or equal to `{1}`".format(
-                self.obj, dest)
+                self.obj, dest
+            )
             assert self.obj <= dest, msg
 
         return True
@@ -832,13 +890,15 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def throw(self, *args, **kw):
-        _that = AssertionHelper(self.obj,
-                     with_args=self._callable_args,
-                     and_kwargs=self._callable_kw)
+        _that = AssertionHelper(
+            self.obj, with_args=self._callable_args, and_kwargs=self._callable_kw
+        )
 
         if self.negative:
-            msg = ("{0} called with args {1} and kwargs {2} should "
-                   "not raise {3} but raised {4}")
+            msg = (
+                "{0} called with args {1} and kwargs {2} should "
+                "not raise {3} but raised {4}"
+            )
 
             exc = args and args[0] or Exception
             try:
@@ -874,7 +934,7 @@ class AssertionBuilder(object):
             except AssertionError:
                 return True
             else:
-                msg = '%r should not look like %r but does'
+                msg = "%r should not look like %r but does"
                 raise AssertionError(msg % (self.obj, value))
 
         return self._that.looks_like(value)
@@ -890,9 +950,9 @@ class AssertionBuilder(object):
     @assertionmethod
     def match(self, regex, *args):
         obj_repr = repr(self.obj)
-        assert isinstance(self.obj, basestring), (
-            "{0} should be a string in order to compare using .match()".format(obj_repr)
-        )
+        assert isinstance(
+            self.obj, basestring
+        ), "{0} should be a string in order to compare using .match()".format(obj_repr)
         matched = re.search(regex, self.obj, *args)
 
         modifiers_map = {
@@ -903,26 +963,31 @@ class AssertionBuilder(object):
             re.U: "u",
         }
         modifiers = "".join([modifiers_map.get(x, "") for x in args])
-        regex_representation = '/{0}/{1}'.format(regex, modifiers)
+        regex_representation = "/{0}/{1}".format(regex, modifiers)
 
         if self.negative:
-            assert matched is None, (
-                "{0} should not match the regular expression {1}".format(
-                    obj_repr, regex_representation))
+            assert (
+                matched is None
+            ), "{0} should not match the regular expression {1}".format(
+                obj_repr, regex_representation
+            )
 
         else:
-            assert matched is not None, (
-                "{0} doesn't match the regular expression {1}".format(
-                    obj_repr, regex_representation))
+            assert (
+                matched is not None
+            ), "{0} doesn't match the regular expression {1}".format(
+                obj_repr, regex_representation
+            )
 
         return True
 
-this = AssertionBuilder('this')
-the = AssertionBuilder('the')
-it = AssertionBuilder('it')
-these = AssertionBuilder('these')
-those = AssertionBuilder('those')
-expect = AssertionBuilder('expect')
+
+this = AssertionBuilder("this")
+the = AssertionBuilder("the")
+it = AssertionBuilder("it")
+these = AssertionBuilder("these")
+those = AssertionBuilder("those")
+expect = AssertionBuilder("expect")
 
 
 def assertion(func):
@@ -953,6 +1018,7 @@ class ensure(object):
     The ``args`` and ``kwargs`` are used to format
     the message using ``format()``.
     """
+
     def __init__(self, msg, *args, **kwargs):
         self.msg = msg
         self.args = args
@@ -973,10 +1039,10 @@ class ensure(object):
         raise AssertionError(msg)
 
 
-allows_new_syntax = not os.getenv('SURE_DISABLE_NEW_SYNTAX')
+allows_new_syntax = not os.getenv("SURE_DISABLE_NEW_SYNTAX")
 
 
-if is_cpython and allows_new_syntax:
+def do_enable():
     def make_safe_property(method, name, should_be_property=True):
         if not should_be_property:
             return method(None)
@@ -1011,13 +1077,13 @@ if is_cpython and allows_new_syntax:
             fdel=partial(deleter, method),
         )
 
-
     def build_assertion_property(name, is_negative, prop=True):
         """Build assertion property
 
         This is the assertion property which is usually patched
         to the built-in ``object`` and ``NoneType``.
         """
+
         def method(self):
             # check if the given object already has an attribute with the
             # given name. If yes return it instead of patching it.
@@ -1029,16 +1095,18 @@ if is_cpython and allows_new_syntax:
                 # it's safe to just continue and patch the `name`.
                 pass
 
-            overwritten_object_handler = overwritten_object_handlers.get((id(self), name), None)
+            overwritten_object_handler = overwritten_object_handlers.get(
+                (id(self), name), None
+            )
             if overwritten_object_handler:
                 return overwritten_object_handler
 
             builder = AssertionBuilder(name, negative=is_negative)
             instance = builder(self)
-            callable_args = getattr(self, '_callable_args', ())
+            callable_args = getattr(self, "_callable_args", ())
             if callable_args:
                 instance._callable_args = callable_args
-            callable_kw = getattr(self, '_callable_kw', {})
+            callable_kw = getattr(self, "_callable_kw", {})
             if callable_kw:
                 instance._callable_kw = callable_kw
             return instance
@@ -1046,12 +1114,12 @@ if is_cpython and allows_new_syntax:
         method.__name__ = str(name)
         return make_safe_property(method, name, prop)
 
-
     object_handler = patchable_builtin(object)
-    # We have to keep track of all objects which should overwrite a
-    # ``POSITIVES`` or ``NEGATIVES`` property. If we wouldn't do that
-    # in the make_safe_property.setter method we would lose the newly
-    # assigned object reference.
+    # We have to keep track of all objects which
+    # should overwrite a ``POSITIVES`` or ``NEGATIVES``
+    # property. If we wouldn't do that in the
+    # make_safe_property.setter method we would loose
+    # the newly assigned object reference.
     overwritten_object_handlers = {}
 
     # None does not have a tp_dict associated to its PyObject, so this
@@ -1078,13 +1146,23 @@ def enable():
             return sorted(frame.f_back.f_locals.keys())
 
         if len(obj) > 1:
-            raise TypeError('dir expected at most 1 arguments, got {0}'.format(len(obj)))
+            raise TypeError(
+                "dir expected at most 1 arguments, got {0}".format(len(obj))
+            )
 
-        patched = [x for x in old_dir(obj[0]) if isinstance(getattr(obj[0], x, None), AssertionBuilder)]
-        return sorted(set(old_dir(obj[0])).difference(patched))
+        # try:
+        #     patched = [
+        #         x
+        #         for x in old_dir(obj[0])
+        #         if isinstance(getattr(obj[0], x, None), AssertionBuilder)
+        #     ]
+        # except Exception:
+        #     patched = []
+        return sorted(set(old_dir(obj[0])).difference(set()))
 
     builtins.dir = _new_dir
+    do_enable()
 
 
-if allows_new_syntax:
+if is_cpython and allows_new_syntax:
     enable()

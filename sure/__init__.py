@@ -1053,11 +1053,11 @@ def do_enable():
                 # we cannot use ``del self.__dict__[name]`` directly because we cannot
                 # modify a mappingproxy object. Thus, we have to delete it in our
                 # proxy __dict__.
-                del overwritten_object_handlers[(id(self), method.__name__)]
+                overwritten_object_handlers.pop((id(self), method.__name__), None)
             else:
                 # if the attribute has to be deleted from an instance object
                 # we are able to directly delete it from the object's __dict__.
-                del self.__dict__[name]
+                self.__dict__.pop(name, None)
 
         def setter(method, self, other):
             if isinstance(self, type):
@@ -1149,15 +1149,21 @@ def enable():
             raise TypeError(
                 "dir expected at most 1 arguments, got {0}".format(len(obj))
             )
+        patched = []
+        try:
+            import pytest
+        except ImportError:
+            pytest = None
 
-        # try:
-        #     patched = [
-        #         x
-        #         for x in old_dir(obj[0])
-        #         if isinstance(getattr(obj[0], x, None), AssertionBuilder)
-        #     ]
-        # except Exception:
-        #     patched = []
+        if not pytest:
+            try:
+                patched = [
+                    x
+                    for x in old_dir(obj[0])
+                    if isinstance(getattr(obj[0], x, None), AssertionBuilder)
+                ]
+            except Exception:
+                pass
         return sorted(set(old_dir(obj[0])).difference(set()))
 
     builtins.dir = _new_dir

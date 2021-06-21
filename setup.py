@@ -91,6 +91,7 @@ if __name__ == "__main__":
         version=version,
         description=__doc__,
         long_description=read_readme(),
+        long_description_content_type="text/x-rst",
         url="http://github.com/gabrielfalcao/sure",
         author="Gabriel Falcao",
         author_email="gabriel@nacaolivre.org",

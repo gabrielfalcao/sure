@@ -47,6 +47,7 @@ docs:
 	$(OPEN_COMMAND) docs/build/html/index.html
 
 test:
+	@rm -f .coverage
 	@$(VENV)/bin/nosetests --rednose --immediate -vv --with-coverage --cover-package=sure
 	@$(VENV)/bin/pytest -vv
 
@@ -61,11 +62,12 @@ push-release: dist  # pushes distribution tarballs of the current version
 # Prepares release of this package prior to pushing to pypi
 build-release:
 	rm -rf ./dist  # remove local packages
-	$(VENV)/bin/twine check dist/*.tar.gz
 	$(VENV)/bin/python setup.py build sdist
+	$(VENV)/bin/twine check dist/*.tar.gz
+
 
 # Convenience target that runs all tests then builds and pushes a release to pypi
-release: tests build-release push-release
+release: test
 	@rm -rf dist/*
 	@./.release
 	$(MAKE) build-release

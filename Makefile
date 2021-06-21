@@ -55,7 +55,7 @@ run: | $(MAIN_CLI_PATH)
 	@$(MAIN_CLI_PATH) --help
 
 # Pushes release of this package to pypi
-push-release:  # pushes distribution tarballs of the current version
+push-release: dist  # pushes distribution tarballs of the current version
 	$(VENV)/bin/twine upload dist/*.tar.gz
 
 # Prepares release of this package prior to pushing to pypi
@@ -66,6 +66,8 @@ build-release:
 
 # Convenience target that runs all tests then builds and pushes a release to pypi
 release: tests build-release push-release
+	@rm -rf dist/*
+	@./.release
 	$(MAKE) build-release
 	$(MAKE) push-release
 

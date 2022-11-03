@@ -18,3 +18,4 @@ sure-*.tar.gz
 *.sublime-workspace
 *.swp
 .venv/
+/.python-version

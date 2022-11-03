@@ -19,6 +19,7 @@
 "utility belt for automated testing in python for python"
 
 import os
+import ast
 import sys
 import codecs
 from setuptools import setup, find_packages
@@ -31,16 +32,38 @@ from setuptools import setup, find_packages
 EXPL_NOT_SUPPORTED_VERSIONS = ((3, 0), (3, 1), (3, 2))
 
 if sys.version_info[0:2] in EXPL_NOT_SUPPORTED_VERSIONS:
-    raise SystemExit("sure does explicitly not support the following python versions "
-                     "due to big incompatibilities: {0}".format(EXPL_NOT_SUPPORTED_VERSIONS))
+    raise SystemExit(
+        "sure does explicitly not support the following python versions "
+        "due to big incompatibilities: {0}".format(EXPL_NOT_SUPPORTED_VERSIONS)
+    )
 
 
 PROJECT_ROOT = os.path.dirname(__file__)
 
 
+class VersionFinder(ast.NodeVisitor):
+    VARIABLE_NAME = "version"
+
+    def __init__(self):
+        self.version = None
+
+    def visit_Assign(self, node):
+        try:
+            if node.targets[0].id == self.VARIABLE_NAME:
+                self.version = node.value.s
+        except Exception:
+            pass
+
+
+def read_version():
+    finder = VersionFinder()
+    finder.visit(ast.parse(local_text_file("sure", "version.py")))
+    return finder.version
+
+
 def local_text_file(*f):
     path = os.path.join(PROJECT_ROOT, *f)
-    with open(path, 'rt') as fp:
+    with open(path, "rt") as fp:
         file_data = fp.read()
 
     return file_data
@@ -53,48 +76,52 @@ def read_readme():
     only the short description is returned.
     """
     try:
-        return local_text_file('README.rst')
+        return local_text_file("README.rst")
     except IOError:
         return __doc__
 
 
-install_requires = ['mock', 'six']
-tests_require = ['nose']
+install_requires = ["mock", "six"]
+tests_require = ["nose"]
+version = read_version()
 
-
-if __name__ == '__main__':
-    setup(name='sure',
-          version='1.4.11',
-          description=__doc__,
-          long_description=read_readme(),
-          url='http://github.com/gabrielfalcao/sure',
-          author='Gabriel Falcao',
-          author_email='gabriel@nacaolivre.org',
-          maintainer='Timo Furrer',
-          maintainer_email='tuxtimo@gmail.com',
-          include_package_data=True,
-          packages=find_packages(exclude=['*tests*']),
-          install_requires=install_requires,
-          tests_require=tests_require,
-          test_suite='nose.collector',
-          classifiers=[
-              'Development Status :: 5 - Production/Stable',
-              'Environment :: Console',
-              'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-              'Operating System :: MacOS :: MacOS X',
-              'Operating System :: POSIX',
-              'Operating System :: POSIX :: Linux',
-              'Programming Language :: Python',
-              'Programming Language :: Python :: 2',
-              'Programming Language :: Python :: 2.7',
-              'Programming Language :: Python :: 3',
-              'Programming Language :: Python :: 3.4',
-              'Programming Language :: Python :: 3.5',
-              'Programming Language :: Python :: 3.6',
-              'Programming Language :: Python :: 3.7',
-              'Programming Language :: Python :: Implementation',
-              'Programming Language :: Python :: Implementation :: CPython',
-              'Programming Language :: Python :: Implementation :: PyPy',
-              'Topic :: Software Development :: Testing'
-          ]
+if __name__ == "__main__":
+    setup(
+        name="sure",
+        version=version,
+        description=__doc__,
+        long_description=read_readme(),
+        url="http://github.com/gabrielfalcao/sure",
+        author="Gabriel Falcao",
+        author_email="gabriel@nacaolivre.org",
+        maintainer="Timo Furrer",
+        maintainer_email="tuxtimo@gmail.com",
+        include_package_data=True,
+        packages=find_packages(exclude=["*tests*"]),
+        install_requires=install_requires,
+        entry_points={
+            "console_scripts": ["sure = sure.cli:entrypoint"],
+        },
+        tests_require=tests_require,
+        test_suite="nose.collector",
+        classifiers=[
+            "Development Status :: 5 - Production/Stable",
+            "Environment :: Console",
+            "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+            "Operating System :: MacOS :: MacOS X",
+            "Operating System :: POSIX",
+            "Operating System :: POSIX :: Linux",
+            "Programming Language :: Python",
+            "Programming Language :: Python :: 2",
+            "Programming Language :: Python :: 2.7",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.4",
+            "Programming Language :: Python :: 3.5",
+            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: Implementation",
+            "Programming Language :: Python :: Implementation :: CPython",
+            "Programming Language :: Python :: Implementation :: PyPy",
+            "Topic :: Software Development :: Testing",
+        ],
     )

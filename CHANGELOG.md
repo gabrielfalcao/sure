@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v2.0.0]
+### Fixed
+- No longer patch the builtin `dir()` function, which fixes pytest in some cases such as projects using gevent.
+
 ## [v1.4.11]
 ### Fixed
 - Reading the version dinamically was causing import errors that caused error when installing package. Refs #144

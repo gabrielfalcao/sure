@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
 
+import pytest
 from six import text_type, PY2
 from six.moves import xrange
 
@@ -24,7 +25,6 @@ import sure
 from sure.deprecated import that
 from sure.magic import is_cpython
 from sure import VariablesBag, expect
-from nose.tools import assert_equals, assert_raises
 from sure.compat import compat_repr, safe_repr, text_type_name
 
 
@@ -40,10 +40,7 @@ def test_setup_with_context():
         assert hasattr(context, "name")
 
     john_is_within_context()
-    assert_equals(
-        john_is_within_context.__name__,
-        'john_is_within_context',
-    )
+    assert john_is_within_context.__name__ == 'john_is_within_context'
 
 
 def test_context_is_not_optional():
@@ -58,7 +55,7 @@ def test_context_is_not_optional():
 
     assert that(it_crashes).raises(
         TypeError, (
-        "the function it_crashes defined at test_old_api.py line 56, is being "
+        "the function it_crashes defined at test_old_api.py line 53, is being "
         "decorated by either @that_with_context or @scenario, so it should "
         "take at least 1 parameter, which is the test context"),
     )
@@ -204,10 +201,7 @@ def test_that_len_greater_than_should_raise_assertion_error():
     try:
         that(lst).len_greater_than(1000)
     except AssertionError as e:
-        assert_equals(
-            str(e),
-            'the length of the list should be greater then %d, but is %d'  \
-            % (1000, 1000))
+        assert str(e) == 'the length of the list should be greater then 1000, but is 1000'
 
 
 def test_that_len_greater_than_or_equals():
@@ -230,10 +224,7 @@ def test_that_len_greater_than_or_equals_should_raise_assertion_error():
     try:
         that(lst).len_greater_than_or_equals(1001)
     except AssertionError as e:
-        assert_equals(
-            str(e),
-            'the length of %r should be greater then or equals %d, but is %d' \
-            % (lst, 1001, 1000))
+        assert str(e) == f'the length of {lst} should be greater then or equals 1001, but is 1000'
 
 
 def test_that_len_lower_than():
@@ -254,10 +245,7 @@ def test_that_len_lower_than_should_raise_assertion_error():
     try:
         that(lst).len_lower_than(1000)
     except AssertionError as e:
-        assert_equals(
-            str(e),
-            'the length of %r should be lower then %d, but is %d' % \
-            (lst, 1000, 1000))
+        assert str(e) == f'the length of {lst} should be lower then 1000, but is 1000'
 
 
 def test_that_len_lower_than_or_equals():
@@ -280,10 +268,7 @@ def test_that_len_lower_than_or_equals_should_raise_assertion_error():
     try:
         that(lst).len_lower_than_or_equals(100)
     except AssertionError as e:
-        assert_equals(
-            str(e),
-            'the length of %r should be lower then or equals %d, but is %d' % \
-            (lst, 100, 1000))
+        assert str(e) == f'the length of {lst} should be lower then or equals 100, but is 1000'
 
 
 def test_that_checking_all_atributes():
@@ -425,10 +410,11 @@ def test_that_raises():
         assert called
         called = False
 
-    assert_raises(RuntimeError, function, 1, 2)
+    with pytest.raises(RuntimeError):
+        function(1, 2)
 
     called = False
-    assert_equals(function(3, 5), 'OK')
+    assert function(3, 5) == 'OK'
     assert called
 
     called = False
@@ -563,10 +549,7 @@ def test_that_none_contains_string():
         assert False, 'should not reach here'
     except Exception as e:
         error_msg = "argument of type 'NoneType' is not iterable" if is_cpython else "'NoneType' object is not iterable"
-        assert_equals(
-            text_type(e),
-            error_msg
-        )
+        assert text_type(e) == error_msg
 
 
 def test_that_some_iterable_is_empty():
@@ -657,24 +640,24 @@ def test_within_fail():
         within(five=miliseconds)(sleepy)()
     except AssertionError as e:
         failed = True
-        assert_equals('sleepy did not run within five miliseconds', str(e))
+        assert 'sleepy did not run within five miliseconds' == str(e)
 
     assert failed, 'within(five=miliseconds)(sleepy) did not fail'
 
 
 def test_word_to_number():
-    assert_equals(sure.word_to_number('one'),      1)
-    assert_equals(sure.word_to_number('two'),      2)
-    assert_equals(sure.word_to_number('three'),    3)
-    assert_equals(sure.word_to_number('four'),     4)
-    assert_equals(sure.word_to_number('five'),     5)
-    assert_equals(sure.word_to_number('six'),      6)
-    assert_equals(sure.word_to_number('seven'),    7)
-    assert_equals(sure.word_to_number('eight'),    8)
-    assert_equals(sure.word_to_number('nine'),     9)
-    assert_equals(sure.word_to_number('ten'),     10)
-    assert_equals(sure.word_to_number('eleven'),  11)
-    assert_equals(sure.word_to_number('twelve'),  12)
+    assert sure.word_to_number('one') ==       1
+    assert sure.word_to_number('two') ==       2
+    assert sure.word_to_number('three') ==     3
+    assert sure.word_to_number('four') ==      4
+    assert sure.word_to_number('five') ==      5
+    assert sure.word_to_number('six') ==       6
+    assert sure.word_to_number('seven') ==     7
+    assert sure.word_to_number('eight') ==     8
+    assert sure.word_to_number('nine') ==      9
+    assert sure.word_to_number('ten') ==      10
+    assert sure.word_to_number('eleven') ==   11
+    assert sure.word_to_number('twelve') ==   12
 
 
 def test_word_to_number_fail():
@@ -683,10 +666,7 @@ def test_word_to_number_fail():
         sure.word_to_number('twenty')
     except AssertionError as e:
         failed = True
-        assert_equals(
-            text_type(e),
-            'sure supports only literal numbers from one ' \
-            'to twelve, you tried the word "twenty"')
+        assert text_type(e) == 'sure supports only literal numbers from one to twelve, you tried the word "twenty"'
 
     assert failed, 'should raise assertion error'
 
@@ -695,52 +675,52 @@ def test_microsecond_unit():
     "testing microseconds convertion"
     cfrom, cto = sure.UNITS[sure.microsecond]
 
-    assert_equals(cfrom(1), 100000)
-    assert_equals(cto(1), 1)
+    assert cfrom(1) ==  100000
+    assert cto(1) ==  1
 
     cfrom, cto = sure.UNITS[sure.microseconds]
 
-    assert_equals(cfrom(1), 100000)
-    assert_equals(cto(1), 1)
+    assert cfrom(1) ==  100000
+    assert cto(1) ==  1
 
 
 def test_milisecond_unit():
     "testing miliseconds convertion"
     cfrom, cto = sure.UNITS[sure.milisecond]
 
-    assert_equals(cfrom(1), 1000)
-    assert_equals(cto(100), 1)
+    assert cfrom(1) ==  1000
+    assert cto(100) ==  1
 
     cfrom, cto = sure.UNITS[sure.miliseconds]
 
-    assert_equals(cfrom(1), 1000)
-    assert_equals(cto(100), 1)
+    assert cfrom(1) ==  1000
+    assert cto(100) ==  1
 
 
 def test_second_unit():
     "testing seconds convertion"
     cfrom, cto = sure.UNITS[sure.second]
 
-    assert_equals(cfrom(1), 1)
-    assert_equals(cto(100000), 1)
+    assert cfrom(1) ==  1
+    assert cto(100000) ==  1
 
     cfrom, cto = sure.UNITS[sure.seconds]
 
-    assert_equals(cfrom(1), 1)
-    assert_equals(cto(100000), 1)
+    assert cfrom(1) ==  1
+    assert cto(100000) ==  1
 
 
 def test_minute_unit():
     "testing minutes convertion"
     cfrom, cto = sure.UNITS[sure.minute]
 
-    assert_equals(cfrom(60), 1)
-    assert_equals(cto(1), 6000000)
+    assert cfrom(60) ==  1
+    assert cto(1) ==  6000000
 
     cfrom, cto = sure.UNITS[sure.minutes]
 
-    assert_equals(cfrom(60), 1)
-    assert_equals(cto(1), 6000000)
+    assert cfrom(60) ==  1
+    assert cto(1) ==  6000000
 
 
 def test_within_pass_utc():
@@ -762,7 +742,7 @@ def test_that_is_a_matcher_should_absorb_callables_to_be_used_as_matcher():
         return 'foobar'
 
     assert that('friend').is_truthful()
-    assert_equals(that('friend').is_truthful(), 'foobar')
+    assert that('friend').is_truthful() ==  'foobar'
 
 
 def test_accepts_setup_list():
@@ -780,10 +760,7 @@ def test_accepts_setup_list():
         assert context.last_name == 'Resig'
 
     john_is_within_context()
-    assert_equals(
-        john_is_within_context.__name__,
-        'john_is_within_context',
-    )
+    assert john_is_within_context.__name__ == 'john_is_within_context'
 
 
 def test_accepts_teardown_list():
@@ -820,20 +797,17 @@ def test_scenario_is_alias_for_context_on_setup_and_teardown():
         context.name = "Robert C Martin"
 
     def teardown(context):
-        assert_equals(context.name, "Robert C Martin")
+        assert context.name ==  "Robert C Martin"
 
     @scenario([setup], [teardown])
     def robert_is_within_context(context):
         "Robert is within context"
         assert isinstance(context, VariablesBag)
         assert hasattr(context, "name")
-        assert_equals(context.name, "Robert C Martin")
+        assert context.name ==  "Robert C Martin"
 
     robert_is_within_context()
-    assert_equals(
-        robert_is_within_context.__name__,
-        'robert_is_within_context',
-    )
+    assert robert_is_within_context.__name__ == 'robert_is_within_context'
 
 
 def test_actions_returns_context():
@@ -917,7 +891,7 @@ def test_depends_on_failing_due_nothing_found():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "lonely_action" defined at %s:926 ' \
+    error = 'the action "lonely_action" defined at %s:900 ' \
         'depends on the attribute "something" to be available in the' \
         ' context. It turns out that there are no actions providing ' \
         'that. Please double-check the implementation' % fullpath
@@ -943,10 +917,10 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "my_action" defined at {0}:956 ' \
+    error = 'the action "my_action" defined at {0}:930 ' \
         'depends on the attribute "some_attr" to be available in the context.'\
         ' You need to call one of the following actions beforehand:\n' \
-        ' -> dependency_action at {0}:952'.replace('{0}', fullpath)
+        ' -> dependency_action at {0}:926'.replace('{0}', fullpath)
 
     def with_setup(context):
         @action_for(context, provides=['some_attr'])

@@ -12,6 +12,8 @@ jobs:
           - 3.7.3
           - 3.8.6
           - 3.9.0
+          - "3.10.0"
+          - "3.11.0"
 
     steps:
     - uses: actions/checkout@v2
@@ -27,8 +29,5 @@ jobs:
     - name: Install sure
       run: pip install -e .
 
-    - name: Run tests with nose
-      run: nosetests --verbosity 2
-
-    - name: Test with pytest
-      run: pytest -vv
+    - name: Run tests
+      run: make test

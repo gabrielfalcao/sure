@@ -47,7 +47,6 @@ docs:
 	$(OPEN_COMMAND) docs/build/html/index.html
 
 test:
-	@$(VENV)/bin/nosetests --rednose --immediate -vv --with-coverage --cover-package=sure
 	@$(VENV)/bin/pytest -vv
 
 # run main command-line tool

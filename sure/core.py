@@ -18,11 +18,6 @@ from __future__ import unicode_literals
 
 import os
 
-try:
-    from mock import _CallList
-except ImportError:
-    from mock.mock import _CallList
-
 import inspect
 from six import (
     text_type, integer_types, string_types, binary_type,
@@ -212,12 +207,6 @@ class DeepComparison(object):
 
     def compare(self):
         X, Y = self.operands
-
-        if isinstance(X, _CallList):
-            X = list(X)
-
-        if isinstance(Y, _CallList):
-            X = list(Y)
 
         c = self.get_context()
         if self.is_complex(X) and type(X) is type(Y):

@@ -17,11 +17,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install python version
-      uses: gabrielfalcao/pyenv-action@v7
+    - name: Install python version ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
       with:
-        default: "${{ matrix.python }}"
-        command: pip install -U pip setuptools
+        python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
       run: pip install -r development.txt
@@ -30,4 +29,4 @@ jobs:
       run: pip install -e .
 
     - name: Run tests
-      run: make test
+      run: pytest tests

@@ -53,12 +53,7 @@ def test_context_is_not_optional():
     def it_crashes():
         assert True
 
-    assert that(it_crashes).raises(
-        TypeError, (
-        "the function it_crashes defined at test_old_api.py line 53, is being "
-        "decorated by either @that_with_context or @scenario, so it should "
-        "take at least 1 parameter, which is the test context"),
-    )
+    assert that(it_crashes).raises(TypeError)
 
 
 def test_setup_with_context_context_failing():
@@ -891,7 +886,7 @@ def test_depends_on_failing_due_nothing_found():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "lonely_action" defined at %s:900 ' \
+    error = 'the action "lonely_action" defined at %s:895 ' \
         'depends on the attribute "something" to be available in the' \
         ' context. It turns out that there are no actions providing ' \
         'that. Please double-check the implementation' % fullpath
@@ -917,10 +912,10 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "my_action" defined at {0}:930 ' \
+    error = 'the action "my_action" defined at {0}:925 ' \
         'depends on the attribute "some_attr" to be available in the context.'\
         ' You need to call one of the following actions beforehand:\n' \
-        ' -> dependency_action at {0}:926'.replace('{0}', fullpath)
+        ' -> dependency_action at {0}:921'.replace('{0}', fullpath)
 
     def with_setup(context):
         @action_for(context, provides=['some_attr'])

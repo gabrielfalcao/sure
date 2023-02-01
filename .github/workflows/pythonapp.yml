@@ -15,9 +15,9 @@ jobs:
           - "3.9"
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@main
     - name: Install python version
-      uses: gabrielfalcao/pyenv-action@v11
+      uses: gabrielfalcao/pyenv-action@main
       with:
         default: "${{ matrix.python }}"
         command: pip install -U pip setuptools

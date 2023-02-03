@@ -28,8 +28,8 @@ jobs:
     - name: Install sure
       run: pip install -e .
 
-    - name: Run tests with nose
-      run: nosetests --verbosity 2
-
-    - name: Test with pytest
+    - name: Run tests via pytest
       run: pytest -vv
+
+    - name: Run tests via nose
+      run: nosetests --verbosity 2

@@ -127,9 +127,8 @@ class CallBack(object):
             err = err.replace("{0}:".format(exc_klass.__name__), "").strip()
 
             if err.startswith(self.callback_name) and (
-                "takes no arguments (1 given)" in err
-                or "takes 0 positional arguments but 1 was given" in err
-            ):
+                "takes no arguments (1 given)" in err) or \
+                "takes 0 positional arguments but 1 was given" in err:
                 raise TypeError(
                     self.context_error
                     % (

@@ -46,9 +46,9 @@ docs:
 	@(cd docs && make html)
 	$(OPEN_COMMAND) docs/build/html/index.html
 
-test tests:
-	@$(VENV)/bin/nosetests --rednose --immediate -vv --with-coverage --cover-package=sure
+test tests: clean | $(VENV)/bin/pytest $(VENV)/bin/nosetests
 	@$(VENV)/bin/pytest -vv
+	@$(VENV)/bin/nosetests --rednose --immediate -vv --with-coverage --cover-package=sure
 
 # run main command-line tool
 run: | $(MAIN_CLI_PATH)
@@ -73,7 +73,7 @@ release: tests build-release push-release
 
 # Convenience target to delete the virtualenv
 clean:
-	@rm -rf .venv
+	@rm -rf .coverage
 
 # Convenience target to format code with black with PEP8's default
 # 80 character limit per line

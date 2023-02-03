@@ -46,7 +46,7 @@ docs:
 	@(cd docs && make html)
 	$(OPEN_COMMAND) docs/build/html/index.html
 
-test:
+test tests:
 	@$(VENV)/bin/nosetests --rednose --immediate -vv --with-coverage --cover-package=sure
 	@$(VENV)/bin/pytest -vv
 
@@ -133,4 +133,5 @@ $(REQUIREMENTS_PATH):
 	setup \
 	run \
 	test \
+	tests \
 	docs

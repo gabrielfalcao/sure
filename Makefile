@@ -64,7 +64,6 @@ build-release:
 
 # Convenience target that runs all tests then builds and pushes a release to pypi
 release: tests
-	rm -rf ./dist  # remove local packages
 	@./.release
 	$(MAKE) build-release
 	$(MAKE) push-release

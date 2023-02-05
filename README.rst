@@ -1,8 +1,6 @@
 sure
 ====
 
-
-
 .. image:: https://img.shields.io/pypi/dm/sure
    :target: https://pypi.org/project/sure
 

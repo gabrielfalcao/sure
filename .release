@@ -38,7 +38,7 @@ if [ "${sure}" == "yes" ]; then
             if git commit $(find_files) -m "New release: $newversion"; then
                 if git push; then
                     echo "creating tag ${newversion}..."
-                    if git tag "${newversion}"; then
+                    if git tag "v${newversion}"; then
                         echo "pushing tag ${newversion}..."
                         git push --tags
                     else

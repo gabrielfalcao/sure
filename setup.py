@@ -99,6 +99,7 @@ if __name__ == "__main__":
         include_package_data=True,
         packages=find_packages(exclude=["*tests*"]),
         install_requires=install_requires,
+        long_description_content_type='text/x-rst',
         entry_points={
             "console_scripts": ["sure = sure.cli:entrypoint"],
         },

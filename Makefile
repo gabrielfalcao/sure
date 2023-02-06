@@ -59,8 +59,8 @@ push-release: dist  # pushes distribution tarballs of the current version
 
 # Prepares release of this package prior to pushing to pypi
 build-release:
-	$(VENV)/bin/twine check dist/*.tar.gz
 	$(VENV)/bin/python setup.py build sdist
+	$(VENV)/bin/twine check dist/*.tar.gz
 
 # Convenience target that runs all tests then builds and pushes a release to pypi
 release: tests

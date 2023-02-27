@@ -1,6 +1,24 @@
 TODO
 ----
 
+
+Test Runner
+~~~~~~~~~~~
+
+Pytest is unnecessarily verbose, showing full tracebacks when sure
+already performs that at the lowest level rather than hijacking some
+features of the python runtime.
+
+Sure's prerrogative is that it's designed to empower engineers to
+write adequate code rather than play with the language so as to
+deliver "production" code without worrying so much about the test
+runtime being diffrent than the production runtime.
+
+The test runner should be simple enough like nosetests was, but don't
+try to share too much information with the developer that might only
+slow down one's developer project.
+
+
 ``.when.py2.should.`` and ``.should.when.py2.``
 ``.when.py3.should.`` and ``.should.when.py3.``
 

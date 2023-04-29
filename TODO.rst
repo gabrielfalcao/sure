@@ -8,24 +8,28 @@ TODO
 Mock and Stubbing support
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+New way for adding behavior to scenarios
+
 
 .. code:: python
 
    import sure
+   from sure.scenario import BehaviorDefinition
+
+   class Example1(BehaviorDefinition):
+       context_namespace = 'example1'
+
+       def setup(self, argument1):
+           self.data = {
+               'parameter': argument1
+           }
+
+       def teardown(self):
+           self.data = {}
 
 
-   def some_helper_function(value):
-       if value == 'foo':
-           return 'expected'
-
-
-   def main_function_that_depends_on_helper(param1, param2):
-       return some_helper_function(param1)
-
-
-   def test_main_function_succeeds_when_helper_returns_expected_result():
-       some_helper_function.stub.called_with('foo').returns(['expected'])
-
-       result = main_function_that_depends_on_helper('foo', 'bar')
-
-       result.should.equal('expected')
+   @apply_behavior(Example1, argument1='hello-world')
+   def test_example_1(context):
+       context.example1.data.should.equal({
+           'parameter': 'hello-world',
+       })

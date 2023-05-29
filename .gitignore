@@ -1,3 +1,6 @@
+# rust
+target/
+
 # python bytecode
 *.pyc
 __pycache__
@@ -7,7 +10,9 @@ docs/_build
 build/
 dist/
 *.egg-info/
-sure-*.tar.gz
+-*.tar.gz
+.venv/
+/.python-version
 
 # temporary test files and dirs
 .coverage
@@ -17,5 +22,3 @@ sure-*.tar.gz
 *.sublime-project
 *.sublime-workspace
 *.swp
-.venv/
-/.python-version

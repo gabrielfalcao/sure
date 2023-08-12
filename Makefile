@@ -51,7 +51,7 @@ test tests: clean | $(VENV)/bin/pytest # $(VENV)/bin/nosetests	# @$(VENV)/bin/no
 
 # run main command-line tool
 run: | $(MAIN_CLI_PATH)
-	@$(MAIN_CLI_PATH) --help
+	@$(MAIN_CLI_PATH) tests/runner/test_eins.py
 
 # Pushes release of this package to pypi
 push-release: dist  # pushes distribution tarballs of the current version

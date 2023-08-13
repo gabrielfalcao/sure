@@ -21,7 +21,7 @@ import sys
 import inspect
 import traceback
 
-from sure import importer
+from sure.importer import importer
 from sure.reporter import Reporter
 from mock import Mock
 
@@ -194,7 +194,10 @@ class Runner(object):
     def find_candidates(self, lookup_paths):
         candidate_modules = []
         for path in map(os.path.abspath, lookup_paths):
-            candidate_modules.extend(importer.load_recursive(path))
+            modules = importer.load_recursive(path)
+            modules = importer.load_recursive(path)
+            # import ipdb;ipdb.set_trace()
+            candidate_modules.extend(modules)
 
         return candidate_modules
 

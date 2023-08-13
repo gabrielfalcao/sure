@@ -1,6 +1,14 @@
 import os
+from pathlib import Path
+import click
 
-from sure.version import version
+from sure.runner import Runner
+from sure.importer import resolve_path
 
 
-def entrypoint():
+@click.command()
+@click.argument("paths", nargs=-1)
+@click.option("-r", "--reporter", default="spec")
+def entrypoint(paths, reporter):
+    runner = Runner(resolve_path(os.getcwd()), reporter)
+    runner.run(paths)

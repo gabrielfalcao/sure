@@ -16,21 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
-from sure import importer
-_registry = {}
+from sure.meta import get_reporter, MetaReporter
 
 __path__ = os.path.abspath(os.path.dirname(__file__))
 
 
-class MetaReporter(type):
-    def __init__(cls, name, bases, attrs):
-        if cls.__module__ != __name__:
-            _registry[cls.name] = cls
-
-        super(MetaReporter, cls).__init__(name, bases, attrs)
-
-
-class Reporter(object):
+class Reporter(object, metaclass=MetaReporter):
     """# Base class for implementing reporters.
 
     To create a reporter all you need is to inherit from this class
@@ -236,7 +227,7 @@ class Reporter(object):
         ```
         """
 
-        found = _registry.get(name)
+        found = get_reporter(name)
         if not found:
             raise RuntimeError(
                 'no Reporter found for name {}, options are: {}'.format(
@@ -267,7 +258,7 @@ class Reporter(object):
         ```python
         reporter = Reporter.from_name_and_runner('spec', runner)
         ```"""
-        importer.load_recursive(
+        cls.importer.load_recursive(
             os.path.join(__path__, 'reporters'),
             ignore_errors=False,
         )

@@ -88,8 +88,8 @@ class FinalTestSuiteResult(Result):
 
 class TestSuite(object):
     def __init__(self, module):
-        name = getattr(module, 'suite_name', module.__name__)
-        description = getattr(module, 'suite_description', "")
+        name = getattr(module, 'suite_name', getattr(module, 'scenario', getattr(module, 'name', module.__name__)))
+        description = getattr(module, 'suite_description', getattr(module, 'description', ""))
 
         self.name = stripped(name)
         self.description = stripped(description)
@@ -99,7 +99,7 @@ class TestSuite(object):
         self.testcases = []
 
     def load_cases(self, executables):
-        self.testcases = map((lambda e: TestCase(e, self)), executables)
+        self.testcases = list(map((lambda e: TestCase(e, self)), executables))
         self.ready = True
         return self.testcases
 
@@ -159,10 +159,13 @@ class TestCase(object):
 
         # maybe sure should have a `Callable` class that just takes a
         # context and abstracts the way to call the callable.
-        if self.object.func_code.co_argcount == 1:
+
+        if self.object.__code__.co_argcount == 1:
             return self.object(context)
-        else:
+        elif self.object.__code__.co_argcount == 0:
             return self.object()
+        else:
+            raise RuntimeError(f'it appears that the test function {self.object} takes more than one argument')
 
     def run(self, context):
         try:
@@ -193,10 +196,11 @@ class Runner(object):
 
     def find_candidates(self, lookup_paths):
         candidate_modules = []
-        for path in map(os.path.abspath, lookup_paths):
-            modules = importer.load_recursive(path)
-            modules = importer.load_recursive(path)
-            # import ipdb;ipdb.set_trace()
+        for path in lookup_paths:
+            modules = importer.load_recursive(
+                path,
+                glob_pattern='test*.py'
+            )
             candidate_modules.extend(modules)
 
         return candidate_modules
@@ -211,7 +215,7 @@ class Runner(object):
 
     def extract_members(self, candidate):
         all_members = [m[1] for m in inspect.getmembers(candidate)]
-        members = filter(self.is_runnable_test, all_members)
+        members = list(filter(self.is_runnable_test, all_members))
         return candidate, members
 
     def load_suites(self, lookup_paths):

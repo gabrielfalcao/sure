@@ -23,8 +23,8 @@ from sure.reporter import Reporter
 
 sh = Shell()
 
-checkmark = '\xe2\x9c\x94'
-ballot = '\xe2\x9c\x99'
+checkmark = '✓'
+ballot = '✗'
 
 
 class SpecReporter(Reporter):
@@ -32,9 +32,8 @@ class SpecReporter(Reporter):
 
     def on_start(self):
         self.indentation = 0
-        sh.bold_white("Running sure version ")
-        sh.bold_yellow(sure.version)
-        sh.bold_green(checkmark)
+        # sh.bold_white("Running sure version ")
+        # sh.bold_yellow(sure.version)
         sh.reset("\n")
 
     def on_suite(self, suite):
@@ -47,11 +46,11 @@ class SpecReporter(Reporter):
         sh.reset("\n")
 
     def on_suite_done(self, suite, result):
-        sh.reset(" " * self.indentation)
-        sh.bold_white("[")
-        sh.bold_black(suite.name)
-        sh.bold_white("]")
-        sh.bold_white(checkmark)
+        # sh.reset(" " * self.indentation)
+        # sh.bold_white("[")
+        # sh.bold_black(suite.name)
+        # sh.bold_white("]")
+        # sh.bold_white(checkmark)
         sh.reset("\n\n")
         self.indentation = 0
 

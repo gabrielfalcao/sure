@@ -1,3 +1,4 @@
+import os
 import sys
 import importlib
 import importlib.util
@@ -34,30 +35,39 @@ def get_root_python_module(path) -> Path:
 class importer(object):
     @classmethod
     def load_recursive(cls, path, ignore_errors=True, glob_pattern='*.py'):
+        modules = []
+        path = Path(path)
+        if path.is_file():
+            return cls.load_python_file(path)
+
         base_path = Path(path).expanduser().absolute()
         targets = list(base_path.glob(glob_pattern))
         for file in targets:
-            if file.is_dir():
-                logger.debug(f'ignoring directory {file}')
-                continue
+            modules.extend(cls.load_python_file(file))
 
-            if file.name.startswith('_') or file.name.endswith('_'):
-                continue
+        return modules
 
-            module, root = cls.dig_to_root(file)
-            __ROOTS__[str(root)] = root
+    @classmethod
+    def load_python_file(cls, file):
+        if file.is_dir():
+            logger.debug(f'ignoring directory {file}')
+            return
 
-        return list(__MODULES__.values())
+        if file.name.startswith('_') or file.name.endswith('_'):
+            return
+
+        module, root = cls.dig_to_root(file)
+        __ROOTS__[str(root)] = root
+        return [module]
 
     @classmethod
     def dig_to_root(cls, file):
         root = get_root_python_module(file)
-        module_is_not_artificial = file.name != '__init__.py' and file.parent.joinpath('__init__.py').exists()
-        if module_is_not_artificial:
-            module_name = file.parent.name
-            import ipdb;ipdb.set_trace()
-        else:
-            module_name = file.parent.name
+        module_is_artificial = file.parent.joinpath('__init__.py').exists()
+        module_name = file.parent.name
+        if not module_is_artificial:
+            relative = str(file.relative_to(root.parent))
+            module_name = os.path.splitext(relative)[0].replace(os.sep, '.')
 
         spec = importlib.util.spec_from_file_location(module_name, file)
         module = importlib.util.module_from_spec(spec)

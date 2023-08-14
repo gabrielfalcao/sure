@@ -80,7 +80,7 @@ class UseFakeHTTPAPIServer(GreenConcurrencyBehaviorDefinition):
         self.server.add_url_rule('/auth', view_func=self.fake_auth_endpoint)
         self.server.add_url_rule('/item/<uid>', view_func=self.fake_get_item_endpoint)
         # 3. Run the server
-        self.pool.spawn(self..server.run, port=http_port)
+        self.pool.spawn(self.server.run, port=http_port)
 
     def teardown(self):
         self.server.stop()

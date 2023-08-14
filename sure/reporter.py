@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
-from sure.meta import get_reporter, MetaReporter
+from sure.meta import get_reporter, MetaReporter, gather_reporter_names
 
 __path__ = os.path.abspath(os.path.dirname(__file__))
 
@@ -232,7 +232,7 @@ class Reporter(object, metaclass=MetaReporter):
             raise RuntimeError(
                 'no Reporter found for name {}, options are: {}'.format(
                     name,
-                    ',\n'.join(_registry.keys())
+                    ',\n'.join(gather_reporter_names())
                 ))
 
         return found

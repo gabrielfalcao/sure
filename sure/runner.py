@@ -18,9 +18,12 @@
 import os
 import re
 import sys
+import types
 import inspect
 import traceback
-
+import unittest
+from typing import Optional
+from sure.errors import NonValidTest
 from sure.importer import importer
 from sure.reporter import Reporter
 from mock import Mock
@@ -31,12 +34,18 @@ def stripped(string):
 
 
 class SpecContext(object):
+    reporter: Reporter
+    current_test: Optional[object]
+
     def __init__(self, reporter):
-        self.mock = Mock()
         self.reporter = reporter
+        self.current_test = None
+
+    def set_current_test(self, test):
+        self.current_test = test
 
 
-class Result(object):
+class BaseResult(object):
     def __init__(self, results):
         self.results = results
 
@@ -48,7 +57,7 @@ class Result(object):
         return all([x.ok for x in self.results])
 
 
-class TestCaseResult(Result):
+class ScenarioResult(BaseResult):
     def __init__(self, case, error=None):
         self.case = case
         self.error = error
@@ -57,7 +66,7 @@ class TestCaseResult(Result):
         if self.is_error:
             return self.error.printable()
         elif self.is_failure:
-            return "\n".join(traceback.format_exception(*self.error))
+            return str(self.error)
         else:
             return ""
 
@@ -67,7 +76,7 @@ class TestCaseResult(Result):
 
     @property
     def is_failure(self):
-        return isinstance(self.error, tuple)
+        return isinstance(self.error, AssertionError)
 
     @property
     def is_success(self):
@@ -78,17 +87,17 @@ class TestCaseResult(Result):
         return self.is_success
 
 
-class TestSuiteResult(Result):
+class TestSuiteResult(BaseResult):
     pass
 
 
-class FinalTestSuiteResult(Result):
+class FinalTestSuiteResult(BaseResult):
     pass
 
 
-class TestSuite(object):
+class Feature(object):
     def __init__(self, module):
-        name = getattr(module, 'suite_name', getattr(module, 'scenario', getattr(module, 'name', module.__name__)))
+        name = getattr(module, 'suite_name', getattr(module, 'feature', getattr(module, 'name', module.__name__)))
         description = getattr(module, 'suite_description', getattr(module, 'description', ""))
 
         self.name = stripped(name)
@@ -98,8 +107,8 @@ class TestSuite(object):
         self.ready = False
         self.testcases = []
 
-    def load_cases(self, executables):
-        self.testcases = list(map((lambda e: TestCase(e, self)), executables))
+    def read_scenarios(self, executables):
+        self.testcases = list(map((lambda e: Scenario(e, self)), executables))
         self.ready = True
         return self.testcases
 
@@ -145,37 +154,47 @@ class ErrorStack(object):
         return "\n".join(self.traceback)
 
 
-class TestCase(object):
+class Scenario(object):
     def __init__(self, class_or_callable, suite):
         fallback = class_or_callable.__name__
 
         self.description = stripped(class_or_callable.__doc__ or fallback)
 
         self.object = class_or_callable
+        if isinstance(class_or_callable, type):
+            if issubclass(class_or_callable, unittest.TestCase):
+                self.object = class_or_callable()
+
         self.suite = suite
 
-    def run_object(self, context):
-        # TODO classes must be handled here
+    def run_unittesttestcase(self, context):
+        for name, member in inspect.getmembers(self.object):
+            if isinstance(member, types.MethodType):
+                # XXX: log debug else
+                self.run_single_test(member, context)
 
-        # maybe sure should have a `Callable` class that just takes a
-        # context and abstracts the way to call the callable.
+    def run_single_test(self, test, context):
+        argcount = test.__code__.co_argcount
+        try:
+            if argcount == 0:
+                test()
+            elif argcount == 1:
+                test(context)
+            else:
+                raise RuntimeError(f'it appears that the test function {self.object} takes more than one argument')
 
-        if self.object.__code__.co_argcount == 1:
-            return self.object(context)
-        elif self.object.__code__.co_argcount == 0:
-            return self.object()
-        else:
-            raise RuntimeError(f'it appears that the test function {self.object} takes more than one argument')
+        except AssertionError as failure:
+            return ScenarioResult(self, failure)
+        except Exception:
+            return ScenarioResult(self, ErrorStack(sys.exc_info()))
+
+        return ScenarioResult(self)
 
     def run(self, context):
-        try:
-            self.run_object(context)
-        except AssertionError:
-            return TestCaseResult(self, sys.exc_info())
-        except:
-            return TestCaseResult(self, ErrorStack(sys.exc_info()))
-        else:
-            return TestCaseResult(self)
+        if isinstance(self.object, unittest.TestCase):
+            return self.run_unittesttestcase(context)
+
+        return self.run_single_test(self.object, context)
 
 
 class Runner(object):
@@ -206,6 +225,15 @@ class Runner(object):
         return candidate_modules
 
     def is_runnable_test(self, item):
+        if isinstance(item, type):
+            if not issubclass(item, unittest.TestCase):
+                return
+            if item == unittest.TestCase:
+                return
+
+        elif not isinstance(item, types.FunctionType):
+            return
+
         try:
             name = item.__name__
         except AttributeError:
@@ -223,8 +251,8 @@ class Runner(object):
         cases = []
         candidates = self.find_candidates(lookup_paths)
         for module, executables in map(self.extract_members, candidates):
-            suite = TestSuite(module)
-            cases.extend(suite.load_cases(executables))
+            suite = Feature(module)
+            cases.extend(suite.read_scenarios(executables))
             suites.append(suite)
 
         return suites

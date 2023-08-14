@@ -48,7 +48,7 @@ from sure.registry import context as _registry
 if not PY2:
     basestring = str
 
-version = "1.4.11"
+version = "2.0.0"
 
 
 not_here_error = (
@@ -206,7 +206,7 @@ def within(**units):
                 else:
                     exc.append(traceback.format_exc())
 
-            except Exception as e:
+            except Exception:
                 exc.append(traceback.format_exc())
 
             end = datetime.utcnow()

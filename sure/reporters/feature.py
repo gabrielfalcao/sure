@@ -27,38 +27,39 @@ checkmark = '✓'
 ballot = '✗'
 
 
-class SpecReporter(Reporter):
-    name = 'spec'
+class FeatureReporter(Reporter):
+    name = 'feature'
 
     def on_start(self):
         self.indentation = 0
-        # sh.bold_white("Running sure version ")
-        # sh.bold_yellow(sure.version)
+        # sh.white("Running sure version ")
+        # sh.yellow(sure.version)
         sh.reset("\n")
 
     def on_suite(self, suite):
         self.indentation += 2
 
         sh.reset(" " * self.indentation)
-        sh.bold_white("Scenario: '")
-        sh.bold_yellow(suite.name)
-        sh.bold_white("'")
+        sh.blue("Feature: ")
+        sh.yellow("'")
+        sh.green(suite.name)
+        sh.yellow("'")
         sh.reset("\n")
 
     def on_suite_done(self, suite, result):
         # sh.reset(" " * self.indentation)
-        # sh.bold_white("[")
-        # sh.bold_black(suite.name)
-        # sh.bold_white("]")
-        # sh.bold_white(checkmark)
+        # sh.white("[")
+        # sh.normal(suite.name)
+        # sh.white("]")
+        # sh.white(checkmark)
         sh.reset("\n\n")
         self.indentation = 0
 
     def on_test(self, test):
         self.indentation += 2
         sh.reset(" " * self.indentation)
-        sh.bold_white("Spec: ")
-        sh.bold_black(test.description)
+        sh.green("Scenario: ")
+        sh.normal(test.description)
         sh.reset(" ")
 
     def on_test_done(self, test, result):

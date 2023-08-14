@@ -40,6 +40,7 @@ class Anything(object):
     def __eq__(self, _):
         return True
 
+
 anything = Anything()
 
 

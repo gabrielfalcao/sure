@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
 # Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
@@ -16,32 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
-from typing import List
-from pathlib import Path
-from sure.importer import importer
-
-__path__ = Path(__file__).parent.absolute()
-
-REPORTERS = {}
 
 
-def add_reporter(reporter: type) -> type:
-    REPORTERS[reporter.name] = reporter
-    return reporter
-
-
-def get_reporter(name: str) -> type:
-    return REPORTERS.get(name)
-
-
-def gather_reporter_names() -> List[str]:
-    return list(filter(bool, REPORTERS.keys()))
-
-
-class MetaReporter(type):
-    def __init__(cls, name, bases, attrs):
-        if cls.__module__ != __name__:
-            cls = add_reporter(cls)
-            attrs['importer'] = cls.importer = importer
-
-        super(MetaReporter, cls).__init__(name, bases, attrs)
+class NonValidTest(Exception):
+    """raised when a non-compatible test appears within the test-run session"""

@@ -1,6 +1,7 @@
 .. _Tutorial:
 
-# WORK IN PROGRESS, please don't add this to the table of contents
+..
+   WORK IN PROGRESS, please don't add this to the table of contents
 
 How to organize your tests
 ==========================

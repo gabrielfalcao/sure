@@ -13,6 +13,7 @@ Contents:
 
    intro
    getting-started
+   guide
    how-it-works
    api-reference
    about

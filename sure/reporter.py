@@ -22,20 +22,21 @@ __path__ = os.path.abspath(os.path.dirname(__file__))
 
 
 class Reporter(object, metaclass=MetaReporter):
-    """# Base class for implementing reporters.
+    """Base class for reporters.
 
-    To create a reporter all you need is to inherit from this class
-    and implement (optionally) the following methods:
+    The following optional methods should be implemented:
 
-    * [`on_start()`](@sure.reporter.Reporter.on_start)
-    * [`on_feature(feature)`](@sure.reporter.Reporter.on_feature)
-    * [`on_feature_done(feature, result)`](@sure.reporter.Reporter.on_feature_done)
-    * [`on_scenario(test)`](@sure.reporter.Reporter.on_scenario)
-    * [`on_scenario_done(test, result)`](@sure.reporter.Reporter.on_scenario_done)
-    * [`on_failure(test, error)`](@sure.reporter.Reporter.on_failure)
-    * [`on_error(test, error)`](@sure.reporter.Reporter.on_error)
-    * [`on_success(test)`](@sure.reporter.Reporter.on_success)
-    * [`on_finish()`](@sure.reporter.Reporter.on_finish)
+    * :py:meth:`~sure.reporter.Reporter.on_start`
+    * :py:meth:`~sure.reporter.Reporter.on_feature`
+    * :py:meth:`~sure.reporter.Reporter.on_feature_done`
+    * :py:meth:`~sure.reporter.Reporter.on_scenario`
+    * :py:meth:`~sure.reporter.Reporter.on_scenario_done`
+    * :py:meth:`~sure.reporter.Reporter.on_feature`
+    * :py:meth:`~sure.reporter.Reporter.on_feature_done`
+    * :py:meth:`~sure.reporter.Reporter.on_failure`
+    * :py:meth:`~sure.reporter.Reporter.on_error`
+    * :py:meth:`~sure.reporter.Reporter.on_success`
+    * :py:meth:`~sure.reporter.Reporter.on_finish`
     """
     __metaclass__ = MetaReporter
     name = None
@@ -50,173 +51,155 @@ class Reporter(object, metaclass=MetaReporter):
         return '<{}>'.format(self.__class__.__name__)
 
     def on_start(self):
-        """### `def on_start()`
+        """Called as soon as `sure' starts running.
 
-        Called as soon as sure starts running.
+        .. code:: python
 
-        Example:
-        ```python
-        from sure.reporter import Reporter
+           from sure.reporter import Reporter
 
-        class HelloReporter(Reporter):
-            def on_start(self):
-                steaymark.aka('Reporter.on_start works')
+           class HelloReporter(Reporter):
+               def on_start(self):
+                   sys.stderr.write('Reporter.on_start works')
 
-        HelloReporter('a <sure.runner.Runner()>').on_start()
-        ```"""
+           HelloReporter('a <sure.runner.Runner()>').on_start()
+        """
 
     def on_feature(self, feature):
-        """### `def on_feature(feature)`
+        """Called when a test feature is about to run
 
-        Called when a test feature is about to run
+        .. code:: python
 
-        Example:
-        ```python
-        from sure.reporter import Reporter
+           from sure.reporter import Reporter
 
-        class FeatureReporter(Reporter):
-            def on_feature(self, feature):
-                steaymark.aka('Reporter.on_feature reported {}'.format(feature.name))
+           class FeatureReporter(Reporter):
+               def on_feature(self, feature):
+                   sys.stderr.write('Reporter.on_feature reported {}'.format(feature.name))
 
-        class feature:
-            name = 'a simple test feature'
+           class feature:
+               name = 'a simple test feature'
 
-        FeatureReporter('a <sure.runner.Runner()>').on_feature(feature)
-        ```"""
+           FeatureReporter('a <sure.runner.Runner()>').on_feature(feature)
+        """
 
     def on_feature_done(self, feature, result):
-        """### `def on_feature_done(feature, result)`
+        """Called when a test feature_done is about to run
 
-        Called when a test feature_done is about to run
+        .. code:: python
 
-        Example:
-        ```python
-        from sure.reporter import Reporter
+           from sure.reporter import Reporter
 
-        class FeatureReporter(Reporter):
-            def on_feature_done(self, feature):
-                steaymark.aka('Reporter.on_feature_done reported {}'.format(feature.name))
+           class FeatureReporter(Reporter):
+               def on_feature_done(self, feature):
+                   sys.stderr.write('Reporter.on_feature_done reported {}'.format(feature.name))
 
-        class feature_done:
-            name = 'a simple test'
+           class feature_done:
+               name = 'a simple test'
 
-        Feature_doneReporter('a <sure.runner.Runner()>').on_feature_done(feature_done)
-        ```"""
+           Feature_doneReporter('a <sure.runner.Runner()>').on_feature_done(feature_done)
+        """
 
     def on_scenario(self, test, result):
-        """### `def on_scenario_done(test, result)`
+        """Called when a test test_done is about to run
 
-        Called when a test test_done is about to run
+        .. code:: python
 
-        Example:
-        ```python
-        from sure.reporter import Reporter
+           from sure.reporter import Reporter
 
-        class TestReporter(Reporter):
-            def on_scenario_done(self, test):
-                steaymark.aka('Reporter.on_scenario_done reported {}'.format(test.name))
+           class TestReporter(Reporter):
+               def on_scenario_done(self, test):
+                   sys.stderr.write('Reporter.on_scenario_done reported {}'.format(test.name))
 
-        class test_done:
-            name = 'a simple test'
+           class test_done:
+               name = 'a simple test'
 
-        TestReporter('a <sure.runner.Runner()>').on_scenario_done(test_done)
-        ```"""
+           TestReporter('a <sure.runner.Runner()>').on_scenario_done(test_done)
+       """
 
     def on_scenario_done(self, test):
-        """### `def on_scenario_done(test)`
+        """Called when a test test_done is about to run
 
-        Called when a test test_done is about to run
+        .. code:: python
 
-        Example:
-        ```python
-        from sure.reporter import Reporter
+           from sure.reporter import Reporter
 
-        class TestReporter(Reporter):
-            def on_scenario_done(self, test):
-                steaymark.aka('Reporter.on_scenario_done reported {}'.format(test.name))
+           class TestReporter(Reporter):
+               def on_scenario_done(self, test):
+                   sys.stderr.write('Reporter.on_scenario_done reported {}'.format(test.name))
 
-        class test_done:
-            name = 'a simple test'
+           class test_done:
+               name = 'a simple test'
 
-        TestReporter('a <sure.runner.Runner()>').on_scenario_done(test_done)
-        ```"""
+           TestReporter('a <sure.runner.Runner()>').on_scenario_done(test_done)
+        """
 
     def on_failure(self, test, error):
-        """### `def on_failure(test, error)`
+        """Called when a test fails without crashing
 
-        Called when a test fails without crashing
+        .. code:: python
 
-        Example:
-        ```python
-        from sure.reporter import Reporter
+           from sure.reporter import Reporter
 
-        class FailureReporter(Reporter):
-            def on_failure(self, test):
-                steaymark.aka('Reporter.on_failure reported {}'.format(test.name))
+           class FailureReporter(Reporter):
+               def on_failure(self, test):
+                   sys.stderr.write('Reporter.on_failure reported {}'.format(test.name))
 
-        class failure:
-            name = 'a simple failure'
+           class failure:
+               name = 'a simple failure'
 
-        FailureReporter('a <sure.runner.Runner()>').on_failure(failure)
-        ```"""
+           FailureReporter('a <sure.runner.Runner()>').on_failure(failure)
+        """
 
     def on_success(self, test):
-        """### `def on_success(test)`
+        """Called when a test passes
 
-        Called when a test passes
+        .. code:: python
 
-        Example:
-        ```python
-        from sure.reporter import Reporter
+           from sure.reporter import Reporter
 
-        class SuccessReporter(Reporter):
-            def on_success(self, test):
-                steaymark.aka('Reporter.on_success reported {}'.format(test.name))
+           class SuccessReporter(Reporter):
+               def on_success(self, test):
+                   sys.stderr.write('Reporter.on_success reported {}'.format(test.name))
 
-        class success:
-            name = 'a simple success'
+           class success:
+               name = 'a simple success'
 
-        SuccessReporter('a <sure.runner.Runner()>').on_success(success)
-        ```"""
+           SuccessReporter('a <sure.runner.Runner()>').on_success(success)
+        """
 
     def on_error(self, test, error):
-        """### `def on_error(test, error)`
+        """Called when a test fails with exception
 
-        Called when a test fails with exception
+        .. code:: python
 
-        Example:
-        ```python
-        from sure.reporter import Reporter
+           from sure.reporter import Reporter
 
-        class ErrorReporter(Reporter):
-            def on_error(self, test):
-                steaymark.aka('Reporter.on_error reported {}'.format(test.name))
+           class ErrorReporter(Reporter):
+               def on_error(self, test):
+                   sys.stderr.write('Reporter.on_error reported {}'.format(test.name))
 
-        class error:
-            name = 'a simple error'
+           class error:
+               name = 'a simple error'
 
-        ErrorReporter('a <sure.runner.Runner()>').on_error(error)
-        ```"""
+           ErrorReporter('a <sure.runner.Runner()>').on_error(error)
+        """
 
     def on_finish(self):
-        """### `def on_finish()`
+        """Called as soon as `sure' finishes running.
 
-        Called as soon as sure finishes running.
+        .. code:: python
 
-        Example:
-        ```python
-        from sure.reporter import Reporter
+           from sure.reporter import Reporter
 
-        class HelloReporter(Reporter):
-            def on_finish(self):
-                steaymark.aka('Reporter.on_finish works')
+           class HelloReporter(Reporter):
+           def on_finish(self):
+               sys.stderr.write('Reporter.on_finish works')
 
-        HelloReporter('a <sure.runner.Runner()>').on_finish()
-        ```"""
+           HelloReporter('a <sure.runner.Runner()>').on_finish()
+        """
 
     @classmethod
     def from_name(cls, name):
-        """### `def from_name(name)`
+        """`def from_name(name)`
 
         Finds a suitable Reporter class for the given name, after any
         `Reporter` subclasses with a `name` class attribute are registered
@@ -226,7 +209,7 @@ class Reporter(object, metaclass=MetaReporter):
 
         from sure.reporter import Reporter
 
-        Reporter.from_name('spec')
+        Reporter.from_name('feature')
         ```
         """
 
@@ -242,25 +225,23 @@ class Reporter(object, metaclass=MetaReporter):
 
     @classmethod
     def from_name_and_runner(cls, name, runner):
-        """### `def from_name_and_runner(name, runner)`
+        """
+        .. code:: python
 
-        Shorthand for:
-        ```python
-        from sure.runner import Runner
-        from sure.reporter import Reporter
+           from sure.runner import Runner
+           from sure.reporter import Reporter
 
-        runner = Runner('/some/path')
+           runner = Runner('/some/path')
 
-        ReporterClass = Reporter.from_name('spec')
-        reporter = ReporterClass(runner)
-
-        ```
+           ReporterClass = Reporter.from_name('feature')
+           reporter = ReporterClass(runner)
 
         Example usage:
 
-        ```python
-        reporter = Reporter.from_name_and_runner('spec', runner)
-        ```"""
+        .. code:: python
+
+           reporter = Reporter.from_name_and_runner('feature', runner)
+        """
         cls.importer.load_recursive(
             os.path.join(__path__, 'reporters'),
             ignore_errors=False,

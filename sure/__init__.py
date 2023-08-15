@@ -289,7 +289,7 @@ def action_for(context, provides=None, depends_on=None):
         if re.search(r"^[{]\d+[}]$", attr):
             return  # ignore dynamically declared provides
 
-        if not attr in context.__sure_providers_of__:
+        if attr not in context.__sure_providers_of__:
             context.__sure_providers_of__[attr] = []
 
         context.__sure_providers_of__[attr].append(func)
@@ -308,7 +308,7 @@ def action_for(context, provides=None, depends_on=None):
 
         attr = args[index]
 
-        if not attr in context.__sure_providers_of__:
+        if attr not in context.__sure_providers_of__:
             context.__sure_providers_of__[attr] = []
 
         context.__sure_providers_of__[attr].append(func)
@@ -482,7 +482,6 @@ class AssertionBuilder(object):
         self._that = AssertionHelper(self.obj)
 
     def __call__(self, obj):
-
         self.obj = obj
 
         if isinstance(obj, self.__class__):

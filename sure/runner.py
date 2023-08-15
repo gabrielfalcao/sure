@@ -71,14 +71,6 @@ class BaseResult(object):
         return len(set([x.is_error for x in self.results]).union(set([x.is_failure for x in self.results]))) == 0
 
 
-class FeatureResult(BaseResult):
-    pass
-
-
-class FinalFeatureResult(BaseResult):
-    pass
-
-
 class Feature(object):
     def __init__(self, module):
         name = getattr(module, 'suite_name', getattr(module, 'feature', getattr(module, 'name', module.__name__)))
@@ -111,8 +103,10 @@ class Feature(object):
 
             if result.is_failure:
                 reporter.on_failure(scenario, result.failure)
+
             elif result.is_error:
                 reporter.on_error(scenario, result.error)
+
             else:
                 reporter.on_success(scenario)
 
@@ -176,9 +170,8 @@ class Scenario(object):
 
     def run_single_test(self, test, context):
         code = test.__code__
-        varnames = set(code.co_varnames).difference({'self'})
+        varnames = set(code.co_varnames).intersection({'context'})
         argcount = len(varnames)
-
         try:
             if argcount == 0:
                 test()
@@ -275,7 +268,7 @@ class Runner(object):
 
         self.reporter.on_finish()
 
-        return FinalFeatureResult(results)
+        return FeatureResultSet(results)
 
 
 class ScenarioResult(BaseResult):
@@ -374,3 +367,101 @@ class ScenarioResultSet(ScenarioResult):
         for scenario in self.failed_scenarios:
             if scenario.is_failure:
                 return scenario.failure
+
+
+class FeatureResult(BaseResult):
+    scenario_results: ScenarioResultSet
+    error: Optional[Exception]
+    failure: Optional[AssertionError]
+
+    def __init__(self, feature, error=None):
+        self.feature = feature
+        self.__error__ = None
+        self.__failure__ = None
+
+        if isinstance(error, AssertionError):
+            self.__failure__ = error
+        else:
+            self.__error__ = error
+
+    def printable(self):
+        if self.is_failure:
+            return str(self.error)
+
+        if callable(getattr(self.error, 'printable', None)):
+            return self.error.printable()
+
+        return ""
+
+    @property
+    def is_error(self):
+        return isinstance(self.error, (ErrorStack, Exception))
+
+    @property
+    def error(self) -> Optional[Exception]:
+        if not isinstance(self.__error__, AssertionError):
+            return self.__error__
+
+    def set_error(self, error: Optional[Exception]):
+        self.__error__ = error
+
+    @property
+    def is_failure(self):
+        return isinstance(self.__failure__, AssertionError)
+
+    @property
+    def failure(self) -> Optional[AssertionError]:
+        if self.is_failure:
+            return self.__failure__
+
+    @property
+    def is_success(self) -> bool:
+        return not self.is_error and not self.is_failure
+
+    @property
+    def ok(self):
+        return self.is_success
+
+
+class FeatureResultSet(FeatureResult):
+    error: Optional[FeatureResult]
+    failure: Optional[FeatureResult]
+
+    def __init__(self, feature_results: List[FeatureResult]):
+        self.feature_results = feature_results
+        self.failed_features = []
+        self.errored_features = []
+
+        for feature in feature_results:
+            if feature.is_error:
+                self.errored_features.append(feature)
+            if feature.is_failure:
+                self.failed_features.append(feature)
+
+    def printable(self):
+        if self.failure is not None:
+            return self.failure
+        if self.error:
+            return self.error.printable()
+
+        return ""
+
+    @property
+    def is_error(self):
+        return len(self.errored_features) > 0
+
+    @property
+    def error(self) -> Optional[Exception]:
+        for feature in self.errored_features:
+            if feature.is_error:
+                return feature.error
+
+    @property
+    def is_failure(self):
+        return len(self.failed_features) > 0
+
+    @property
+    def failure(self) -> Optional[Exception]:
+        for feature in self.failed_features:
+            if feature.is_failure:
+                return feature.failure

@@ -17,14 +17,14 @@ short assertions like:
 
 .. code:: python
 
-    PERSON = {
-      "name": "John",
-      "facebook_info": {
-        "token": "abcd"
-      }
-    }
+   PERSON = {
+     "name": "John",
+     "facebook_info": {
+       "token": "abcd"
+     }
+   }
 
-    PERSON.should.have.key("facebook_info").being.a(dict)
+   PERSON.should.have.key("facebook_info").being.a(dict)
 
 Monkey-patching
 ===============

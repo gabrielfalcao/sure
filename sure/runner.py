@@ -22,7 +22,7 @@ import types
 import inspect
 import traceback
 import unittest
-from typing import Optional
+from typing import List, Optional, Dict
 from sure.errors import NonValidTest
 from sure.importer import importer
 from sure.reporter import Reporter
@@ -33,16 +33,30 @@ def stripped(string):
     return "\n".join(filter(bool, [s.strip() for s in string.splitlines()]))
 
 
+def seem_to_indicate_test(name: str) -> bool:
+    return re.search(r'^(Ensure|Test|Spec|Scenario)', name, re.I)
+
+
+class RuntimeOptions(object):
+    immediate: bool
+
+    def __init__(self, immediate: bool):
+        self.immediate = immediate
+
+    def __repr__(self):
+        return f'<RuntimeOptions immediate={self.immediate}>'
+
+
 class SpecContext(object):
     reporter: Reporter
-    current_test: Optional[object]
+    runtime: RuntimeOptions
 
-    def __init__(self, reporter):
+    def __init__(self, reporter: Reporter, runtime: RuntimeOptions):
         self.reporter = reporter
-        self.current_test = None
+        self.runtime = runtime
 
-    def set_current_test(self, test):
-        self.current_test = test
+    def __repr__(self):
+        return f'<SpecContext reporter={self.reporter} runtime={self.runtime}>'
 
 
 class BaseResult(object):
@@ -54,44 +68,14 @@ class BaseResult(object):
 
     @property
     def ok(self):
-        return all([x.ok for x in self.results])
+        return len(set([x.is_error for x in self.results]).union(set([x.is_failure for x in self.results]))) == 0
 
 
-class ScenarioResult(BaseResult):
-    def __init__(self, case, error=None):
-        self.case = case
-        self.error = error
-
-    def printable(self):
-        if self.is_error:
-            return self.error.printable()
-        elif self.is_failure:
-            return str(self.error)
-        else:
-            return ""
-
-    @property
-    def is_error(self):
-        return isinstance(self.error, ErrorStack)
-
-    @property
-    def is_failure(self):
-        return isinstance(self.error, AssertionError)
-
-    @property
-    def is_success(self):
-        return self.error is None
-
-    @property
-    def ok(self):
-        return self.is_success
-
-
-class TestSuiteResult(BaseResult):
+class FeatureResult(BaseResult):
     pass
 
 
-class FinalTestSuiteResult(BaseResult):
+class FinalFeatureResult(BaseResult):
     pass
 
 
@@ -105,38 +89,36 @@ class Feature(object):
 
         self.module = module
         self.ready = False
-        self.testcases = []
+        self.scenarios = []
 
     def read_scenarios(self, executables):
-        self.testcases = list(map((lambda e: Scenario(e, self)), executables))
+        self.scenarios = list(map((lambda e: Scenario(e, self)), executables))
         self.ready = True
-        return self.testcases
+        return self.scenarios
 
-    def run(self, reporter):
+    def run(self, reporter, runtime: RuntimeOptions):
         results = []
-        for case in self.testcases:
-            context = SpecContext(reporter)
+        for scenario in self.scenarios:
+            context = SpecContext(reporter, runtime)
 
-            reporter.on_test(case)
+            reporter.on_scenario(scenario)
             self.run_predicates(context)
 
-            result = case.run(context)
+            result = scenario.run(context)
 
             self.run_complements(context)
             results.append(result)
 
-            if result.is_error:
-                reporter.on_error(case, result)
-
-            elif result.is_failure:
-                reporter.on_failure(case, result)
-
+            if result.is_failure:
+                reporter.on_failure(scenario, result.failure)
+            elif result.is_error:
+                reporter.on_error(scenario, result.error)
             else:
-                reporter.on_success(case)
+                reporter.on_success(scenario)
 
-            reporter.on_test_done(case, result)
+            reporter.on_scenario_done(scenario, result)
 
-        return TestSuiteResult(results)
+        return FeatureResult(results)
 
     def run_predicates(self, context):
         pass
@@ -161,27 +143,49 @@ class Scenario(object):
         self.description = stripped(class_or_callable.__doc__ or fallback)
 
         self.object = class_or_callable
+        self.object_ancestor = None
         if isinstance(class_or_callable, type):
             if issubclass(class_or_callable, unittest.TestCase):
-                self.object = class_or_callable()
+                self.object_ancestor = unittest.TestCase
 
         self.suite = suite
+        self.fail_immediately = False
 
     def run_unittesttestcase(self, context):
-        for name, member in inspect.getmembers(self.object):
-            if isinstance(member, types.MethodType):
-                # XXX: log debug else
-                self.run_single_test(member, context)
+        last_failure = None
+        last_error = None
+        for name in dir(self.object):
+            if last_failure and context.runtime.immediate:
+                # XXX: log
+                break
+
+            if last_error and context.runtime.immediate:
+                # XXX: log
+                break
+
+            if not seem_to_indicate_test(name):
+                # XXX: log
+                continue
+
+            member = getattr(self.object(name), name, None)
+            if isinstance(member, types.MethodType) and seem_to_indicate_test(name):
+                result = self.run_single_test(member, context)
+                last_failure = result.failure
+                last_error = result.error
+                yield result
 
     def run_single_test(self, test, context):
-        argcount = test.__code__.co_argcount
+        code = test.__code__
+        varnames = set(code.co_varnames).difference({'self'})
+        argcount = len(varnames)
+
         try:
             if argcount == 0:
                 test()
             elif argcount == 1:
                 test(context)
             else:
-                raise RuntimeError(f'it appears that the test function {self.object} takes more than one argument')
+                raise NonValidTest(f'it appears that the test function {self.object} takes more than one argument: {argcount}')
 
         except AssertionError as failure:
             return ScenarioResult(self, failure)
@@ -191,8 +195,8 @@ class Scenario(object):
         return ScenarioResult(self)
 
     def run(self, context):
-        if isinstance(self.object, unittest.TestCase):
-            return self.run_unittesttestcase(context)
+        if self.object_ancestor in (unittest.TestCase, ):
+            return ScenarioResultSet(self.run_unittesttestcase(context))
 
         return self.run_single_test(self.object, context)
 
@@ -239,34 +243,134 @@ class Runner(object):
         except AttributeError:
             return
         else:
-            return re.search(r'(^Ensure|^Test|^Spec|Spec$|Test$)', name, re.I)
+            return seem_to_indicate_test(name)
 
     def extract_members(self, candidate):
         all_members = [m[1] for m in inspect.getmembers(candidate)]
         members = list(filter(self.is_runnable_test, all_members))
         return candidate, members
 
-    def load_suites(self, lookup_paths):
-        suites = []
+    def load_features(self, lookup_paths):
+        features = []
         cases = []
         candidates = self.find_candidates(lookup_paths)
         for module, executables in map(self.extract_members, candidates):
-            suite = Feature(module)
-            cases.extend(suite.read_scenarios(executables))
-            suites.append(suite)
+            feature = Feature(module)
+            cases.extend(feature.read_scenarios(executables))
+            features.append(feature)
 
-        return suites
+        return features
 
-    def run(self, lookup_paths):
+    def run(self, lookup_paths, immediate: bool = False):
         results = []
         self.reporter.on_start()
 
-        for suite in self.load_suites(lookup_paths):
-            self.reporter.on_suite(suite)
-            result = suite.run(self.reporter)
+        for feature in self.load_features(lookup_paths):
+            self.reporter.on_feature(feature)
+            runtime = RuntimeOptions(immediate=immediate)
+            result = feature.run(self.reporter, runtime=runtime)
+
             results.append(result)
-            self.reporter.on_suite_done(suite, result)
+            self.reporter.on_feature_done(feature, result)
 
         self.reporter.on_finish()
 
-        return FinalTestSuiteResult(results)
+        return FinalFeatureResult(results)
+
+
+class ScenarioResult(BaseResult):
+    scenario: Scenario
+    error: Optional[Exception]
+    failure: Optional[AssertionError]
+
+    def __init__(self, scenario, error=None):
+        self.scenario = scenario
+        self.__error__ = None
+        self.__failure__ = None
+
+        if isinstance(error, AssertionError):
+            self.__failure__ = error
+        else:
+            self.__error__ = error
+
+    def printable(self):
+        if self.is_failure:
+            return str(self.error)
+
+        if callable(getattr(self.error, 'printable', None)):
+            return self.error.printable()
+
+        return ""
+
+    @property
+    def is_error(self):
+        return isinstance(self.error, (ErrorStack, Exception))
+
+    @property
+    def error(self) -> Optional[Exception]:
+        if not isinstance(self.__error__, AssertionError):
+            return self.__error__
+
+    def set_error(self, error: Optional[Exception]):
+        self.__error__ = error
+
+    @property
+    def is_failure(self):
+        return isinstance(self.__failure__, AssertionError)
+
+    @property
+    def failure(self) -> Optional[AssertionError]:
+        if self.is_failure:
+            return self.__failure__
+
+    @property
+    def is_success(self) -> bool:
+        return not self.is_error and not self.is_failure
+
+    @property
+    def ok(self):
+        return self.is_success
+
+
+class ScenarioResultSet(ScenarioResult):
+    error: Optional[ScenarioResult]
+    failure: Optional[ScenarioResult]
+
+    def __init__(self, scenario_results: List[ScenarioResult]):
+        self.scenario_results = scenario_results
+        self.failed_scenarios = []
+        self.errored_scenarios = []
+
+        for scenario in scenario_results:
+            if scenario.is_error:
+                self.errored_scenarios.append(scenario)
+            if scenario.is_failure:
+                self.failed_scenarios.append(scenario)
+
+    def printable(self):
+        if self.failure is not None:
+            return self.failure
+        if self.error:
+            return self.error.printable()
+
+        return ""
+
+    @property
+    def is_error(self):
+        return len(self.errored_scenarios) > 0
+
+    @property
+    def error(self) -> Optional[Exception]:
+        for scenario in self.errored_scenarios:
+            if scenario.is_error:
+                return scenario.error
+
+    @property
+    def is_failure(self):
+        return len(self.failed_scenarios) > 0
+
+    @property
+    def failure(self) -> Optional[Exception]:
+        for scenario in self.failed_scenarios:
+            if scenario.is_failure:
+                return scenario.failure

@@ -36,47 +36,75 @@ class FeatureReporter(Reporter):
         # sh.yellow(sure.version)
         sh.reset("\n")
 
-    def on_suite(self, suite):
+    def on_feature(self, feature):
         self.indentation += 2
 
         sh.reset(" " * self.indentation)
         sh.blue("Feature: ")
         sh.yellow("'")
-        sh.green(suite.name)
+        sh.green(feature.name)
         sh.yellow("'")
         sh.reset("\n")
 
-    def on_suite_done(self, suite, result):
+    def on_feature_done(self, feature, result):
         # sh.reset(" " * self.indentation)
         # sh.white("[")
-        # sh.normal(suite.name)
+        # sh.normal(feature.name)
         # sh.white("]")
         # sh.white(checkmark)
         sh.reset("\n\n")
         self.indentation = 0
 
-    def on_test(self, test):
+    def on_scenario(self, test):
         self.indentation += 2
         sh.reset(" " * self.indentation)
         sh.green("Scenario: ")
         sh.normal(test.description)
         sh.reset(" ")
 
-    def on_test_done(self, test, result):
+    def on_scenario_done(self, test, result):
         self.indentation -= 2
 
     def on_failure(self, test, error):
-        sh.bold_red(ballot)
+        self.failures.append(test)
+        self.indentation += 2
+        sh.red(ballot)
         sh.reset("\n")
-        sh.red(error.printable())
+        sh.reset(" " * self.indentation)
+        sh.red(str(error))
         sh.reset("\n")
+        self.indentation -= 2
 
     def on_success(self, test):
-        sh.bold_green(checkmark)
+        self.successes.append(test)
+        sh.green(checkmark)
         sh.reset("\n")
 
     def on_error(self, test, error):
-        self.on_failure(test, error)
+        self.errors.append(test)
+        self.failures.append(test)
+        self.indentation += 2
+        sh.yellow(ballot)
+        sh.reset("\n")
+        sh.reset(" " * self.indentation)
+        sh.yellow(error.printable())
+        sh.reset("\n")
+        self.indentation -= 2
 
     def on_finish(self):
-        pass
+        failed = len(self.failures)
+        errors = len(self.errors)
+        successful = len(self.successes)
+        self.indentation -= 2
+        sh.reset(" " * self.indentation)
+
+        if failed:
+            sh.red(f"{failed} failed")
+            sh.reset("\n")
+        if errors:
+            sh.yellow(f"{errors} errors")
+            sh.reset("\n")
+        if successful:
+            sh.green(f"{successful} successful")
+            sh.reset("\n")
+        sh.reset(" ")

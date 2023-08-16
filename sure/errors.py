@@ -15,7 +15,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
+from functools import reduce
 
 
 class NonValidTest(Exception):
     """raised when a non-compatible test appears within the test-run session"""
+
+
+def xor(lhs, rhs):
+    return lhs ^ rhs
+
+
+def exit_code(codeword: str) -> int:
+    return reduce(xor, list(map(ord, codeword)))
+
+
+def ExitError(result):
+    raise SystemExit(exit_code('ERROR'))
+
+
+def ExitFailure(result):
+    raise SystemExit(exit_code('FAILURE'))

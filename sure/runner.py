@@ -23,7 +23,7 @@ import inspect
 import traceback
 import unittest
 from typing import List, Optional, Dict
-from sure.errors import NonValidTest
+from sure.errors import NonValidTest, ExitError, ExitFailure
 from sure.importer import importer
 from sure.reporter import Reporter
 from mock import Mock
@@ -34,7 +34,7 @@ def stripped(string):
 
 
 def seem_to_indicate_test(name: str) -> bool:
-    return re.search(r'^(Ensure|Test|Spec|Scenario)', name, re.I)
+    return re.search(r'^(Ensure|Test|Spec|Scenario)', name or "", re.I)
 
 
 class RuntimeOptions(object):
@@ -60,8 +60,9 @@ class SpecContext(object):
 
 
 class BaseResult(object):
-    def __init__(self, results):
+    def __init__(self, results, reporter: Reporter):
         self.results = results
+        self.reporter = reporter
 
     def __nonzero__(self):
         return self.ok
@@ -103,9 +104,13 @@ class Feature(object):
 
             if result.is_failure:
                 reporter.on_failure(scenario, result.failure)
+                if runtime.immediate:
+                    raise ExitFailure(result)
 
             elif result.is_error:
                 reporter.on_error(scenario, result.error)
+                if runtime.immediate:
+                    raise ExitError(result)
 
             else:
                 reporter.on_success(scenario)
@@ -182,14 +187,12 @@ class Scenario(object):
 
         except AssertionError as failure:
             return ScenarioResult(self, failure)
-        except Exception:
-            return ScenarioResult(self, ErrorStack(sys.exc_info()))
 
         return ScenarioResult(self)
 
     def run(self, context):
         if self.object_ancestor in (unittest.TestCase, ):
-            return ScenarioResultSet(self.run_unittesttestcase(context))
+            return ScenarioResultSet(self.run_unittesttestcase(context), context)
 
         return self.run_single_test(self.object, context)
 
@@ -231,12 +234,8 @@ class Runner(object):
         elif not isinstance(item, types.FunctionType):
             return
 
-        try:
-            name = item.__name__
-        except AttributeError:
-            return
-        else:
-            return seem_to_indicate_test(name)
+        name = getattr(item, '__name__', None)
+        return seem_to_indicate_test(name)
 
     def extract_members(self, candidate):
         all_members = [m[1] for m in inspect.getmembers(candidate)]
@@ -262,6 +261,12 @@ class Runner(object):
             self.reporter.on_feature(feature)
             runtime = RuntimeOptions(immediate=immediate)
             result = feature.run(self.reporter, runtime=runtime)
+            if runtime.immediate:
+                if result.is_failure:
+                    raise ExitFailure(result)
+
+                if result.is_error:
+                    raise ExitError(result)
 
             results.append(result)
             self.reporter.on_feature_done(feature, result)
@@ -329,7 +334,52 @@ class ScenarioResultSet(ScenarioResult):
     error: Optional[ScenarioResult]
     failure: Optional[ScenarioResult]
 
-    def __init__(self, scenario_results: List[ScenarioResult]):
+    def __init__(self, scenario_results: List[ScenarioResult], context: SpecContext):
+        self.scenario_results = scenario_results
+        self.failed_scenarios = []
+        self.errored_scenarios = []
+
+        for scenario in scenario_results:
+            if scenario.is_failure:
+                self.failed_scenarios.append(scenario)
+            if scenario.is_error:
+                self.errored_scenarios.append(scenario)
+
+    def printable(self):
+        if self.failure is not None:
+            return self.failure
+        if self.error:
+            return self.error.printable()
+
+        return ""
+
+    @property
+    def is_error(self):
+        return len(self.errored_scenarios) > 0
+
+    @property
+    def error(self) -> Optional[Exception]:
+        for scenario in self.errored_scenarios:
+            if scenario.is_error:
+                return scenario.error
+
+    @property
+    def is_failure(self):
+        return len(self.failed_scenarios) > 0
+
+    @property
+    def failure(self) -> Optional[Exception]:
+        for scenario in self.failed_scenarios:
+            if scenario.is_failure:
+                return scenario.failure
+
+
+class FeatureResult(BaseResult):
+    scenario_results: ScenarioResultSet
+    error: Optional[Exception]
+    failure: Optional[AssertionError]
+
+    def __init__(self, scenario_results, error=None):
         self.scenario_results = scenario_results
         self.failed_scenarios = []
         self.errored_scenarios = []
@@ -369,65 +419,11 @@ class ScenarioResultSet(ScenarioResult):
                 return scenario.failure
 
 
-class FeatureResult(BaseResult):
-    scenario_results: ScenarioResultSet
+class FeatureResultSet(BaseResult):
     error: Optional[Exception]
     failure: Optional[AssertionError]
 
-    def __init__(self, feature, error=None):
-        self.feature = feature
-        self.__error__ = None
-        self.__failure__ = None
-
-        if isinstance(error, AssertionError):
-            self.__failure__ = error
-        else:
-            self.__error__ = error
-
-    def printable(self):
-        if self.is_failure:
-            return str(self.error)
-
-        if callable(getattr(self.error, 'printable', None)):
-            return self.error.printable()
-
-        return ""
-
-    @property
-    def is_error(self):
-        return isinstance(self.error, (ErrorStack, Exception))
-
-    @property
-    def error(self) -> Optional[Exception]:
-        if not isinstance(self.__error__, AssertionError):
-            return self.__error__
-
-    def set_error(self, error: Optional[Exception]):
-        self.__error__ = error
-
-    @property
-    def is_failure(self):
-        return isinstance(self.__failure__, AssertionError)
-
-    @property
-    def failure(self) -> Optional[AssertionError]:
-        if self.is_failure:
-            return self.__failure__
-
-    @property
-    def is_success(self) -> bool:
-        return not self.is_error and not self.is_failure
-
-    @property
-    def ok(self):
-        return self.is_success
-
-
-class FeatureResultSet(FeatureResult):
-    error: Optional[FeatureResult]
-    failure: Optional[FeatureResult]
-
-    def __init__(self, feature_results: List[FeatureResult]):
+    def __init__(self, feature_results, error=None):
         self.feature_results = feature_results
         self.failed_features = []
         self.errored_features = []

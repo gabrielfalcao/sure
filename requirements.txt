@@ -1,2 +1,3 @@
 six==1.16.0
 click==8.1.6
+couleur

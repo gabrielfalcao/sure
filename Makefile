@@ -47,7 +47,7 @@ docs:
 	$(OPEN_COMMAND) docs/build/html/index.html
 
 test tests: clean | $(VENV)/bin/pytest # $(VENV)/bin/nosetests	# @$(VENV)/bin/nosetests --rednose --immediate -vv --with-coverage --cover-package=sure
-	@$(VENV)/bin/pytest -vv --cov=sure
+	@$(VENV)/bin/pytest -vv --cov=sure tests/unit tests/functional
 
 # run main command-line tool
 run: | $(MAIN_CLI_PATH)

@@ -17,6 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 from sure.meta import get_reporter, MetaReporter, gather_reporter_names
+from sure.meta import get_agent, MetaAgent, gather_agent_names
+from sure.meta import get_actor, MetaActor, gather_actor_names
 
 __path__ = os.path.abspath(os.path.dirname(__file__))
 
@@ -65,7 +67,7 @@ class Reporter(object, metaclass=MetaReporter):
         """
 
     def on_feature(self, feature):
-        """Called when a test feature is about to run
+        """Called when a scenario feature is about to run
 
         .. code:: python
 
@@ -76,13 +78,13 @@ class Reporter(object, metaclass=MetaReporter):
                    sys.stderr.write('Reporter.on_feature reported {}'.format(feature.name))
 
            class feature:
-               name = 'a simple test feature'
+               name = 'a simple scenario feature'
 
            FeatureReporter('a <sure.runner.Runner()>').on_feature(feature)
         """
 
     def on_feature_done(self, feature, result):
-        """Called when a test feature_done is about to run
+        """Called when a scenario feature_done is about to run
 
         .. code:: python
 
@@ -93,55 +95,55 @@ class Reporter(object, metaclass=MetaReporter):
                    sys.stderr.write('Reporter.on_feature_done reported {}'.format(feature.name))
 
            class feature_done:
-               name = 'a simple test'
+               name = 'a simple scenario'
 
            Feature_doneReporter('a <sure.runner.Runner()>').on_feature_done(feature_done)
         """
 
-    def on_scenario(self, test, result):
-        """Called when a test test_done is about to run
+    def on_scenario(self, scenario, result):
+        """Called when a scenario test_done is about to run
 
         .. code:: python
 
            from sure.reporter import Reporter
 
            class TestReporter(Reporter):
-               def on_scenario_done(self, test):
-                   sys.stderr.write('Reporter.on_scenario_done reported {}'.format(test.name))
+               def on_scenario_done(self, scenario):
+                   sys.stderr.write('Reporter.on_scenario_done reported {}'.format(scenario.name))
 
            class test_done:
-               name = 'a simple test'
+               name = 'a simple scenario'
 
            TestReporter('a <sure.runner.Runner()>').on_scenario_done(test_done)
        """
 
-    def on_scenario_done(self, test):
-        """Called when a test test_done is about to run
+    def on_scenario_done(self, scenario):
+        """Called when a scenario test_done is about to run
 
         .. code:: python
 
            from sure.reporter import Reporter
 
            class TestReporter(Reporter):
-               def on_scenario_done(self, test):
-                   sys.stderr.write('Reporter.on_scenario_done reported {}'.format(test.name))
+               def on_scenario_done(self, scenario):
+                   sys.stderr.write('Reporter.on_scenario_done reported {}'.format(scenario.name))
 
            class test_done:
-               name = 'a simple test'
+               name = 'a simple scenario'
 
            TestReporter('a <sure.runner.Runner()>').on_scenario_done(test_done)
         """
 
-    def on_failure(self, test, error):
-        """Called when a test fails without crashing
+    def on_failure(self, scenario, error):
+        """Called when a scenario fails without crashing
 
         .. code:: python
 
            from sure.reporter import Reporter
 
            class FailureReporter(Reporter):
-               def on_failure(self, test):
-                   sys.stderr.write('Reporter.on_failure reported {}'.format(test.name))
+               def on_failure(self, scenario):
+                   sys.stderr.write('Reporter.on_failure reported {}'.format(scenario.name))
 
            class failure:
                name = 'a simple failure'
@@ -149,16 +151,16 @@ class Reporter(object, metaclass=MetaReporter):
            FailureReporter('a <sure.runner.Runner()>').on_failure(failure)
         """
 
-    def on_success(self, test):
-        """Called when a test passes
+    def on_success(self, scenario):
+        """Called when a scenario passes
 
         .. code:: python
 
            from sure.reporter import Reporter
 
            class SuccessReporter(Reporter):
-               def on_success(self, test):
-                   sys.stderr.write('Reporter.on_success reported {}'.format(test.name))
+               def on_success(self, scenario):
+                   sys.stderr.write('Reporter.on_success reported {}'.format(scenario.name))
 
            class success:
                name = 'a simple success'
@@ -166,16 +168,16 @@ class Reporter(object, metaclass=MetaReporter):
            SuccessReporter('a <sure.runner.Runner()>').on_success(success)
         """
 
-    def on_error(self, test, error):
-        """Called when a test fails with exception
+    def on_error(self, scenario, error):
+        """Called when a scenario fails with exception
 
         .. code:: python
 
            from sure.reporter import Reporter
 
            class ErrorReporter(Reporter):
-               def on_error(self, test):
-                   sys.stderr.write('Reporter.on_error reported {}'.format(test.name))
+               def on_error(self, scenario):
+                   sys.stderr.write('Reporter.on_error reported {}'.format(scenario.name))
 
            class error:
                name = 'a simple error'

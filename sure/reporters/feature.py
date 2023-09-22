@@ -22,12 +22,12 @@ from sure.reporter import Reporter
 
 sh = Shell()
 
-checkmark = '✓'
-ballot = '✗'
+checkmark = "✓"
+ballot = "✗"
 
 
 class FeatureReporter(Reporter):
-    name = 'feature'
+    name = "feature"
 
     def on_start(self):
         self.indentation = 0
@@ -60,10 +60,11 @@ class FeatureReporter(Reporter):
     def on_failure(self, test, error):
         self.failures.append(test)
         self.indentation += 2
-        sh.red(ballot)
+        sh.yellow(ballot)
         sh.reset("\n")
         sh.reset(" " * self.indentation)
-        sh.red(str(error))
+        import ipdb;ipdb.set_trace()
+        sh.yellow(" ".join(error.args))
         sh.reset("\n")
         self.indentation -= 2
 
@@ -76,10 +77,10 @@ class FeatureReporter(Reporter):
         self.errors.append(test)
         self.failures.append(test)
         self.indentation += 2
-        sh.yellow(ballot)
+        sh.red(ballot)
         sh.reset("\n")
         sh.reset(" " * self.indentation)
-        sh.yellow(error.printable())
+        sh.red(" ".join(error.args))
         sh.reset("\n")
         self.indentation -= 2
 

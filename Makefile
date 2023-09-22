@@ -17,7 +17,8 @@ OPEN_COMMAND		:= gnome-open
 else
 OPEN_COMMAND		:= open
 endif
-export SURE_NO_COLORS := true
+export SURE_NO_COLORS	:= true
+export SURE_LOG_FILE	:= $(GIT_ROOT)/sure-$(date +"%Y-%m-%d-%H:%M:%S").log
 
 AUTO_STYLE_TARGETS	:= sure/runtime.py sure/runner.py sure/meta.py sure/meta.py sure/reporter.py sure/reporters sure/actors.py sure/agents.py
 ######################################################################
@@ -54,6 +55,8 @@ test tests: clean | $(VENV)/bin/pytest # $(VENV)/bin/nosetests	# @$(VENV)/bin/no
 run: | $(MAIN_CLI_PATH)
 	$(MAIN_CLI_PATH) --immediate tests/runner/test_eins.py
 	$(MAIN_CLI_PATH) --immediate tests/runner/
+	$(MAIN_CLI_PATH) --immediate tests/
+	$(MAIN_CLI_PATH) --immediate
 
 # Pushes release of this package to pypi
 push-release: dist  # pushes distribution tarballs of the current version
@@ -84,7 +87,7 @@ isort: | $(VENV)/bin/isort
 	@$(VENV)/bin/isort --overwrite-in-place --profile=black --ls --srx --cs --ca -n --ot --tc --color --star-first --virtual-env $(VENV) --py auto $(AUTO_STYLE_TARGETS)
 
 
-autostyle: isort black flake8
+autostyle: run isort black flake8
 
 
 ##############################################################

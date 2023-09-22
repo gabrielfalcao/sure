@@ -17,8 +17,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 
-from sure.meta import get_agent, MetaAgent, gather_agent_names
+from sure.meta import MetaAgent, get_agent, gather_agent_names
 from sure.actors import Actor
+
 __path__ = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -33,17 +34,21 @@ class Agent(Actor):
     * :py:meth:`~sure.agent.Agent.on_produce`
     * :py:meth:`~sure.agent.Agent.on_communication_error`
     """
+
     __metaclass__ = MetaAgent
     name = None
 
-    def __init__(self, runner, ):
+    def __init__(
+        self,
+        runner,
+    ):
         self.runner = runner
 
     def __repr__(self):
-        return '<{}>'.format(self.__class__.__name__)
+        return "<{}>".format(self.__class__.__name__)
 
     def on_present(self):
-        """Called as soon as `sure' starts running.
+        """Called as soon as `sure' presents running.
 
         .. code:: python
 
@@ -52,10 +57,10 @@ class Agent(Actor):
            output = open('/dev/random', 'ba')
 
            class HelloAgent(Agent):
-               def on_start(self):
-                   output.write(b"sure's test runner has started")
+               def on_present(self):
+                   output.write(b"sure's test runner has presented")
 
-           HelloAgent(':py:class:`sure.runner.Runner`').on_start()
+           HelloAgent(':py:class:`sure.runner.Runner`').on_present()
         """
 
     def on_finish(self):

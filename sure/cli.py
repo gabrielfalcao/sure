@@ -29,32 +29,41 @@ import sure.reporters
 
 from sure.importer import resolve_path
 from sure.runner import Runner
-from sure.meta import gather_reporter_names
+from sure.reporters import gather_reporter_names, CoReporter
 from sure.errors import ExitError, ExitFailure
 
 
 @click.command(no_args_is_help=True)
 @click.argument("paths", nargs=-1)
-@click.option("-r", "--reporter", default="feature", help='default=feature')  # , type=click.Choice(gather_reporter_names()))
-@click.option("-R", "--reporters", multiple=True)
+@click.option("-r", "--reporter", default="feature", help='default=feature', type=click.Choice(gather_reporter_names()))
+@click.option("-R", "--reporters", multiple=True, help=f"options=[{','.join(gather_reporter_names())}]")
 @click.option("-i", "--immediate", is_flag=True)
 @click.option("-l", "--log-level", type=click.Choice(['none', 'debug', 'info', 'warning', 'error']), help="default='none'")
 @click.option("-F", "--log-file", help='path to a log file. Default to SURE_LOG_FILE')
-def entrypoint(paths, reporter, reporters, immediate, log_level, log_file):
+@click.option("-v", "--verbose", is_flag=True, multiple=True)
+@click.option("-q", "--quiet", is_flag=True, multiple=True)
+def entrypoint(paths, reporter, reporters, immediate, log_level, log_file, verbose, quiet):
     if not paths:
         paths = glob('test*/**')
     else:
         paths = flatten(*list(map(glob, paths)))
 
+    reporters = reporters and list(reporters) or None
+    verbosity_level = sum(verbose)
+    quietness_level = sum(quiet)
+    verbosity = verbosity_level - quietness_level
+    quietness = quietness_level - verbosity_level
+
     configure_logging(log_level, log_file)
-    runner = Runner(resolve_path(os.getcwd()), reporter)
+    runner = Runner(resolve_path(os.getcwd()), reporter, reporters)
     result = runner.run(paths, immediate=immediate)
 
-    if result.is_failure:
-        raise ExitFailure(result)
+    if result:
+        if result.is_failure:
+            raise ExitFailure(runner.context, result)
 
-    if result.is_error:
-        raise ExitError(result)
+        if result.is_error:
+            raise ExitError(runner.context, result)
 
 
 def configure_logging(log_level: str, log_file: str):
@@ -71,7 +80,7 @@ def configure_logging(log_level: str, log_file: str):
 
         handler = logging.FileHandler(log_file)
     else:
-        handler = logging.StreamHandler(sys.stderr)
+        handler = logging.NullHandler()
 
     handler.setLevel(level)
 

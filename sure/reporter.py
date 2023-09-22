@@ -18,11 +18,12 @@
 from pathlib import Path
 
 from sure.meta import MetaReporter, get_reporter, gather_reporter_names
+from sure.actors import Actor
 
 __path__ = Path(__file__).absolute().parent
 
 
-class Reporter(object, metaclass=MetaReporter):
+class Reporter(Actor, metaclass=MetaReporter):
     """Base class for reporters.
 
     The following optional methods should be implemented:
@@ -39,6 +40,7 @@ class Reporter(object, metaclass=MetaReporter):
     * :py:meth:`~sure.reporter.Reporter.on_success`
     * :py:meth:`~sure.reporter.Reporter.on_finish`
     """
+
     __metaclass__ = MetaReporter
     name = None
 
@@ -53,7 +55,7 @@ class Reporter(object, metaclass=MetaReporter):
         pass
 
     def __repr__(self):
-        return '<{}>'.format(self.__class__.__name__)
+        return "<{}>".format(self.__class__.__name__)
 
     def on_start(self):
         """Called as soon as `sure' starts running.
@@ -118,7 +120,7 @@ class Reporter(object, metaclass=MetaReporter):
                name = 'a simple scenario'
 
            TestReporter('a <sure.runner.Runner()>').on_scenario_done(test_done)
-       """
+        """
 
     def on_scenario_done(self, scenario):
         """Called when a scenario test_done is about to run
@@ -217,14 +219,15 @@ class Reporter(object, metaclass=MetaReporter):
         Reporter.from_name('feature')
         ```
         """
-
+        if not isinstance(name, str):
+            raise TypeError(f'name should be a {str.__name__} but got the {type(name).__name__} {name} instead')
         found = get_reporter(name)
         if not found:
             raise RuntimeError(
-                'no Reporter found for name {}, options are: {}'.format(
-                    name,
-                    ',\n'.join(gather_reporter_names())
-                ))
+                "no reporter found with name {}, options are: {}".format(
+                    name, ", ".join(gather_reporter_names())
+                )
+            )
 
         return found
 
@@ -248,7 +251,7 @@ class Reporter(object, metaclass=MetaReporter):
            reporter = Reporter.from_name_and_runner('feature', runner)
         """
         cls.importer.load_recursive(
-            __path__.joinpath('reporters'),
+            __path__.joinpath("reporters"),
             ignore_errors=False,
         )
         return cls.from_name(name)(runner)

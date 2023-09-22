@@ -22,7 +22,11 @@ import inspect
 import unittest
 import traceback
 
-from sure.errors import ExitError, ExitFailure
+from pathlib import Path
+from typing import List, Optional
+from functools import lru_cache, cached_property
+
+from sure.errors import ExitError, ExitFailure, ImmediateError, ImmediateFailure
 from sure.runtime import (
     Feature,
     Scenario,
@@ -44,9 +48,12 @@ from sure.reporter import Reporter
 class Runner(object):
     """Manages I/O operations to find tests and execute them"""
 
-    def __init__(self, base_path, reporter_name, plugin_paths=None, **kwargs):
+    def __init__(self, base_path: Path, reporter: str, reporters: Optional[List[str]] = None, plugin_paths=None, **kwargs):
         self.base_path = base_path
-        self.reporter = self.get_reporter(reporter_name)
+        if isinstance(reporters, list) and len(reporters) > 0:
+            self.reporter = CoReporter(map(self.get_reporter, reporters))
+        else:
+            self.reporter = self.get_reporter(reporter)
 
         for k in kwargs:
             setattr(self, k, kwargs.get(k))
@@ -94,20 +101,22 @@ class Runner(object):
 
         return features
 
-    def run(self, lookup_paths, immediate: bool = False):
+    def runin(self, lookup_paths, immediate: bool = False):
         results = []
         self.reporter.on_start()
 
         for feature in self.load_features(lookup_paths):
             self.reporter.on_feature(feature)
             runtime = RuntimeOptions(immediate=immediate)
+            context = SpecContext(self.reporter, runtime)
+
             result = feature.run(self.reporter, runtime=runtime)
             if runtime.immediate:
                 if result.is_failure:
-                    raise ExitFailure(result)
+                    raise ExitFailure(context, result)
 
                 if result.is_error:
-                    raise ExitError(result)
+                    raise ExitError(context, result)
 
             results.append(result)
             self.reporter.on_feature_done(feature, result)
@@ -115,3 +124,22 @@ class Runner(object):
         self.reporter.on_finish()
 
         return FeatureResultSet(results)
+
+    def run(self, *args, **kwargs):
+        try:
+            return self.runin(*args, **kwargs)
+        except ImmediateFailure as failure:
+            self.reporter.on_failure(failure.scenario, failure)
+            return failure.result
+
+        except ImmediateError as error:
+            self.reporter.on_error(failure.scenario, error)
+            return error.result
+
+    @cached_property
+    def runtime(self, immediate: bool = False):
+        return RuntimeOptions(immediate=immediate)
+
+    @cached_property
+    def context(self):
+        return SpecContext(self.reporter, self.runtime)

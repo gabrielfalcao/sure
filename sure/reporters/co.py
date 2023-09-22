@@ -18,6 +18,7 @@
 from typing import Iterable
 
 from couleur import Shell
+from collections import OrderedDict
 
 import sure
 from sure.agents import Agent
@@ -26,13 +27,20 @@ from sure.reporter import Reporter
 sh = Shell()
 
 
+def non_stochastic_set(items) -> list:
+    return list(OrderedDict(map(lambda x: (x, x), items)).keys())
+
+
 class CoReporter(Reporter):
-    name = '__meta__'
+    name = "__meta__"
 
     def __init__(self, runner, liaison_with: Iterable[Reporter]):
+        liaison_with = non_stochastic_set(liaison_with)
         for possible_liaison in liaison_with:
             if not isinstance(possible_liaison, Reporter):
-                raise TypeError(f'CoReporter takes a set of reporters to broadcast data to, but got {possible_liaison:r} instead')
+                raise TypeError(
+                    f"CoReporter takes a set of reporters to broadcast data to, but got {possible_liaison:r} instead"
+                )
 
         self.liaisons = liaison_with
         super().__init__(runner)

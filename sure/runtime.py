@@ -26,7 +26,7 @@ from typing import Dict, List, Optional
 
 from mock import Mock
 
-from sure.errors import ExitError, ExitFailure, NonValidTest
+from sure.errors import ExitError, ExitFailure, NonValidTest, ImmediateError, ImmediateFailure
 from sure.importer import importer
 from sure.reporter import Reporter
 
@@ -36,7 +36,27 @@ def stripped(string):
 
 
 def seem_to_indicate_test(name: str) -> bool:
-    return re.search(r'^(Ensure|Test|Spec|Scenario)', name or "", re.I)
+    return re.search(r"^(Ensure|Test|Spec|Scenario)", name or "", re.I)
+
+
+class Logort(object):
+    def __init__(self, scenario):
+        self.internal = logging.getLogger(__name__)
+        self.external = logging.getLogger(scenario.id)
+        self.locations = []
+
+        self.history = [
+            self.internal,
+            self.external,
+        ]
+
+    @property
+    def current(self):
+        return self.history[-1]
+
+    def set_location(self, location):
+        self.locations.append(location)
+        self.history.append(logging.getLogger(location.ort))
 
 
 class RuntimeOptions(object):
@@ -46,7 +66,7 @@ class RuntimeOptions(object):
         self.immediate = immediate
 
     def __repr__(self):
-        return f'<RuntimeOptions immediate={self.immediate}>'
+        return f"<RuntimeOptions immediate={self.immediate}>"
 
 
 class SpecContext(object):
@@ -58,7 +78,7 @@ class SpecContext(object):
         self.runtime = runtime
 
     def __repr__(self):
-        return f'<SpecContext reporter={self.reporter} runtime={self.runtime}>'
+        return f"<SpecContext reporter={self.reporter} runtime={self.runtime}>"
 
 
 class BaseResult(object):
@@ -71,13 +91,23 @@ class BaseResult(object):
 
     @property
     def ok(self):
-        return len(set([x.is_error for x in self.results]).union(set([x.is_failure for x in self.results]))) == 0
+        er = set([x.is_error for x in self.results])
+        fe = set([x.is_failure for x in self.results])
+        return len(er.union(fe)) == 0
 
 
 class Feature(object):
     def __init__(self, module):
-        name = getattr(module, 'suite_name', getattr(module, 'feature', getattr(module, 'name', module.__name__)))
-        description = getattr(module, 'suite_description', getattr(module, 'description', ""))
+        name = getattr(
+            module,
+            "suite_name",
+            getattr(
+                module, "feature", getattr(module, "name", module.__name__)
+            ),
+        )
+        description = getattr(
+            module, "suite_description", getattr(module, "description", "")
+        )
 
         self.name = stripped(name)
         self.description = stripped(description)
@@ -107,12 +137,12 @@ class Feature(object):
             if result.is_failure:
                 reporter.on_failure(scenario, result.failure)
                 if runtime.immediate:
-                    raise ExitFailure(result)
+                    raise ExitFailure(context, result)
 
             elif result.is_error:
                 reporter.on_error(scenario, result.error)
                 if runtime.immediate:
-                    raise ExitError(result)
+                    raise ExitError(context, result)
 
             else:
                 reporter.on_success(scenario)
@@ -137,11 +167,35 @@ class ErrorStack(object):
         return "\n".join(self.traceback)
 
 
+class TestLocation(object):
+    def __init__(self, test, ancestor=None):
+        self.test = test
+        self.code = test.__code__
+        self.filename = self.code.co_filename
+        self.line = self.code.co_firstlineno
+        self.kind = self.test.__class__
+        self.name = self.test.__func__.__name__
+        self.ancestral_description = ""
+        if ancestor:
+            self.ancestral_description = ancestor.description or ancestor.__doc__ or ""
+        self.description = self.test.__func__.__doc__ or ""
+
+    def __str__(self):
+        return "\n".join([
+            f'the scenario "{self.description}" ',
+            f"defined at {self.ort}",
+        ])
+
+    @property
+    def ort(self):
+        return f"{self.filename}:{self.line}"
+
+
 class Scenario(object):
-    def __init__(self, class_or_callable, suite):
-        fallback = class_or_callable.__name__
-        self.logger = logging.getLogger(f'{__name__}.Scenario({suite.name})')
-        self.description = stripped(class_or_callable.__doc__ or fallback)
+    def __init__(self, class_or_callable, feature):
+        self.id = class_or_callable.__name__
+        self.log = Logort(self)
+        self.description = stripped(class_or_callable.__doc__ or self.id)
 
         self.object = class_or_callable
         self.object_ancestor = None
@@ -149,7 +203,7 @@ class Scenario(object):
             if issubclass(class_or_callable, unittest.TestCase):
                 self.object_ancestor = class_or_callable
 
-        self.suite = suite
+        self.feature = feature
         self.fail_immediately = False
 
     def run_class_based_test(self, context):
@@ -157,55 +211,83 @@ class Scenario(object):
         last_error = None
         for name in dir(self.object):
             if last_failure and context.runtime.immediate:
-                raise last_failure
+                # XXX: raise last_failure
+                self.log.internal.warning(f"fail: {result}")
+                raise ImmediateFailure(last_failure)
 
             if last_error and context.runtime.immediate:
-                raise last_error
+                # XXX: raise last_error
+                self.log.internal.error(f"error: {result}")
+                raise ImmediateError(last_error)
 
             if not seem_to_indicate_test(name):
-                self.logger.debug(f"ignoring {self.object}.{name}")
+                self.log.internal.debug(f"ignoring {self.object}.{name}")
                 continue
 
-            member = getattr(self.object(name), name, None)
-            if isinstance(member, types.MethodType) and seem_to_indicate_test(name):
-                result = self.run_single_test(member, context)
-                last_failure = result.failure
-                last_error = result.error
+            if isinstance(self.object, type) and issubclass(self.object, unittest.TestCase):
+                runnable = getattr(self.object(name), name, None)
+            else:
+                # XXX: support non-unittest.TestCase classes
+                runnable = getattr(self.object, name, None)
+
+            if isinstance(runnable, types.MethodType) and seem_to_indicate_test(
+                name
+            ):
+                result = self.run_single_test(runnable, context)
+                if result.failure:
+                    last_failure = result
+                if result.error:
+                    last_error = result
+
                 yield result
 
     def run_single_test(self, test, context):
-        if not hasattr(test, '__code__'):
-            raise RuntimeError(f'expected {test} to be a function in this instance')
+        if not hasattr(test, "__code__"):
+            raise RuntimeError(
+                f"expected {test} to be a function in this instance"
+            )
         code = test.__code__
-        varnames = set(code.co_varnames).intersection({'context'})
+        varnames = set(code.co_varnames).intersection({"context"})
         argcount = len(varnames)
+        location = TestLocation(test)
+        self.log.set_location(location)
         try:
             if argcount == 0:
                 test()
             elif argcount == 1:
                 test(context)
             else:
-                raise NonValidTest(f'it appears that the test function {self.object} takes more than one argument: {argcount}')
+                raise NonValidTest(
+                    f"it appears that the test function {self.object} takes more than one argument: {argcount}"
+                )
 
         except AssertionError as failure:
-            return ScenarioResult(self, failure)
+            return ScenarioResult(self, location, context, failure)
 
-        return ScenarioResult(self)
+        except Exception as error:
+            return ScenarioResult(self, location, context, error)
+
+        return ScenarioResult(self, location, context)
 
     def run(self, context):
         if isinstance(self.object_ancestor, type):
-            return ScenarioResultSet(self.run_class_based_test(context), context)
+            return ScenarioResultSet(
+                self.run_class_based_test(context), context
+            )
 
-        return self.run_single_test(self.object, context)
+        return ScenarioResultSet.single(self.run_single_test(self.object, context))
 
 
 class ScenarioResult(BaseResult):
     scenario: Scenario
     error: Optional[Exception]
     failure: Optional[AssertionError]
+    location: TestLocation
 
-    def __init__(self, scenario, error=None):
+    def __init__(self, scenario, location: TestLocation, context: SpecContext, error=None):
         self.scenario = scenario
+        self.location = location
+        self.context = context
         self.__error__ = None
         self.__failure__ = None
 
@@ -217,22 +299,27 @@ class ScenarioResult(BaseResult):
     @property
     def label(self) -> str:
         if self.ok:
-            return 'OK'
+            return "OK"
         if self.is_failure:
-            return 'FAILURE'
+            return "FAILURE"
         if self.is_error:
-            return 'ERROR'
+            return "ERROR"
 
-        raise '...'
+        raise "..."
+
+    def __str__(self):
+        return "\n".join([
+            f"{self.printable()}",
+        ])
 
     def printable(self):
-        if self.is_failure:
-            return str(self.error)
+        prelude = f"{self.location}"
 
-        if callable(getattr(self.error, 'printable', None)):
-            return self.error.printable()
+        hook = ""
+        if callable(getattr(self.error, "printable", None)):
+            hook = self.error.printable()
 
-        return ""
+        return " ".join(filter(bool, [prelude, hook]))
 
     @property
     def is_error(self):
@@ -253,7 +340,7 @@ class ScenarioResult(BaseResult):
     @property
     def failure(self) -> Optional[AssertionError]:
         if self.is_failure:
-            return self.__failure__
+            return self.sucinct_assertion()
 
     @property
     def is_success(self) -> bool:
@@ -263,12 +350,18 @@ class ScenarioResult(BaseResult):
     def ok(self):
         return self.is_success
 
+    def sucinct_assertion(self) -> str:
+        # XXX: strip callable identifier
+        import ipdb;ipdb.set_trace()
+
 
 class ScenarioResultSet(ScenarioResult):
     error: Optional[ScenarioResult]
     failure: Optional[ScenarioResult]
 
-    def __init__(self, scenario_results: List[ScenarioResult], context: SpecContext):
+    def __init__(
+        self, scenario_results: List[ScenarioResult], context: SpecContext
+    ):
         self.scenario_results = scenario_results
         self.failed_scenarios = []
         self.errored_scenarios = []

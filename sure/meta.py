@@ -55,7 +55,7 @@ def gather_actor_names() -> List[str]:
 
 
 def add_reporter(reporter: type) -> type:
-    if reporter.name == '__meta__':
+    if reporter.name == "__meta__":
         return reporter
 
     REPORTERS[reporter.name] = reporter
@@ -71,10 +71,11 @@ def gather_reporter_names() -> List[str]:
 
 
 def internal_module_name(name):
-    return __name__.replace('.meta', f'.{name}.')
+    return __name__.replace(".meta", f".{name}.")
 
 
 def register_class(cls, identifier):
+    cls.kind = identifier
     cls.importer = importer
     if len(cls.__mro__) > 2:
         register = MODULE_REGISTERS[identifier]
@@ -83,30 +84,32 @@ def register_class(cls, identifier):
         return cls
 
 
-MODULE_REGISTERS = dict((
-    ('reporter', add_reporter),
-    ('agent', add_agent),
-    ('actor', add_actor),
-))
-
-
-class MetaReporter(type):
-    def __init__(cls, name, bases, attrs):
-        cls = register_class(cls, 'reporter')
-        super(MetaReporter, cls).__init__(name, bases, attrs)
-
-
-class MetaAgent(type):
-    def __init__(cls, name, bases, attrs):
-        if cls.__module__ != __name__:
-            cls = register_class(cls, 'agent')
-
-        super(MetaAgent, cls).__init__(name, bases, attrs)
+MODULE_REGISTERS = dict(
+    (
+        ("reporter", add_reporter),
+        ("agent", add_agent),
+        ("actor", add_actor),
+    )
+)
 
 
 class MetaActor(type):
     def __init__(cls, name, bases, attrs):
         if cls.__module__ != __name__:
-            cls = register_class(cls, 'actor')
+            cls = register_class(cls, "actor")
 
         super(MetaActor, cls).__init__(name, bases, attrs)
+
+
+class MetaReporter(MetaActor):
+    def __init__(cls, name, bases, attrs):
+        cls = register_class(cls, "reporter")
+        super(MetaReporter, cls).__init__(name, bases, attrs)
+
+
+class MetaAgent(MetaActor):
+    def __init__(cls, name, bases, attrs):
+        if cls.__module__ != __name__:
+            cls = register_class(cls, "agent")
+
+        super(MetaAgent, cls).__init__(name, bases, attrs)

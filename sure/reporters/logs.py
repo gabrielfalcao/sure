@@ -23,7 +23,7 @@ from sure.reporter import Reporter
 
 
 class LogsReporter(Reporter):
-    name = 'logger'
+    name = "logger"
     logger = logging.getLogger(__name__)
 
     def initialize(self, logger: logging.Logger = None):
@@ -34,32 +34,32 @@ class LogsReporter(Reporter):
             self.logger = logger
         else:
             raise TypeError(
-                f'expeted {logger} to be a {logging.Logger} but got a {type(logger)} instead'
+                f"expeted {logger} to be a {logging.Logger} but got a {type(logger)} instead"
             )
 
     def on_start(self):
-        self.logger.info('test session started')
+        self.logger.info("test session started")
 
     def on_feature(self, feature):
-        self.logger.info('testing feature: {feature.name}...')
+        self.logger.info("testing feature: {feature.name}...")
 
     def on_feature_done(self, feature, result):
-        self.logger.info('testing feature: {feature.name}: {result.label}')
+        self.logger.info("testing feature: {feature.name}: {result.label}")
 
     def on_scenario(self, test):
-        self.logger.info('testing scenario: {test.name}...')
+        self.logger.info("testing scenario: {test.name}...")
 
     def on_scenario_done(self, test, result):
-        self.logger.info('testing scenario: {test.name}: {result.label}')
+        self.logger.info("testing scenario: {test.name}: {result.label}")
 
     def on_failure(self, test, error):
-        self.logger.warning('failed scenario: {test.name}: {error}')
+        self.logger.warning("failed scenario: {test.name}: {error}")
 
     def on_success(self, test):
-        self.logger.warning('succeeded scenario: {test.name}: {error}')
+        self.logger.warning("succeeded scenario: {test.name}: {error}")
 
     def on_error(self, test, error):
-        self.logger.error('error scenario: {test.name}: {error}')
+        self.logger.error("error scenario: {test.name}: {error}")
 
     def on_finish(self):
-        self.logger.info('test session completed')
+        self.logger.info("test session completed")

@@ -30,9 +30,35 @@ def exit_code(codeword: str) -> int:
     return reduce(xor, list(map(ord, codeword)))
 
 
-def ExitError(result):
-    raise SystemExit(exit_code('ERROR'))
+class RuntimeInterruption(Exception):
+    def __init__(self, scenario_result):
+        self.result = scenario_result
+        self.scenario = scenario_result.scenario
+        self.context = scenario_result.context
+        super().__init__(f"{self.result}")
 
 
-def ExitFailure(result):
-    raise SystemExit(exit_code('FAILURE'))
+class ImmediateError(RuntimeInterruption):
+    def __init__(self, scenario_result):
+        self.args = scenario_result.error.args
+        self.message = " ".join(self.args)
+        super().__init__(scenario_result)
+
+
+class ImmediateFailure(RuntimeInterruption):
+    def __init__(self, scenario_result):
+        self.args = scenario_result.failure.args
+        self.message = " ".join(self.args)
+        super().__init__(scenario_result)
+
+
+class ExitError(SystemExit):
+    def __init__(self, context, result):
+        context.reporter.on_failure(result.scenario, result.error)
+        return super().__init__(exit_code('ERROR'))
+
+
+class ExitFailure(SystemExit):
+    def __init__(self, context, result):
+        context.reporter.on_failure(result.scenario, result.failure)
+        return super().__init__(exit_code('FAILURE'))

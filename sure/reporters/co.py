@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
 # Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
@@ -15,13 +15,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from typing import Iterable
+
 from couleur import Shell
 
 import sure
-from typing import Set
 from sure.agents import Agent
 from sure.reporter import Reporter
-
 
 sh = Shell()
 
@@ -29,89 +29,46 @@ sh = Shell()
 class CoReporter(Reporter):
     name = '__meta__'
 
-    def __init__(self, runner, liaison_with: Set[Reporter]):
+    def __init__(self, runner, liaison_with: Iterable[Reporter]):
         for possible_liaison in liaison_with:
             if not isinstance(possible_liaison, Reporter):
-                raise TypeError(f'CoReporter takes a set of reporters to broadcast data to')
+                raise TypeError(f'CoReporter takes a set of reporters to broadcast data to, but got {possible_liaison:r} instead')
 
         self.liaisons = liaison_with
         super().__init__(runner)
 
     def on_start(self):
-        self.indentation = 0
-        # sh.white("Running sure version ")
-        # sh.yellow(sure.version)
-        sh.reset("\n")
+        for liaison in self.liaisons:
+            liaison.on_start()
 
     def on_feature(self, feature):
-        self.indentation += 2
-
-        sh.reset(" " * self.indentation)
-        sh.blue("Feature: ")
-        sh.yellow("'")
-        sh.green(feature.name)
-        sh.yellow("'")
-        sh.reset("\n")
+        for liaison in self.liaisons:
+            liaison.on_feature(feature)
 
     def on_feature_done(self, feature, result):
-        # sh.reset(" " * self.indentation)
-        # sh.white("[")
-        # sh.normal(feature.name)
-        # sh.white("]")
-        # sh.white(checkmark)
-        sh.reset("\n\n")
-        self.indentation = 0
+        for liaison in self.liaisons:
+            liaison.on_feature_done(feature, result)
 
     def on_scenario(self, test):
-        self.indentation += 2
-        sh.reset(" " * self.indentation)
-        sh.green("Scenario: ")
-        sh.normal(test.description)
-        sh.reset(" ")
+        for liaison in self.liaisons:
+            liaison.on_scenario(test)
 
     def on_scenario_done(self, test, result):
-        self.indentation -= 2
+        for liaison in self.liaisons:
+            liaison.on_scenario_done(test, result)
 
     def on_failure(self, test, error):
-        self.failures.append(test)
-        self.indentation += 2
-        sh.red(ballot)
-        sh.reset("\n")
-        sh.reset(" " * self.indentation)
-        sh.red(str(error))
-        sh.reset("\n")
-        self.indentation -= 2
+        for liaison in self.liaisons:
+            liaison.on_failure(test, result)
 
     def on_success(self, test):
-        self.successes.append(test)
-        sh.green(checkmark)
-        sh.reset("\n")
+        for liaison in self.liaisons:
+            liaison.on_success(test)
 
     def on_error(self, test, error):
-        self.errors.append(test)
-        self.failures.append(test)
-        self.indentation += 2
-        sh.yellow(ballot)
-        sh.reset("\n")
-        sh.reset(" " * self.indentation)
-        sh.yellow(error.printable())
-        sh.reset("\n")
-        self.indentation -= 2
+        for liaison in self.liaisons:
+            liaison.on_error(test, error)
 
     def on_finish(self):
-        failed = len(self.failures)
-        errors = len(self.errors)
-        successful = len(self.successes)
-        self.indentation -= 2
-        sh.reset(" " * self.indentation)
-
-        if failed:
-            sh.red(f"{failed} failed")
-            sh.reset("\n")
-        if errors:
-            sh.yellow(f"{errors} errors")
-            sh.reset("\n")
-        if successful:
-            sh.green(f"{successful} successful")
-            sh.reset("\n")
-        sh.reset(" ")
+        for liaison in self.liaisons:
+            liaison.on_finish()

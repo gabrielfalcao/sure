@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
 # Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
@@ -20,7 +20,6 @@ from couleur import Shell
 import sure
 from sure.reporter import Reporter
 
-
 sh = Shell()
 
 checkmark = '✓'
@@ -32,8 +31,6 @@ class FeatureReporter(Reporter):
 
     def on_start(self):
         self.indentation = 0
-        # sh.white("Running sure version ")
-        # sh.yellow(sure.version)
         sh.reset("\n")
 
     def on_feature(self, feature):
@@ -47,11 +44,6 @@ class FeatureReporter(Reporter):
         sh.reset("\n")
 
     def on_feature_done(self, feature, result):
-        # sh.reset(" " * self.indentation)
-        # sh.white("[")
-        # sh.normal(feature.name)
-        # sh.white("]")
-        # sh.white(checkmark)
         sh.reset("\n\n")
         self.indentation = 0
 

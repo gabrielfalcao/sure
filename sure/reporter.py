@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
 # Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
@@ -15,12 +15,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import os
-from sure.meta import get_reporter, MetaReporter, gather_reporter_names
-from sure.meta import get_agent, MetaAgent, gather_agent_names
-from sure.meta import get_actor, MetaActor, gather_actor_names
+from pathlib import Path
 
-__path__ = os.path.abspath(os.path.dirname(__file__))
+from sure.meta import MetaReporter, get_reporter, gather_reporter_names
+
+__path__ = Path(__file__).absolute().parent
 
 
 class Reporter(object, metaclass=MetaReporter):
@@ -43,11 +42,15 @@ class Reporter(object, metaclass=MetaReporter):
     __metaclass__ = MetaReporter
     name = None
 
-    def __init__(self, runner):
+    def __init__(self, runner, *args, **kw):
         self.runner = runner
         self.successes = []
         self.failures = []
         self.errors = []
+        self.initialize()
+
+    def initialize(self, *args, **kw):
+        pass
 
     def __repr__(self):
         return '<{}>'.format(self.__class__.__name__)
@@ -245,7 +248,7 @@ class Reporter(object, metaclass=MetaReporter):
            reporter = Reporter.from_name_and_runner('feature', runner)
         """
         cls.importer.load_recursive(
-            os.path.join(__path__, 'reporters'),
+            __path__.joinpath('reporters'),
             ignore_errors=False,
         )
         return cls.from_name(name)(runner)

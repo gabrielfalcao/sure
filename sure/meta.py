@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
 # Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
@@ -15,9 +15,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import unicode_literals
+
 from typing import List
 from pathlib import Path
+
 from sure.importer import importer
 
 module_root = Path(__file__).parent.absolute()
@@ -54,6 +55,9 @@ def gather_actor_names() -> List[str]:
 
 
 def add_reporter(reporter: type) -> type:
+    if reporter.name == '__meta__':
+        return reporter
+
     REPORTERS[reporter.name] = reporter
     return reporter
 
@@ -66,20 +70,36 @@ def gather_reporter_names() -> List[str]:
     return list(filter(bool, REPORTERS.keys()))
 
 
+def internal_module_name(name):
+    return __name__.replace('.meta', f'.{name}.')
+
+
+def register_class(cls, identifier):
+    cls.importer = importer
+    if len(cls.__mro__) > 2:
+        register = MODULE_REGISTERS[identifier]
+        return register(cls)
+    else:
+        return cls
+
+
+MODULE_REGISTERS = dict((
+    ('reporter', add_reporter),
+    ('agent', add_agent),
+    ('actor', add_actor),
+))
+
+
 class MetaReporter(type):
     def __init__(cls, name, bases, attrs):
-        if cls.__module__ != __name__:
-            cls = add_reporter(cls)
-            attrs['importer'] = cls.importer = importer
-
+        cls = register_class(cls, 'reporter')
         super(MetaReporter, cls).__init__(name, bases, attrs)
 
 
 class MetaAgent(type):
     def __init__(cls, name, bases, attrs):
         if cls.__module__ != __name__:
-            cls = add_agent(cls)
-            attrs['importer'] = cls.importer = importer
+            cls = register_class(cls, 'agent')
 
         super(MetaAgent, cls).__init__(name, bases, attrs)
 
@@ -87,7 +107,6 @@ class MetaAgent(type):
 class MetaActor(type):
     def __init__(cls, name, bases, attrs):
         if cls.__module__ != __name__:
-            cls = add_actor(cls)
-            attrs['importer'] = cls.importer = importer
+            cls = register_class(cls, 'actor')
 
         super(MetaActor, cls).__init__(name, bases, attrs)

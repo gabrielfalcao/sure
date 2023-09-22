@@ -43,6 +43,7 @@ from sure.core import anything  # noqa
 
 from sure.magic import is_cpython, patchable_builtin
 from sure.registry import context as _registry
+import sure.reporters
 
 
 if not PY2:

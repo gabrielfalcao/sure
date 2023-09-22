@@ -51,10 +51,10 @@ class importer(object):
     def load_python_file(cls, file):
         if file.is_dir():
             logger.debug(f'ignoring directory {file}')
-            return
+            return []
 
         if file.name.startswith('_') or file.name.endswith('_'):
-            return
+            return []
 
         module, root = cls.dig_to_root(file)
         __ROOTS__[str(root)] = root

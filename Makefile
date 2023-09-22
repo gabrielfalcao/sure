@@ -19,6 +19,7 @@ OPEN_COMMAND		:= open
 endif
 export SURE_NO_COLORS := true
 
+AUTO_STYLE_TARGETS	:= sure/runtime.py sure/runner.py sure/meta.py sure/meta.py sure/reporter.py sure/reporters sure/actors.py sure/agents.py
 ######################################################################
 # Phony targets (only exist for typing convenience and don't represent
 #                real paths as Makefile expects)
@@ -73,10 +74,18 @@ release: tests
 clean:
 	@rm -rf .coverage
 
-# Convenience target to format code with black with PEP8's default
-# 80 character limit per line
+flake8: | $(VENV)/bin/flake8
+	@$(VENV)/bin/flake8 --statistics --max-complexity 17 --exclude=$(VENV) $(AUTO_STYLE_TARGETS)
+
 black: | $(VENV)/bin/black
-	@$(VENV)/bin/black -l 80 $(PACKAGE_PATH) tests
+	@$(VENV)/bin/black -l 80 $(AUTO_STYLE_TARGETS)
+
+isort: | $(VENV)/bin/isort
+	@$(VENV)/bin/isort --overwrite-in-place --profile=black --ls --srx --cs --ca -n --ot --tc --color --star-first --virtual-env $(VENV) --py auto $(AUTO_STYLE_TARGETS)
+
+
+autostyle: isort black flake8
+
 
 ##############################################################
 # Real targets (only run target if its file has been "made" by
@@ -97,6 +106,12 @@ $(VENV)/bin/python $(VENV)/bin/pip: # installs latest pip
  # installs latest version of the "black" code formatting tool
 $(VENV)/bin/black: | $(VENV)/bin/pip
 	$(VENV)/bin/pip install -U black
+
+$(VENV)/bin/isort: | $(VENV)/bin/pip
+	$(VENV)/bin/pip install -U isort
+
+$(VENV)/bin/flake8: | $(VENV)/bin/pip
+	$(VENV)/bin/pip install -U flake8
 
 # installs this package in "edit" mode after ensuring its requirements are installed
 
@@ -122,6 +137,9 @@ $(REQUIREMENTS_PATH):
 .PHONY: \
 	all \
 	black \
+	isort \
+	flake8 \
+	autostyle \
 	build-release \
 	clean \
 	dependencies \

@@ -133,9 +133,8 @@ class Feature(object):
 
             self.run_complements(context)
             results.append(result)
-
             if result.is_failure:
-                reporter.on_failure(scenario, result.failure)
+                reporter.on_failure(scenario, result.succinct_failure)
                 if runtime.immediate:
                     raise ExitFailure(context, result)
 
@@ -175,10 +174,17 @@ class TestLocation(object):
         self.line = self.code.co_firstlineno
         self.kind = self.test.__class__
         self.name = self.test.__func__.__name__
+        self.ancestor = ancestor
         self.ancestral_description = ""
+        self.ancestor_repr = ""
         if ancestor:
-            self.ancestral_description = ancestor.description or ancestor.__doc__ or ""
+            self.ancestral_description = getattr(ancestor, 'description', "") or getattr(ancestor, '__doc__', "")
+            self.ancestor_repr = f'({self.ancestor.__module__}.{self.ancestor.__name__})'
+
         self.description = self.test.__func__.__doc__ or ""
+
+    def __repr__(self):
+        return ' '.join([self.name, 'at', self.ort])
 
     def __str__(self):
         return "\n".join([
@@ -249,7 +255,7 @@ class Scenario(object):
         code = test.__code__
         varnames = set(code.co_varnames).intersection({"context"})
         argcount = len(varnames)
-        location = TestLocation(test)
+        location = TestLocation(test, isinstance(self.object, type) and self.object or None)
         self.log.set_location(location)
         try:
             if argcount == 0:
@@ -340,7 +346,7 @@ class ScenarioResult(BaseResult):
     @property
     def failure(self) -> Optional[AssertionError]:
         if self.is_failure:
-            return self.sucinct_assertion()
+            return self.__failure__
 
     @property
     def is_success(self) -> bool:
@@ -350,9 +356,15 @@ class ScenarioResult(BaseResult):
     def ok(self):
         return self.is_success
 
-    def sucinct_assertion(self) -> str:
-        # XXX: strip callable identifier
-        import ipdb;ipdb.set_trace()
+    @property
+    def succinct_failure(self) -> str:
+        if not self.is_failure:
+            return ""
+
+        assertion = self.__failure__.args[0]
+        assertion = assertion.replace(self.location.name, '')
+        assertion = assertion.replace(self.location.ancestor_repr, '')
+        return assertion.strip()
 
 
 class ScenarioResultSet(ScenarioResult):

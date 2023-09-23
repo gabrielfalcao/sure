@@ -41,15 +41,14 @@ class RuntimeInterruption(Exception):
 class ImmediateError(RuntimeInterruption):
     def __init__(self, scenario_result):
         self.args = scenario_result.error.args
-        self.message = " ".join(self.args)
         super().__init__(scenario_result)
+        self.message = "".join(self.args)
 
 
 class ImmediateFailure(RuntimeInterruption):
     def __init__(self, scenario_result):
-        self.args = scenario_result.failure.args
-        self.message = " ".join(self.args)
         super().__init__(scenario_result)
+        self.message = self.result.succinct_failure
 
 
 class ExitError(SystemExit):

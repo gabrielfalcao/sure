@@ -60,11 +60,9 @@ class FeatureReporter(Reporter):
     def on_failure(self, test, error):
         self.failures.append(test)
         self.indentation += 2
-        sh.yellow(ballot)
         sh.reset("\n")
         sh.reset(" " * self.indentation)
-        import ipdb;ipdb.set_trace()
-        sh.yellow(" ".join(error.args))
+        sh.yellow(error.result.succinct_failure)
         sh.reset("\n")
         self.indentation -= 2
 

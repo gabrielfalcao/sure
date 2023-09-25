@@ -42,6 +42,8 @@ def seem_to_indicate_test(name: str) -> bool:
 class Logort(object):
     def __init__(self, scenario):
         self.internal = logging.getLogger(__name__)
+        self.internal.handlers = []
+        self.internal.addHandler(logging.FileHandler(f"/tmp/sure%{os.getpid()}.log"))
         self.external = logging.getLogger(scenario.id)
         self.locations = []
 
@@ -188,7 +190,7 @@ class TestLocation(object):
 
     def __str__(self):
         return "\n".join([
-            f'the scenario "{self.description}" ',
+            f'scenario "{self.description}" ',
             f"defined at {self.ort}",
         ])
 

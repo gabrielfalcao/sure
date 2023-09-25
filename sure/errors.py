@@ -59,5 +59,5 @@ class ExitError(SystemExit):
 
 class ExitFailure(SystemExit):
     def __init__(self, context, result):
-        context.reporter.on_failure(result.scenario, result.failure)
+        context.reporter.on_failure(result.scenario, result)
         return super().__init__(exit_code('FAILURE'))

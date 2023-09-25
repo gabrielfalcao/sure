@@ -18,7 +18,9 @@
 from couleur import Shell
 
 import sure
+from sure.errors import ImmediateFailure
 from sure.reporter import Reporter
+from sure.runtime import ScenarioResult
 
 sh = Shell()
 
@@ -57,14 +59,19 @@ class FeatureReporter(Reporter):
     def on_scenario_done(self, test, result):
         self.indentation -= 2
 
-    def on_failure(self, test, error):
+    def on_failure(self, test, result):
         self.failures.append(test)
         self.indentation += 2
         sh.reset("\n")
         sh.reset(" " * self.indentation)
-        sh.yellow(error.result.succinct_failure)
+        self.indentation += 2
+        sh.yellow(result.succinct_failure)
+        sh.reset(" " * self.indentation)
+        sh.bold_yellow(f"\n{' ' * self.indentation} Scenario:")
+        sh.bold_yellow(f"\n{' ' * self.indentation}     {result.location.description}")
+        sh.bold_red(f"\n{' ' * self.indentation} {result.location.ort}")
         sh.reset("\n")
-        self.indentation -= 2
+        self.indentation -= 4
 
     def on_success(self, test):
         self.successes.append(test)

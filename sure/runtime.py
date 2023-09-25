@@ -22,7 +22,7 @@ import inspect
 import logging
 import unittest
 import traceback
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any, Callable
 
 from mock import Mock
 
@@ -71,7 +71,7 @@ class RuntimeOptions(object):
         return f"<RuntimeOptions immediate={self.immediate}>"
 
 
-class SpecContext(object):
+class RuntimeContext(object):
     reporter: Reporter
     runtime: RuntimeOptions
 
@@ -80,7 +80,7 @@ class SpecContext(object):
         self.runtime = runtime
 
     def __repr__(self):
-        return f"<SpecContext reporter={self.reporter} runtime={self.runtime}>"
+        return f"<RuntimeContext reporter={self.reporter} runtime={self.runtime}>"
 
 
 class BaseResult(object):
@@ -96,6 +96,104 @@ class BaseResult(object):
         er = set([x.is_error for x in self.results])
         fe = set([x.is_failure for x in self.results])
         return len(er.union(fe)) == 0
+
+
+class PreparedTestSuiteContainer(object):
+    """Thought with the goal of providing a hermetically isolated
+    environment where the runtime context and associated reporters are
+    kept in sync with potentially nested occurrences of scenarios
+
+    Contains a setup/teardown and a list of runnable tests associated
+    with a :py:class:`unittest.TestCase` along with a reference to the
+    original instance and a runtime context.
+    """
+    source: Any
+    context: RuntimeContext
+    setup_methods: List[Callable]
+    teardown_methods: List[Callable]
+    test_methods: List[Callable]
+
+    def __init__(self,
+                 source: Any,
+                 context: RuntimeContext,
+                 setup_methods: List[Callable],
+                 teardown_methods: List[Callable],
+                 test_methods: List[Callable]):
+        self.log = Logort(self)
+        self.source_instance = source
+        self.context = context
+        self.setup_methods = setup_methods
+        self.teardown_methods = teardown_methods
+        self.test_methods = test_methods
+
+    def run_predicates(self, context):
+        pass
+
+    def run_complements(self, context):
+        pass
+
+    def run_class_based_test(self, context):
+        last_failure = None
+        last_error = None
+        for name in dir(self.object):
+            if last_failure and context.runtime.immediate:
+                # XXX: raise last_failure
+                self.log.internal.warning(f"fail: {result}")
+                raise ImmediateFailure(last_failure)
+
+            if last_error and context.runtime.immediate:
+                # XXX: raise last_error
+                self.log.internal.error(f"error: {result}")
+                raise ImmediateError(last_error)
+
+            if not seem_to_indicate_test(name):
+                self.log.internal.debug(f"ignoring {self.object}.{name}")
+                continue
+
+            if isinstance(self.object, type) and issubclass(self.object, unittest.TestCase):
+                runnable = getattr(self.object(name), name, None)
+            else:
+                # XXX: support non-unittest.TestCase classes
+                runnable = getattr(self.object, name, None)
+
+            if isinstance(runnable, types.MethodType) and seem_to_indicate_test(
+                name
+            ):
+                result = self.run_single_test(runnable, context)
+                if result.failure:
+                    last_failure = result
+                if result.error:
+                    last_error = result
+
+                yield result
+
+    def run_single_test(self, test, context):
+        if not hasattr(test, "__code__"):
+            raise RuntimeError(
+                f"expected {test} to be a function in this instance"
+            )
+        code = test.__code__
+        varnames = set(code.co_varnames).intersection({"context"})
+        argcount = len(varnames)
+        location = TestLocation(test, isinstance(self.object, type) and self.object or None)
+        self.log.set_location(location)
+        try:
+            if argcount == 0:
+                test()
+            elif argcount == 1:
+                test(context)
+            else:
+                raise NonValidTest(
+                    f"it appears that the test function {self.object} takes more than one argument: {argcount}"
+                )
+
+        except AssertionError as failure:
+            return ScenarioResult(self, location, context, failure)
+
+        except Exception as error:
+            return ScenarioResult(self, location, context, error)
+
+        return ScenarioResult(self, location, context)
 
 
 class Feature(object):
@@ -126,7 +224,7 @@ class Feature(object):
     def run(self, reporter, runtime: RuntimeOptions):
         results = []
         for scenario in self.scenarios:
-            context = SpecContext(reporter, runtime)
+            context = RuntimeContext(reporter, runtime)
 
             reporter.on_scenario(scenario)
             self.run_predicates(context)
@@ -214,7 +312,7 @@ class Scenario(object):
         self.feature = feature
         self.fail_immediately = False
 
-    def run_class_based_test(self, context):
+    def run_class_based_test(self, context) -> PreparedTestSuiteContainer:
         last_failure = None
         last_error = None
         for name in dir(self.object):
@@ -292,7 +390,7 @@ class ScenarioResult(BaseResult):
     failure: Optional[AssertionError]
     location: TestLocation
 
-    def __init__(self, scenario, location: TestLocation, context: SpecContext, error=None):
+    def __init__(self, scenario, location: TestLocation, context: RuntimeContext, error=None):
         self.scenario = scenario
         self.location = location
         self.context = context
@@ -374,7 +472,7 @@ class ScenarioResultSet(ScenarioResult):
     failure: Optional[ScenarioResult]
 
     def __init__(
-        self, scenario_results: List[ScenarioResult], context: SpecContext
+        self, scenario_results: List[ScenarioResult], context: RuntimeContext
     ):
         self.scenario_results = scenario_results
         self.failed_scenarios = []

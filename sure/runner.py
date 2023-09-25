@@ -32,7 +32,7 @@ from sure.runtime import (
     Scenario,
     BaseResult,
     ErrorStack,
-    SpecContext,
+    RuntimeContext,
     FeatureResult,
     RuntimeOptions,
     ScenarioResult,
@@ -108,7 +108,7 @@ class Runner(object):
         for feature in self.load_features(lookup_paths):
             self.reporter.on_feature(feature)
             runtime = RuntimeOptions(immediate=immediate)
-            context = SpecContext(self.reporter, runtime)
+            context = RuntimeContext(self.reporter, runtime)
 
             result = feature.run(self.reporter, runtime=runtime)
             if runtime.immediate:
@@ -142,4 +142,4 @@ class Runner(object):
 
     @cached_property
     def context(self):
-        return SpecContext(self.reporter, self.runtime)
+        return RuntimeContext(self.reporter, self.runtime)

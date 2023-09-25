@@ -107,6 +107,10 @@ class BaseResult(object):
 
 
 class PreparedTestSuiteContainer(object):
+    pass
+
+
+class PreparedTestSuiteContainer(object):
     """Thought with the goal of providing a hermetically isolated
     environment where the runtime context and associated reporters are
     kept in sync with potentially nested occurrences of scenarios
@@ -126,7 +130,9 @@ class PreparedTestSuiteContainer(object):
                  context: RuntimeContext,
                  setup_methods: List[Callable],
                  teardown_methods: List[Callable],
-                 test_methods: List[Callable]):
+                 test_methods: List[Callable],
+                 nested_suites: List[PreparedTestSuiteContainer],
+                 ):
         self.log = Logort(self)
         self.source_instance = source
         self.context = context
@@ -139,6 +145,52 @@ class PreparedTestSuiteContainer(object):
 
     def run_complements(self, context):
         pass
+
+    @classmethod
+    def from_generic_object(cls, some_object, context: RuntimeContext):
+        test_methods = []
+        setup_methods = []
+        teardown_methods = []
+        nested_suites = []
+        for name in dir(some_object):
+            if last_failure and context.runtime.immediate:
+                # XXX: raise last_failure
+                self.log.internal.warning(f"fail: {result}")
+                raise ImmediateFailure(last_failure)
+
+            if last_error and context.runtime.immediate:
+                # XXX: raise last_error
+                self.log.internal.error(f"error: {result}")
+                raise ImmediateError(last_error)
+
+            if not seem_to_indicate_test(name):
+                self.log.internal.debug(f"ignoring {self.object}.{name}")
+                continue
+
+            if isinstance(self.object, type) and issubclass(self.object, unittest.TestCase):
+                runnable = getattr(self.object(name), name, None)
+            else:
+                # XXX: support non-unittest.TestCase classes
+                runnable = getattr(self.object, name, None)
+
+            if isinstance(runnable, types.MethodType):
+                if seem_to_indicate_setup(name):
+                    setup_methods.append((name, runnable))
+                elif seem_to_indicate_test(name):
+                    test_methods.append((name, runnable))
+                elif seem_to_indicate_teardown(name):
+                    teardown_methods.append((name, runnable))
+            elif isinstance(runnable, type):
+                nested_suites.append((name, cls.from_generic_object(runnable)))
+
+        return cls(
+            source=some_object,
+            context=context,
+            setup_methods=setup_methods,
+            teardown_methods=teardown_methods,
+            test_methods=test_methods,
+            nested_suites=nested_suites
+        )
 
     def run_class_based_test(self, context):
         last_failure = None
@@ -325,9 +377,6 @@ class Scenario(object):
         # XXX: def run_class_based_test(self, context) -> PreparedTestSuiteContainer:
         last_failure = None
         last_error = None
-        test_methods = []
-        setup_methods = []
-        teardown_methods = []
         for name in dir(self.object):
             if last_failure and context.runtime.immediate:
                 # XXX: raise last_failure

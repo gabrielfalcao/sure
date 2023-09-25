@@ -39,6 +39,14 @@ def seem_to_indicate_test(name: str) -> bool:
     return re.search(r"^(Ensure|Test|Spec|Scenario)", name or "", re.I)
 
 
+def seem_to_indicate_setup(name: str) -> bool:
+    return re.search(r"^(setUp|setup|set_up)$", name or "")
+
+
+def seem_to_indicate_teardown(name: str) -> bool:
+    return re.search(r"^(tearDown|teardown|tear_down)$", name or "")
+
+
 class Logort(object):
     def __init__(self, scenario):
         self.internal = logging.getLogger(__name__)
@@ -312,9 +320,14 @@ class Scenario(object):
         self.feature = feature
         self.fail_immediately = False
 
-    def run_class_based_test(self, context) -> PreparedTestSuiteContainer:
+    def run_class_based_test(self, context):
+        # TODO: wrap logic in PreparedTestSuiteContainer
+        # XXX: def run_class_based_test(self, context) -> PreparedTestSuiteContainer:
         last_failure = None
         last_error = None
+        test_methods = []
+        setup_methods = []
+        teardown_methods = []
         for name in dir(self.object):
             if last_failure and context.runtime.immediate:
                 # XXX: raise last_failure

@@ -22,6 +22,8 @@ import inspect
 import logging
 import unittest
 import traceback
+from pathlib import Path
+from functools import reduce
 from typing import Dict, List, Optional, Any, Callable
 
 from mock import Mock
@@ -30,11 +32,24 @@ from sure.errors import ExitError, ExitFailure, NonValidTest, ImmediateError, Im
 from sure.importer import importer
 from sure.reporter import Reporter
 
+self = sys.modules[__name__]
 
-def object_name(some_object) -> str:
-    if hasattr(some_object, '__class__'):
-        return some_object.__class__.__name__
-    return getattr(some_object, '__name__', repr(some_object))
+
+log = logging.getLogger(__name__)
+
+
+def object_name(so) -> str:
+    """so: stands for "some object"""
+    if isinstance(so, type):
+        return f"{so.__module__}.{so.__name__}"
+
+    elif hasattr(so, '__name__'):
+        return so.__name__
+
+    elif hasattr(so, '__class__'):
+        return so.__class__.__name__
+
+    return getattr(so, '__name__', repr(so))
 
 
 def stripped(string):
@@ -57,12 +72,65 @@ def appears_to_be_runnable(name: str) -> bool:
     return any(tuple(map(lambda check: check(name), (seem_to_indicate_setup, seem_to_indicate_test, seem_to_indicate_teardown))))
 
 
+class TestLocation(object):
+    def __init__(self, test, ancestor=None):
+        self.test = test
+        self.code = test.__code__
+        self.filename = self.code.co_filename
+        self.line = self.code.co_firstlineno
+        self.kind = self.test.__class__
+        self.name = self.test.__func__.__name__
+        self.ancestor = ancestor
+        self.ancestral_description = ""
+        self.ancestor_repr = ""
+        if ancestor:
+            self.ancestral_description = getattr(ancestor, 'description', "") or getattr(ancestor, '__doc__', "")
+            self.ancestor_repr = f'({self.ancestor.__module__}.{self.ancestor.__name__})'
+
+        self.description = self.test.__func__.__doc__ or ""
+
+    def __repr__(self):
+        return ' '.join([self.name, 'at', self.ort])
+
+    def __str__(self):
+        return "\n".join([
+            f'scenario "{self.description}" ',
+            f"defined at {self.ort}",
+        ])
+
+    @property
+    def ort(self):
+        return f"{self.filename}:{self.line}"
+
+
+class Container(object):
+    owner: Optional[object]
+    name: str
+    runnable: callable
+    location: TestLocation
+
+    def __init__(self, name: str, runnable: callable, location: TestLocation, owner: Optional[object] = None):
+        self.name = name
+        self.runnable = runnable
+        self.location = location
+        self.owner = owner
+
+    @property
+    def unit(self):
+        return self.runnable
+
+    def __repr__(self):
+        return f"<{repr(self.runnable)} at {self.location.ort}>"
+
+
 class Logort(object):
     def __init__(self, scenario):
         self.internal = logging.getLogger(".".join((__name__, object_name(scenario))))
         self.internal.handlers = []
         self.internal.addHandler(logging.FileHandler(f"/tmp/sure%{os.getpid()}.log"))
-        self.external = logging.getLogger(scenario.id)
+        scenario_id = getattr(scenario, 'id', None)
+        scenario_id = callable(scenario_id) and scenario_id() or scenario_id
+        self.external = logging.getLogger(scenario_id)
         self.locations = []
 
         self.history = [
@@ -116,6 +184,12 @@ class BaseResult(object):
         return len(er.union(fe)) == 0
 
 
+class RuntimeRole:
+    Setup = reduce(lambda L, R: L ^ R, b"Setup")
+    Unit = reduce(lambda L, R: L ^ R, b"Unit")
+    Teardown = reduce(lambda L, R: L ^ R, b"Teardown")
+
+
 class PreparedTestSuiteContainer(object):
     pass
 
@@ -135,15 +209,16 @@ class PreparedTestSuiteContainer(object):
     teardown_methods: List[Callable]
     test_methods: List[Callable]
 
-    def __init__(self,
-                 source: Any,
-                 context: RuntimeContext,
-                 setup_methods: List[Callable],
-                 teardown_methods: List[Callable],
-                 test_methods: List[Callable],
-                 nested_suites: List[PreparedTestSuiteContainer],
-                 ):
-        self.log = Logort(self)
+    def __init__(
+        self,
+        source: Any,
+        context: RuntimeContext,
+        setup_methods: List[Callable],
+        teardown_methods: List[Callable],
+        test_methods: List[Callable],
+        nested_suites: List[PreparedTestSuiteContainer],
+    ):
+        self.log = Logort(source())
         self.source_instance = source
         self.context = context
         self.setup_methods = setup_methods
@@ -152,11 +227,11 @@ class PreparedTestSuiteContainer(object):
 
     def run_predicates(self, context):
         for name, setup, location in self.setup_methods:
-            self.invoke_contextualized(setup, context, name=name, location=location)
+            yield self.invoke_contextualized(setup, context, name=name, location=location)
 
     def run_complements(self, context):
         for name, setup, location in self.teardown_methods:
-            self.invoke_contextualized(setup, context, name=name, location=location)
+            yield self.invoke_contextualized(setup, context, name=name, location=location)
 
     @classmethod
     def from_generic_object(cls, some_object, context: RuntimeContext):
@@ -166,7 +241,7 @@ class PreparedTestSuiteContainer(object):
         nested_suites = []
         for name in dir(some_object):
             if not appears_to_be_runnable(name):
-                self.log.internal.debug(f"ignoring {self.object}.{name}")
+                log.debug(f"ignoring {some_object}.{name}")
                 continue
 
             # <unittest.TestCase.__init__>
@@ -184,11 +259,11 @@ class PreparedTestSuiteContainer(object):
 
                 if seem_to_indicate_setup(name):
                     # XXX: warn about probability of abuse of TestCase constructor taking non-standard arguments
-                    setup_methods.append((name, runnable, location))
+                    setup_methods.append(Container(name, runnable, location, some_object))
                 elif seem_to_indicate_test(name):
-                    test_methods.append((name, runnable, location))
+                    test_methods.append(Container(name, runnable, location, some_object))
                 elif seem_to_indicate_teardown(name):
-                    teardown_methods.append((name, runnable, location))
+                    teardown_methods.append(Container(name, runnable, location, some_object))
 
             elif isinstance(runnable, type):
                 nested_suites.append((name, cls.from_generic_object(runnable)))
@@ -209,7 +284,7 @@ class PreparedTestSuiteContainer(object):
                 f"expected {runnable} to be a function in this instance"
             )
         self.log.set_location(location)
-        code = test.__code__
+        code = runnable.__code__
         varnames = set(code.co_varnames).intersection({"context"})
         argcount = len(varnames)
         if argcount == 0:
@@ -226,7 +301,7 @@ class PreparedTestSuiteContainer(object):
         last_error = None
 
         try:
-            yield self.run_predicates()
+            yield self.run_predicates(context), RuntimeRole.Setup
         except Exception as error:
             # the apparent non-distinguishingly catching of
             # AssertionError instances is intentional to the present
@@ -242,21 +317,29 @@ class PreparedTestSuiteContainer(object):
             # to expose the failures of the system comprised of the
             # referred subject along with other subject-object targets
             # which beg scrutinity from a careful developer.
-            return ScenarioResult(self, location, context, error)
+            return ScenarioResult(self, location=None, context=context, error=error)
 
         try:
-            for name, test, location in self.test_methods:
-                result = self.run_single_test(test, context, name=name, location=location)
+            for container in self.test_methods:
+                result = self.run_container(container, context)
                 if result.failure:
                     last_failure = result
                 if result.error:
                     last_error = result
 
-                yield result
+                yield result, RuntimeRole.Unit
         finally:
-            yield self.run_complements()
+            yield self.run_complements(context), RuntimeRole.Teardown
 
-    def run_single_test(self, test, context, name, location):
+    def run_container(self, container, context):
+        return self.perform_unit(
+            test=container.unit,
+            context=context,
+            name=container.name,
+            location=container.location,
+        )
+
+    def perform_unit(self, test, context, name, location):
         self.log.set_location(location)
         try:
             self.invoke_contextualized(test, context, name, location)
@@ -307,7 +390,7 @@ class Feature(object):
             self.run_complements(context)
             results.append(result)
             if result.is_failure:
-                reporter.on_failure(scenario, result.succinct_failure)
+                reporter.on_failure(scenario, result)
                 if runtime.immediate:
                     raise ExitFailure(context, result)
 
@@ -331,43 +414,33 @@ class Feature(object):
 
 
 class ErrorStack(object):
-    def __init__(self, exception_info):
-        self.exception_info = exception_info
-        self.traceback = traceback.format_exception(*exception_info)
+    def __init__(self, exception_info=None):
+        self.exception_info = exception_info or sys.exc_info()
+        self.traceback = self.exception_info[-1]
+
+    def tb(self):
+        return self.traceback
+
+    def ff(self):
+        module_path = str(Path(__file__).parent.absolute())
+        tb = self.traceback
+        cutoff_index = 0
+        while True:
+            yield tb, cutoff_index
+            code_path = str(Path(tb.tb_frame.f_code.co_filename).absolute())
+            if code_path.startswith(module_path):
+                tb = tb.tb_next
+                cutoff_index += 1
+            else:
+                yield tb, cutoff_index
+                break
+
+    def relevant_error_message(self):
+        stack = list(self.ff())
+        return "\n".join(traceback.format_tb(stack[-1][0]))
 
     def printable(self):
-        return "\n".join(self.traceback)
-
-
-class TestLocation(object):
-    def __init__(self, test, ancestor=None):
-        self.test = test
-        self.code = test.__code__
-        self.filename = self.code.co_filename
-        self.line = self.code.co_firstlineno
-        self.kind = self.test.__class__
-        self.name = self.test.__func__.__name__
-        self.ancestor = ancestor
-        self.ancestral_description = ""
-        self.ancestor_repr = ""
-        if ancestor:
-            self.ancestral_description = getattr(ancestor, 'description', "") or getattr(ancestor, '__doc__', "")
-            self.ancestor_repr = f'({self.ancestor.__module__}.{self.ancestor.__name__})'
-
-        self.description = self.test.__func__.__doc__ or ""
-
-    def __repr__(self):
-        return ' '.join([self.name, 'at', self.ort])
-
-    def __str__(self):
-        return "\n".join([
-            f'scenario "{self.description}" ',
-            f"defined at {self.ort}",
-        ])
-
-    @property
-    def ort(self):
-        return f"{self.filename}:{self.line}"
+        return "\n".join(self.tb())
 
 
 class Scenario(object):
@@ -451,12 +524,20 @@ class Scenario(object):
         return ScenarioResult(self, location, context)
 
     def run(self, context):
-        if isinstance(self.object_ancestor, type):
-            return ScenarioResultSet(
-                self.run_class_based_test(context), context
-            )
+        collector = PreparedTestSuiteContainer.from_generic_object(self.object, context)
+        results = []
+        for result, role in collector.run(context):
+            if role != RuntimeRole.Unit:
+                continue
+            results.append(result)
+            if result.is_success:
+                continue
+            if context.runtime.immediate:
+                # return results[-1]
+                # XXX: consider non-reliance on ScenarioResultSet.__getattr__ proxying attributes from results[-1]
+                return ScenarioResultSet(results, context)
 
-        return ScenarioResultSet.single(self.run_single_test(self.object, context))
+        return ScenarioResultSet(results, context)
 
 
 class ScenarioResult(BaseResult):
@@ -469,6 +550,8 @@ class ScenarioResult(BaseResult):
         self.scenario = scenario
         self.location = location
         self.context = context
+        self.exc_info = sys.exc_info()
+        self.stack = ErrorStack(self.exc_info)
         self.__error__ = None
         self.__failure__ = None
 
@@ -476,6 +559,9 @@ class ScenarioResult(BaseResult):
             self.__failure__ = error
         else:
             self.__error__ = error
+
+    def tb(self):
+        return traceback.format_exception(*self.exc_info)
 
     @property
     def label(self) -> str:
@@ -536,7 +622,7 @@ class ScenarioResult(BaseResult):
         if not self.is_failure:
             return ""
 
-        assertion = self.__failure__.args[0]
+        assertion = self.failure.args[0]
         assertion = assertion.replace(self.location.name, '')
         assertion = assertion.replace(self.location.ancestor_repr, '')
         return assertion.strip()
@@ -558,6 +644,12 @@ class ScenarioResultSet(ScenarioResult):
                 self.failed_scenarios.append(scenario)
             if scenario.is_error:
                 self.errored_scenarios.append(scenario)
+
+    def __getattr__(self, attr, fallback=None):
+        try:
+            return self.__getattribute__(attr)
+        except AttributeError:
+            return getattr(self.scenario_results[-1], attr, fallback)
 
     def printable(self):
         if self.failure is not None:

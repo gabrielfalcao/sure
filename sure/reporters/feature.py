@@ -65,6 +65,8 @@ class FeatureReporter(Reporter):
         sh.reset("\n")
         sh.reset(" " * self.indentation)
         self.indentation += 2
+        if isinstance(result,  str):
+            import ipdb;ipdb.set_trace()
         sh.yellow(result.succinct_failure)
         sh.reset(" " * self.indentation)
         sh.bold_yellow(f"\n{' ' * self.indentation} Scenario:")

@@ -31,6 +31,12 @@ from sure.importer import importer
 from sure.reporter import Reporter
 
 
+def object_name(some_object) -> str:
+    if hasattr(some_object, '__class__'):
+        return some_object.__class__.__name__
+    return getattr(some_object, '__name__', repr(some_object))
+
+
 def stripped(string):
     return "\n".join(filter(bool, [s.strip() for s in string.splitlines()]))
 
@@ -47,9 +53,13 @@ def seem_to_indicate_teardown(name: str) -> bool:
     return re.search(r"^(tearDown|teardown|tear_down)$", name or "")
 
 
+def appears_to_be_runnable(name: str) -> bool:
+    return any(tuple(map(lambda check: check(name), (seem_to_indicate_setup, seem_to_indicate_test, seem_to_indicate_teardown))))
+
+
 class Logort(object):
     def __init__(self, scenario):
-        self.internal = logging.getLogger(__name__)
+        self.internal = logging.getLogger(".".join((__name__, object_name(scenario))))
         self.internal.handlers = []
         self.internal.addHandler(logging.FileHandler(f"/tmp/sure%{os.getpid()}.log"))
         self.external = logging.getLogger(scenario.id)
@@ -141,10 +151,12 @@ class PreparedTestSuiteContainer(object):
         self.test_methods = test_methods
 
     def run_predicates(self, context):
-        pass
+        for name, setup, location in self.setup_methods:
+            self.invoke_contextualized(setup, context, name=name, location=location)
 
     def run_complements(self, context):
-        pass
+        for name, setup, location in self.teardown_methods:
+            self.invoke_contextualized(setup, context, name=name, location=location)
 
     @classmethod
     def from_generic_object(cls, some_object, context: RuntimeContext):
@@ -153,33 +165,31 @@ class PreparedTestSuiteContainer(object):
         teardown_methods = []
         nested_suites = []
         for name in dir(some_object):
-            if last_failure and context.runtime.immediate:
-                # XXX: raise last_failure
-                self.log.internal.warning(f"fail: {result}")
-                raise ImmediateFailure(last_failure)
-
-            if last_error and context.runtime.immediate:
-                # XXX: raise last_error
-                self.log.internal.error(f"error: {result}")
-                raise ImmediateError(last_error)
-
-            if not seem_to_indicate_test(name):
+            if not appears_to_be_runnable(name):
                 self.log.internal.debug(f"ignoring {self.object}.{name}")
                 continue
 
-            if isinstance(self.object, type) and issubclass(self.object, unittest.TestCase):
-                runnable = getattr(self.object(name), name, None)
+            # <unittest.TestCase.__init__>
+            #   constructs instance of unittest.TestCase and filter out each runnable
+            if isinstance(some_object, type) and issubclass(some_object, unittest.TestCase):
+                # XXX: warn about probability of abuse of TestCase constructor taking non-standard arguments
+                runnable = getattr(some_object(name), name, None)
             else:
                 # XXX: support non-unittest.TestCase classes
-                runnable = getattr(self.object, name, None)
+                runnable = getattr(some_object, name, None)
+            # </unittest.TestCase.__init__>
 
             if isinstance(runnable, types.MethodType):
+                location = TestLocation(runnable, isinstance(some_object, type) and some_object or None)
+
                 if seem_to_indicate_setup(name):
-                    setup_methods.append((name, runnable))
+                    # XXX: warn about probability of abuse of TestCase constructor taking non-standard arguments
+                    setup_methods.append((name, runnable, location))
                 elif seem_to_indicate_test(name):
-                    test_methods.append((name, runnable))
+                    test_methods.append((name, runnable, location))
                 elif seem_to_indicate_teardown(name):
-                    teardown_methods.append((name, runnable))
+                    teardown_methods.append((name, runnable, location))
+
             elif isinstance(runnable, type):
                 nested_suites.append((name, cls.from_generic_object(runnable)))
 
@@ -192,61 +202,64 @@ class PreparedTestSuiteContainer(object):
             nested_suites=nested_suites
         )
 
-    def run_class_based_test(self, context):
+    def invoke_contextualized(self, runnable, context, name, location):
+        """exception handling is left to the caller"""
+        if not hasattr(runnable, "__code__"):
+            raise RuntimeError(
+                f"expected {runnable} to be a function in this instance"
+            )
+        self.log.set_location(location)
+        code = test.__code__
+        varnames = set(code.co_varnames).intersection({"context"})
+        argcount = len(varnames)
+        if argcount == 0:
+            runnable()
+        elif argcount == 1:
+            runnable(context)
+        else:
+            raise NonValidTest(
+                f"it appears that the test function {name} {location} takes more than one argument: {argcount}"
+            )
+
+    def run(self, context):
         last_failure = None
         last_error = None
-        for name in dir(self.object):
-            if last_failure and context.runtime.immediate:
-                # XXX: raise last_failure
-                self.log.internal.warning(f"fail: {result}")
-                raise ImmediateFailure(last_failure)
 
-            if last_error and context.runtime.immediate:
-                # XXX: raise last_error
-                self.log.internal.error(f"error: {result}")
-                raise ImmediateError(last_error)
+        try:
+            yield self.run_predicates()
+        except Exception as error:
+            # the apparent non-distinguishingly catching of
+            # AssertionError instances is intentional to the present
+            # conceptual context during this period of ponderation in
+            # regards to the status-quo of what begs the non-essential
+            # whole-truth to be exposed, coming from the current
+            # presupposition that predicates are inherently
+            # non-supposed to make assertions of any kind, but rather
+            # prepare the subject-under-test to undergo a test process
+            # in such way that the process itself is, in its turn,
+            # presupposed not to raise any exceptions other than
+            # assertions whose purpose is not to fail unreasonably but
+            # to expose the failures of the system comprised of the
+            # referred subject along with other subject-object targets
+            # which beg scrutinity from a careful developer.
+            return ScenarioResult(self, location, context, error)
 
-            if not seem_to_indicate_test(name):
-                self.log.internal.debug(f"ignoring {self.object}.{name}")
-                continue
-
-            if isinstance(self.object, type) and issubclass(self.object, unittest.TestCase):
-                runnable = getattr(self.object(name), name, None)
-            else:
-                # XXX: support non-unittest.TestCase classes
-                runnable = getattr(self.object, name, None)
-
-            if isinstance(runnable, types.MethodType) and seem_to_indicate_test(
-                name
-            ):
-                result = self.run_single_test(runnable, context)
+        try:
+            for name, test, location in self.test_methods:
+                result = self.run_single_test(test, context, name=name, location=location)
                 if result.failure:
                     last_failure = result
                 if result.error:
                     last_error = result
 
                 yield result
+        finally:
+            yield self.run_complements()
 
-    def run_single_test(self, test, context):
-        if not hasattr(test, "__code__"):
-            raise RuntimeError(
-                f"expected {test} to be a function in this instance"
-            )
-        code = test.__code__
-        varnames = set(code.co_varnames).intersection({"context"})
-        argcount = len(varnames)
-        location = TestLocation(test, isinstance(self.object, type) and self.object or None)
+    def run_single_test(self, test, context, name, location):
         self.log.set_location(location)
         try:
-            if argcount == 0:
-                test()
-            elif argcount == 1:
-                test(context)
-            else:
-                raise NonValidTest(
-                    f"it appears that the test function {self.object} takes more than one argument: {argcount}"
-                )
-
+            self.invoke_contextualized(test, context, name, location)
         except AssertionError as failure:
             return ScenarioResult(self, location, context, failure)
 

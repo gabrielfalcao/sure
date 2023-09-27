@@ -246,7 +246,7 @@ class PreparedTestSuiteContainer(object):
 
         try:
             for name, test, location in self.test_methods:
-                result = self.run_single_test(test, context, name=name, location=location)
+                result = self.perform_unit(test, context, name=name, location=location)
                 if result.failure:
                     last_failure = result
                 if result.error:
@@ -256,7 +256,7 @@ class PreparedTestSuiteContainer(object):
         finally:
             yield self.run_complements()
 
-    def run_single_test(self, test, context, name, location):
+    def perform_unit(self, test, context, name, location):
         self.log.set_location(location)
         try:
             self.invoke_contextualized(test, context, name, location)

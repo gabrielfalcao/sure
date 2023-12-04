@@ -156,7 +156,7 @@ class Logort(object):
     def __init__(self, scenario):
         self.internal = logging.getLogger(".".join((__name__, object_name(scenario))))
         self.internal.handlers = []
-        self.internal.addHandler(logging.FileHandler(f"/tmp/sure%{os.getpid()}.log"))
+        self.internal.addHandler(self.log_handler())
         scenario_id = getattr(scenario, "id", None)
         scenario_id = callable(scenario_id) and scenario_id() or scenario_id
         self.external = logging.getLogger(scenario_id)
@@ -167,13 +167,21 @@ class Logort(object):
             self.external,
         ]
 
+    @classmethod
+    def log_handler(cls):
+        return logging.FileHandler(f"/tmp/sure%{os.getpid()}.log")
+
     @property
     def current(self):
         return self.history[-1]
 
     def set_location(self, location):
+        default_logger = logging.getLogger()
         self.locations.append(location)
         self.history.append(logging.getLogger(location.ort))
+        for logger in self.history:
+            logger.setLevel(default_logger.level)
+            logger.handlers = [self.log_handler]
 
 
 class RuntimeOptions(object):
@@ -248,8 +256,8 @@ class PreparedTestSuiteContainer(object):
         test_methods: List[Callable],
         nested_suites: List[PreparedTestSuiteContainer],
     ):
-        self.log = Logort(source())
-        self.source_instance = source
+        self.source_instance = source()
+        self.log = Logort(self.source_instance)
         self.context = context
         self.setup_methods = setup_methods
         self.teardown_methods = teardown_methods
@@ -283,7 +291,7 @@ class PreparedTestSuiteContainer(object):
             if isinstance(some_object, type) and issubclass(
                 some_object, unittest.TestCase
             ):
-                # XXX: warn about probability of abuse of TestCase constructor taking non-standard arguments
+                # XXX: warn about probability of abuse of TestCase constructor taking wrong arguments
                 runnable = getattr(some_object(name), name, None)
             else:
                 # XXX: support non-unittest.TestCase classes
@@ -329,6 +337,7 @@ class PreparedTestSuiteContainer(object):
         code = runnable.__code__
         varnames = set(code.co_varnames).intersection({"context"})
         argcount = len(varnames)
+
         if argcount == 0:
             runnable()
         elif argcount == 1:
@@ -381,6 +390,7 @@ class PreparedTestSuiteContainer(object):
             yield self.run_complements(context), RuntimeRole.Teardown
 
     def run_container(self, container, context):
+        # concentrated area of test execution
         return self.perform_unit(
             test=container.unit,
             context=context,
@@ -566,7 +576,6 @@ class ScenarioResult(BaseResult):
 
     def printable(self):
         prelude = f"{self.location}"
-
         hook = ""
         if callable(getattr(self.error, "printable", None)):
             hook = self.error.printable()

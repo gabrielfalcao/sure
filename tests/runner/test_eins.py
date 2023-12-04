@@ -11,7 +11,7 @@ def test_function_ok():
 
 def test_function_fail():
     "testing failing function with sure runner"
-    assert False, 'the failure appears to be right'
+    assert False, "this very message SHALL aid in tracing back to the error's root-cause"
 
 
 class TestClass(TestCase):

@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import unicode_literals
+import sys
 from functools import reduce
 
 
@@ -41,23 +42,24 @@ class RuntimeInterruption(Exception):
 class ImmediateError(RuntimeInterruption):
     def __init__(self, scenario_result):
         self.args = scenario_result.error.args
-        super().__init__(scenario_result)
         self.message = "".join(self.args)
+        super().__init__(scenario_result)
 
 
 class ImmediateFailure(RuntimeInterruption):
     def __init__(self, scenario_result):
-        super().__init__(scenario_result)
+        self.args = scenario_result.failure.args
         self.message = self.result.succinct_failure
+        super().__init__(scenario_result)
 
 
 class ExitError(SystemExit):
     def __init__(self, context, result):
-        context.reporter.on_failure(result.scenario, result.error)
+        context.reporter.on_failure(result.scenario, result.succinct_error)
         return super().__init__(exit_code('ERROR'))
 
 
 class ExitFailure(SystemExit):
     def __init__(self, context, result):
-        context.reporter.on_failure(result.scenario, result)
+        context.reporter.on_failure(result.scenario, result.succinct_failure)
         return super().__init__(exit_code('FAILURE'))

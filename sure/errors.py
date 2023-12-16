@@ -31,6 +31,13 @@ def exit_code(codeword: str) -> int:
     return reduce(xor, list(map(ord, codeword)))
 
 
+class ImmediateAbort(Exception):
+    """base-exception to immediate runtime abortion"""
+    def __init__(self, code):
+        sys.stderr.write(f"IMMEDIATE ABORT [{code}]")
+        sys.exit(code)
+
+
 class RuntimeInterruption(Exception):
     def __init__(self, scenario_result):
         self.result = scenario_result
@@ -53,13 +60,13 @@ class ImmediateFailure(RuntimeInterruption):
         super().__init__(scenario_result)
 
 
-class ExitError(SystemExit):
+class ExitError(ImmediateAbort):
     def __init__(self, context, result):
-        context.reporter.on_failure(result.scenario, result.succinct_error)
+        context.reporter.on_errorure(result.errored_features[0].errored_scenarios[0], result.succinct_error)
         return super().__init__(exit_code('ERROR'))
 
 
-class ExitFailure(SystemExit):
+class ExitFailure(ImmediateAbort):
     def __init__(self, context, result):
-        context.reporter.on_failure(result.scenario, result.succinct_failure)
+        context.reporter.on_failure(result.failed_features[0].failed_scenarios[0], result.succinct_failure)
         return super().__init__(exit_code('FAILURE'))

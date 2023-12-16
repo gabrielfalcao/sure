@@ -29,7 +29,7 @@ import sure.reporters
 
 from sure.importer import resolve_path
 from sure.runner import Runner
-from sure.reporters import gather_reporter_names, CoReporter
+from sure.reporters import gather_reporter_names
 from sure.errors import ExitError, ExitFailure
 
 

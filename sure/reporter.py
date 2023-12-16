@@ -18,12 +18,11 @@
 from pathlib import Path
 
 from sure.meta import MetaReporter, get_reporter, gather_reporter_names
-from sure.actors import Actor
 
 __path__ = Path(__file__).absolute().parent
 
 
-class Reporter(Actor, metaclass=MetaReporter):
+class Reporter(object, metaclass=MetaReporter):
     """Base class for reporters.
 
     The following optional methods should be implemented:

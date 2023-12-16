@@ -17,11 +17,11 @@
 
 
 def stub(base_class=None, **attributes):
-    """creates a python class on-the-fly with the given keyword-arguments
+    """creates a python class "on-the-fly" with the given keyword-arguments
     as class-attributes accessible with .attrname.
 
-    The new class inherits from
-    Use this to mock rather than stub.
+    The new class inherits from ``base_class`` and defaults to ``object``
+    Use this to mock rather than stub in instances where such approach seems reasonable.
     """
     if base_class is None:
         base_class = object
@@ -30,9 +30,8 @@ def stub(base_class=None, **attributes):
         "__init__": lambda self: None,
         "__new__": lambda *args, **kw: object.__new__(
             *args, *kw
-        ),  # remove __new__ and metaclass behavior from object
+        ),
         "__metaclass__": None,
     }
     members.update(attributes)
-    # let's create a python class on-the-fly :)
     return type(f"{base_class.__name__}Stub", (base_class,), members)()

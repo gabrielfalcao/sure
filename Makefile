@@ -19,8 +19,9 @@ OPEN_COMMAND		:= open
 endif
 export SURE_NO_COLORS	:= true
 export SURE_LOG_FILE	:= $(GIT_ROOT)/sure-$(date +"%Y-%m-%d-%H:%M:%S").log
+AUTO_STYLE_TARGETS	:= sure/runtime.py sure/runner.py sure/meta.py sure/meta.py sure/reporter.py sure/reporters
+export SURE_DISABLE_NEW_SYNTAX	:= true
 
-AUTO_STYLE_TARGETS	:= sure/runtime.py sure/runner.py sure/meta.py sure/meta.py sure/reporter.py sure/reporters sure/actors.py sure/agents.py
 ######################################################################
 # Phony targets (only exist for typing convenience and don't represent
 #                real paths as Makefile expects)
@@ -44,8 +45,13 @@ dependencies:
 	@rm -f $(MAIN_CLI_PATH) # remove MAIN_CLI_PATH to trigger pip install
 	$(MAKE) develop setup
 
-docs:
+clean-docs:
+	@rm -rf docs/build
+
+html-docs: clean-docs
 	@(cd docs && make html)
+
+docs: html-docs
 	$(OPEN_COMMAND) docs/build/html/index.html
 
 test tests: clean | $(VENV)/bin/pytest # $(VENV)/bin/nosetests	# @$(VENV)/bin/nosetests --rednose --immediate -vv --with-coverage --cover-package=sure
@@ -153,4 +159,6 @@ $(REQUIREMENTS_PATH):
 	run \
 	test \
 	tests \
+	clean-docs \
+	html-docs \
 	docs

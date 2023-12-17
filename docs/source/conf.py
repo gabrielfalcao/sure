@@ -1,6 +1,7 @@
 import sys
 import os
 import sphinx_rtd_theme
+os.environ['SURE_DISABLE_NEW_SYNTAX'] = 'true'
 
 extensions = [
     "sphinx.ext.autodoc",
@@ -13,22 +14,21 @@ extensions = [
     "sphinx.ext.viewcode",
 ]
 
-templates_path = ["sure_docs_templates"]
 source_suffix = ".rst"
 master_doc = "index"
 project = "sure"
 copyright = "2015-2023, Gabriel Falcão"
 author = "Gabriel Falcão"
-version = "2.1.0"
-release = "2.1.0"
-language = None
+version = "3.0.0a"
+release = "3.0.0a"
+language = 'en'
 exclude_patterns = []
 pygments_style = "sphinx"
 todo_include_todos = True
 
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-html_static_path = ["sure_docs_static"]
+# html_static_path = ["_static"]
 htmlhelp_basename = "sure_"
 latex_elements = {}
 latex_documents = [
@@ -42,8 +42,8 @@ texinfo_documents = [
         "Sure Documentation",
         author,
         "Sure",
-        "One line description of project.",
-        "Miscellaneous",
+        "utility belt for automated testing in python for python.",
+        "Automated Testing",
     ),
 ]
 epub_title = project

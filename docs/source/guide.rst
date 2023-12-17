@@ -117,7 +117,7 @@ Example: Multiple Setup and Teardown functions
 
 
 ``tests/test_filesystem.py``
-........................
+............................
 
 .. code:: python
 
@@ -197,14 +197,14 @@ this will give you and output like
 
 .. code:: bash
 
-    Difference:
+   Difference:
 
-      <root>
-    -   <a-tag with-attribute="one">AND A VALUE</a-tag>
-    ?                           --
-    +   <a-tag with-attribute="two">AND A VALUE</a-tag>
-    ?                          ++
-      </root>'''
+   <root>
+   -   <a-tag with-attribute="one">AND A VALUE</a-tag>
+   ?                           --
+   +   <a-tag with-attribute="two">AND A VALUE</a-tag>
+   ?                          ++
+   </root>
 
 ``.should.equal("a string")``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -400,7 +400,7 @@ And negate truthfulness:
 
 
 ``.have.property().being.*``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+............................
 
 If the programmer calls ``have.property()`` it returns an assertion
 builder of the property if it exists, so that you can chain up
@@ -426,7 +426,7 @@ assertions for the property value itself.
     basket3.should.have.key("fruits")
 
 ``.have.key().being.*``
-^^^^^^^^^^^^^^^^^^^^^^^
+.......................
 
 If the programmer calls ``have.key()`` it returns an assertion builder
 of the key if it exists, so that you can chain up assertions for the
@@ -478,7 +478,7 @@ Callables
 
 
 ``callable.when.called_with(arg1, kwarg1=2).should.have.raised(Exception)``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can use this feature to assert that a callable raises an exception:
 
@@ -488,7 +488,7 @@ You can use this feature to assert that a callable raises an exception:
     range.when.called_with(10).should_not.throw(TypeError)
 
 Regular Expression matching on the exception message
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+....................................................
 
 You can also match regular expressions with to the expected exception
 messages:
@@ -547,7 +547,7 @@ this takes a type name and checks if the class matches that name
     range(10).should.be.a('collections.Iterable')
 
 ``.be.a(type)``
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 this takes the class (type) itself and checks if the object is an
 instance of it
@@ -593,7 +593,7 @@ Too long, don't read
 
 
 All those possibilities below work just as the same
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...................................................
 
 .. code:: python
 
@@ -608,7 +608,7 @@ All those possibilities below work just as the same
 
 
 Also if you prefer using the assert keyword in your tests just go ahead an do it!
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.................................................................................
 
 Every assertion returns ``True`` when succeeded, and if failed the
 AssertionError is already raised internally by sure, with a nice
@@ -641,8 +641,8 @@ Test if something is or not callable
     (123).should_not.be.callable
 
 
-A note about the assert keyword
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+A note about the ``assert`` keyword
+...................................
 
 .. note:: *you can use or not the* ``assert`` *keyword, sure
           internally already raises an appropriate* ``AssertionError`` *with an
@@ -765,7 +765,7 @@ Negative boolean synonyms
     None.should_not.be.ok
 
 Holy guacamole, how did you implement that feature ?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+....................................................
 
 Differently of `ruby <http://www.ruby-lang.org>`__ python doesn't have
 `open classes

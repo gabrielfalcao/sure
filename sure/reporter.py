@@ -25,7 +25,7 @@ __path__ = Path(__file__).absolute().parent
 class Reporter(object, metaclass=MetaReporter):
     """Base class for reporters.
 
-    The following optional methods should be implemented:
+    The following non-optional methods should be implemented:
 
     * :py:meth:`~sure.reporter.Reporter.on_start`
     * :py:meth:`~sure.reporter.Reporter.on_feature`
@@ -38,6 +38,8 @@ class Reporter(object, metaclass=MetaReporter):
     * :py:meth:`~sure.reporter.Reporter.on_error`
     * :py:meth:`~sure.reporter.Reporter.on_success`
     * :py:meth:`~sure.reporter.Reporter.on_finish`
+
+    .. admonition:: The default reference reporter implementation is :py:class:`sure.reporters.feature.FeatureReporter`
     """
 
     __metaclass__ = MetaReporter
@@ -69,6 +71,7 @@ class Reporter(object, metaclass=MetaReporter):
 
            HelloReporter('a <sure.runner.Runner()>').on_start()
         """
+        raise NotImplementedError
 
     def on_feature(self, feature):
         """Called when a scenario feature is about to run
@@ -86,6 +89,7 @@ class Reporter(object, metaclass=MetaReporter):
 
            FeatureReporter('a <sure.runner.Runner()>').on_feature(feature)
         """
+        raise NotImplementedError
 
     def on_feature_done(self, feature, result):
         """Called when a scenario feature_done is about to run
@@ -103,6 +107,7 @@ class Reporter(object, metaclass=MetaReporter):
 
            Feature_doneReporter('a <sure.runner.Runner()>').on_feature_done(feature_done)
         """
+        raise NotImplementedError
 
     def on_scenario(self, scenario, result):
         """Called when a scenario test_done is about to run
@@ -120,6 +125,7 @@ class Reporter(object, metaclass=MetaReporter):
 
            TestReporter('a <sure.runner.Runner()>').on_scenario_done(test_done)
         """
+        raise NotImplementedError
 
     def on_scenario_done(self, scenario):
         """Called when a scenario test_done is about to run
@@ -137,6 +143,7 @@ class Reporter(object, metaclass=MetaReporter):
 
            TestReporter('a <sure.runner.Runner()>').on_scenario_done(test_done)
         """
+        raise NotImplementedError
 
     def on_failure(self, scenario, error):
         """Called when a scenario fails without crashing
@@ -146,7 +153,7 @@ class Reporter(object, metaclass=MetaReporter):
            from sure.reporter import Reporter
 
            class FailureReporter(Reporter):
-               def on_failure(self, scenario):
+               def on_failure(self, scenario, error):
                    sys.stderr.write('Reporter.on_failure reported {}'.format(scenario.name))
 
            class failure:
@@ -154,6 +161,7 @@ class Reporter(object, metaclass=MetaReporter):
 
            FailureReporter('a <sure.runner.Runner()>').on_failure(failure)
         """
+        raise NotImplementedError
 
     def on_success(self, scenario):
         """Called when a scenario passes
@@ -171,6 +179,7 @@ class Reporter(object, metaclass=MetaReporter):
 
            SuccessReporter('a <sure.runner.Runner()>').on_success(success)
         """
+        raise NotImplementedError
 
     def on_error(self, scenario, error):
         """Called when a scenario fails with exception
@@ -188,6 +197,7 @@ class Reporter(object, metaclass=MetaReporter):
 
            ErrorReporter('a <sure.runner.Runner()>').on_error(error)
         """
+        raise NotImplementedError
 
     def on_finish(self):
         """Called as soon as `sure' finishes running.
@@ -202,6 +212,7 @@ class Reporter(object, metaclass=MetaReporter):
 
            HelloReporter('a <sure.runner.Runner()>').on_finish()
         """
+        raise NotImplementedError
 
     @classmethod
     def from_name(cls, name):

@@ -671,6 +671,28 @@ class ScenarioResultSet(ScenarioResult):
             if scenario.is_failure:
                 return scenario.failure
 
+    @property
+    def succinct_failure(self) -> Optional[str]:
+        for scenario in self.failed_scenarios:
+            if scenario.is_failure:
+                return scenario.succinct_failure
+
+    @property
+    def first_scenario_result_error(self) -> Optional[ScenarioResult]:
+        for scenario in self.errored_scenarios:
+            if scenario.is_error:
+                return scenario
+
+    @property
+    def first_scenario_result_fail(self) -> Optional[ScenarioResult]:
+        for scenario in self.failed_scenarios:
+            if scenario.is_failure:
+                return scenario
+
+    @property
+    def first_nonsuccessful_result(self) -> Optional[ScenarioResult]:
+        return self.first_scenario_result_error or self.first_scenario_result_fail
+
 
 class FeatureResult(BaseResult):
     scenario_results: ScenarioResultSet
@@ -716,6 +738,28 @@ class FeatureResult(BaseResult):
             if scenario.is_failure:
                 return scenario.failure
 
+    @property
+    def succinct_failure(self) -> Optional[str]:
+        for scenario in self.failed_scenarios:
+            if scenario.is_failure:
+                return scenario.succinct_failure
+
+    @property
+    def first_scenario_result_error(self) -> Optional[ScenarioResult]:
+        for scenario in self.errored_scenarios:
+            if scenario.is_error:
+                return scenario
+
+    @property
+    def first_scenario_result_fail(self) -> Optional[ScenarioResult]:
+        for scenario in self.failed_scenarios:
+            if scenario.is_failure:
+                return scenario
+
+    @property
+    def first_nonsuccessful_result(self) -> Optional[ScenarioResult]:
+        return self.first_scenario_result_error or self.first_scenario_result_fail
+
 
 class FeatureResultSet(BaseResult):
     error: Optional[Exception]
@@ -759,3 +803,25 @@ class FeatureResultSet(BaseResult):
         for feature in self.failed_features:
             if feature.is_failure:
                 return feature.failure
+
+    @property
+    def succinct_failure(self) -> Optional[str]:
+        for feature in self.failed_features:
+            if feature.is_failure:
+                return feature.succinct_failure
+
+    @property
+    def first_scenario_result_error(self) -> Optional[FeatureResult]:
+        for feature_result in self.errored_features:
+            if feature_result.is_error:
+                return feature_result.first_nonsuccessful_result
+
+    @property
+    def first_scenario_result_fail(self) -> Optional[FeatureResult]:
+        for feature_result in self.failed_features:
+            if feature_result.is_failure:
+                return feature_result.first_nonsuccessful_result
+
+    @property
+    def first_nonsuccessful_result(self) -> Optional[FeatureResult]:
+        return self.first_scenario_result_error or self.first_scenario_result_fail

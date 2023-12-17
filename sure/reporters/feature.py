@@ -17,7 +17,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from couleur import Shell
 
-import sure
 from sure.errors import ImmediateFailure
 from sure.reporter import Reporter
 from sure.runtime import ScenarioResult
@@ -29,6 +28,7 @@ ballot = "✗"
 
 
 class FeatureReporter(Reporter):
+    """Test Reporter inspired by the output of Behaviour-driven-development tools du jour"""
     name = "feature"
 
     def on_start(self):
@@ -37,7 +37,6 @@ class FeatureReporter(Reporter):
 
     def on_feature(self, feature):
         self.indentation += 2
-
         sh.reset(" " * self.indentation)
         sh.blue("Feature: ")
         sh.yellow("'")
@@ -65,9 +64,7 @@ class FeatureReporter(Reporter):
         sh.reset("\n")
         sh.reset(" " * self.indentation)
         self.indentation += 2
-        if isinstance(result,  str):
-            import ipdb;ipdb.set_trace()
-        sh.yellow(result.succinct_failure)
+        sh.yellow(f"Failure: {result.succinct_failure}")
         sh.reset(" " * self.indentation)
         sh.bold_yellow(f"\n{' ' * self.indentation} Scenario:")
         sh.bold_yellow(f"\n{' ' * self.indentation}     {result.location.description}")

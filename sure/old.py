@@ -50,10 +50,18 @@ def identify_callable_location(callable_object):
 
 
 def is_iterable(obj):
+    """returns ``True`` the given object is iterable
+
+    :param obj: :py:class:`object`
+    """
     return hasattr(obj, '__iter__') and not isinstance(obj, string_types)
 
 
 def all_integers(obj):
+    """returns ``True`` if all members of the given iterable are integers
+
+    :param obj: an iterable object
+    """
     if not is_iterable(obj):
         return
 

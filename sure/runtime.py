@@ -231,7 +231,7 @@ class PreparedTestSuiteContainer(object):
     pass
 
 
-class PreparedTestSuiteContainer(object):
+class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
     """Thought with the goal of providing a hermetically isolated
     environment where the runtime context and associated reporters are
     kept in sync with potentially nested occurrences of scenarios
@@ -318,7 +318,7 @@ class PreparedTestSuiteContainer(object):
                     )
 
             elif isinstance(runnable, type):
-                nested_suites.append((name, cls.from_generic_object(runnable)))
+                nested_suites.append((name, cls.from_generic_object(runnable, context)))
 
         return cls(
             source=some_object,
@@ -339,9 +339,9 @@ class PreparedTestSuiteContainer(object):
         argcount = len(varnames)
 
         if argcount == 0:
-            runnable()
+            return runnable()
         elif argcount == 1:
-            runnable(context)
+            return runnable(context)
         else:
             raise NonValidTest(
                 f"it appears that the test function {name} {location} takes more than one argument: {argcount}"
@@ -352,7 +352,8 @@ class PreparedTestSuiteContainer(object):
         last_error = None
 
         try:
-            yield self.run_predicates(context), RuntimeRole.Setup
+            for result in self.run_predicates(context):
+                yield result, RuntimeRole.Setup
         except Exception as error:
             # the apparent non-distinguishingly catching of
             # AssertionError instances is intentional to the present
@@ -387,7 +388,8 @@ class PreparedTestSuiteContainer(object):
 
                 yield result, RuntimeRole.Unit
         finally:
-            yield self.run_complements(context), RuntimeRole.Teardown
+            for result in self.run_complements(context):
+                yield result, RuntimeRole.Teardown
 
     def run_container(self, container, context):
         # concentrated area of test execution
@@ -440,11 +442,9 @@ class Feature(object):
             context = RuntimeContext(reporter, runtime)
 
             reporter.on_scenario(scenario)
-            self.run_predicates(context)
 
             result = scenario.run(context)
 
-            self.run_complements(context)
             results.append(result)
             if result.is_failure:
                 reporter.on_failure(scenario, result)
@@ -462,12 +462,6 @@ class Feature(object):
             reporter.on_scenario_done(scenario, result)
 
         return FeatureResult(results)
-
-    def run_predicates(self, context):
-        pass
-
-    def run_complements(self, context):
-        pass
 
 
 class ErrorStack(object):

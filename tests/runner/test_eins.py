@@ -9,11 +9,6 @@ def test_function_ok():
     assert True
 
 
-# def test_function_fail():
-#     "testing failing function with sure runner"
-#     assert False, "this very message SHALL aid in tracing back to the error's root-cause"
-
-
 class TestClass(TestCase):
     "`sure' should work seamlessly with a unittest.TestCase"
 

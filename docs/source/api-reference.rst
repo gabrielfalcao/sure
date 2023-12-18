@@ -90,15 +90,15 @@ API Reference
 .. autoclass:: sure.reporters.feature.FeatureReporter
 
 
-``sure.old``
-------------
+``sure.original``
+-----------------
 
-.. py:module:: sure.old
+.. py:module:: sure.original
 
-.. autofunction:: sure.old.identify_callable_location
+.. autofunction:: sure.original.identify_callable_location
 
-.. autofunction:: sure.old.is_iterable
+.. autofunction:: sure.original.is_iterable
 
-.. autofunction:: sure.old.all_integers
+.. autofunction:: sure.original.all_integers
 
-.. autofunction:: sure.old.explanation
+.. autofunction:: sure.original.explanation

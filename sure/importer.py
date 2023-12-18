@@ -73,5 +73,8 @@ class importer(object):
         module = importlib.util.module_from_spec(spec)
         __MODULES__[module_name] = module
         sys.modules[module_name] = module
-        spec.loader.exec_module(module)
+        try:
+            spec.loader.exec_module(module)
+        except Exception as e:
+            raise e
         return module, root.absolute()

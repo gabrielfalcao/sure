@@ -42,7 +42,8 @@ from sure.errors import ExitError, ExitFailure
 @click.option("-F", "--log-file", help='path to a log file. Default to SURE_LOG_FILE')
 @click.option("-c", "--with-coverage", is_flag=True)
 @click.option("--cover-branches", is_flag=True)
-def entrypoint(paths, reporter, reporters, immediate, log_level, log_file, with_coverage, cover_branches):
+@click.option("--cover-module", multiple=True, help="specify module names to cover")
+def entrypoint(paths, reporter, reporters, immediate, log_level, log_file, with_coverage, cover_branches, cover_module):
     if not paths:
         paths = glob('test*/**')
     else:
@@ -52,7 +53,7 @@ def entrypoint(paths, reporter, reporters, immediate, log_level, log_file, with_
 
     configure_logging(log_level, log_file)
     runner = Runner(resolve_path(os.getcwd()), reporter, reporters)
-    result = runner.run(paths, immediate=immediate, with_coverage=with_coverage, cover_branches=cover_branches)
+    result = runner.run(paths, immediate=immediate, with_coverage=with_coverage, cover_branches=cover_branches, cover_module=cover_module)
 
     if result:
         if result.is_failure:

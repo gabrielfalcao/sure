@@ -48,7 +48,7 @@ from sure.reporter import Reporter
 
 
 class Runner(object):
-    """Manages I/O operations to find tests and execute them"""
+    """Manages I/O operations in regards to finding tests and executing them"""
 
     def __init__(self, base_path: Path, reporter: str, reporters: Optional[List[str]] = None, plugin_paths=None, **kwargs):
         self.base_path = base_path
@@ -103,19 +103,21 @@ class Runner(object):
 
         return features
 
-    def runin(self, lookup_paths, immediate: bool = False, with_coverage: bool = False, cover_branches: bool = False):
+    def runin(self, lookup_paths, immediate: bool = False, with_coverage: bool = False, cover_branches: bool = False, cover_module: Optional[List[str]] = None):
         results = []
         self.reporter.on_start()
 
         coverageopts = {
             'auto_data': True,
             'cover_pylib': False,
+            'source': cover_module,
             'branch': cover_branches,
             'config_file': True,
         }
         cov = with_coverage and coverage.Coverage(**coverageopts) or None
 
         if cov:
+            cov.load()
             cov.start()
 
         for feature in self.load_features(lookup_paths):
@@ -124,21 +126,18 @@ class Runner(object):
             context = RuntimeContext(self.reporter, runtime)
 
             result = feature.run(self.reporter, runtime=runtime)
-            if runtime.immediate:
-                if result.is_failure:
-                    if cov:
-                        cov.stop()
-                        cov.save()
-                        cov.report()
-                    raise ExitFailure(context, result)
+            try:
+                if runtime.immediate:
+                    if result.is_failure:
+                        raise ExitFailure(context, result)
 
-                if result.is_error:
-                    if cov:
-                        cov.stop()
-                        cov.save()
-                        cov.report()
-
-                    raise ExitError(context, result)
+                    if result.is_error:
+                        raise ExitError(context, result)
+            finally:
+                if cov and runtime.immediate and (result.is_error or result.is_failure):
+                    cov.stop()
+                    cov.save()
+                    cov.report()
 
             results.append(result)
             self.reporter.on_feature_done(feature, result)
@@ -146,7 +145,6 @@ class Runner(object):
         if cov:
             cov.stop()
             cov.save()
-
         self.reporter.on_finish()
         if cov:
             cov.report()

@@ -1,4 +1,5 @@
 -r requirements.txt
+black
 ipdb==0.13.9
 rednose==1.3.0
 Sphinx==2.3.1

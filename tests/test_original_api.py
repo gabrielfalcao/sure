@@ -21,7 +21,7 @@ from six import text_type, PY2
 from six.moves import xrange
 
 import sure
-from sure.deprecated import that
+from sure.original import that
 from sure.magic import is_cpython
 from sure import VariablesBag, expect
 from nose.tools import assert_equals, assert_raises
@@ -58,7 +58,7 @@ def test_context_is_not_optional():
 
     assert that(it_crashes).raises(
         TypeError, (
-        "the function it_crashes defined at test_old_api.py line 56, is being "
+        "the function it_crashes defined at test_original_api.py line 56, is being "
         "decorated by either @that_with_context or @scenario, so it should "
         "take at least 1 parameter, which is the test context"),
     )
@@ -663,18 +663,22 @@ def test_within_fail():
 
 
 def test_word_to_number():
-    assert_equals(sure.word_to_number('one'),      1)
-    assert_equals(sure.word_to_number('two'),      2)
-    assert_equals(sure.word_to_number('three'),    3)
-    assert_equals(sure.word_to_number('four'),     4)
-    assert_equals(sure.word_to_number('five'),     5)
-    assert_equals(sure.word_to_number('six'),      6)
-    assert_equals(sure.word_to_number('seven'),    7)
-    assert_equals(sure.word_to_number('eight'),    8)
-    assert_equals(sure.word_to_number('nine'),     9)
-    assert_equals(sure.word_to_number('ten'),     10)
-    assert_equals(sure.word_to_number('eleven'),  11)
-    assert_equals(sure.word_to_number('twelve'),  12)
+    assert_equals(sure.word_to_number('one'),       1)
+    assert_equals(sure.word_to_number('two'),       2)
+    assert_equals(sure.word_to_number('three'),     3)
+    assert_equals(sure.word_to_number('four'),      4)
+    assert_equals(sure.word_to_number('five'),      5)
+    assert_equals(sure.word_to_number('six'),       6)
+    assert_equals(sure.word_to_number('seven'),     7)
+    assert_equals(sure.word_to_number('eight'),     8)
+    assert_equals(sure.word_to_number('nine'),      9)
+    assert_equals(sure.word_to_number('ten'),      10)
+    assert_equals(sure.word_to_number('eleven'),   11)
+    assert_equals(sure.word_to_number('twelve'),   12)
+    assert_equals(sure.word_to_number('thirteen'), 13)
+    assert_equals(sure.word_to_number('fourteen'), 14)
+    assert_equals(sure.word_to_number('fifteen'),  15)
+    assert_equals(sure.word_to_number('sixteen'),  16)
 
 
 def test_word_to_number_fail():
@@ -686,7 +690,7 @@ def test_word_to_number_fail():
         assert_equals(
             text_type(e),
             'sure supports only literal numbers from one ' \
-            'to twelve, you tried the word "twenty"')
+            'to sixteen, you tried the word "twenty"')
 
     assert failed, 'should raise assertion error'
 
@@ -917,7 +921,7 @@ def test_depends_on_failing_due_nothing_found():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "lonely_action" defined at %s:926 ' \
+    error = 'the action "lonely_action" defined at %s:930 ' \
         'depends on the attribute "something" to be available in the' \
         ' context. It turns out that there are no actions providing ' \
         'that. Please double-check the implementation' % fullpath
@@ -943,10 +947,10 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "my_action" defined at {0}:956 ' \
+    error = 'the action "my_action" defined at {0}:960 ' \
         'depends on the attribute "some_attr" to be available in the context.'\
         ' You need to call one of the following actions beforehand:\n' \
-        ' -> dependency_action at {0}:952'.replace('{0}', fullpath)
+        ' -> dependency_action at {0}:956'.replace('{0}', fullpath)
 
     def with_setup(context):
         @action_for(context, provides=['some_attr'])

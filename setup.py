@@ -105,7 +105,7 @@ if __name__ == "__main__":
         },
         tests_require=tests_require,
         classifiers=[
-            "Development Status :: 5 - Production/Stable",
+            "Development Status :: 1 - Planning",
             "Environment :: Console",
             "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
             "Operating System :: MacOS :: MacOS X",

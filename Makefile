@@ -20,7 +20,7 @@ endif
 export SURE_NO_COLORS	:= true
 export SURE_LOG_FILE	:= $(GIT_ROOT)/sure-$(date +"%Y-%m-%d-%H:%M:%S").log
 AUTO_STYLE_TARGETS	:= sure/runtime.py sure/runner.py sure/meta.py sure/meta.py sure/reporter.py sure/reporters
-export SURE_DISABLE_NEW_SYNTAX	:= true
+# export SURE_DISABLE_NEW_SYNTAX	:= true
 
 ######################################################################
 # Phony targets (only exist for typing convenience and don't represent
@@ -55,14 +55,13 @@ docs: html-docs
 	$(OPEN_COMMAND) docs/build/html/index.html
 
 test tests: clean | $(VENV)/bin/pytest # $(VENV)/bin/nosetests	# @$(VENV)/bin/nosetests --rednose --immediate -vv --with-coverage --cover-package=sure
-	@$(VENV)/bin/pytest -vv --cov=sure tests/unit tests/functional
+	@$(VENV)/bin/pytest -vv --cov=sure tests
 
 # run main command-line tool
 run: | $(MAIN_CLI_PATH)
-	$(MAIN_CLI_PATH) --with-coverage --cover-branches tests/runner/test_eins.py
-	$(MAIN_CLI_PATH) --with-coverage --cover-branches tests/runner/
-	$(MAIN_CLI_PATH) --with-coverage --cover-branches tests/
-	$(MAIN_CLI_PATH) --with-coverage --cover-branches --immediate
+	$(MAIN_CLI_PATH) --with-coverage --cover-branches --cover-module=sure.core  --cover-module=sure tests/runner/
+	$(MAIN_CLI_PATH) --with-coverage --cover-branches --cover-module=sure.core tests/
+	$(MAIN_CLI_PATH) --with-coverage --cover-branches --cover-module=sure.core --immediate
 
 # Pushes release of this package to pypi
 push-release: dist  # pushes distribution tarballs of the current version

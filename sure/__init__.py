@@ -30,9 +30,10 @@ from datetime import datetime
 from six import string_types, text_type, PY2, get_function_code
 from six.moves import reduce
 
-from sure.old import AssertionHelper
-from sure.old import Iterable
-from sure.old import builtins
+from sure.original import AssertionHelper
+from sure.original import Iterable
+from sure.original import builtins
+from sure.original import that
 
 from sure.core import DeepComparison
 from sure.core import DeepExplanation
@@ -269,13 +270,18 @@ def word_to_number(word):
         "ten": 10,
         "eleven": 11,
         "twelve": 12,
+        "thirteen": 13,
+        "fourteen": 14,
+        "fifteen": 15,
+        "sixteen": 16,
     }
+    # TODO: refactor
     try:
         return basic[word]
     except KeyError:
         raise AssertionError(
-            "sure supports only literal numbers from one to twelve, "
-            'you tried the word "twenty"'
+            "sure supports only literal numbers from one to sixteen, "
+            f'you tried the word "{word}"'
         )
 
 

@@ -22,6 +22,8 @@ import inspect
 import unittest
 import traceback
 
+import coverage
+
 from pathlib import Path
 from typing import List, Optional
 from functools import lru_cache, cached_property
@@ -101,9 +103,20 @@ class Runner(object):
 
         return features
 
-    def runin(self, lookup_paths, immediate: bool = False):
+    def runin(self, lookup_paths, immediate: bool = False, with_coverage: bool = False, cover_branches: bool = False):
         results = []
         self.reporter.on_start()
+
+        coverageopts = {
+            'auto_data': True,
+            'cover_pylib': False,
+            'branch': cover_branches,
+            'config_file': True,
+        }
+        cov = with_coverage and coverage.Coverage(**coverageopts) or None
+
+        if cov:
+            cov.start()
 
         for feature in self.load_features(lookup_paths):
             self.reporter.on_feature(feature)
@@ -113,15 +126,30 @@ class Runner(object):
             result = feature.run(self.reporter, runtime=runtime)
             if runtime.immediate:
                 if result.is_failure:
+                    if cov:
+                        cov.stop()
+                        cov.save()
+                        cov.report()
                     raise ExitFailure(context, result)
 
                 if result.is_error:
+                    if cov:
+                        cov.stop()
+                        cov.save()
+                        cov.report()
+
                     raise ExitError(context, result)
 
             results.append(result)
             self.reporter.on_feature_done(feature, result)
 
+        if cov:
+            cov.stop()
+            cov.save()
+
         self.reporter.on_finish()
+        if cov:
+            cov.report()
 
         return FeatureResultSet(results)
 

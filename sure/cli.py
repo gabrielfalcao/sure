@@ -40,23 +40,19 @@ from sure.errors import ExitError, ExitFailure
 @click.option("-i", "--immediate", is_flag=True)
 @click.option("-l", "--log-level", type=click.Choice(['none', 'debug', 'info', 'warning', 'error']), help="default='none'")
 @click.option("-F", "--log-file", help='path to a log file. Default to SURE_LOG_FILE')
-@click.option("-v", "--verbose", is_flag=True, multiple=True)
-@click.option("-q", "--quiet", is_flag=True, multiple=True)
-def entrypoint(paths, reporter, reporters, immediate, log_level, log_file, verbose, quiet):
+@click.option("-c", "--with-coverage", is_flag=True)
+@click.option("--cover-branches", is_flag=True)
+def entrypoint(paths, reporter, reporters, immediate, log_level, log_file, with_coverage, cover_branches):
     if not paths:
         paths = glob('test*/**')
     else:
         paths = flatten(*list(map(glob, paths)))
 
     reporters = reporters and list(reporters) or None
-    verbosity_level = sum(verbose)
-    quietness_level = sum(quiet)
-    verbosity = verbosity_level - quietness_level
-    quietness = quietness_level - verbosity_level
 
     configure_logging(log_level, log_file)
     runner = Runner(resolve_path(os.getcwd()), reporter, reporters)
-    result = runner.run(paths, immediate=immediate)
+    result = runner.run(paths, immediate=immediate, with_coverage=with_coverage, cover_branches=cover_branches)
 
     if result:
         if result.is_failure:

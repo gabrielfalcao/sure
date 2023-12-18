@@ -59,10 +59,10 @@ test tests: clean | $(VENV)/bin/pytest # $(VENV)/bin/nosetests	# @$(VENV)/bin/no
 
 # run main command-line tool
 run: | $(MAIN_CLI_PATH)
-	$(MAIN_CLI_PATH) tests/runner/test_eins.py
-	$(MAIN_CLI_PATH) tests/runner/
-	$(MAIN_CLI_PATH) tests/
-	$(MAIN_CLI_PATH) --immediate
+	$(MAIN_CLI_PATH) --with-coverage --cover-branches tests/runner/test_eins.py
+	$(MAIN_CLI_PATH) --with-coverage --cover-branches tests/runner/
+	$(MAIN_CLI_PATH) --with-coverage --cover-branches tests/
+	$(MAIN_CLI_PATH) --with-coverage --cover-branches --immediate
 
 # Pushes release of this package to pypi
 push-release: dist  # pushes distribution tarballs of the current version

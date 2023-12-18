@@ -81,8 +81,8 @@ def read_readme():
         return __doc__
 
 
-install_requires = ["mock", "six"]
-tests_require = ["nose"]
+install_requires = ["mock", "six", "coverage"]
+tests_require = []
 version = read_version()
 
 if __name__ == "__main__":
@@ -104,7 +104,6 @@ if __name__ == "__main__":
             "console_scripts": ["sure = sure.cli:entrypoint"],
         },
         tests_require=tests_require,
-        test_suite="nose.collector",
         classifiers=[
             "Development Status :: 5 - Production/Stable",
             "Environment :: Console",

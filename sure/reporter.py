@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from pathlib import Path
-
+from typing import Dict
 from sure.meta import MetaReporter, get_reporter, gather_reporter_names
 
 __path__ = Path(__file__).absolute().parent
@@ -50,7 +50,7 @@ class Reporter(object, metaclass=MetaReporter):
         self.successes = []
         self.failures = []
         self.errors = []
-        self.initialize()
+        self.initialize(*args, **kw)
 
     def initialize(self, *args, **kw):
         pass
@@ -65,11 +65,11 @@ class Reporter(object, metaclass=MetaReporter):
 
            from sure.reporter import Reporter
 
-           class HelloReporter(Reporter):
+           class FeatureReporter(Reporter):
                def on_start(self):
                    sys.stderr.write('Reporter.on_start works')
 
-           HelloReporter('a <sure.runner.Runner()>').on_start()
+           FeatureReporter('a <sure.runner.Runner()>').on_start()
         """
         raise NotImplementedError
 
@@ -105,7 +105,7 @@ class Reporter(object, metaclass=MetaReporter):
            class feature_done:
                name = 'a simple scenario'
 
-           Feature_doneReporter('a <sure.runner.Runner()>').on_feature_done(feature_done)
+           FeatureReporter('a <sure.runner.Runner()>').on_feature_done(feature_done)
         """
         raise NotImplementedError
 
@@ -231,6 +231,7 @@ class Reporter(object, metaclass=MetaReporter):
         """
         if not isinstance(name, str):
             raise TypeError(f'name should be a {str.__name__} but got the {type(name).__name__} {name} instead')
+
         found = get_reporter(name)
         if not found:
             raise RuntimeError(

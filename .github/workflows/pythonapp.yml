@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install python version
-      uses: gabrielfalcao/pyenv-action@v12
+      uses: gabrielfalcao/pyenv-action@v18
       with:
         default: "${{ matrix.python }}"
         command: pip install -U pip setuptools
@@ -28,39 +28,3 @@ jobs:
 
     - name: Install sure
       run: pip install -e .
-
-    - name: Run tests via pytest
-      run: pytest -vv
-
-    # - name: Run tests via nose
-    #   run: nosetests --verbosity 2
-  #
-  # oldschool:
-  #   name: "Old School Python"
-  #   runs-on: ubuntu-18.04
-  #   strategy:
-  #     matrix:
-  #       python:
-  #         - "2.7"
-  #         - "3.6"
-  #         - "3.7"
-  #
-  #   steps:
-  #   - uses: actions/checkout@v3
-  #   - name: Install python version
-  #     uses: gabrielfalcao/pyenv-action@v12
-  #     with:
-  #       default: "${{ matrix.python }}"
-  #       command: pip install -U pip setuptools
-  #
-  #   - name: Install dependencies
-  #     run: pip install -r development.txt
-  #
-  #   - name: Install sure
-  #     run: pip install -e .
-  #
-  #   - name: Run tests via nose
-  #     run: nosetests --verbosity 2
-  #
-  #   - name: Run tests via pytest
-  #     run: pytest -vv

@@ -25,6 +25,8 @@ from functools import reduce
 from pathlib import Path
 
 import click
+import coverage
+
 import sure.reporters
 
 from sure.importer import resolve_path
@@ -36,26 +38,41 @@ from sure.errors import ExitError, ExitFailure
 @click.command(no_args_is_help=True)
 @click.argument("paths", nargs=-1)
 @click.option("-r", "--reporter", default="feature", help='default=feature', type=click.Choice(gather_reporter_names()))
-@click.option("-R", "--reporters", multiple=True, help=f"options=[{','.join(gather_reporter_names())}]")
 @click.option("-i", "--immediate", is_flag=True)
 @click.option("-l", "--log-level", type=click.Choice(['none', 'debug', 'info', 'warning', 'error']), help="default='none'")
 @click.option("-F", "--log-file", help='path to a log file. Default to SURE_LOG_FILE')
 @click.option("-c", "--with-coverage", is_flag=True)
 @click.option("--cover-branches", is_flag=True)
 @click.option("--cover-module", multiple=True, help="specify module names to cover")
-def entrypoint(paths, reporter, reporters, immediate, log_level, log_file, with_coverage, cover_branches, cover_module):
+def entrypoint(paths, reporter, immediate, log_level, log_file, with_coverage, cover_branches, cover_module):
     if not paths:
         paths = glob('test*/**')
     else:
         paths = flatten(*list(map(glob, paths)))
 
-    reporters = reporters and list(reporters) or None
-
     configure_logging(log_level, log_file)
-    runner = Runner(resolve_path(os.getcwd()), reporter, reporters)
-    result = runner.run(paths, immediate=immediate, with_coverage=with_coverage, cover_branches=cover_branches, cover_module=cover_module)
+
+    coverageopts = {
+        'auto_data': True,
+        'cover_pylib': False,
+        'source': cover_module,
+        'branch': cover_branches,
+        'config_file': True,
+    }
+    cov = with_coverage and coverage.Coverage(**coverageopts) or None
+    if cov:
+        cov.load()
+        cov.start()
+
+    runner = Runner(resolve_path(os.getcwd()), reporter)
+    result = runner.run(paths, immediate=immediate)
 
     if result:
+        if cov:
+            cov.stop()
+            cov.save()
+            cov.report()
+
         if result.is_failure:
             raise ExitFailure(runner.context, result)
 

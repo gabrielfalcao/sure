@@ -46,9 +46,7 @@ anything = Anything()
 
 class DeepExplanation(text_type):
     def get_header(self, X, Y, suffix):
-        params = (safe_repr(X), safe_repr(Y), text_type(suffix))
-        header = "given\nX = {0}\n    and\nY = {1}\n{2}".format(*params)
-
+        header = f"given\nX = {safe_repr(X)}\n    and\nY = {safe_repr(Y)}\n{text_type(suffix)}"
         return yellow(header).strip()
 
     def get_assertion(self, X, Y):
@@ -116,14 +114,16 @@ class DeepComparison(object):
             msg = "X{0} has the key {1!r} whereas Y{2} does not".format(
                 red(c.current_X_keys),
                 safe_repr(diff_x[0]),
-                green(c.current_Y_keys))
+                green(c.current_Y_keys),
+            )
             return DeepExplanation(msg)
 
         elif diff_y:
             msg = "X{0} does not have the key {1!r} whereas Y{2} has it".format(
                 red(c.current_X_keys),
                 safe_repr(diff_y[0]),
-                green(c.current_Y_keys))
+                green(c.current_Y_keys)
+            )
             return DeepExplanation(msg)
 
         elif X == Y:
@@ -135,22 +135,22 @@ class DeepComparison(object):
                 self.key_Y = key_X
                 value_X = X[key_X]
                 value_Y = Y[key_X]
-                child = DeepComparison(
+                instance = DeepComparison(
                     value_X,
                     value_Y,
                     epsilon=self.epsilon,
                     parent=self,
                 ).compare()
-                if isinstance(child, DeepExplanation):
-                    return child
+                if isinstance(instance, DeepExplanation):
+                    return instance
 
     def compare_ordereddict(self, X, Y):
         """Compares two instances of an OrderedDict."""
 
         # check if OrderedDict instances have the same keys and values
-        child = self.compare_dicts(X, Y)
-        if isinstance(child, DeepExplanation):
-            return child
+        instance = self.compare_dicts(X, Y)
+        if isinstance(instance, DeepExplanation):
+            return instance
 
         # check if the order of the keys is the same
         for i, j in zip(X.items(), Y.items()):
@@ -202,14 +202,14 @@ class DeepComparison(object):
         else:
             for i, (value_X, value_Y) in enumerate(zip(X, Y)):
                 self.key_X = self.key_Y = i
-                child = DeepComparison(
+                instance = DeepComparison(
                     value_X,
                     value_Y,
                     epsilon=self.epsilon,
                     parent=self,
                 ).compare()
-                if isinstance(child, DeepExplanation):
-                    return child
+                if isinstance(instance, DeepExplanation):
+                    return instance
 
     def compare(self):
         X, Y = self.operands

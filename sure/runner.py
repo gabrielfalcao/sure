@@ -22,8 +22,6 @@ import inspect
 import unittest
 import traceback
 
-import coverage
-
 from pathlib import Path
 from typing import List, Optional
 from functools import lru_cache, cached_property
@@ -50,12 +48,9 @@ from sure.reporter import Reporter
 class Runner(object):
     """Manages I/O operations in regards to finding tests and executing them"""
 
-    def __init__(self, base_path: Path, reporter: str, reporters: Optional[List[str]] = None, plugin_paths=None, **kwargs):
+    def __init__(self, base_path: Path, reporter: str, plugin_paths=None, **kwargs):
         self.base_path = base_path
-        if isinstance(reporters, list) and len(reporters) > 0:
-            self.reporter = CoReporter(map(self.get_reporter, reporters))
-        else:
-            self.reporter = self.get_reporter(reporter)
+        self.reporter = self.get_reporter(reporter)
 
         for k in kwargs:
             setattr(self, k, kwargs.get(k))
@@ -103,22 +98,9 @@ class Runner(object):
 
         return features
 
-    def runin(self, lookup_paths, immediate: bool = False, with_coverage: bool = False, cover_branches: bool = False, cover_module: Optional[List[str]] = None):
+    def runin(self, lookup_paths, immediate: bool = False):
         results = []
         self.reporter.on_start()
-
-        coverageopts = {
-            'auto_data': True,
-            'cover_pylib': False,
-            'source': cover_module,
-            'branch': cover_branches,
-            'config_file': True,
-        }
-        cov = with_coverage and coverage.Coverage(**coverageopts) or None
-
-        if cov:
-            cov.load()
-            cov.start()
 
         for feature in self.load_features(lookup_paths):
             self.reporter.on_feature(feature)
@@ -126,29 +108,17 @@ class Runner(object):
             context = RuntimeContext(self.reporter, runtime)
 
             result = feature.run(self.reporter, runtime=runtime)
-            try:
-                if runtime.immediate:
-                    if result.is_failure:
-                        raise ExitFailure(context, result)
+            if runtime.immediate:
+                if result.is_failure:
+                    raise ExitFailure(context, result)
 
-                    if result.is_error:
-                        raise ExitError(context, result)
-            finally:
-                if cov and runtime.immediate and (result.is_error or result.is_failure):
-                    cov.stop()
-                    cov.save()
-                    cov.report()
+                if result.is_error:
+                    raise ExitError(context, result)
 
             results.append(result)
             self.reporter.on_feature_done(feature, result)
 
-        if cov:
-            cov.stop()
-            cov.save()
         self.reporter.on_finish()
-        if cov:
-            cov.report()
-
         return FeatureResultSet(results)
 
     def run(self, *args, **kwargs):

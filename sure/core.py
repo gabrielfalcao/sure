@@ -18,10 +18,7 @@ from __future__ import unicode_literals
 
 import os
 
-try:
-    from mock import _CallList
-except ImportError:
-    from mock.mock import _CallList
+from unittest.mock import _CallList
 
 import inspect
 from six import (

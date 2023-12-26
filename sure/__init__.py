@@ -1044,7 +1044,7 @@ class ensure(object):
         raise AssertionError(msg)
 
 
-allows_new_syntax = not os.getenv("SURE_DISABLE_NEW_SYNTAX")
+allows_new_syntax = os.getenv("SURE_ENABLE_NEW_SYNTAX")
 
 
 def do_enable():
@@ -1143,7 +1143,7 @@ def do_enable():
 old_dir = dir
 
 
-def enable():
+def enable_magic_syntax():
     @wraps(builtins.dir)
     def _new_dir(*obj):
         if not obj:
@@ -1175,5 +1175,7 @@ def enable():
     do_enable()
 
 
+enable = enable_magic_syntax
+
 if is_cpython and allows_new_syntax:
-    enable()
+    enable_magic_syntax()

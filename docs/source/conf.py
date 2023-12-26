@@ -1,7 +1,7 @@
 import sys
 import os
 import sphinx_rtd_theme
-os.environ['SURE_DISABLE_NEW_SYNTAX'] = 'true'
+
 
 extensions = [
     "sphinx.ext.autodoc",

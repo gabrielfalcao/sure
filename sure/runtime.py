@@ -35,7 +35,7 @@ from sure.errors import (
     ImmediateError,
     ImmediateFailure,
 )
-from sure.importer import importer
+from sure.loader import loader
 from sure.reporter import Reporter
 
 self = sys.modules[__name__]
@@ -89,6 +89,31 @@ def appears_to_be_runnable(name: str) -> bool:
     )
 
 
+class CallGuard(object):
+    def __init__(self, source, ancestor=None):
+        self.source = source
+        self.ancestor = ancestor
+        self.function = isinstance(source, types.FunctionType)
+        self.callable = callable(source)
+
+    @property
+    def name(self):
+        if self.is_function:
+            return self.source.__name__
+        return self.test.__func__.__name__
+
+    def __call__(self, *args, **kw):
+        if isinstance(source, type):
+            self.source_instance = source()
+        elif callable(source):
+            test_methods.insert(0, Container(source.__name__, source, TestLocation(
+                source, source.__module__
+            ), some_object))
+            self.source_instance = source.__module__
+        else:
+            raise NotImplementedError(f"PreparedTestSuiteContainer received unexpected type: {source}")
+
+
 class TestLocation(object):
     def __init__(self, test, ancestor=None):
         self.test = test
@@ -96,19 +121,26 @@ class TestLocation(object):
         self.filename = self.code.co_filename
         self.line = self.code.co_firstlineno
         self.kind = self.test.__class__
-        self.name = self.test.__func__.__name__
+        self.name = isinstance(self.test, types.FunctionType) and self.test.__name__ or self.test.__func__.__name__
         self.ancestor = ancestor
         self.ancestral_description = ""
         self.ancestor_repr = ""
         if ancestor:
             self.ancestral_description = getattr(
                 ancestor, "description", ""
-            ) or getattr(ancestor, "__doc__", "")
-            self.ancestor_repr = (
-                f"({self.ancestor.__module__}.{self.ancestor.__name__})"
+            ) or getattr(
+                ancestor, "__doc__", ""
             )
+            if isinstance(ancestor, type):
+                self.ancestor_repr = (
+                    f"({self.ancestor.__module__}.{self.ancestor.__name__})"
+                )
+            elif isinstance(ancestor, str):
+                self.ancestor_repr = ancestor
+            else:
+                raise NotImplementedError
 
-        self.description = self.test.__func__.__doc__ or ""
+        self.description = getattr(self.test, '__func__', self.test).__doc__ or ""
 
     def __repr__(self):
         return " ".join([self.name, "at", self.ort])
@@ -256,7 +288,18 @@ class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
         test_methods: List[Callable],
         nested_suites: List[PreparedTestSuiteContainer],
     ):
-        self.source_instance = source()
+        self.error = None
+        self.failure = None
+        if isinstance(source, type):
+            self.source_instance = source()
+        elif callable(source):
+            test_methods.insert(0, Container(source.__name__, source, TestLocation(
+                source, source.__module__
+            ), source.__module__))
+            self.source_instance = source.__module__
+        else:
+            raise NotImplementedError(f"PreparedTestSuiteContainer received unexpected type: {source}")
+
         self.log = Logort(self.source_instance)
         self.context = context
         self.setup_methods = setup_methods
@@ -291,10 +334,10 @@ class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
             if isinstance(some_object, type) and issubclass(
                 some_object, unittest.TestCase
             ):
-                # XXX: warn about probability of abuse of TestCase constructor taking wrong arguments
+                # TODO: warn about probability of abuse of TestCase constructor taking wrong arguments
                 runnable = getattr(some_object(name), name, None)
             else:
-                # XXX: support non-unittest.TestCase classes
+                # TODO: support non-unittest.TestCase classes
                 runnable = getattr(some_object, name, None)
             # </unittest.TestCase.__init__>
 
@@ -304,7 +347,7 @@ class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
                 )
 
                 if seem_to_indicate_setup(name):
-                    # XXX: warn about probability of abuse of TestCase constructor taking non-standard arguments
+                    # TODO: warn about probability of abuse of TestCase constructor taking non-standard arguments
                     setup_methods.append(
                         Container(name, runnable, location, some_object)
                     )
@@ -392,7 +435,6 @@ class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
                 yield result, RuntimeRole.Teardown
 
     def run_container(self, container, context):
-        # concentrated area of test execution
         return self.perform_unit(
             test=container.unit,
             context=context,
@@ -465,33 +507,21 @@ class Feature(object):
 
 
 class ErrorStack(object):
-    def __init__(self, exception_info=None):
+    def __init__(self, location: TestLocation, exc: Exception, exception_info=None):
         self.exception_info = exception_info or sys.exc_info()
         self.traceback = self.exception_info[-1]
+        self.exception = exc
+        self.location = location
 
-    def tb(self):
-        return self.traceback
+    def location_specific_stack(self):
+        return [e for e in traceback.format_tb(self.traceback) if self.location.name in e]
 
-    def ff(self):
-        module_path = str(Path(__file__).parent.absolute())
-        tb = self.traceback
-        cutoff_index = 0
-        while True:
-            yield tb, cutoff_index
-            code_path = str(Path(tb.tb_frame.f_code.co_filename).absolute())
-            if code_path.startswith(module_path):
-                tb = tb.tb_next
-                cutoff_index += 1
-            else:
-                yield tb, cutoff_index
-                break
+    def location_specific_error(self):
+        stack = self.location_specific_stack()
+        return stack and stack[-1] or str(self.exception)
 
-    def relevant_error_message(self):
-        stack = list(self.ff())
-        return "\n".join(traceback.format_tb(stack[-1][0]))
-
-    def printable(self):
-        return "\n".join(self.tb())
+    def __str__(self):
+        return "\n".join(self.location_specific_stack())
 
 
 class Scenario(object):
@@ -538,7 +568,7 @@ class ScenarioResult(BaseResult):
         self.location = location
         self.context = context
         self.exc_info = sys.exc_info()
-        self.stack = ErrorStack(self.exc_info)
+        self.stack = ErrorStack(location, error, self.exc_info)
         self.__error__ = None
         self.__failure__ = None
 
@@ -610,10 +640,7 @@ class ScenarioResult(BaseResult):
         if not self.is_failure:
             return ""
 
-        assertion = self.failure.args[0]
-        assertion = assertion.replace(self.location.name, "")
-        assertion = assertion.replace(self.location.ancestor_repr, "")
-        return assertion.strip()
+        return self.stack.location_specific_error()
 
 
 class ScenarioResultSet(ScenarioResult):

@@ -14,8 +14,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import unicode_literals
+
 import sys
+import traceback
 from functools import reduce
 
 
@@ -69,3 +70,12 @@ class ExitFailure(ImmediateExit):
     def __init__(self, context, result):
         context.reporter.on_failure(result, result.first_nonsuccessful_result)
         return super().__init__(exit_code('FAILURE'))
+
+
+class InternalRuntimeError(Exception):
+    def __init__(self, context, exception: Exception):
+        self.traceback = traceback.format_exc()
+        self.exception = exception
+        self.code = exit_code(self.traceback)
+        super().__init__(self.traceback)
+        context.reporter.on_internal_runtime_error(context, self)

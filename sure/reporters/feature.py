@@ -15,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from couleur import Shell
 
 from sure.errors import ImmediateFailure
@@ -64,7 +65,7 @@ class FeatureReporter(Reporter):
         sh.reset("\n")
         sh.reset(" " * self.indentation)
         self.indentation += 2
-        sh.yellow(f"Failure: {result.succinct_failure}")
+        sh.bold_yellow(f"Failure:\n{result.succinct_failure}")
         sh.reset(" " * self.indentation)
         sh.bold_yellow(f"\n{' ' * self.indentation} Scenario:")
         sh.bold_yellow(f"\n{' ' * self.indentation}     {result.location.description}")
@@ -84,9 +85,15 @@ class FeatureReporter(Reporter):
         sh.red(ballot)
         sh.reset("\n")
         sh.reset(" " * self.indentation)
-        sh.red(" ".join(error.args))
+        sh.bold_red(" ".join(error.args))
         sh.reset("\n")
         self.indentation -= 2
+
+    def on_internal_runtime_error(self, context, error):
+        sh = Shell()
+        sh.bold_yellow("Internal Runtime Error\n")
+        sh.bold_red(error.traceback)
+        raise SystemExit(error.code)
 
     def on_finish(self):
         failed = len(self.failures)

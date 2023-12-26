@@ -62,16 +62,16 @@ API Reference
 
 .. autoclass:: sure.runner.Runner
 
-``sure.importer``
+``sure.loader``
 -----------------
 
-.. py:module:: sure.importer
+.. py:module:: sure.loader
 
-.. autofunction:: sure.importer.resolve_path
+.. autofunction:: sure.loader.resolve_path
 
-.. autofunction:: sure.importer.get_root_python_module
+.. autofunction:: sure.loader.get_root_python_module
 
-.. autoclass:: sure.importer.importer
+.. autoclass:: sure.loader.loader
 
 
 ``sure.reporter``

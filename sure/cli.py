@@ -29,10 +29,10 @@ import coverage
 
 import sure.reporters
 
-from sure.importer import resolve_path
+from sure.loader import resolve_path
 from sure.runner import Runner
 from sure.reporters import gather_reporter_names
-from sure.errors import ExitError, ExitFailure
+from sure.errors import ExitError, ExitFailure, InternalRuntimeError
 
 
 @click.command(no_args_is_help=True)
@@ -65,7 +65,10 @@ def entrypoint(paths, reporter, immediate, log_level, log_file, with_coverage, c
         cov.start()
 
     runner = Runner(resolve_path(os.getcwd()), reporter)
-    result = runner.run(paths, immediate=immediate)
+    try:
+        result = runner.run(paths, immediate=immediate)
+    except Exception as e:
+        raise InternalRuntimeError(runner.context, e)
 
     if result:
         if cov:

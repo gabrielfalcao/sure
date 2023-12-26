@@ -174,10 +174,25 @@ class Reporter(object, metaclass=MetaReporter):
                def on_success(self, scenario):
                    sys.stderr.write('Reporter.on_success reported {}'.format(scenario.name))
 
-           class success:
-               name = 'a simple success'
+           class FakeScenario:
+               pass
 
-           SuccessReporter('a <sure.runner.Runner()>').on_success(success)
+           SuccessReporter('a <sure.runner.Runner()>').on_success(FakeScenario)
+        """
+        raise NotImplementedError
+
+    def on_internal_runtime_error(self, context, exception: Exception):
+        """Called when :py:class:`sure.FeatureReporter`
+
+        .. code:: python
+
+           from sure.reporter import Reporter
+
+           class ErrorReporter(Reporter):
+               def on_internal_runtime_error(self, scenario):
+                   sys.stderr.write('Reporter.on_success reported {}'.format(scenario.name))
+
+           ErrorReporter('a <sure.runner.Runner()>').on_internal_runtime_error(context, error)
         """
         raise NotImplementedError
 
@@ -261,7 +276,7 @@ class Reporter(object, metaclass=MetaReporter):
 
            reporter = Reporter.from_name_and_runner('feature', runner)
         """
-        cls.importer.load_recursive(
+        cls.loader.load_recursive(
             __path__.joinpath("reporters"),
             ignore_errors=False,
         )

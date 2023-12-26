@@ -19,7 +19,7 @@
 from typing import List
 from pathlib import Path
 
-from sure.importer import importer
+from sure.loader import loader
 
 module_root = Path(__file__).parent.absolute()
 
@@ -48,7 +48,7 @@ def internal_module_name(name):
 
 def register_class(cls, identifier):
     cls.kind = identifier
-    cls.importer = importer
+    cls.loader = loader
     if len(cls.__mro__) > 2:
         register = MODULE_REGISTERS[identifier]
         return register(cls)

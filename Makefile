@@ -59,9 +59,10 @@ test tests: clean | $(VENV)/bin/pytest # $(VENV)/bin/nosetests	# @$(VENV)/bin/no
 
 # run main command-line tool
 run: | $(MAIN_CLI_PATH)
-	$(MAIN_CLI_PATH) --with-coverage --cover-branches --cover-module=sure.core  --cover-module=sure tests/runner/
-	$(MAIN_CLI_PATH) --with-coverage --cover-branches --cover-module=sure.core tests/
-	$(MAIN_CLI_PATH) --with-coverage --cover-branches --cover-module=sure.core --immediate
+	# $(MAIN_CLI_PATH) --with-coverage --cover-branches --cover-module=sure.core tests/
+	# $(MAIN_CLI_PATH) --with-coverage --cover-branches --cover-module=sure.core --immediate
+	# $(MAIN_CLI_PATH) --with-coverage --cover-branches --cover-module=sure.core  --cover-module=sure tests/runner/
+	$(MAIN_CLI_PATH) --with-coverage --cover-branches --cover-module=sure.runtime tests/unit/
 
 # Pushes release of this package to pypi
 push-release: dist  # pushes distribution tarballs of the current version

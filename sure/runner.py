@@ -41,7 +41,7 @@ from sure.runtime import (
     stripped,
     seem_to_indicate_test,
 )
-from sure.importer import importer
+from sure.loader import loader
 from sure.reporter import Reporter
 
 
@@ -64,7 +64,7 @@ class Runner(object):
     def find_candidates(self, lookup_paths):
         candidate_modules = []
         for path in lookup_paths:
-            modules = importer.load_recursive(path, glob_pattern="test*.py")
+            modules = loader.load_recursive(path, glob_pattern="test*.py")
             candidate_modules.extend(modules)
 
         return candidate_modules

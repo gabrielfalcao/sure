@@ -6,7 +6,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [v3.0.0]
 - Sure's featured synctactic-sugar of injecting/monkey-patching
   ``.should``, ``.should_not``, et cetera methods into
-  :py:class:`object` and its subclasses is disabled by default and needs to be enabled explicitly, programmatically via ``sure.enable_magic_syntax()`` or via command-line with the flags: ``-s`` or ``--syntax-magic``
+  :py:class:`object` and its subclasses is disabled by default and needs to be enabled explicitly, programmatically via ``sure.enable_special_syntax()`` or via command-line with the flags: ``-s`` or ``--special-syntax``
 
 ## [v2.0.0]
 ### Fixed

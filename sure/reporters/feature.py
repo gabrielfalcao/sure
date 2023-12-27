@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
 # Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
@@ -78,22 +77,17 @@ class FeatureReporter(Reporter):
         sh.green(checkmark)
         sh.reset("\n")
 
-    def on_error(self, test, error):
+    def on_error(self, test, result):
         self.errors.append(test)
         self.failures.append(test)
         self.indentation += 2
-        sh.red(ballot)
         sh.reset("\n")
+        sh.bold_red(f"Error started at {result.location.ort}\n")
+        sh.bold_red(f"{result.stack.nonlocation_specific_error()}")
+        sh.bold_red(f"{' ' * self.indentation}{result.error}")
         sh.reset(" " * self.indentation)
-        sh.bold_red(" ".join(error.args))
         sh.reset("\n")
         self.indentation -= 2
-
-    def on_internal_runtime_error(self, context, error):
-        sh = Shell()
-        sh.bold_yellow("Internal Runtime Error\n")
-        sh.bold_red(error.traceback)
-        raise SystemExit(error.code)
 
     def on_finish(self):
         failed = len(self.failures)
@@ -112,3 +106,9 @@ class FeatureReporter(Reporter):
             sh.green(f"{successful} successful")
             sh.reset("\n")
         sh.reset(" ")
+
+    def on_internal_runtime_error(self, context, error):
+        sh = Shell()
+        sh.bold_yellow("Internal Runtime Error\n")
+        sh.bold_red(error.traceback)
+        raise SystemExit(error.code)

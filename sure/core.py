@@ -24,13 +24,15 @@ except ImportError:
     from mock.mock import _CallList
 
 import inspect
+
+from collections import OrderedDict
 from six import (
     text_type, integer_types, string_types, binary_type,
     get_function_code
 )
 
 from sure.terminal import red, green, yellow
-from sure.compat import safe_repr, OrderedDict
+from sure.compat import safe_repr
 
 
 class Anything(object):

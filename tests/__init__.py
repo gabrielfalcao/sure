@@ -1,2 +1,2 @@
 import sure
-sure.enable_magic_syntax()
+sure.enable_special_syntax()

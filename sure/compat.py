@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 import six
-from collections import OrderedDict
 
 try:
     from collections.abc import Iterable
@@ -11,6 +10,7 @@ except ImportError:
     from collections import Iterable
 
 from sure.terminal import red, green, yellow
+from sure.doubles import FakeOrderedDict
 
 
 if six.PY2:
@@ -38,36 +38,6 @@ if six.PY2:
 else:
     def compat_repr(object_repr):
         return object_repr
-
-# FIXME: move FakeOrderedDict to another module since it
-#        does not have anything todo with compat.
-#        The safe_repr function should already get a
-#        FakeOrderedDict instance. Maybe the _obj_with_safe_repr
-#        function should be part of the FakeOrderedDict
-#        classes __repr__ method.
-class FakeOrderedDict(OrderedDict):
-    """ OrderedDict that has the repr of a normal dict
-
-    We must return a string whether in py2 or py3.
-    """
-    def __unicode__(self):
-        if not self:
-            return '{}'
-        key_values = []
-        for key, value in self.items():
-            key, value = repr(key), repr(value)
-            if isinstance(value, six.binary_type) and six.PY2:
-                value = value.decode("utf-8")
-            key_values.append("{0}: {1}".format(key, value))
-        res = "{{{0}}}".format(", ".join(key_values))
-        return res
-
-    if six.PY2:
-        def __repr__(self):
-            return self.__unicode__().encode('utf-8')
-    else:
-        def __repr__(self):
-            return self.__unicode__()
 
 
 def _obj_with_safe_repr(obj):

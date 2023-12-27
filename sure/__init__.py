@@ -14,8 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import unicode_literals
-
 import re
 import os
 import sys
@@ -42,7 +40,7 @@ from sure.core import _get_line_number
 from sure.core import safe_repr
 from sure.core import anything  # noqa
 
-from sure.magic import is_cpython, patchable_builtin
+from sure.special import is_cpython, patchable_builtin
 from sure.registry import context as _registry
 import sure.reporters
 
@@ -483,10 +481,20 @@ class AssertionBuilder(object):
         self._name = name
         self.negative = negative
 
-        self.obj = obj
+        self._obj = obj
         self._callable_args = callable_args or []
         self._callable_kw = callable_kw or {}
         self._that = AssertionHelper(self.obj)
+
+    def get_obj(self):
+        if isinstance(self._obj, AssertionBuilder):
+            return self._obj.obj
+        return self._obj
+
+    def set_obj(self, obj):
+        self._obj = obj
+
+    obj = property(get_obj, set_obj)
 
     def __call__(self, obj):
         self.obj = obj
@@ -1143,7 +1151,7 @@ def do_enable():
 old_dir = dir
 
 
-def enable_magic_syntax():
+def enable_special_syntax():
     @wraps(builtins.dir)
     def _new_dir(*obj):
         if not obj:
@@ -1175,7 +1183,7 @@ def enable_magic_syntax():
     do_enable()
 
 
-enable = enable_magic_syntax
+enable = enable_special_syntax
 
 if is_cpython and allows_new_syntax:
-    enable_magic_syntax()
+    enable_special_syntax()

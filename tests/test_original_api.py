@@ -22,7 +22,7 @@ from six.moves import xrange
 
 import sure
 from sure.original import that
-from sure.magic import is_cpython
+from sure.special import is_cpython
 from sure import VariablesBag, expect
 from nose.tools import assert_equals, assert_raises
 from sure.compat import compat_repr, safe_repr, text_type_name

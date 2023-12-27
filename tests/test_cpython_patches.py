@@ -19,7 +19,7 @@ from __future__ import unicode_literals
 
 import sure
 from sure import expect
-from sure.magic import is_cpython
+from sure.special import is_cpython
 
 # if is_cpython:
 #     if sure.allows_new_syntax:

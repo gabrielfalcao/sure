@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""original module from sure's inception prior to the creation of :py:mod:`sure.magic`"""
+"""original module from sure's inception prior to the creation of :py:mod:`sure.special`"""
 import os
 import re
 import traceback

@@ -771,7 +771,7 @@ Differently of `ruby <http://www.ruby-lang.org>`__ python doesn't have
 `open classes
 <http://blog.aizatto.com/2007/06/01/ruby-and-open-classes/>`__, but
 `sure uses a technique
-<https://github.com/gabrielfalcao/sure/blob/master/sure/magic.py>`_
+<https://github.com/gabrielfalcao/sure/blob/master/sure/special.py>`_
 involving the module :py:mod:`ctypes` to write directly in the private
 ``__dict__`` of in-memory objects.
 For more information check out the `Forbidden Fruit <https://github.com/clarete/forbiddenfruit>`_ project.
@@ -879,7 +879,7 @@ Use the ``chainproperty`` decorator like the following to build your own *chain*
 
 
    class Foo:
-       magic = 42
+       special = 42
 
 
    @chainproperty
@@ -903,8 +903,8 @@ Use the ``chainproperty`` decorator like the following to build your own *chain*
                self.obj, name)
 
    # Build awesome assertion chains
-   expect(Foo).having.attribute('magic')
-   Foo.doesnt.implement.attribute('nomagic')
+   expect(Foo).having.attribute('special')
+   Foo.doesnt.implement.attribute('nospecial')
 
 Use custom assertion messages with ``ensure``
 ---------------------------------------------

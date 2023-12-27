@@ -84,12 +84,12 @@ actually challenged Lincoln to do try and do so.
 
 As Gabriel imagined, it wouldn't take long for Lincoln Clarete to
 achieve that goal, he then presently wrote most if not all the code
-currently present inside :py:mod:`sure.magic` and also took the idea
+currently present inside :py:mod:`sure.special` and also took the idea
 forward and evolvend it, ultimately resulting in the publishing of the
 Python Package `forbidden fruit
 <http://clarete.github.io/forbiddenfruit/>`_.
 
-The only catch is that the functionallity inside :py:mod:`sure.magic`
+The only catch is that the functionallity inside :py:mod:`sure.special`
 is primarily guaranteed to work only with CPython, the original
 implementation of Python in the C programming language.
 

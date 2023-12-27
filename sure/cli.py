@@ -41,11 +41,11 @@ from sure.errors import ExitError, ExitFailure, InternalRuntimeError
 @click.option("-i", "--immediate", is_flag=True)
 @click.option("-l", "--log-level", type=click.Choice(['none', 'debug', 'info', 'warning', 'error']), help="default='none'")
 @click.option("-F", "--log-file", help='path to a log file. Default to SURE_LOG_FILE')
-@click.option("-s", "--syntax-magic", is_flag=True)
+@click.option("-s", "--special-syntax", is_flag=True)
 @click.option("-c", "--with-coverage", is_flag=True)
 @click.option("--cover-branches", is_flag=True)
 @click.option("--cover-module", multiple=True, help="specify module names to cover")
-def entrypoint(paths, reporter, immediate, log_level, log_file, syntax_magic, with_coverage, cover_branches, cover_module):
+def entrypoint(paths, reporter, immediate, log_level, log_file, special_syntax, with_coverage, cover_branches, cover_module):
     if not paths:
         paths = glob('test*/**')
     else:
@@ -66,8 +66,8 @@ def entrypoint(paths, reporter, immediate, log_level, log_file, syntax_magic, wi
         cov.load()
         cov.start()
 
-    if syntax_magic:
-        sure.enable_magic_syntax()
+    if special_syntax:
+        sure.enable_special_syntax()
 
     runner = Runner(resolve_path(os.getcwd()), reporter)
     try:

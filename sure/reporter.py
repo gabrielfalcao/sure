@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
 # Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
@@ -145,7 +144,7 @@ class Reporter(object, metaclass=MetaReporter):
         """
         raise NotImplementedError
 
-    def on_failure(self, scenario, error):
+    def on_failure(self, scenario_result, error):
         """Called when a scenario fails without crashing
 
         .. code:: python
@@ -196,7 +195,7 @@ class Reporter(object, metaclass=MetaReporter):
         """
         raise NotImplementedError
 
-    def on_error(self, scenario, error):
+    def on_error(self, scenario_result, error):
         """Called when a scenario fails with exception
 
         .. code:: python

@@ -26,9 +26,9 @@
 # Notes:
 # ~~~~~
 #
-# * the following methods require exactly one positional argument: ``mock_name``, otherwise: ``raise AssertionError("self.mock.simple() and self.mock.magic() require one positional argument: its name.")``
+# * the following methods require exactly one positional argument: ``mock_name``, otherwise: ``raise AssertionError("self.mock.simple() and self.mock.special() require one positional argument: its name.")``
 #   * ``self.mock.simple()``
-#   * ``self.mock.magic()``
+#   * ``self.mock.special()``
 # * self.mock.install() forwards keyword-arguments to ``mock.patch``, for example:
 #   * ``self.mock.install('myapp.api.http.db.engine.connect', return_value='DUMMY_CONNECTION')
 #   * ``self.mock.install('myapp.api.http.db.engine.connect', return_value='DUMMY_CONNECTION')

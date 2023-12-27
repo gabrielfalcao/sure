@@ -67,7 +67,7 @@ class loader(object):
         module_is_artificial = path.parent.joinpath('__init__.py').exists()
         module_name = path.parent.name
         if not module_is_artificial:
-            relative = str(path.relative_to(root.parent))
+            relative = str(path.relative_to(package.parent))
             module_name = os.path.splitext(relative)[0].replace(os.sep, '.')
 
         spec = importlib.util.spec_from_file_location(module_name, path)

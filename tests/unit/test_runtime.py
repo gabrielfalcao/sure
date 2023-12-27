@@ -23,5 +23,5 @@ from sure.runtime import object_name
 
 def test_object_name_type():
     "calling ``sure.runtime.object_name(X)`` where X is a ``type``"
-    object_name(Awaitable).should_not.equal("collections.abc.Awaitablea")
-    object_name(Awaitable).should.equal("collections.abc.Awaitable")
+    assert object_name(Awaitable).should_not.equal("collections.abc.Awaitablea")
+    assert object_name(Awaitable).should.equal("collections.abc.Awaitable")

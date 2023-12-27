@@ -5,7 +5,7 @@ Test custom assertions.
 """
 
 from sure import expect, assertion, chain, chainproperty
-from sure.magic import is_cpython
+from sure.special import is_cpython
 
 
 def test_custom_assertion():
@@ -60,7 +60,7 @@ def test_custom_chain_property():
     "test extending sure with a custom chain property."
 
     class Response(object):
-        magic = 41
+        special = 41
 
     @chainproperty
     def having(self):
@@ -84,5 +84,5 @@ def test_custom_chain_property():
         return True
 
 
-    expect(Response).having.attribute("magic")
-    expect(Response).doesnt.implement.attribute("nomagic")
+    expect(Response).having.attribute("special")
+    expect(Response).doesnt.implement.attribute("nospecial")

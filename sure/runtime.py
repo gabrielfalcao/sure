@@ -44,6 +44,10 @@ self = sys.modules[__name__]
 log = logging.getLogger(__name__)
 
 
+class BaseContainer(object):
+    """base-class for runtime containers"""
+
+
 def object_name(so) -> str:
     """so: stands for "some object"""
     if isinstance(so, type):
@@ -58,20 +62,16 @@ def object_name(so) -> str:
     return getattr(so, "__name__", repr(so))
 
 
-def stripped(string):
-    return "\n".join(filter(bool, [s.strip() for s in string.splitlines()]))
-
-
-def seem_to_indicate_test(name: str) -> bool:
-    return re.search(r"^(Ensure|Test|Spec|Scenario)", name or "", re.I)
-
-
 def seem_to_indicate_setup(name: str) -> bool:
     return re.search(r"^(setUp|setup|set_up)$", name or "")
 
 
 def seem_to_indicate_teardown(name: str) -> bool:
     return re.search(r"^(tearDown|teardown|tear_down)$", name or "")
+
+
+def seem_to_indicate_test(name: str) -> bool:
+    return re.search(r"^(Ensure|Test|Spec|Scenario)", name or "", re.I)
 
 
 def appears_to_be_runnable(name: str) -> bool:
@@ -87,31 +87,6 @@ def appears_to_be_runnable(name: str) -> bool:
             )
         )
     )
-
-
-class CallGuard(object):
-    def __init__(self, source, ancestor=None):
-        self.source = source
-        self.ancestor = ancestor
-        self.function = isinstance(source, types.FunctionType)
-        self.callable = callable(source)
-
-    @property
-    def name(self):
-        if self.is_function:
-            return self.source.__name__
-        return self.test.__func__.__name__
-
-    def __call__(self, *args, **kw):
-        if isinstance(source, type):
-            self.source_instance = source()
-        elif callable(source):
-            test_methods.insert(0, Container(source.__name__, source, TestLocation(
-                source, source.__module__
-            ), some_object))
-            self.source_instance = source.__module__
-        else:
-            raise NotImplementedError(f"PreparedTestSuiteContainer received unexpected type: {source}")
 
 
 class TestLocation(object):
@@ -155,14 +130,15 @@ class TestLocation(object):
 
     @property
     def ort(self):
-        return f"{self.filename}:{self.line}"
+        return collapse_path(f"{self.filename}:{self.line}")
 
 
-class Container(object):
+class Container(BaseContainer):
     owner: Optional[object]
     name: str
     runnable: callable
     location: TestLocation
+    nested_containers: List[BaseContainer]
 
     def __init__(
         self,
@@ -170,11 +146,13 @@ class Container(object):
         runnable: callable,
         location: TestLocation,
         owner: Optional[object] = None,
+        nested: Optional[List[BaseContainer]] = None,
     ):
         self.name = name
         self.runnable = runnable
         self.location = location
         self.owner = owner
+        self.nested = nested or []
 
     @property
     def unit(self):
@@ -248,9 +226,9 @@ class BaseResult(object):
 
     @property
     def ok(self):
-        er = set([x.is_error for x in self.results])
-        fe = set([x.is_failure for x in self.results])
-        return len(er.union(fe)) == 0
+        errors = set([x.is_error for x in self.results])
+        failures = set([x.is_failure for x in self.results])
+        return len(errors.union(failures)) == 0
 
 
 class RuntimeRole:
@@ -259,11 +237,7 @@ class RuntimeRole:
     Teardown = reduce(lambda L, R: L ^ R, b"Teardown")
 
 
-class PreparedTestSuiteContainer(object):
-    pass
-
-
-class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
+class PreparedTestSuiteContainer(BaseContainer):
     """Thought with the goal of providing a hermetically isolated
     environment where the runtime context and associated reporters are
     kept in sync with potentially nested occurrences of scenarios
@@ -277,7 +251,8 @@ class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
     context: RuntimeContext
     setup_methods: List[Callable]
     teardown_methods: List[Callable]
-    test_methods: List[Callable]
+    test_methods: List[BaseContainer]
+    nested_suites: List[BaseContainer]
 
     def __init__(
         self,
@@ -286,7 +261,7 @@ class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
         setup_methods: List[Callable],
         teardown_methods: List[Callable],
         test_methods: List[Callable],
-        nested_suites: List[PreparedTestSuiteContainer],
+        nested_suites: List[BaseContainer],
     ):
         self.error = None
         self.failure = None
@@ -305,6 +280,10 @@ class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
         self.setup_methods = setup_methods
         self.teardown_methods = teardown_methods
         self.test_methods = test_methods
+
+    @property
+    def tests(self):
+        return self.test_methods
 
     def run_predicates(self, context):
         for name, setup, location in self.setup_methods:
@@ -334,7 +313,7 @@ class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
             if isinstance(some_object, type) and issubclass(
                 some_object, unittest.TestCase
             ):
-                # TODO: warn about probability of abuse of TestCase constructor taking wrong arguments
+                # TODO: warn about possibility of abuse of TestCase constructor taking wrong arguments
                 runnable = getattr(some_object(name), name, None)
             else:
                 # TODO: support non-unittest.TestCase classes
@@ -362,6 +341,8 @@ class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
 
             elif isinstance(runnable, type):
                 nested_suites.append((name, cls.from_generic_object(runnable, context)))
+            else:
+                raise NotImplementedError
 
         return cls(
             source=some_object,
@@ -372,25 +353,7 @@ class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
             nested_suites=nested_suites,
         )
 
-    def invoke_contextualized(self, runnable, context, name, location):
-        """exception handling is left to the caller"""
-        if not hasattr(runnable, "__code__"):
-            raise RuntimeError(f"expected {runnable} to be a function in this instance")
-        self.log.set_location(location)
-        code = runnable.__code__
-        varnames = set(code.co_varnames).intersection({"context"})
-        argcount = len(varnames)
-
-        if argcount == 0:
-            return runnable()
-        elif argcount == 1:
-            return runnable(context)
-        else:
-            raise NonValidTest(
-                f"it appears that the test function {name} {location} takes more than one argument: {argcount}"
-            )
-
-    def run(self, context):
+    def run(self, context, tests):
         last_failure = None
         last_error = None
 
@@ -415,37 +378,37 @@ class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
             return ScenarioResult(self, location=None, context=context, error=error)
 
         try:
-            for container in self.test_methods:
-                result = self.run_container(container, context)
-
-                if result.failure:
-                    last_failure = result
-                if result.error:
-                    last_error = result
-
-                if context.runtime.immediate:
-                    if last_error is not None:
-                        raise ImmediateError(last_error)
-                    if last_failure is not None:
-                        raise ImmediateFailure(last_failure)
-
-                yield result, RuntimeRole.Unit
+            for container in tests:
+                for result, role in self.run_container(container, context):
+                    yield result, role
         finally:
             for result in self.run_complements(context):
                 yield result, RuntimeRole.Teardown
 
     def run_container(self, container, context):
-        return self.perform_unit(
-            test=container.unit,
+        result = self.perform_unit(
+            container=container,
             context=context,
             name=container.name,
             location=container.location,
         )
+        if result.failure:
+            last_failure = result
+        if result.error:
+            last_error = result
 
-    def perform_unit(self, test, context, name, location):
+        if context.runtime.immediate:
+            if last_error is not None:
+                raise ImmediateError(last_error)
+            if last_failure is not None:
+                raise ImmediateFailure(last_failure)
+
+        yield result, RuntimeRole.Unit
+
+    def perform_unit(self, container, context, name, location):
         self.log.set_location(location)
         try:
-            self.invoke_contextualized(test, context, name, location)
+            self.invoke_contextualized(container, context, name, location)
         except AssertionError as failure:
             return ScenarioResult(self, location, context, failure)
 
@@ -453,6 +416,24 @@ class PreparedTestSuiteContainer(PreparedTestSuiteContainer):
             return ScenarioResult(self, location, context, error)
 
         return ScenarioResult(self, location, context)
+
+    def invoke_contextualized(self, container, context, name, location):
+        """exception handling is left to the caller"""
+        if not isinstance(container, BaseContainer):
+            raise RuntimeError(f"expected {container} to be an instance of BaseContainer in this instance")
+        self.log.set_location(location)
+        code = container.unit.__code__
+        varnames = set(code.co_varnames).intersection({"context"})
+        argcount = len(varnames)
+
+        if argcount == 0:
+            return container.unit()
+        elif argcount == 1:
+            return container.unit(context)
+        else:
+            raise NonValidTest(
+                f"it appears that the test function {name} {location} takes more than one argument: {argcount}"
+            )
 
 
 class Feature(object):
@@ -494,7 +475,7 @@ class Feature(object):
                     raise ExitFailure(context, result)
 
             elif result.is_error:
-                reporter.on_error(scenario, result.error)
+                reporter.on_error(scenario, result)
                 if runtime.immediate:
                     raise ExitError(context, result)
 
@@ -514,11 +495,18 @@ class ErrorStack(object):
         self.location = location
 
     def location_specific_stack(self):
-        return [e for e in traceback.format_tb(self.traceback) if self.location.name in e]
+        return [collapse_path(e) for e in traceback.format_tb(self.traceback) if self.location.name in e]
 
     def location_specific_error(self):
         stack = self.location_specific_stack()
-        return stack and stack[-1] or str(self.exception)
+        return collapse_path(stack and stack[-1] or str(self.exception))
+
+    def nonlocation_specific_stack(self):
+        return [collapse_path(e) for e in traceback.format_tb(self.traceback) if self.location.name not in e]
+
+    def nonlocation_specific_error(self):
+        stack = self.nonlocation_specific_stack()
+        return collapse_path(stack and stack[-1] or str(self.exception))
 
     def __str__(self):
         return "\n".join(self.location_specific_stack())
@@ -540,16 +528,16 @@ class Scenario(object):
 
     def run(self, context):
         collector = PreparedTestSuiteContainer.from_generic_object(self.object, context)
+
         results = []
-        for result, role in collector.run(context):
+        for result, role in collector.run(context, collector.tests):
             if role != RuntimeRole.Unit:
                 continue
             results.append(result)
             if result.is_success:
                 continue
             if context.runtime.immediate:
-                # return results[-1]
-                # XXX: consider non-reliance on ScenarioResultSet.__getattr__ proxying attributes from results[-1]
+                # TODO: consider non-reliance on ScenarioResultSet.__getattr__ proxying attributes from results[-1]
                 return ScenarioResultSet(results, context)
 
         return ScenarioResultSet(results, context)
@@ -813,7 +801,7 @@ class FeatureResultSet(BaseResult):
     def error(self) -> Optional[Exception]:
         for feature in self.errored_features:
             if feature.is_error:
-                return feature.error
+                return collapse_path(feature.error)
 
     @property
     def is_failure(self):
@@ -846,3 +834,11 @@ class FeatureResultSet(BaseResult):
     @property
     def first_nonsuccessful_result(self) -> Optional[FeatureResult]:
         return self.first_scenario_result_error or self.first_scenario_result_fail
+
+
+def stripped(string):
+    return collapse_path("\n".join(filter(bool, [s.strip() for s in string.splitlines()])))
+
+
+def collapse_path(e: str):
+    return e.replace(os.getenv("HOME"), "~")

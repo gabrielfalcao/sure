@@ -5,7 +5,7 @@ Test fix of bug described in GitHub Issue #19.
 """
 
 from sure import expect, AssertionBuilder
-from sure.magic import is_cpython
+from sure.special import is_cpython
 
 
 def test_issue_19():

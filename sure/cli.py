@@ -39,7 +39,7 @@ from sure.errors import ExitError, ExitFailure, InternalRuntimeError
 @click.argument("paths", nargs=-1)
 @click.option("-r", "--reporter", default="feature", help='default=feature', type=click.Choice(gather_reporter_names()))
 @click.option("-i", "--immediate", is_flag=True)
-@click.option("-l", "--log-level", type=click.Choice(['none', 'debug', 'info', 'warning', 'error']), help="default='none'")
+@click.option("-l", "--log-level", type=click.Choice(['debug', 'info', 'warning', 'error']), help="default='info'")
 @click.option("-F", "--log-file", help='path to a log file. Default to SURE_LOG_FILE')
 @click.option("-s", "--special-syntax", is_flag=True)
 @click.option("-c", "--with-coverage", is_flag=True)
@@ -76,21 +76,27 @@ def entrypoint(paths, reporter, immediate, log_level, log_file, special_syntax, 
         raise InternalRuntimeError(runner.context, e)
 
     if result:
-        if cov:
+        if result.is_failure:
+            raise ExitFailure(runner.context, result)
+
+        elif result.is_error:
+            raise ExitError(runner.context, result)
+
+        elif cov:
             cov.stop()
             cov.save()
             cov.report()
 
-        if result.is_failure:
-            raise ExitFailure(runner.context, result)
-
-        if result.is_error:
-            raise ExitError(runner.context, result)
-
 
 def configure_logging(log_level: str, log_file: str):
-    if not isinstance(log_level, str) or log_level.lower() == 'none':
-        return
+    if not log_level:
+        log_level = "none"
+
+    if not isinstance(log_level, str):
+        raise TypeError(
+            f"log_level should be a string but is {log_level}({type(log_level)}) instead"
+        )
+    log_level = log_level.lower() == 'none' and 'info' or log_level
 
     level = getattr(logging, log_level.upper())
 

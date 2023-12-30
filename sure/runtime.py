@@ -13,7 +13,8 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
 import os
 import re
 import sys
@@ -24,7 +25,7 @@ import unittest
 import traceback
 from pathlib import Path
 from functools import reduce
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Callable, Union
 
 from mock import Mock
 
@@ -35,9 +36,12 @@ from sure.errors import (
     ImmediateError,
     ImmediateFailure,
 )
-from sure.loader import loader
+from sure.loader import (
+    loader,
+    get_type_definition_filename_and_firstlineno,
+)
 from sure.reporter import Reporter
-
+from sure.errors import InternalRuntimeError
 self = sys.modules[__name__]
 
 
@@ -48,8 +52,16 @@ class BaseContainer(object):
     """base-class for runtime containers"""
 
 
-def object_name(so) -> str:
-    """so: stands for "some object"""
+class RuntimeRole:
+    Setup = reduce(lambda L, R: L ^ R, b"Setup")
+    Unit = reduce(lambda L, R: L ^ R, b"Unit")
+    Teardown = reduce(lambda L, R: L ^ R, b"Teardown")
+
+
+def object_name(so: object) -> str:
+    """
+    :param so: stands for "some object" - a :py:class:`object` from which some kind of "name" - :py:class:`str` can be derived.
+    """
     if isinstance(so, type):
         return f"{so.__module__}.{so.__name__}"
 
@@ -90,28 +102,43 @@ def appears_to_be_runnable(name: str) -> bool:
 
 
 class TestLocation(object):
-    def __init__(self, test, ancestor=None):
+    def __init__(self, test, module_or_instance=None):
         self.test = test
-        self.code = test.__code__
-        self.filename = self.code.co_filename
-        self.line = self.code.co_firstlineno
-        self.kind = self.test.__class__
-        self.name = isinstance(self.test, types.FunctionType) and self.test.__name__ or self.test.__func__.__name__
-        self.ancestor = ancestor
+
+        if isinstance(test, (types.FunctionType, types.MethodType)):
+            self.name = test.__name__
+            code = test.__code__
+            self.filename = code.co_filename
+            self.line = code.co_firstlineno
+            self.kind = self.test.__class__
+
+        elif isinstance(test, unittest.TestCase):
+            self.name = test.__class__.__name__
+            self.filename, self.line = get_type_definition_filename_and_firstlineno(test.__class__)
+            self.kind = test.__class__
+        elif isinstance(test, type):
+            self.name = test.__name__
+            self.filename, self.line = get_type_definition_filename_and_firstlineno(test)
+            self.kind = test
+        else:
+            raise NotImplementedError(f"{test} of type {type(test)} is not yet supported by {TestLocation}")
+
+        self.module_or_instance = module_or_instance
         self.ancestral_description = ""
-        self.ancestor_repr = ""
-        if ancestor:
+        self.module_or_instance_repr = ""
+        if module_or_instance:
             self.ancestral_description = getattr(
-                ancestor, "description", ""
-            ) or getattr(
-                ancestor, "__doc__", ""
-            )
-            if isinstance(ancestor, type):
-                self.ancestor_repr = (
-                    f"({self.ancestor.__module__}.{self.ancestor.__name__})"
+                module_or_instance, "description",
+                getattr(
+                    module_or_instance, "__doc__", ""
                 )
-            elif isinstance(ancestor, str):
-                self.ancestor_repr = ancestor
+            )
+            if isinstance(module_or_instance, type):
+                self.module_or_instance_repr = (
+                    f"({self.module_or_instance.__module__}.{self.module_or_instance.__name__})"
+                )
+            elif isinstance(module_or_instance, str):
+                self.module_or_instance_repr = module_or_instance
             else:
                 raise NotImplementedError
 
@@ -133,33 +160,32 @@ class TestLocation(object):
         return collapse_path(f"{self.filename}:{self.line}")
 
 
-class Container(BaseContainer):
-    owner: Optional[object]
-    name: str
-    runnable: callable
-    location: TestLocation
-    nested_containers: List[BaseContainer]
-
-    def __init__(
-        self,
-        name: str,
-        runnable: callable,
-        location: TestLocation,
-        owner: Optional[object] = None,
-        nested: Optional[List[BaseContainer]] = None,
-    ):
-        self.name = name
-        self.runnable = runnable
+class ErrorStack(object):
+    def __init__(self, location: TestLocation, exc: Exception, exception_info=None):
+        self.exception_info = exception_info or sys.exc_info()
+        self.traceback = self.exception_info[-1]
+        self.exception = exc
         self.location = location
-        self.owner = owner
-        self.nested = nested or []
 
-    @property
-    def unit(self):
-        return self.runnable
+    def full(self) -> str:
+        return "\n".join([collapse_path(e) for e in traceback.format_tb(self.traceback)])
 
-    def __repr__(self):
-        return f"<{repr(self.runnable)} at {self.location.ort}>"
+    def location_specific_stack(self) -> List[str]:
+        return [collapse_path(e) for e in traceback.format_tb(self.traceback) if self.location.name in e]
+
+    def location_specific_error(self) -> str:
+        stack = self.location_specific_stack()
+        return collapse_path(stack and stack[-1] or str(self.exception))
+
+    def nonlocation_specific_stack(self) -> List[str]:
+        return [collapse_path(e) for e in traceback.format_tb(self.traceback) if self.location.name not in e]
+
+    def nonlocation_specific_error(self) -> List[str]:
+        stack = self.nonlocation_specific_stack()
+        return collapse_path(stack and stack[-1] or str(self.exception))
+
+    def __str__(self):
+        return "\n".join(self.location_specific_stack())
 
 
 class Logort(object):
@@ -191,7 +217,7 @@ class Logort(object):
         self.history.append(logging.getLogger(location.ort))
         for logger in self.history:
             logger.setLevel(default_logger.level)
-            logger.handlers = [self.log_handler]
+            logger.handlers = default_logger.handlers
 
 
 class RuntimeOptions(object):
@@ -207,10 +233,12 @@ class RuntimeOptions(object):
 class RuntimeContext(object):
     reporter: Reporter
     runtime: RuntimeOptions
+    unittest_testcase_method_name: str
 
-    def __init__(self, reporter: Reporter, runtime: RuntimeOptions):
+    def __init__(self, reporter: Reporter, runtime: RuntimeOptions, unittest_testcase_method_name: str = 'runTest'):
         self.reporter = reporter
         self.runtime = runtime
+        self.unittest_testcase_method_name = unittest_testcase_method_name
 
     def __repr__(self):
         return f"<RuntimeContext reporter={self.reporter} runtime={self.runtime}>"
@@ -231,10 +259,29 @@ class BaseResult(object):
         return len(errors.union(failures)) == 0
 
 
-class RuntimeRole:
-    Setup = reduce(lambda L, R: L ^ R, b"Setup")
-    Unit = reduce(lambda L, R: L ^ R, b"Unit")
-    Teardown = reduce(lambda L, R: L ^ R, b"Teardown")
+class Container(BaseContainer):
+    module_or_instance: Optional[object]
+    name: str
+    runnable: callable
+    location: TestLocation
+
+    def __init__(
+        self,
+        name: str,
+        runnable: Union[callable, unittest.TestCase, object],  # TODO: think whether it's reasonable to support a subclass of some kind of future :py:class:`~sure.Scenario`, hipothetically speaking.
+        module_or_instance: Optional[object] = None,
+    ):
+        self.name = name
+        self.runnable = runnable
+        self.location = TestLocation(runnable)
+        self.module_or_instance = module_or_instance
+
+    @property
+    def unit(self):
+        return self.runnable
+
+    def __repr__(self):
+        return f"<Container of {repr(self.runnable)} at {self.location.ort}>"
 
 
 class PreparedTestSuiteContainer(BaseContainer):
@@ -252,7 +299,7 @@ class PreparedTestSuiteContainer(BaseContainer):
     setup_methods: List[Callable]
     teardown_methods: List[Callable]
     test_methods: List[BaseContainer]
-    nested_suites: List[BaseContainer]
+    nested_containers: List[BaseContainer]
 
     def __init__(
         self,
@@ -261,137 +308,155 @@ class PreparedTestSuiteContainer(BaseContainer):
         setup_methods: List[Callable],
         teardown_methods: List[Callable],
         test_methods: List[Callable],
-        nested_suites: List[BaseContainer],
+        nested_containers: List[BaseContainer],
     ):
+        self.location = TestLocation(source)
+        self.name = self.location.name
         self.error = None
         self.failure = None
-        if isinstance(source, type):
+
+        if isinstance(source, unittest.TestCase):
+            self.source_instance = source
+        elif isinstance(source, type):
             self.source_instance = source()
-        elif callable(source):
-            test_methods.insert(0, Container(source.__name__, source, TestLocation(
-                source, source.__module__
-            ), source.__module__))
+        elif isinstance(source, types.FunctionType):
+
+            test_methods.insert(0, Container(source.__name__, source, source.__module__))
             self.source_instance = source.__module__
         else:
-            raise NotImplementedError(f"PreparedTestSuiteContainer received unexpected type: {source}")
+            raise NotImplementedError(f"PreparedTestSuiteContainer received unexpected type: {source} ({type(source)})")
 
         self.log = Logort(self.source_instance)
         self.context = context
         self.setup_methods = setup_methods
         self.teardown_methods = teardown_methods
         self.test_methods = test_methods
+        self.nested_containers = nested_containers
+
+    def __repr__(self):
+        return f"<PreparedTestSuiteContainer:{self.name} {self.location}>"
 
     @property
     def tests(self):
         return self.test_methods
 
-    def run_predicates(self, context):
-        for name, setup, location in self.setup_methods:
-            yield self.invoke_contextualized(
-                setup, context, name=name, location=location
-            )
-
-    def run_complements(self, context):
-        for name, setup, location in self.teardown_methods:
-            yield self.invoke_contextualized(
-                setup, context, name=name, location=location
-            )
+    def uncollapse_nested(self):
+        """uncollapses nested instances of
+        :py:class:`~sure.PreparedTestSuiteContainer` and returns
+        flattened list of this type.
+        """
+        flattened = [self]
+        for ptc in self.nested_containers:
+            flattened.extend(ptc.uncollapse_nested())
+        return flattened
 
     @classmethod
     def from_generic_object(cls, some_object, context: RuntimeContext):
         test_methods = []
         setup_methods = []
         teardown_methods = []
-        nested_suites = []
-        for name in dir(some_object):
-            if not appears_to_be_runnable(name):
-                log.debug(f"ignoring {some_object}.{name}")
-                continue
+        nested_containers = []
 
-            # <unittest.TestCase.__init__>
-            #   constructs instance of unittest.TestCase and filter out each runnable
-            if isinstance(some_object, type) and issubclass(
+        if isinstance(some_object, type):
+            some_object_type = some_object
+            #     <unittest.TestCase.__init__>
+            #   constructs instance of unittest.TestCase and filter out each instance_or_function
+            if issubclass(
                 some_object, unittest.TestCase
             ):
-                # TODO: warn about possibility of abuse of TestCase constructor taking wrong arguments
-                runnable = getattr(some_object(name), name, None)
+                instance_or_function = some_object(context.unittest_testcase_method_name)
             else:
-                # TODO: support non-unittest.TestCase classes
-                runnable = getattr(some_object, name, None)
-            # </unittest.TestCase.__init__>
+                # TODO: test support to non-unittest.TestCase classes
+                instance_or_function = some_object()
 
-            if isinstance(runnable, types.MethodType):
-                location = TestLocation(
-                    runnable, isinstance(some_object, type) and some_object or None
-                )
+        elif isinstance(some_object, types.FunctionType):
+            some_object_type = type(some_object)
+            instance_or_function = some_object
+            # TODO: refactor :py:mod:`sure.runner` and
+            # :py:mod:`sure.runtime` to provide a test function's
+            # module as ``some_object`` so that setup and teardown
+            # methods can be fetched from within the module's scope
+            return cls(
+                source=instance_or_function,
+                context=context,
+                setup_methods=[],
+                teardown_methods=[],
+                test_methods=[],
+                nested_containers=[],
+            )
 
+        else:
+            raise NotImplementedError(
+                f"PreparedTestSuiteContainer.from_generic_object received unexpected type: {some_object} ({type(some_object)})"
+            )
+
+        for name, runnable in inspect.getmembers(instance_or_function):
+            if not appears_to_be_runnable(name):
+                self.log.debug(f"ignoring {some_object}.{name}")
+                continue
+            if not issubclass(some_object_type, (types.FunctionType, types.MethodType)):
+                module_or_instance = instance_or_function.__module__
+            else:
+                module_or_instance = instance_or_function
+
+            if isinstance(runnable, (types.FunctionType, types.MethodType)):
                 if seem_to_indicate_setup(name):
                     # TODO: warn about probability of abuse of TestCase constructor taking non-standard arguments
                     setup_methods.append(
-                        Container(name, runnable, location, some_object)
+                        Container(name, runnable, module_or_instance)
                     )
                 elif seem_to_indicate_test(name):
                     test_methods.append(
-                        Container(name, runnable, location, some_object)
+                        Container(name, runnable, module_or_instance)
                     )
                 elif seem_to_indicate_teardown(name):
                     teardown_methods.append(
-                        Container(name, runnable, location, some_object)
+                        Container(name, runnable, module_or_instance)
                     )
-
             elif isinstance(runnable, type):
-                nested_suites.append((name, cls.from_generic_object(runnable, context)))
+                nested_containers.append(
+                    cls.from_generic_object(runnable, context)
+                )
+
             else:
                 raise NotImplementedError
 
         return cls(
-            source=some_object,
+            source=instance_or_function,
             context=context,
             setup_methods=setup_methods,
             teardown_methods=teardown_methods,
             test_methods=test_methods,
-            nested_suites=nested_suites,
+            nested_containers=nested_containers,
         )
 
-    def run(self, context, tests):
-        last_failure = None
-        last_error = None
+    def run(self, context):
 
-        try:
-            for result in self.run_predicates(context):
-                yield result, RuntimeRole.Setup
-        except Exception as error:
-            # the apparent non-distinguishingly catching of
-            # AssertionError instances is intentional to the present
-            # conceptual context during this period of ponderation in
-            # regards to the status-quo of what begs the non-essential
-            # whole-truth to be exposed, coming from the current
-            # presupposition that predicates are inherently
-            # non-supposed to make assertions of any kind, but rather
-            # prepare the subject-under-test to undergo a test process
-            # in such way that the process itself is, in its turn,
-            # presupposed not to raise any exceptions other than
-            # assertions whose purpose is not to fail unreasonably but
-            # to expose the failures of the system comprised of the
-            # referred subject along with other subject-object targets
-            # which beg scrutinity from a careful developer.
-            return ScenarioResult(self, location=None, context=context, error=error)
+        for setup_container in self.setup_methods:
+            yield self.invoke_contextualized(
+                setup_container, context
+            ), RuntimeRole.Setup
 
-        try:
-            for container in tests:
-                for result, role in self.run_container(container, context):
-                    yield result, role
-        finally:
-            for result in self.run_complements(context):
-                yield result, RuntimeRole.Teardown
+        for container in self.tests:
+            if len(self.tests) > 1:
+                context.reporter.on_scenario(container.location)
+            for result, role in self.run_container(container, context):
+                if len(self.tests) > 1:
+                    context.reporter.on_scenario_done(container.location, result)
+                yield result, role
+
+        for teardown_container in self.teardown_methods:
+            yield self.invoke_contextualized(
+                teardown_container, context
+            ), RuntimeRole.Teardown
 
     def run_container(self, container, context):
-        result = self.perform_unit(
+        result = self.invoke_contextualized(
             container=container,
             context=context,
-            name=container.name,
-            location=container.location,
         )
+        last_error = None
+        last_failure = None
         if result.failure:
             last_failure = result
         if result.error:
@@ -405,31 +470,56 @@ class PreparedTestSuiteContainer(BaseContainer):
 
         yield result, RuntimeRole.Unit
 
-    def perform_unit(self, container, context, name, location):
-        self.log.set_location(location)
-        try:
-            self.invoke_contextualized(container, context, name, location)
-        except AssertionError as failure:
-            return ScenarioResult(self, location, context, failure)
+    def invoke_contextualized(self, container, context):
+        """Calls the unit of code within *container* - :py:attr:`~sure.runtime.Container.unit` - and returns a :py:class:`~sure.runtime.ScenarioResult`.
 
-        except Exception as error:
-            return ScenarioResult(self, location, context, error)
+        If a python exception happens during that call then a
+        distinction is made between :py:class:`AssertionError` or
+        :py:class:`Exception` and forwarded to the
+        :py:class:`~sure.runtime.ScenarioResult` as "failure" or
+        "error", respectively.
 
-        return ScenarioResult(self, location, context)
+        .. note:: The given :py:attr:`~sure.runtime.Container.unit` may optionally take one argument: ``context`` which may or may not be an instance of :py:class:`~sure.VariablesBag`
 
-    def invoke_contextualized(self, container, context, name, location):
-        """exception handling is left to the caller"""
+        :param container: :py:class:`~sure.runtime.Container`
+        :param context: :py:class:`~sure.runtime.RuntimeContext`
+        :param name: :py:class:`str`
+        :param location: :py:class:`~sure.runtime.TestLocation`
+        """
         if not isinstance(container, BaseContainer):
-            raise RuntimeError(f"expected {container} to be an instance of BaseContainer in this instance")
+            raise InternalRuntimeError(f"expected {container} to be an instance of BaseContainer in this instance")
+
+        name = container.name
+        location = container.location
         self.log.set_location(location)
         code = container.unit.__code__
         varnames = set(code.co_varnames).intersection({"context"})
         argcount = len(varnames)
 
         if argcount == 0:
-            return container.unit()
+            try:
+                return_value = container.unit()
+                return ScenarioResult(self, container.location, context, return_value=return_value)
+
+            except AssertionError as failure:
+                return ScenarioResult(self, container.location, context, failure)
+
+            except Exception as error:
+                return ScenarioResult(self, container.location, context, error)
+
         elif argcount == 1:
-            return container.unit(context)
+            try:
+                # TODO: think whether it's reasonable to admit a similar
+                # behavior or approach, that of how
+                # :py:meth:`sure.that_with_context` applies an instance of
+                # VariablesBag, here:
+                return_value = container.unit(context)
+            except AssertionError as failure:
+                return ScenarioResult(self, container.location, context, failure, return_value=return_value)
+
+            except Exception as error:
+                return ScenarioResult(self, container.location, context, error, return_value=return_value)
+
         else:
             raise NonValidTest(
                 f"it appears that the test function {name} {location} takes more than one argument: {argcount}"
@@ -464,8 +554,6 @@ class Feature(object):
         for scenario in self.scenarios:
             context = RuntimeContext(reporter, runtime)
 
-            reporter.on_scenario(scenario)
-
             result = scenario.run(context)
 
             results.append(result)
@@ -475,48 +563,18 @@ class Feature(object):
                     raise ExitFailure(context, result)
 
             elif result.is_error:
-                reporter.on_error(scenario, result)
+                reporter.on_error(result.scenario, result)
                 if runtime.immediate:
                     raise ExitError(context, result)
-
-            else:
-                reporter.on_success(scenario)
-
-            reporter.on_scenario_done(scenario, result)
 
         return FeatureResult(results)
 
 
-class ErrorStack(object):
-    def __init__(self, location: TestLocation, exc: Exception, exception_info=None):
-        self.exception_info = exception_info or sys.exc_info()
-        self.traceback = self.exception_info[-1]
-        self.exception = exc
-        self.location = location
-
-    def location_specific_stack(self):
-        return [collapse_path(e) for e in traceback.format_tb(self.traceback) if self.location.name in e]
-
-    def location_specific_error(self):
-        stack = self.location_specific_stack()
-        return collapse_path(stack and stack[-1] or str(self.exception))
-
-    def nonlocation_specific_stack(self):
-        return [collapse_path(e) for e in traceback.format_tb(self.traceback) if self.location.name not in e]
-
-    def nonlocation_specific_error(self):
-        stack = self.nonlocation_specific_stack()
-        return collapse_path(stack and stack[-1] or str(self.exception))
-
-    def __str__(self):
-        return "\n".join(self.location_specific_stack())
-
-
 class Scenario(object):
     def __init__(self, class_or_callable, feature):
-        self.id = class_or_callable.__name__
+        self.name = class_or_callable.__name__
         self.log = Logort(self)
-        self.description = stripped(class_or_callable.__doc__ or self.id)
+        self.description = stripped(class_or_callable.__doc__ or "")
 
         self.object = class_or_callable
         self.object_ancestor = None
@@ -526,20 +584,32 @@ class Scenario(object):
 
         self.feature = feature
 
-    def run(self, context):
-        collector = PreparedTestSuiteContainer.from_generic_object(self.object, context)
-
+    def run(self, context: RuntimeContext):
+        collectors = PreparedTestSuiteContainer.from_generic_object(
+            self.object,
+            context,
+        ).uncollapse_nested()
         results = []
-        for result, role in collector.run(context, collector.tests):
-            if role != RuntimeRole.Unit:
-                continue
-            results.append(result)
-            if result.is_success:
-                continue
-            if context.runtime.immediate:
-                # TODO: consider non-reliance on ScenarioResultSet.__getattr__ proxying attributes from results[-1]
-                return ScenarioResultSet(results, context)
+        for collector in collectors:
+            collector_results = []
+            context.reporter.on_scenario(collector.location)
 
+            for result, role in collector.run(context):
+                if role == RuntimeRole.Unit:
+                    collector_results.append(result)
+                elif not result.is_success:
+                    if result.is_failure:
+                        context.reporter.on_failure(result.scenario, result)
+                        if context.runtime.immediate:
+                            raise ExitFailure(context, result)
+
+                    elif result.is_error:
+                        context.reporter.on_error(result.scenario, result)
+                        if context.runtime.immediate:
+                            raise ExitError(context, result)
+
+            context.reporter.on_scenario_done(collector.location, ScenarioResultSet(collector_results, context))
+            results.extend(collector_results)
         return ScenarioResultSet(results, context)
 
 
@@ -550,7 +620,7 @@ class ScenarioResult(BaseResult):
     location: TestLocation
 
     def __init__(
-        self, scenario, location: TestLocation, context: RuntimeContext, error=None
+        self, scenario, location: TestLocation, context: RuntimeContext, error=None, return_value=None
     ):
         self.scenario = scenario
         self.location = location
@@ -646,12 +716,6 @@ class ScenarioResultSet(ScenarioResult):
             if scenario.is_error:
                 self.errored_scenarios.append(scenario)
 
-    def __getattr__(self, attr, fallback=None):
-        try:
-            return self.__getattribute__(attr)
-        except AttributeError:
-            return getattr(self.scenario_results[-1], attr, fallback)
-
     def printable(self):
         if self.failure is not None:
             return self.failure
@@ -669,6 +733,17 @@ class ScenarioResultSet(ScenarioResult):
         for scenario in self.errored_scenarios:
             if scenario.is_error:
                 return scenario.error
+
+    @property
+    def stack(self) -> Optional[ErrorStack]:
+        for scenario in self.errored_scenarios:
+            return scenario.stack
+
+    def __getattr__(self, attr, fallback=None):
+        try:
+            return self.__getattribute__(attr)
+        except AttributeError:
+            return getattr(self.scenario_results[-1], attr, fallback)
 
     @property
     def is_failure(self):

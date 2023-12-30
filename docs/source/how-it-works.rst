@@ -1,5 +1,7 @@
-How sure works
-==============
+.. _How Sure Works:
+
+How :py:mod:`sure` works
+========================
 
 The class ``sure.AssertionBuilder`` creates objects capable of doing
 assertions. The AssertionBuilder simply arranges a vast set of possible
@@ -26,8 +28,20 @@ short assertions like:
 
    PERSON.should.have.key("facebook_info").being.a(dict)
 
+
+.. _Special Syntax:
+
+Special Syntax
+==============
+
+The :py:mod:`sure` module presents the concept of "special-syntax"
+defined as the optional feature of, during runtime, extending every
+:py:class:`object` with assertion methods with the purpose of enabling
+a kind of fluent writing of automated tests.
+
+
 A bit of history
-================
+----------------
 
 From Sure's absolute ideation, its original author - Gabriel Falcão -
 had envisioned to somehow expand Python's :py:class:`object` with

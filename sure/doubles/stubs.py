@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-def stub(base_class=None, **attributes):
+def stub(base_class=None, metaclass=None, **attributes):
     """creates a python class "on-the-fly" with the given keyword-arguments
     as class-attributes accessible with .attrname.
 
@@ -31,7 +31,11 @@ def stub(base_class=None, **attributes):
         "__new__": lambda *args, **kw: object.__new__(
             *args, *kw
         ),
-        "__metaclass__": None,
     }
+    kwds = {}
+    if metaclass is not None:
+        kwds["metaclass"] =  metaclass
+        members["__metaclass__"] = metaclass  # TODO: remove this line
+
     members.update(attributes)
-    return type(f"{base_class.__name__}Stub", (base_class,), members)()
+    return type(f"{base_class.__name__}Stub", (base_class,), members, **kwds)()

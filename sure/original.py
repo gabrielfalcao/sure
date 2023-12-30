@@ -19,9 +19,11 @@ import os
 import re
 import traceback
 import inspect
+import typing
 from copy import deepcopy
 from pprint import pformat
 from functools import wraps
+from typing import Union
 
 try:
     import __builtin__ as builtins
@@ -73,12 +75,18 @@ def all_integers(obj):
 
 
 def explanation(msg):
+    """Decorator for methods of :py:class:`~sure.original.AssertionHelper`.
+
+    :param msg: message to be interpolated with the operands of the comparison taking place within the decorated method.
+    """
     def dec(func):
         @wraps(func)
         def wrap(self, what):
             ret = func(self, what)
-            assert ret, msg % (self._src, what)
-            return True
+            if ret:
+                return True
+            else:
+                raise AssertionError(msg % (self._src, what))
 
         return wrap
 
@@ -114,6 +122,10 @@ class AssertionHelper(object):
 
         if isinstance(and_kwargs, dict):
             self._callable_kw.update(and_kwargs)
+
+    @property
+    def src(self):
+        return self._src
 
     @classmethod
     def is_a_matcher(cls, func):
@@ -231,8 +243,10 @@ class AssertionHelper(object):
         self._src = re.sub(r'\s', '', self._src).lower()
         dst = re.sub(r'\s', '', dst).lower()
         error = '%s does not look like %s' % (old_src, old_dst)
-        assert self._src == dst, error
-        return self._src == dst
+        if self._src == dst:
+            return True
+        else:
+            raise AssertionError(error)
 
     def every_one_is(self, dst):
         msg = 'all members of %r should be %r, but the %dth is %r'
@@ -256,7 +270,9 @@ class AssertionHelper(object):
         return isinstance(self._src, dst)
 
     def at(self, key):
-        assert self.has(key)
+        if not self.has(key):
+            raise AssertionError(f"key {key} not present in {self._src}")
+
         if isinstance(self._src, dict):
             return AssertionHelper(self._src[key])
 
@@ -267,15 +283,13 @@ class AssertionHelper(object):
     def has(self, that):
         return that in self
 
-    def _get_that(self, that):
-        try:
-            that = int(that)
-        except TypeError:
-            that = len(that)
-        return that
+    def _get_int_or_length(self, obj: Union[int, typing.Iterable]):
+        if isinstance(obj, Iterable):
+            return len(obj)
+        return int(obj)
 
-    def len_greater_than(self, that):
-        that = self._get_that(that)
+    def len_greater_than(self, that: Union[int, typing.Iterable]):
+        that = self._get_int_or_length(that)
         length = len(self._src)
 
         if length <= that:
@@ -288,8 +302,8 @@ class AssertionHelper(object):
 
         return True
 
-    def len_greater_than_or_equals(self, that):
-        that = self._get_that(that)
+    def len_greater_than_or_equals(self, that: Union[int, typing.Iterable]):
+        that = self._get_int_or_length(that)
 
         length = len(self._src)
 
@@ -303,12 +317,12 @@ class AssertionHelper(object):
 
         return True
 
-    def len_lower_than(self, that):
+    def len_lower_than(self, that: Union[int, typing.Iterable]):
         original_that = that
         if isinstance(that, Iterable):
             that = len(that)
         else:
-            that = self._get_that(that)
+            that = self._get_int_or_length(that)
         length = len(self._src)
 
         if length >= that:
@@ -321,8 +335,8 @@ class AssertionHelper(object):
 
         return True
 
-    def len_lower_than_or_equals(self, that):
-        that = self._get_that(that)
+    def len_lower_than_or_equals(self, that: Union[int, typing.Iterable]):
+        that = self._get_int_or_length(that)
 
         length = len(self._src)
         error = 'the length of %r should be lower then or equals %d, but is %d'
@@ -337,8 +351,8 @@ class AssertionHelper(object):
 
         return True
 
-    def len_is(self, that):
-        that = self._get_that(that)
+    def len_is(self, that: Union[int, typing.Iterable]):
+        that = self._get_int_or_length(that)
         length = len(self._src)
 
         if length != that:
@@ -351,8 +365,8 @@ class AssertionHelper(object):
 
         return True
 
-    def len_is_not(self, that):
-        that = self._get_that(that)
+    def len_is_not(self, that: Union[int, typing.Iterable]):
+        that = self._get_int_or_length(that)
         length = len(self._src)
 
         if length == that:
@@ -415,10 +429,13 @@ class AssertionHelper(object):
         try:
             lst = list(self._src)
             length = len(lst)
-            assert length == 0, \
-                   '%r is not empty, it has %s' % (self._src,
-                                                   itemize_length(self._src))
-            return True
+            if length == 0:
+                return True
+            else:
+                raise AssertionError('%r is not empty, it has %s' % (
+                    self._src,
+                    itemize_length(self._src)
+                ))
 
         except TypeError:
             raise AssertionError("%r is not iterable" % self._src)
@@ -439,14 +456,16 @@ class AssertionHelper(object):
         return what in items
 
     def contains(self, what):
-        assert what in self._src, '%r should be in %r' % (what, self._src)
-        return True
+        if what in self._src:
+            return True
+        else:
+            raise AssertionError('%r should be in %r' % (what, self._src))
 
     def does_not_contain(self, what):
-        assert what not in self._src, \
-            '%r should NOT be in %r' % (what, self._src)
-
-        return True
+        if what not in self._src:
+            return True
+        else:
+            raise AssertionError('%r should NOT be in %r' % (what, self._src))
 
     doesnt_contain = does_not_contain
 

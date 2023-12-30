@@ -17,7 +17,7 @@
 
 from couleur import Shell
 
-from sure.errors import ImmediateFailure
+from sure.errors import ImmediateFailure, InternalRuntimeError
 from sure.reporter import Reporter
 from sure.runtime import ScenarioResult
 
@@ -38,25 +38,37 @@ class FeatureReporter(Reporter):
     def on_feature(self, feature):
         self.indentation += 2
         sh.reset(" " * self.indentation)
-        sh.blue("Feature: ")
+        sh.bold_blue("Feature: ")
         sh.yellow("'")
         sh.green(feature.name)
         sh.yellow("'")
-        sh.reset("\n")
+        sh.reset(" ")
 
     def on_feature_done(self, feature, result):
         sh.reset("\n\n")
         self.indentation = 0
 
     def on_scenario(self, test):
+        if test in self.tests_started:
+            return
+        self.tests_started.append(test)
         self.indentation += 2
         sh.reset(" " * self.indentation)
-        sh.green("Scenario: ")
-        sh.normal(test.description)
+        if test.description:
+            sh.bold_green(f"\n{' ' * self.indentation} Scenario: ")
+            sh.normal(test.description)
+        else:
+            sh.green(f"\n{' ' * self.indentation} Variant: ")
+            sh.normal(test.name)
         sh.reset(" ")
 
     def on_scenario_done(self, test, result):
+        if test in self.tests_finished:
+            return
         self.indentation -= 2
+        if result.is_success:
+            self.on_success(test)
+        self.tests_finished.append(test)
 
     def on_failure(self, test, result):
         self.failures.append(test)
@@ -64,29 +76,35 @@ class FeatureReporter(Reporter):
         sh.reset("\n")
         sh.reset(" " * self.indentation)
         self.indentation += 2
-        sh.bold_yellow(f"Failure:\n{result.succinct_failure}")
+        if not result.failure:
+            raise RuntimeError(
+                f"{self.__class__}.on_failure() called with a {ScenarioResult} which does not contain a failure"
+            )
+        sh.bold_yellow(f"Failure: {result.failure}\n{result.succinct_failure}")
         sh.reset(" " * self.indentation)
-        sh.bold_yellow(f"\n{' ' * self.indentation} Scenario:")
-        sh.bold_yellow(f"\n{' ' * self.indentation}     {result.location.description}")
-        sh.bold_red(f"\n{' ' * self.indentation} {result.location.ort}")
+        if result.location.description.strip():
+            sh.bold_yellow(f"\n{' ' * self.indentation} Scenario:")
+            sh.bold_yellow(f"\n{' ' * self.indentation}     {result.location.description}")
+        if result.location:
+            sh.bold_red(f"\n{' ' * self.indentation} outer location {result.location.ort}")
         sh.reset("\n")
         self.indentation -= 4
 
     def on_success(self, test):
         self.successes.append(test)
-        sh.green(checkmark)
-        sh.reset("\n")
+        sh.bold_green(checkmark)
+        sh.reset("")
 
     def on_error(self, test, result):
         self.errors.append(test)
         self.failures.append(test)
         self.indentation += 2
         sh.reset("\n")
-        sh.bold_red(f"Error started at {result.location.ort}\n")
-        sh.bold_red(f"{result.stack.nonlocation_specific_error()}")
-        sh.bold_red(f"{' ' * self.indentation}{result.error}")
+        sh.bold_red(f"Error {result.error}\n")
+        sh.bold_red(f"{result.stack.full()}")
         sh.reset(" " * self.indentation)
         sh.reset("\n")
+        sh.bold_red(f"{result.location.ort}\n")
         self.indentation -= 2
 
     def on_finish(self):

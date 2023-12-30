@@ -1,4 +1,3 @@
-## #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
 # Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
@@ -15,9 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import unicode_literals
 
-from six import text_type, PY2
+from six import text_type
 from six.moves import xrange
 
 import sure
@@ -58,7 +56,7 @@ def test_context_is_not_optional():
 
     assert that(it_crashes).raises(
         TypeError, (
-        "the function it_crashes defined at test_original_api.py line 56, is being "
+        "the function it_crashes defined at test_original_api.py line 54, is being "
         "decorated by either @that_with_context or @scenario, so it should "
         "take at least 1 parameter, which is the test context"),
     )
@@ -544,8 +542,7 @@ def test_that_contains_none():
     "that('foobar').contains(None)"
 
     def assertions():
-        # We can't use unicode in Py2, otherwise it will try to coerce
-        assert that(b'foobar' if PY2 else 'foobar').contains(None)
+        assert that('foobar').contains(None)
 
     error_msg = "'in <string>' requires string as left operand, not NoneType" if is_cpython else "'NoneType' does not have the buffer interface"
 
@@ -604,9 +601,8 @@ def test_that_something_is_empty_raises():
 def test_that_something_iterable_matches_another():
     "that(something_iterable).matches(another_iterable)"
 
-    # types must be unicode in py3, bute bytestrings in py2
-    KlassOne = type(b'KlassOne' if PY2 else 'KlassOne', (object,), {})
-    KlassTwo = type(b'KlassTwo' if PY2 else 'KlassTwo', (object,), {})
+    KlassOne = type('KlassOne', (object,), {})
+    KlassTwo = type('KlassTwo', (object,), {})
     one = [
         ("/1", KlassOne),
         ("/2", KlassTwo),
@@ -921,7 +917,7 @@ def test_depends_on_failing_due_nothing_found():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "lonely_action" defined at %s:930 ' \
+    error = 'the action "lonely_action" defined at %s:926 ' \
         'depends on the attribute "something" to be available in the' \
         ' context. It turns out that there are no actions providing ' \
         'that. Please double-check the implementation' % fullpath
@@ -947,10 +943,10 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
     from sure import action_for, scenario
 
     fullpath = os.path.abspath(__file__).replace('.pyc', '.py')
-    error = 'the action "my_action" defined at {0}:960 ' \
+    error = 'the action "my_action" defined at {0}:956 ' \
         'depends on the attribute "some_attr" to be available in the context.'\
         ' You need to call one of the following actions beforehand:\n' \
-        ' -> dependency_action at {0}:956'.replace('{0}', fullpath)
+        ' -> dependency_action at {0}:952'.replace('{0}', fullpath)
 
     def with_setup(context):
         @action_for(context, provides=['some_attr'])

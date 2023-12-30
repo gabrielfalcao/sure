@@ -10,7 +10,6 @@ except ImportError:
     from collections import Iterable
 
 from sure.terminal import red, green, yellow
-from sure.doubles import FakeOrderedDict
 
 
 if six.PY2:
@@ -42,7 +41,7 @@ else:
 
 def _obj_with_safe_repr(obj):
     if isinstance(obj, dict):
-        ret = FakeOrderedDict()
+        ret = {}
         try:
             keys = sorted(obj.keys())
         except TypeError:  # happens for obj types which are not orderable, like ``Enum``

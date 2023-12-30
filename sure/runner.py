@@ -69,15 +69,15 @@ class Runner(object):
 
         return candidate_modules
 
-    def is_runnable_test(self, item):
+    def is_runnable_test(self, item) -> bool:
         if isinstance(item, type):
             if not issubclass(item, unittest.TestCase):
-                return
+                return False
             if item == unittest.TestCase:
-                return
+                return False
 
         elif not isinstance(item, types.FunctionType):
-            return
+            return False
 
         name = getattr(item, "__name__", None)
         return seem_to_indicate_test(name)

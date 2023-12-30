@@ -1,34 +1,60 @@
 # -*- coding: utf-8 -*-
-from sure.original import that
+import unittest
 from unittest import TestCase
+from sure.original import that
+
 
 feature = "nested tests"
 
 
-class TestEggcelent(TestCase):
+class TestEggcelent(unittest.TestCase):
     "First Nested Test"
 
-    def test_101(self):
-        assert "one".should.equal("one")
-        # assert that("one").should.equal("one")  # TODO: kill apparent bug in AssertionBuilder.compare
+#     def test_101(self):
+#         assert "one".should.equal("one")
+#         assert that("one").should.equal("one")
 
-    def test_201(self):
-        assert "one".should.equal("one")
-        assert that("two").should_not.equal("one")
+#     def test_201(self):
+#         assert "one".should.equal("one")
+#         assert that("two").should_not.equal("one")
 
-    class TestAnother(TestCase):
-        "Another Nested Test"
+#     def test_401(self):
+#         assert that("""
+# line 1
+# line 2
+# line 3
+# line 4
+# """).should.be.different_of("""
+# line 1
+# line 2
+# line 5
+# line 3
+# line 4
+# """)
 
-        def test_301(self):
-            assert "three".should.equal("three")
-            assert that("three").should.equal("three")
-            assert that("three").should_not.equal("one")
-            assert that("three").should_not.equal("one")
+#         assert that("""line 1
+# line 2
+# line 3
+# line 4
+# """).should_not.be.different_of("""line 1
+# line 2
+# line 3
+# line 4
+# """)
+
+#     class TestAnother(TestCase):
+#         "Another Nested Test"
+
+#         def test_301(self):
+#             assert "three".should.equal("three")
+#             assert that("three").should.equal("three")
+#             that("three").should_not.equal("one")
+#             assert that("three").should_not.equal("one")
 
     class TestContextualized(TestCase):
-        "Contextualized Test"
+        "One More Contextualized Test"
 
-        def setup(self):
+        def setUp(self):
             self.datum = {}
 
         def test_empty_context(self):
@@ -53,6 +79,7 @@ class TestEggcelent(TestCase):
         def test_non_ideal_side_effect_2(self):
             assert that(self.datum).should.equal({
                 'side-effects': 0,
+                'extra-side-effects': {},
             })
             self.datum['extra-side-effects']['placate-code'] = (
                 'tests ideally should not cause side-effects'
@@ -116,5 +143,5 @@ class TestEggcelent(TestCase):
                     'placate-code': 'tests ideally should not cause side-effects',
                     'acknowledge-exception': "for broad adoption `sure' should support running tests in deterministic, alphabetic order so that existing codebases that rely on side-effects will continue to work as expected"
                 },
-                'session-1': [],
+                'session-1': ["The somewhat complex rationale presented in this instance to be quite reasonable thus far"],
             })

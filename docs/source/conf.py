@@ -1,7 +1,19 @@
 import sys
 import os
 import sphinx_rtd_theme
-
+from pathlib import Path
+try:
+    import sure
+    import sure.original
+    import sure.core
+    import sure.runtime
+    import sure.runner
+    import sure.doubles
+    import sure.meta
+    import sure.reporter
+    import sure.reporters.feature
+except ImportError:
+    sys.path.insert(0, Path(__file__).parent.parent.parent)
 
 extensions = [
     "sphinx.ext.autodoc",
@@ -53,4 +65,5 @@ epub_copyright = copyright
 epub_exclude_files = ["search.html"]
 intersphinx_mapping = {
     "python": ("https://docs.python.org/", None),
+    "mock": ("https://mock.readthedocs.io/en/latest/", None),
 }

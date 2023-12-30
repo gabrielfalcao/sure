@@ -62,13 +62,11 @@ class ImmediateFailure(RuntimeInterruption):
 
 class ExitError(ImmediateExit):
     def __init__(self, context, result):
-        context.reporter.on_error(result, result.first_nonsuccessful_result)
         return super().__init__(exit_code('ERROR'))
 
 
 class ExitFailure(ImmediateExit):
     def __init__(self, context, result):
-        context.reporter.on_failure(result, result.first_nonsuccessful_result)
         return super().__init__(exit_code('FAILURE'))
 
 

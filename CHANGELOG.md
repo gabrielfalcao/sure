@@ -4,6 +4,11 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [v3.0.0]
+
+- Presents better documentation
+- Drops support to Python 2
+- Introduces the modules ``sure.doubles``, ``sure.doubles.fakes`` and ``sure.doubles.stubs``
+- Moves the class ``sure.compat.FakeOrderedDict`` into the module ``sure.doubles.fakes``
 - Sure's featured synctactic-sugar of injecting/monkey-patching
   ``.should``, ``.should_not``, et cetera methods into
   :py:class:`object` and its subclasses is disabled by default and needs to be enabled explicitly, programmatically via ``sure.enable_special_syntax()`` or via command-line with the flags: ``-s`` or ``--special-syntax``

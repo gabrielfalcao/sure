@@ -179,7 +179,8 @@ scenario = that_with_context
 
 
 def within(**units):
-    assert len(units) == 1, "use within(number=unit). e.g.: within(one=second)"
+    if len(units) != 1:
+        raise AssertionError("use within(number=unit). e.g.: within(one=second)")
 
     word, unit = list(units.items())[0]
     value = word_to_number(word)
@@ -213,11 +214,13 @@ def within(**units):
             delta = end - start
             took = convert_to(delta.microseconds)
             print(took, timeout)
-            assert took < timeout, "%s did not run within %s %s" % (
-                func.__name__,
-                word,
-                unit,
-            )
+            if not took < timeout:
+                raise AssertionError(
+                    "%s did not run within %s %s" % (
+                        func.__name__,
+                        word,
+                        unit,
+                    ))
             if exc:
                 raise AssertionError(exc.pop(0))
 
@@ -324,11 +327,12 @@ def action_for(context, provides=None, depends_on=None):
             index = int(found.group(1))
             attr = args[index]
 
-        assert attr in context, (
-            'the action "%s" was supposed to provide the attribute "%s" '
-            "into the context, but it did not. Please double check its "
-            "implementation" % (func.__name__, attr)
-        )
+        if attr not in context:
+            raise AssertionError(
+                'the action "%s" was supposed to provide the attribute "%s" '
+                "into the context, but it did not. Please double check its "
+                "implementation" % (func.__name__, attr)
+            )
 
     dependency_error_lonely = (
         'the action "%s" defined at %s:%d '
@@ -408,6 +412,7 @@ def work_in_progress(func):
 def assertionmethod(func):
     @wraps(func)
     def wrapper(self, *args, **kw):
+        self.obj = unwrap_assertion_helper(self.obj)
         try:
             value = func(self, *args, **kw)
         except AssertionError as e:
@@ -432,22 +437,22 @@ def assertionproperty(func):
 
 
 POSITIVES = [
-    "should",
-    "does",
     "do",
+    "does",
     "must",
+    "should",
     "when",
 ]
 
 NEGATIVES = [
-    "shouldnt",
-    "dont",
     "do_not",
-    "doesnt",
+    "dont",
     "does_not",
-    "doesnot",
+    "doesnt",
+    "must_not",
+    "mustnt",
     "should_not",
-    "shouldnot",
+    "shouldnt",
 ]
 
 
@@ -474,6 +479,12 @@ class IdentityAssertion(object):
         return getattr(self._ab, name)
 
 
+def unwrap_assertion_helper(obj) -> object:
+    while isinstance(obj, AssertionHelper):
+        obj = obj.src
+    return obj
+
+
 class AssertionBuilder(object):
     def __init__(
         self, name=None, negative=False, obj=None, callable_args=None, callable_kw=None
@@ -481,20 +492,11 @@ class AssertionBuilder(object):
         self._name = name
         self.negative = negative
 
-        self._obj = obj
+        self.obj = obj
+
         self._callable_args = callable_args or []
         self._callable_kw = callable_kw or {}
         self._that = AssertionHelper(self.obj)
-
-    def get_obj(self):
-        if isinstance(self._obj, AssertionBuilder):
-            return self._obj.obj
-        return self._obj
-
-    def set_obj(self, obj):
-        self._obj = obj
-
-    obj = property(get_obj, set_obj)
 
     def __call__(self, obj):
         self.obj = obj
@@ -594,23 +596,25 @@ class AssertionBuilder(object):
         return expect(getattr(self.obj, name))
 
     def key(self, name):
-        has_it = name in self.obj
+        obj = self.obj
+        has_it = name in obj
         if self.negative:
             assert not has_it, "%r should not have the key `%s`, " "but it is %r" % (
-                self.obj,
+                obj,
                 name,
-                self.obj[name],
+                obj[name],
             )
             return True
 
-        assert has_it, "%r should have the key `%s` but does not" % (self.obj, name)
+        assert has_it, "%r should have the key `%s` but does not" % (obj, name)
 
-        return expect(self.obj[name])
+        return expect(obj[name])
 
     @assertionproperty
     def empty(self):
-        representation = safe_repr(self.obj)
-        length = len(self.obj)
+        obj = self.obj
+        representation = safe_repr(obj)
+        length = len(obj)
         if self.negative:
             assert length > 0, "expected `{0}` to not be empty".format(representation)
         else:
@@ -718,23 +722,24 @@ class AssertionBuilder(object):
         :param what: the expected value
         :param epsilon: a delta to leverage upper-bound floating point permissiveness
         """
+        obj = self.obj
 
         try:
-            comparison = DeepComparison(self.obj, what, epsilon).compare()
+            comparison = DeepComparison(obj, what, epsilon).compare()
             error = False
         except AssertionError as e:
             error = e
             comparison = None
 
         if isinstance(comparison, DeepExplanation):
-            error = comparison.get_assertion(self.obj, what)
+            error = comparison.get_assertion(obj, what)
 
         if self.negative:
             if error:
                 return True
 
             msg = "%s should differ from %s, but is the same thing"
-            raise AssertionError(msg % (safe_repr(self.obj), safe_repr(what)))
+            raise AssertionError(msg % (safe_repr(obj), safe_repr(what)))
 
         else:
             if not error:
@@ -749,17 +754,19 @@ class AssertionBuilder(object):
     def different_of(self, what):
         differ = difflib.Differ()
 
-        source = self.obj.strip().splitlines(True)
+        obj = isinstance(self.obj, AssertionHelper) and self.obj.src or self.obj
+
+        source = obj.strip().splitlines(True)
         destination = what.strip().splitlines(True)
         result = differ.compare(source, destination)
         difference = "".join(result)
         if self.negative:
-            if self.obj != what:
+            if obj != what:
                 assert not difference, "Difference:\n\n{0}".format(difference)
         else:
-            if self.obj == what:
+            if obj == what:
                 raise AssertionError(
-                    "{0} should be different of {1}".format(self.obj, what)
+                    "{0} should be different of {1}".format(obj, what)
                 )
 
         return True
@@ -1004,20 +1011,20 @@ expect = AssertionBuilder("expect")
 
 
 def assertion(func):
-    """Extend sure with a custom assertion method."""
+    """Extends :py:mod:`sure` with a custom assertion method."""
     func = assertionmethod(func)
     setattr(AssertionBuilder, func.__name__, func)
     return func
 
 
 def chain(func):
-    """Extend sure with a custom chaining method."""
+    """Extends :py:mod:`sure` with a custom chaining method."""
     setattr(AssertionBuilder, func.__name__, func)
     return func
 
 
 def chainproperty(func):
-    """Extend sure with a custom chain property."""
+    """Extends :py:mod:`sure` with a custom chain property."""
     func = assertionproperty(func)
     setattr(AssertionBuilder, func.fget.__name__, func)
     return func
@@ -1152,6 +1159,10 @@ old_dir = dir
 
 
 def enable_special_syntax():
+    """enables :py:mod:`sure`'s "special syntax" as documented in :ref:`Special Syntax`
+
+    .. danger:: Enabling the special syntax in production code may cause unintended consequences.
+"""
     @wraps(builtins.dir)
     def _new_dir(*obj):
         if not obj:

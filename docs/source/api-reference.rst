@@ -6,7 +6,9 @@ API Reference
 ``sure``
 --------
 
-.. py:module:: sure
+.. automodule:: sure
+
+.. autofunction:: sure.enable_special_syntax
 
 .. autoclass:: sure.VariablesBag
 
@@ -34,9 +36,6 @@ API Reference
 
 .. autoclass:: sure.ensure
 
-.. autofunction:: sure.do_enable
-
-.. autofunction:: sure.enable
 
 
 ``sure.core``
@@ -67,15 +66,22 @@ API Reference
 
 .. py:module:: sure.loader
 
+.. autoclass:: sure.loader.loader
+
 .. autofunction:: sure.loader.resolve_path
 
-.. autofunction:: sure.loader.get_root_python_module
+.. autofunction:: sure.loader.get_package
 
-.. autoclass:: sure.loader.loader
+.. autofunction:: sure.loader.name_appears_to_indicate_test
+
+.. autofunction:: sure.loader.appears_to_be_test_class
+
+.. autofunction:: sure.loader.read_file_from_path
+
 
 
 ``sure.reporter``
----------------------
+-----------------
 
 .. py:module:: sure.reporter
 
@@ -102,3 +108,29 @@ API Reference
 .. autofunction:: sure.original.all_integers
 
 .. autofunction:: sure.original.explanation
+
+
+``sure.doubles``
+----------------
+
+.. automodule:: sure.doubles
+
+.. autofunction:: sure.doubles.stub
+
+.. autoclass:: sure.doubles.FakeOrderedDict
+
+
+``sure.doubles.fakes``
+----------------------
+
+.. automodule:: sure.doubles.fakes
+
+.. autoclass:: sure.doubles.fakes.FakeOrderedDict
+
+
+``sure.doubles.stubs``
+----------------------
+
+.. automodule:: sure.doubles.stubs
+
+.. autoclass:: sure.doubles.stubs.stub

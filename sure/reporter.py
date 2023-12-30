@@ -37,8 +37,10 @@ class Reporter(object, metaclass=MetaReporter):
     * :py:meth:`~sure.reporter.Reporter.on_error`
     * :py:meth:`~sure.reporter.Reporter.on_success`
     * :py:meth:`~sure.reporter.Reporter.on_finish`
+    * :py:meth:`~sure.reporter.Reporter.on_internal_runtime_error`
 
-    .. admonition:: The default reference reporter implementation is :py:class:`sure.reporters.feature.FeatureReporter`
+    .. note:: The default reference reporter implementation is :py:class:`sure.reporters.feature.FeatureReporter`
+
     """
 
     __metaclass__ = MetaReporter
@@ -46,6 +48,8 @@ class Reporter(object, metaclass=MetaReporter):
 
     def __init__(self, runner, *args, **kw):
         self.runner = runner
+        self.tests_started = []
+        self.tests_finished = []
         self.successes = []
         self.failures = []
         self.errors = []
@@ -108,8 +112,8 @@ class Reporter(object, metaclass=MetaReporter):
         """
         raise NotImplementedError
 
-    def on_scenario(self, scenario, result):
-        """Called when a scenario test_done is about to run
+    def on_scenario(self, scenario):
+        """Called when a scenario is about to run
 
         .. code:: python
 
@@ -126,8 +130,8 @@ class Reporter(object, metaclass=MetaReporter):
         """
         raise NotImplementedError
 
-    def on_scenario_done(self, scenario):
-        """Called when a scenario test_done is about to run
+    def on_scenario_done(self, scenario, result):
+        """Called when a scenario is has finished running
 
         .. code:: python
 

@@ -1,7 +1,23 @@
 # -*- coding: utf-8 -*-
+# <sure - utility belt for automated testing in python>
+# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import unittest
 from unittest import TestCase
-from sure.original import that
+from sure import that
 
 
 feature = "nested tests"
@@ -10,46 +26,46 @@ feature = "nested tests"
 class TestEggcelent(unittest.TestCase):
     "First Nested Test"
 
-#     def test_101(self):
-#         assert "one".should.equal("one")
-#         assert that("one").should.equal("one")
+    def test_101(self):
+        assert "one".should.equal("one")
+        assert that("one").should.equal("one")
 
-#     def test_201(self):
-#         assert "one".should.equal("one")
-#         assert that("two").should_not.equal("one")
+    def test_201(self):
+        assert "one".should.equal("one")
+        assert that("two").should_not.equal("one")
 
-#     def test_401(self):
-#         assert that("""
-# line 1
-# line 2
-# line 3
-# line 4
-# """).should.be.different_of("""
-# line 1
-# line 2
-# line 5
-# line 3
-# line 4
-# """)
+    def test_401(self):
+        assert that("""
+line 1
+line 2
+line 3
+line 4
+""").should.be.different_of("""
+line 1
+line 2
+line 5
+line 3
+line 4
+""")
 
-#         assert that("""line 1
-# line 2
-# line 3
-# line 4
-# """).should_not.be.different_of("""line 1
-# line 2
-# line 3
-# line 4
-# """)
+        assert that("""line 1
+line 2
+line 3
+line 4
+""").should_not.be.different_of("""line 1
+line 2
+line 3
+line 4
+""")
 
-#     class TestAnother(TestCase):
-#         "Another Nested Test"
+    class TestAnother(TestCase):
+        "Another Nested Test"
 
-#         def test_301(self):
-#             assert "three".should.equal("three")
-#             assert that("three").should.equal("three")
-#             that("three").should_not.equal("one")
-#             assert that("three").should_not.equal("one")
+        def test_301(self):
+            assert "three".should.equal("three")
+            assert that("three").should.equal("three")
+            that("three").should_not.equal("one")
+            assert that("three").should_not.equal("one")
 
     class TestContextualized(TestCase):
         "One More Contextualized Test"

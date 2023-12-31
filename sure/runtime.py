@@ -32,9 +32,9 @@ from mock import Mock
 from sure.errors import (
     ExitError,
     ExitFailure,
-    NonValidTest,
     ImmediateError,
     ImmediateFailure,
+    SpecialSyntaxDisabledError,
 )
 from sure.loader import (
     loader,
@@ -44,6 +44,7 @@ from sure.reporter import Reporter
 from sure.errors import InternalRuntimeError
 self = sys.modules[__name__]
 
+KNOWN_ASSERTIONS = []
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ class RuntimeRole:
 
 def object_name(so: object) -> str:
     """
-    :param so: stands for "some object" - a :py:class:`object` from which some kind of "name" - :py:class:`str` can be derived.
+    :param so: stands for "some object" - a :class:`object` from which some kind of "name" - :class:`str` can be derived.
     """
     if isinstance(so, type):
         return f"{so.__module__}.{so.__name__}"
@@ -268,7 +269,7 @@ class Container(BaseContainer):
     def __init__(
         self,
         name: str,
-        runnable: Union[callable, unittest.TestCase, object],  # TODO: think whether it's reasonable to support a subclass of some kind of future :py:class:`~sure.Scenario`, hipothetically speaking.
+        runnable: Union[callable, unittest.TestCase, object],  # TODO: think whether it's reasonable to support a subclass of some kind of future :class:`~sure.Scenario`, hypothetically speaking.
         module_or_instance: Optional[object] = None,
     ):
         self.name = name
@@ -290,7 +291,7 @@ class PreparedTestSuiteContainer(BaseContainer):
     kept in sync with potentially nested occurrences of scenarios
 
     Contains a setup/teardown and a list of runnable tests associated
-    with a :py:class:`unittest.TestCase` along with a reference to the
+    with a :class:`unittest.TestCase` along with a reference to the
     original instance and a runtime context.
     """
 
@@ -342,7 +343,7 @@ class PreparedTestSuiteContainer(BaseContainer):
 
     def uncollapse_nested(self):
         """uncollapses nested instances of
-        :py:class:`~sure.PreparedTestSuiteContainer` and returns
+        :class:`~sure.PreparedTestSuiteContainer` and returns
         flattened list of this type.
         """
         flattened = [self]
@@ -372,8 +373,8 @@ class PreparedTestSuiteContainer(BaseContainer):
         elif isinstance(some_object, types.FunctionType):
             some_object_type = type(some_object)
             instance_or_function = some_object
-            # TODO: refactor :py:mod:`sure.runner` and
-            # :py:mod:`sure.runtime` to provide a test function's
+            # TODO: refactor :mod:`sure.runner` and
+            # :mod:`sure.runtime` to provide a test function's
             # module as ``some_object`` so that setup and teardown
             # methods can be fetched from within the module's scope
             return cls(
@@ -471,59 +472,36 @@ class PreparedTestSuiteContainer(BaseContainer):
         yield result, RuntimeRole.Unit
 
     def invoke_contextualized(self, container, context):
-        """Calls the unit of code within *container* - :py:attr:`~sure.runtime.Container.unit` - and returns a :py:class:`~sure.runtime.ScenarioResult`.
+        """Calls the unit of code within *container* - :attr:`~sure.runtime.Container.unit` - and returns a :class:`~sure.runtime.ScenarioResult`.
 
         If a python exception happens during that call then a
-        distinction is made between :py:class:`AssertionError` or
-        :py:class:`Exception` and forwarded to the
-        :py:class:`~sure.runtime.ScenarioResult` as "failure" or
+        distinction is made between :class:`AssertionError` or
+        :class:`Exception` and forwarded to the
+        :class:`~sure.runtime.ScenarioResult` as "failure" or
         "error", respectively.
 
-        .. note:: The given :py:attr:`~sure.runtime.Container.unit` may optionally take one argument: ``context`` which may or may not be an instance of :py:class:`~sure.VariablesBag`
+        .. note:: The given :attr:`~sure.runtime.Container.unit` may optionally take one argument: ``context`` which may or may not be an instance of :class:`~sure.VariablesBag`
 
-        :param container: :py:class:`~sure.runtime.Container`
-        :param context: :py:class:`~sure.runtime.RuntimeContext`
-        :param name: :py:class:`str`
-        :param location: :py:class:`~sure.runtime.TestLocation`
+        :param container: :class:`~sure.runtime.Container`
+        :param context: :class:`~sure.runtime.RuntimeContext`
+        :param name: :class:`str`
+        :param location: :class:`~sure.runtime.TestLocation`
         """
         if not isinstance(container, BaseContainer):
             raise InternalRuntimeError(f"expected {container} to be an instance of BaseContainer in this instance")
 
-        name = container.name
         location = container.location
         self.log.set_location(location)
-        code = container.unit.__code__
-        varnames = set(code.co_varnames).intersection({"context"})
-        argcount = len(varnames)
 
-        if argcount == 0:
-            try:
-                return_value = container.unit()
-                return ScenarioResult(self, container.location, context, return_value=return_value)
+        try:
+            return_value = container.unit()
+            return ScenarioResult(self, container.location, context, return_value=return_value)
 
-            except AssertionError as failure:
-                return ScenarioResult(self, container.location, context, failure)
+        except AssertionError as failure:
+            return ScenarioResult(self, container.location, context, failure)
 
-            except Exception as error:
-                return ScenarioResult(self, container.location, context, error)
-
-        elif argcount == 1:
-            try:
-                # TODO: think whether it's reasonable to admit a similar
-                # behavior or approach, that of how
-                # :py:meth:`sure.that_with_context` applies an instance of
-                # VariablesBag, here:
-                return_value = container.unit(context)
-            except AssertionError as failure:
-                return ScenarioResult(self, container.location, context, failure, return_value=return_value)
-
-            except Exception as error:
-                return ScenarioResult(self, container.location, context, error, return_value=return_value)
-
-        else:
-            raise NonValidTest(
-                f"it appears that the test function {name} {location} takes more than one argument: {argcount}"
-            )
+        except Exception as error:
+            return ScenarioResult(self, container.location, context, error)
 
 
 class Feature(object):
@@ -613,6 +591,50 @@ class Scenario(object):
         return ScenarioResultSet(results, context)
 
 
+class ExceptionManager(object):
+    def __init__(self, exc: Exception, test_location: TestLocation):
+        self.info = sys.exc_info()
+        self.test_location = test_location
+        self.exc = exc
+
+    def handle_special_syntax_disabled(self) -> Exception:
+        if not isinstance(self.exc, AttributeError):
+            return self.exc
+
+        has_potential = re.search(
+            r"^'(?P<object_type>[^']+)' object has no attribute '(?P<attribute>[a-zA-Z][a-zA-Z0-9_]+)'",
+            str(self.exc)
+        )
+        if not has_potential:
+            return self.exc
+
+        attribute_name = has_potential.group('attribute')
+        object_type = has_potential.group('object_type')
+        if attribute_name in KNOWN_ASSERTIONS:
+            raise SpecialSyntaxDisabledError(
+                f"{self.test_location.ort}\nattempt to access special syntax attribute `{attribute_name}' with a `{object_type}' "
+                f"without explicitly enabling Sure's special syntax\n"
+            )
+
+        return self.exc
+
+    def perform_handoff(self) -> Exception:
+        queue = [
+            self.handle_special_syntax_disabled,
+        ]
+        for method in queue:
+            val = method()
+            if val != self.exc:
+                return val
+
+        return self.exc
+
+
+def treat_error(error: Exception, location: TestLocation) -> Exception:
+    manager = ExceptionManager(error, location)
+    return manager.perform_handoff()
+
+
 class ScenarioResult(BaseResult):
     scenario: Scenario
     error: Optional[Exception]
@@ -633,7 +655,7 @@ class ScenarioResult(BaseResult):
         if isinstance(error, AssertionError):
             self.__failure__ = error
         else:
-            self.__error__ = error
+            self.__error__ = treat_error(error, self.location)
 
     def tb(self):
         return traceback.format_exception(*self.exc_info)
@@ -739,7 +761,7 @@ class ScenarioResultSet(ScenarioResult):
         for scenario in self.errored_scenarios:
             return scenario.stack
 
-    def __getattr__(self, attr, fallback=None):
+    def __getattr__(self, attr):
         try:
             return self.__getattribute__(attr)
         except AttributeError:
@@ -813,6 +835,17 @@ class FeatureResult(BaseResult):
                 return scenario.error
 
     @property
+    def stack(self) -> Optional[ErrorStack]:
+        for scenario in self.errored_scenarios:
+            return scenario.stack
+
+    def __getattr__(self, attr):
+        try:
+            return self.__getattribute__(attr)
+        except AttributeError:
+            return getattr(self.scenario_results[-1], attr, fallback)
+
+    @property
     def is_failure(self):
         return len(self.failed_scenarios) > 0
 
@@ -879,6 +912,17 @@ class FeatureResultSet(BaseResult):
                 return collapse_path(feature.error)
 
     @property
+    def stack(self) -> Optional[ErrorStack]:
+        for feature in self.errored_features:
+            return feature.stack
+
+    def __getattr__(self, attr):
+        try:
+            return self.__getattribute__(attr)
+        except AttributeError:
+            return getattr(self.feature_results[-1], attr, fallback)
+
+    @property
     def is_failure(self):
         return len(self.failed_features) > 0
 
@@ -916,4 +960,4 @@ def stripped(string):
 
 
 def collapse_path(e: str):
-    return e.replace(os.getenv("HOME"), "~")
+    return str(e).replace(os.getenv("HOME"), "~")

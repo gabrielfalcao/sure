@@ -8,12 +8,13 @@ jobs:
     strategy:
       matrix:
         python:
-          - "3.9"
+          - "3.6"
           - "3.7"
+          - "3.8"
+          - "3.9"
           - "3.10"
           - "3.11"
-          - "3.6"
-          - "3.8"
+          # IMPORTANT: update the documentation file ../../docs/source/getting-started.rst when adding more python versions to the list above
 
     steps:
     - uses: actions/checkout@v3
@@ -28,6 +29,9 @@ jobs:
 
     - name: Install sure
       run: pip install -e .
+
+    - name: Test with PyTest
+      run: make tests
 
     - name: Self/Auto Test
       run: make run

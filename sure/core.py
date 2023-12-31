@@ -14,15 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import unicode_literals
-
 import os
-
-try:
-    from mock import _CallList
-except ImportError:
-    from mock.mock import _CallList
-
 import inspect
 
 from collections import OrderedDict
@@ -31,19 +23,14 @@ from six import (
     get_function_code
 )
 
+try:  # TODO: document the coupling with :mod:`mock` or :mod:`unittest.mock`
+    from mock.mock import _CallList
+except ImportError:
+    from unittest.mock import _CallList
+
 from sure.terminal import red, green, yellow
 from sure.compat import safe_repr
-
-
-class Anything(object):
-    """Represents any possible value. Its existence is solely for
-    idiomatic purposes.
-    """
-    def __eq__(self, _):
-        return True
-
-
-anything = Anything()
+from sure.doubles.dummies import Anything
 
 
 class DeepExplanation(text_type):

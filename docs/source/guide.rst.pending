@@ -1,0 +1,143 @@
+.. _Guide:
+
+Guide
+=====
+
+.. note:: The sections in this guide make use of the :ref:`Special Syntax`
+
+
+Setup/Teardown
+--------------
+
+It might not be uncommon for developers to be familiar with to how the :mod:`unittest` module
+suggests to `implement setup and teardown callbacks <https://docs.python.org/3/library/unittest.html#class-and-module-fixtures>`_
+for your tests.
+
+But if you prefer to define test cases as functions and use a runner
+like `nose <https://nose.readthedocs.io/en/latest/>`_ then *sure* can
+help you define and activate modular fixtures.
+
+In *sure's* parlance, we call it a *Scenario*
+
+
+Example: Setup a Flask app for testing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+``my_flask_app.py``
+...................
+
+.. code::
+
+   import json
+   from flask import Response, Flask
+
+   webapp = Flask(__name__)
+
+   @webapp.route('/')
+   def index():
+       data = json.dumps({'hello': 'world'}}
+       return Response(data, headers={'Content-Type': 'application/json'})
+
+
+``tests/scenarios.py``
+......................
+
+.. code:: python
+
+   from sure import scenario
+   from my_flask_app import webapp
+
+   def prepare_webapp(context):
+       context.server = webapp.test_client()
+
+   web_scenario = scenario(prepare_webapp)
+
+
+``tests/test_webapp.py``
+........................
+
+.. code:: python
+
+   import json
+   from sure import scenario
+   from tests.scenarios import web_scenario
+
+   @web_scenario
+   def test_hello_world(context):
+       # Given that I GET /
+       response = context.server.get('/')
+
+       # Then it should have returned a successful json response
+       response.headers.should.have.key('Content-Type').being.equal('application/json')
+       response.status_code.should.equal(200)
+
+       json.loads(response.data).should.equal({'hello': 'world'})
+
+
+Example: Multiple Setup and Teardown functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+``tests/scenarios.py``
+......................
+
+.. code:: python
+
+   import os
+   import shutil
+   from sure import scenario
+
+   def prepare_directories(context):
+       context.root = os.path.dirname(os.path.abspath(__file__))
+       context.fixture_path = os.path.join(context.root, 'input_data')
+       context.result_path = os.path.join(context.root, 'output_data')
+       context.directories = [
+           context.fixture_path,
+           context.result_path,
+       ]
+
+       for path in context.directories:
+           if os.path.isdir(path):
+               shutil.rmtree(path)
+
+           os.makedirs(path)
+
+
+   def cleanup_directories(context):
+       for path in context.directories:
+           if os.path.isdir(path):
+               shutil.rmtree(path)
+
+
+   def create_10_dummy_hex_files(context):
+       for index in range(10):
+           filename = os.path.join(context.fixture_path, 'dummy-{}.hex'.format(index))
+           open(filename, 'wb').write(os.urandom(32).encode('hex'))
+
+
+   dummy_files_scenario = scenario([create_directories, create_10_dummy_hex_files], [cleanup_directories])
+
+
+``tests/test_filesystem.py``
+............................
+
+.. code:: python
+
+   import os
+   from tests.scenarios import dummy_files_scenario
+
+   @dummy_files_scenario
+   def test_files_exist(context):
+       os.listdir(context.fixture_path).should.equal([
+           'dummy-0.hex',
+           'dummy-1.hex',
+           'dummy-2.hex',
+           'dummy-3.hex',
+           'dummy-4.hex',
+           'dummy-5.hex',
+           'dummy-6.hex',
+           'dummy-7.hex',
+           'dummy-8.hex',
+           'dummy-9.hex',
+       ])

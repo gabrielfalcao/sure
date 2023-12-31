@@ -17,7 +17,7 @@
 
 from couleur import Shell
 
-from sure.errors import ImmediateFailure, InternalRuntimeError
+from sure.errors import ImmediateFailure, InternalRuntimeError, SpecialSyntaxDisabledError
 from sure.reporter import Reporter
 from sure.runtime import ScenarioResult
 
@@ -58,6 +58,7 @@ class FeatureReporter(Reporter):
             sh.bold_green(f"\n{' ' * self.indentation} Scenario: ")
             sh.normal(test.description)
         else:
+            self.indentation += 2
             sh.green(f"\n{' ' * self.indentation} Variant: ")
             sh.normal(test.name)
         sh.reset(" ")
@@ -66,6 +67,9 @@ class FeatureReporter(Reporter):
         if test in self.tests_finished:
             return
         self.indentation -= 2
+        if not test.description:
+            self.indentation -= 2
+
         if result.is_success:
             self.on_success(test)
         self.tests_finished.append(test)
@@ -100,12 +104,22 @@ class FeatureReporter(Reporter):
         self.failures.append(test)
         self.indentation += 2
         sh.reset("\n")
-        sh.bold_red(f"Error {result.error}\n")
+        sh.bold_red(f"Error {repr(result.error)}\n")
         sh.bold_red(f"{result.stack.full()}")
         sh.reset(" " * self.indentation)
         sh.reset("\n")
         sh.bold_red(f"{result.location.ort}\n")
         self.indentation -= 2
+
+    def on_internal_runtime_error(self, context, error):
+        if isinstance(error.exception, SpecialSyntaxDisabledError):
+            global sh
+            sh.bold_yellow(f"\n{' ' * self.indentation} {error.exception}")
+        else:
+            sh = Shell()
+            sh.bold_yellow("Internal Runtime Error\n")
+            sh.bold_red(error.traceback)
+        raise SystemExit(error.code)
 
     def on_finish(self):
         failed = len(self.failures)
@@ -115,18 +129,12 @@ class FeatureReporter(Reporter):
         sh.reset(" " * self.indentation)
 
         if failed:
-            sh.red(f"{failed} failed")
+            sh.yellow(f"{failed} failed")
             sh.reset("\n")
         if errors:
-            sh.yellow(f"{errors} errors")
+            sh.red(f"{errors} errors")
             sh.reset("\n")
         if successful:
             sh.green(f"{successful} successful")
             sh.reset("\n")
         sh.reset(" ")
-
-    def on_internal_runtime_error(self, context, error):
-        sh = Shell()
-        sh.bold_yellow("Internal Runtime Error\n")
-        sh.bold_red(error.traceback)
-        raise SystemExit(error.code)

@@ -26,20 +26,20 @@ class Reporter(object, metaclass=MetaReporter):
 
     The following non-optional methods should be implemented:
 
-    * :py:meth:`~sure.reporter.Reporter.on_start`
-    * :py:meth:`~sure.reporter.Reporter.on_feature`
-    * :py:meth:`~sure.reporter.Reporter.on_feature_done`
-    * :py:meth:`~sure.reporter.Reporter.on_scenario`
-    * :py:meth:`~sure.reporter.Reporter.on_scenario_done`
-    * :py:meth:`~sure.reporter.Reporter.on_feature`
-    * :py:meth:`~sure.reporter.Reporter.on_feature_done`
-    * :py:meth:`~sure.reporter.Reporter.on_failure`
-    * :py:meth:`~sure.reporter.Reporter.on_error`
-    * :py:meth:`~sure.reporter.Reporter.on_success`
-    * :py:meth:`~sure.reporter.Reporter.on_finish`
-    * :py:meth:`~sure.reporter.Reporter.on_internal_runtime_error`
+    * :meth:`~sure.reporter.Reporter.on_start`
+    * :meth:`~sure.reporter.Reporter.on_feature`
+    * :meth:`~sure.reporter.Reporter.on_feature_done`
+    * :meth:`~sure.reporter.Reporter.on_scenario`
+    * :meth:`~sure.reporter.Reporter.on_scenario_done`
+    * :meth:`~sure.reporter.Reporter.on_feature`
+    * :meth:`~sure.reporter.Reporter.on_feature_done`
+    * :meth:`~sure.reporter.Reporter.on_failure`
+    * :meth:`~sure.reporter.Reporter.on_error`
+    * :meth:`~sure.reporter.Reporter.on_success`
+    * :meth:`~sure.reporter.Reporter.on_finish`
+    * :meth:`~sure.reporter.Reporter.on_internal_runtime_error`
 
-    .. note:: The default reference reporter implementation is :py:class:`sure.reporters.feature.FeatureReporter`
+    .. note:: The default reference reporter implementation is :class:`sure.reporters.feature.FeatureReporter`
 
     """
 
@@ -185,7 +185,7 @@ class Reporter(object, metaclass=MetaReporter):
         raise NotImplementedError
 
     def on_internal_runtime_error(self, context, exception: Exception):
-        """Called when :py:class:`sure.FeatureReporter`
+        """Called when :class:`sure.FeatureReporter`
 
         .. code:: python
 

@@ -55,11 +55,12 @@ docs: html-docs
 	$(OPEN_COMMAND) docs/build/html/index.html
 
 test tests: clean | $(VENV)/bin/pytest # $(VENV)/bin/nosetests	# @$(VENV)/bin/nosetests --rednose --immediate -vv --with-coverage --cover-package=sure
-	@$(VENV)/bin/pytest -vv --cov=sure tests
+	@$(VENV)/bin/pytest -vv --cov=sure --ignore tests/crashes tests
 	$(MAIN_CLI_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure --immediate tests/
 
 # run main command-line tool
 run: | $(MAIN_CLI_PATH)
+	$(MAIN_CLI_PATH) --reporter=test tests/crashes || true
 	$(MAIN_CLI_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure.core  --cover-module=sure tests/runner
 
 # Pushes release of this package to pypi

@@ -67,3 +67,4 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/", None),
     "mock": ("https://mock.readthedocs.io/en/latest/", None),
 }
+pygments_style = 'xcode'

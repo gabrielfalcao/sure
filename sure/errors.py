@@ -20,10 +20,6 @@ import traceback
 from functools import reduce
 
 
-class NonValidTest(Exception):
-    """raised when a non-compatible test appears within the test-run session"""
-
-
 def xor(lhs, rhs):
     return lhs ^ rhs
 
@@ -62,6 +58,7 @@ class ImmediateFailure(RuntimeInterruption):
 
 class ExitError(ImmediateExit):
     def __init__(self, context, result):
+        context.reporter.on_error(context, result)
         return super().__init__(exit_code('ERROR'))
 
 
@@ -77,3 +74,10 @@ class InternalRuntimeError(Exception):
         self.code = exit_code(self.traceback)
         super().__init__(self.traceback)
         context.reporter.on_internal_runtime_error(context, self)
+
+
+class SpecialSyntaxDisabledError(Exception):
+    """raised when a :class:`AttributeError` occurs and the traceback
+    contains evidence indicating that the probable cause is an attempt
+    to employ the special syntax when such behavior is not permitted
+    """

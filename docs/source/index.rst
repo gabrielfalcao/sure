@@ -9,14 +9,14 @@ Sure |version| - Documentation
 Contents:
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
 
    intro
    getting-started
-   guide
+   assertion-reference
    how-it-works
    api-reference
-   about
+   changelog
 
 Indices and tables
 ==================

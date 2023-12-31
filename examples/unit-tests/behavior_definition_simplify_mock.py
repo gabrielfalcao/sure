@@ -59,11 +59,11 @@ from sure.scenario import MockfulBehaviorDefinition, apply_behavior, require_beh
 
 class FakeSettings(MockfulBehaviorDefinition):
     """automatically patches myapp.settings and overriding its keys with
-    the provided kwargs."""
+    the provided keyword-args."""
 
     context_namespace = 'settings'
 
-    def setup(self, **kwargs):
+    def setup(self, **kw):
         # 1. make 2 copies:
         #    * one original copy for backup
         #    * one containing the overrides
@@ -71,7 +71,7 @@ class FakeSettings(MockfulBehaviorDefinition):
         cloned_state = settings.to_dict()
 
         # 2. Apply the overrides in the cloned state
-        cloned_state.update(kwargs)
+        cloned_state.update(kw)
 
         # 3. Create a module mock containing the members
         fake_settings = self.mock.module(members=fake_state)

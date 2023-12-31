@@ -15,7 +15,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from .logs import LogsReporter
-from ..meta import get_reporter, gather_reporter_names
-from .feature import FeatureReporter
-from .test import TestReporter
+"""this module tests some aspects of attempting to use the
+:ref:`Special Syntax` of :mod:`sure` with that feature disabled
+
+This module SHALL be tested *with* the command-line flags ``--reporter=test`` and **without** the command-line flags ``--special-syntax``
+"""
+
+from sure import expect, that, SpecialSyntaxDisabledError
+from sure.reporters.test import events
+
+description = "Special Syntax Disabled"
+
+
+def try_special_syntax():
+    "shouldnot".should_not.equal("should_not")
+
+
+def test_report_special_syntax_disabled():
+    "SpecialSyntaxDisabledError should be raised when its use is incorrect"
+
+    expect(try_special_syntax).when.called.to.have.raised(
+        SpecialSyntaxDisabledError,
+        "test_special_syntax_disabled.py:31"
+    )

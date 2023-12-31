@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
-# Copyright (C) <2012>  Gabriel Falcão <gabriel@nacaolivre.org>
-# Copyright (C) <2012>  Lincoln Clarete <lincoln@comum.org>
+# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-context = {
-    'is_running': False,
-}
+class Anything(object):
+    """Dummy class whose entire purpose is to serve as sentinel in assertion
+    statements where the :meth:`operator.__eq__` is employed under the
+    specific circumstance of expecting the :class:`bool` value ``True``
+    """
+    def __eq__(self, _):
+        return True
+
+
+"""
+"""
+anything = Anything()

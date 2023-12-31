@@ -48,12 +48,11 @@ from sure.reporter import Reporter
 class Runner(object):
     """Manages I/O operations in regards to finding tests and executing them"""
 
-    def __init__(self, base_path: Path, reporter: str, plugin_paths=None, **kwargs):
+    def __init__(self, base_path: Path, reporter: str, plugin_paths=None, **kwds):
         self.base_path = base_path
         self.reporter = self.get_reporter(reporter)
-
-        for k in kwargs:
-            setattr(self, k, kwargs.get(k))
+        self.plugin_paths = plugin_paths
+        self.kwds = kwds
 
     def __repr__(self):
         return "<Runner: {} {}>".format(self.base_path, self.reporter)
@@ -98,7 +97,7 @@ class Runner(object):
 
         return features
 
-    def runin(self, lookup_paths, immediate: bool = False):
+    def execute(self, lookup_paths, immediate: bool = False):
         results = []
         self.reporter.on_start()
 
@@ -123,7 +122,7 @@ class Runner(object):
 
     def run(self, *args, **kwargs):
         try:
-            return self.runin(*args, **kwargs)
+            return self.execute(*args, **kwargs)
         except ImmediateFailure as failure:
             # self.reporter.on_failure(failure.scenario, failure)
             return failure.result

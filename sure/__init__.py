@@ -18,6 +18,7 @@ import re
 import os
 import sys
 
+import builtins
 import difflib
 import inspect
 import traceback
@@ -25,31 +26,25 @@ import traceback
 from functools import wraps, partial
 from datetime import datetime
 
-from six import string_types, text_type, PY2, get_function_code
+from six import string_types, text_type, get_function_code
 from six.moves import reduce
 
 from sure.original import AssertionHelper
 from sure.original import Iterable
-from sure.original import builtins
-from sure.original import that
 
+from sure import runtime
 from sure.core import DeepComparison
 from sure.core import DeepExplanation
 from sure.core import _get_file_name
 from sure.core import _get_line_number
 from sure.core import safe_repr
-from sure.core import anything  # noqa
-
+from sure.errors import SpecialSyntaxDisabledError
+from sure.errors import InternalRuntimeError
+from sure.doubles.dummies import anything
+from sure.version import version
 from sure.special import is_cpython, patchable_builtin
 from sure.registry import context as _registry
 import sure.reporters
-
-
-if not PY2:
-    basestring = str
-
-version = "2.0.0"
-
 
 not_here_error = (
     "you have tried to access the attribute %r from the context "
@@ -94,11 +89,11 @@ class VariablesBag(dict):
                 )
 
 
-def ensure_type(caller_name, cast, obj):
+def ensure_type(caller_name, cast, obj):  # TODO: test
     try:
         return cast(obj)
     except TypeError:
-        raise AssertionError("{0} tried to  ")
+        raise InternalRuntimeError(f"{caller_name} expected {cast} but received {obj} which is {type(obj)} instead")
 
 
 class CallBack(object):
@@ -196,11 +191,7 @@ def within(**units):
             try:
                 func(start, *args, **kw)
             except TypeError as e:
-                if PY2:
-                    # PY2 has different error message
-                    fmt = "{0}() takes no arguments"
-                else:
-                    fmt = "{0}() takes 0 positional arguments but 1 was given"
+                fmt = "{0}() takes 0 positional arguments but 1 was given"
                 err = text_type(e)
                 if fmt.format(func.__name__) in err:
                     func(*args, **kw)
@@ -410,6 +401,8 @@ def work_in_progress(func):
 
 
 def assertionmethod(func):
+    runtime.KNOWN_ASSERTIONS.append(func.__name__)
+
     @wraps(func)
     def wrapper(self, *args, **kw):
         self.obj = unwrap_assertion_helper(self.obj)
@@ -423,9 +416,6 @@ def assertionmethod(func):
             ", ".join(map(safe_repr, args)),
             ", ".join(["{0}={1}".format(k, safe_repr(kw[k])) for k in kw]),
         )
-        if PY2:
-            msg = text_type(msg)
-
         assert value, msg
         return value
 
@@ -433,6 +423,7 @@ def assertionmethod(func):
 
 
 def assertionproperty(func):
+    runtime.KNOWN_ASSERTIONS.append(func.__name__)
     return builtins.property(assertionmethod(func))
 
 
@@ -454,6 +445,9 @@ NEGATIVES = [
     "should_not",
     "shouldnt",
 ]
+
+runtime.KNOWN_ASSERTIONS.extend(POSITIVES)
+runtime.KNOWN_ASSERTIONS.extend(NEGATIVES)
 
 
 class IdentityAssertion(object):
@@ -482,31 +476,60 @@ class IdentityAssertion(object):
 def unwrap_assertion_helper(obj) -> object:
     while isinstance(obj, AssertionHelper):
         obj = obj.src
+    while isinstance(obj, AssertionBuilder):
+        obj = obj.obj
     return obj
 
 
 class AssertionBuilder(object):
     def __init__(
-        self, name=None, negative=False, obj=None, callable_args=None, callable_kw=None
+        self, name=None,
+        negative=False,
+        obj=None,
+        with_args=None,
+        with_kwargs=None,
+        and_kwargs=None
     ):
         self._name = name
         self.negative = negative
 
-        self.obj = obj
+        self.obj = unwrap_assertion_helper(obj)
+        self._callable_args = []
+        self._callable_kw = {}
+        if isinstance(with_args, (list, tuple)):
+            self._callable_args = list(with_args)
 
-        self._callable_args = callable_args or []
-        self._callable_kw = callable_kw or {}
-        self._that = AssertionHelper(self.obj)
+        if isinstance(with_kwargs, dict):
+            self._callable_kw.update(with_kwargs)
 
-    def __call__(self, obj):
-        self.obj = obj
+        if isinstance(and_kwargs, dict):
+            self._callable_kw.update(and_kwargs)
+
+    def __call__(self,
+                 obj,
+                 with_args=None,
+                 with_kwargs=None,
+                 and_kwargs=None,
+                 *args, **kw):
+        self.obj = unwrap_assertion_helper(obj)
+
+        self._callable_args = []
+        self._callable_kw = {}
+        if isinstance(with_args, (list, tuple)):
+            self._callable_args = list(with_args)
+
+        if isinstance(with_kwargs, dict):
+            self._callable_kw.update(with_kwargs)
+
+        if isinstance(and_kwargs, dict):
+            self._callable_kw.update(and_kwargs)
 
         if isinstance(obj, self.__class__):
             self.obj = obj.obj
             self._callable_args = obj._callable_args
             self._callable_kw = obj._callable_kw
 
-        self._that = AssertionHelper(self.obj)
+        self._that = AssertionHelper(self.obj, *args, **kw)
         return self
 
     def __getattr__(self, attr):
@@ -524,7 +547,12 @@ class AssertionBuilder(object):
                 callable_kw=self._callable_kw,
             )
 
+        try:
+            return getattr(self._that, attr)
+        except AttributeError:
+            return self.__getattribute__(attr)
         return super(AssertionBuilder, self).__getattribute__(attr)
+
 
     @assertionproperty
     def callable(self):
@@ -663,6 +691,24 @@ class AssertionBuilder(object):
             assert self.obj is None, r"expected `{0}` to be None".format(self.obj)
 
         return True
+
+    def __contains__(self, what):
+        if isinstance(self.obj, dict):
+            items = self.obj.keys()
+
+        if isinstance(self.obj, Iterable):
+            items = self.obj
+        else:
+            items = dir(self.obj)
+
+        return what in items
+
+    @assertionmethod
+    def contains(self, what):
+        if what in self.obj:
+            return True
+        else:
+            raise AssertionError('%r should be in %r' % (what, self.obj))
 
     @assertionmethod
     def within_range(self, start, end):
@@ -937,6 +983,7 @@ class AssertionBuilder(object):
         return _that.raises(*args, **kw)
 
     thrown = throw
+    raises = thrown
     raised = thrown
 
     @assertionmethod
@@ -971,7 +1018,7 @@ class AssertionBuilder(object):
     def match(self, regex, *args):
         obj_repr = repr(self.obj)
         assert isinstance(
-            self.obj, basestring
+            self.obj, str
         ), "{0} should be a string in order to compare using .match()".format(obj_repr)
         matched = re.search(regex, self.obj, *args)
 
@@ -1002,29 +1049,31 @@ class AssertionBuilder(object):
         return True
 
 
-this = AssertionBuilder("this")
-the = AssertionBuilder("the")
+assert_that = AssertionBuilder("assert_that")
 it = AssertionBuilder("it")
-these = AssertionBuilder("these")
-those = AssertionBuilder("those")
 expect = AssertionBuilder("expect")
+that = AssertionBuilder("that")
+the = AssertionBuilder("the")
+these = AssertionBuilder("these")
+this = AssertionBuilder("this")
+those = AssertionBuilder("those")
 
 
 def assertion(func):
-    """Extends :py:mod:`sure` with a custom assertion method."""
+    """Extends :mod:`sure` with a custom assertion method."""
     func = assertionmethod(func)
     setattr(AssertionBuilder, func.__name__, func)
     return func
 
 
 def chain(func):
-    """Extends :py:mod:`sure` with a custom chaining method."""
+    """Extends :mod:`sure` with a custom chaining method."""
     setattr(AssertionBuilder, func.__name__, func)
     return func
 
 
 def chainproperty(func):
-    """Extends :py:mod:`sure` with a custom chain property."""
+    """Extends :mod:`sure` with a custom chain property."""
     func = assertionproperty(func)
     setattr(AssertionBuilder, func.fget.__name__, func)
     return func
@@ -1159,7 +1208,7 @@ old_dir = dir
 
 
 def enable_special_syntax():
-    """enables :py:mod:`sure`'s "special syntax" as documented in :ref:`Special Syntax`
+    """enables :mod:`sure`'s "special syntax" as documented in :ref:`Special Syntax`
 
     .. danger:: Enabling the special syntax in production code may cause unintended consequences.
 """

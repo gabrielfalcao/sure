@@ -1,173 +1,35 @@
-.. _Guide:
+.. _Assertion Builder Reference:
 
-Guide
-=====
+Assertion Builder Reference
+===========================
 
-Setup/Teardown
---------------
-
-You might be familiar with to how the :py:mod:`unittest` module
-suggests to `implement setup and teardown callbacks <https://docs.python.org/2/library/unittest.html#class-and-module-fixtures>`_
-for your tests.
-
-But if you prefer to define test cases as functions and use a runner
-like `nose <https://nose.readthedocs.io/en/latest/>`_ then *sure* can
-help you define and activate modular fixtures.
-
-In *sure's* parlance, we call it a *Scenario*
-
-
-Example: Setup a Flask app for testing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-``my_flask_app.py``
-...................
-
-.. code::
-
-   import json
-   from flask import Response, Flask
-
-   webapp = Flask(__name__)
-
-   @webapp.route('/')
-   def index():
-       data = json.dumps({'hello': 'world'}}
-       return Response(data, headers={'Content-Type': 'application/json'})
-
-
-``tests/scenarios.py``
-......................
-
-.. code:: python
-
-   from sure import scenario
-   from my_flask_app import webapp
-
-   def prepare_webapp(context):
-       context.server = webapp.test_client()
-
-   web_scenario = scenario(prepare_webapp)
-
-
-``tests/test_webapp.py``
-........................
-
-.. code:: python
-
-   import json
-   from sure import scenario
-   from tests.scenarios import web_scenario
-
-   @web_scenario
-   def test_hello_world(context):
-       # Given that I GET /
-       response = context.server.get('/')
-
-       # Then it should have returned a successful json response
-       response.headers.should.have.key('Content-Type').being.equal('application/json')
-       response.status_code.should.equal(200)
-
-       json.loads(response.data).should.equal({'hello': 'world'})
-
-
-Example: Multiple Setup and Teardown functions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-``tests/scenarios.py``
-......................
-
-.. code:: python
-
-   import os
-   import shutil
-   from sure import scenario
-
-   def prepare_directories(context):
-       context.root = os.path.dirname(os.path.abspath(__file__))
-       context.fixture_path = os.path.join(context.root, 'input_data')
-       context.result_path = os.path.join(context.root, 'output_data')
-       context.directories = [
-           context.fixture_path,
-           context.result_path,
-       ]
-
-       for path in context.directories:
-           if os.path.isdir(path):
-               shutil.rmtree(path)
-
-           os.makedirs(path)
-
-
-   def cleanup_directories(context):
-       for path in context.directories:
-           if os.path.isdir(path):
-               shutil.rmtree(path)
-
-
-   def create_10_dummy_hex_files(context):
-       for index in range(10):
-           filename = os.path.join(context.fixture_path, 'dummy-{}.hex'.format(index))
-           open(filename, 'wb').write(os.urandom(32).encode('hex'))
-
-
-   dummy_files_scenario = scenario([create_directories, create_10_dummy_hex_files], [cleanup_directories])
-
-
-``tests/test_filesystem.py``
-............................
-
-.. code:: python
-
-   import os
-   from tests.scenarios import dummy_files_scenario
-
-   @dummy_files_scenario
-   def test_files_exist(context):
-       os.listdir(context.fixture_path).should.equal([
-           'dummy-0.hex',
-           'dummy-1.hex',
-           'dummy-2.hex',
-           'dummy-3.hex',
-           'dummy-4.hex',
-           'dummy-5.hex',
-           'dummy-6.hex',
-           'dummy-7.hex',
-           'dummy-8.hex',
-           'dummy-9.hex',
-       ])
-
-
-Number Equality
----------------
+Numerical Equality
+------------------
 
 ``(2 + 2).should.equal(4)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
-    import sure
 
-    (4).should.be.equal(2 + 2)
-    (7.5).should.eql(3.5 + 4)
-    (2).should.equal(8 / 4)
+   (4).should.be.equal(2 + 2)
+   (7.5).should.eql(3.5 + 4)
+   (2).should.equal(8 / 4)
 
-    (3).shouldnt.be.equal(5)
+   (3).shouldnt.be.equal(5)
+
 
 ``.equal(float, epsilon)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
-    import sure
 
-    (4.242423).should.be.equal(4.242420, epsilon=0.000005)
-    (4.01).should.be.eql(4.00, epsilon=0.01)
-    (6.3699999).should.equal(6.37, epsilon=0.001)
+   (4.242423).should.be.equal(4.242420, epsilon=0.000005)
+   (4.01).should.be.eql(4.00, epsilon=0.01)
+   (6.3699999).should.equal(6.37, epsilon=0.001)
 
-    (4.242423).shouldnt.be.equal(4.249000, epsilon=0.000005)
+   (4.242423).shouldnt.be.equal(4.249000, epsilon=0.000005)
 
 
 String Equality
@@ -178,22 +40,21 @@ String Equality
 
 .. code:: python
 
-    import sure
 
-    XML1 = '''<root>
-      <a-tag with-attribute="one">AND A VALUE</a-tag>
-    </root>'''
+   XML1 = '''<root>
+     <a-tag with-attribute="one">AND A VALUE</a-tag>
+   </root>'''
 
 
-    XML1.should_not.be.different_of(XML1)
+   XML1.should_not.be.different_of(XML1)
 
-    XML2 = '''<root>
-      <a-tag with-attribute="two">AND A VALUE</a-tag>
-    </root>'''
+   XML2 = '''<root>
+     <a-tag with-attribute="two">AND A VALUE</a-tag>
+   </root>'''
 
-    XML2.should.be.different_of(XML1)
+   XML2.should.be.different_of(XML1)
 
-this will give you and output like
+The code above should present an output containing a diff like below:
 
 .. code:: bash
 
@@ -211,7 +72,7 @@ this will give you and output like
 
 .. code:: python
 
-    "Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])
+   "Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])
 
 
 String Similarity
@@ -223,50 +84,54 @@ String Similarity
 .. code:: python
 
 
-    """
+   """
+   THIS IS MY loose string
+   """.should.look_like('this is my loose string')
 
-    THIS IS MY loose string
-    """.should.look_like('this is my loose string')
-
-    """this one is different""".should_not.look_like('this is my loose string')
+   """this one is different""".should_not.look_like('this is my loose string')
 
 
-Strings Matching Regular-Expressions
-------------------------------------
+Regular-Expressions
+-------------------
+
+:ref:`Sure` supports testing strings against regular expressions via :mod:`re`
 
 ``should.match()``
 ~~~~~~~~~~~~~~~~~~
 
 You can also use the modifiers:
 
--  `re.DEBUG <http://docs.python.org/2/library/re.html#re.DEBUG>`__
--  `re.I and re.IGNORECASE <http://docs.python.org/2/library/re.html#re.IGNORECASE>`_
--  `re.M and re.MULTILINE <http://docs.python.org/2/library/re.html#re.MULTILINE>`_
--  `re.S re.DOTALL <http://docs.python.org/2/library/re.html#re.DOTALL>`_
--  `re.U and re.UNICODE <http://docs.python.org/2/library/re.html#re.UNICODE>`_
--  `re.X and re.VERBOSE <http://docs.python.org/2/library/re.html#re.VERBOSE>`_
+-  `re.DEBUG <https://docs.python.org/2/library/re.html#re.DEBUG>`__
+-  `re.I and re.IGNORECASE <https://docs.python.org/2/library/re.html#re.IGNORECASE>`_
+-  `re.M and re.MULTILINE <https://docs.python.org/2/library/re.html#re.MULTILINE>`_
+-  `re.S re.DOTALL <https://docs.python.org/2/library/re.html#re.DOTALL>`_
+-  `re.U and re.UNICODE <https://docs.python.org/2/library/re.html#re.UNICODE>`_
+-  `re.X and re.VERBOSE <https://docs.python.org/2/library/re.html#re.VERBOSE>`_
 
 .. code:: python
 
-    import re
+   import re
 
-    "SOME STRING".should.match(r'some \w+', re.I)
-    "FOO BAR CHUCK NORRIS".should_not.match(r'some \w+', re.M)
+   "SOME STRING".should.match(r'some \w+', re.I)
+   "FOO BAR CHUCK NORRIS".should_not.match(r'some \w+', re.M)
 
+.. _Collections or Iterables:
 
-Collections and Iterables
--------------------------
+Collections or Iterables
+------------------------
 
+The following set of assertion methods work with the following kinds
+of data-structures or iterable objects:
 
-Works with:
-
-- Lists, Tuples, Sets
-- Dicts, OrderedDicts
-- Anything that implements ``__iter__()`` / ``next()``
+- Array-like structures: :class:`list`, :class:`tuple`, :class:`set`, :class:`frozenset` etc
+- Key-Value structures: :class:`dict`, :class:`collections.OrderedDict` etc
+- Any valid implementation of :ref:`python:iterator`
 
 
 ``.equal({'a': 'collection'})``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Performs :ref:`deep comparison <Deep Comparison>` of :ref:`collections or iterables <Collections or Iterables>`
 
 .. code:: python
 
@@ -276,7 +141,7 @@ Works with:
 
 
 ``.contain()``
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 ``expect(collection).to.contain(item)`` is a shorthand to
 ``expect(item).to.be.within(collection)``
@@ -312,6 +177,8 @@ Works with:
     "Dummy String".should_not.be.empty
 
 
+.. should_be_within:
+
 ``{number}.should.be.within(0, 10)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -334,12 +201,14 @@ asserts that a member is part of the iterable
 
 .. code:: python
 
+    "G".should.be.within("gabriel".capitalize())
     "g".should.be.within("gabriel")
     'name'.should.be.within({'name': 'Gabriel'})
-    'Lincoln'.should.be.within(['Lincoln', 'Gabriel'])
+    'peace'.should.be.within(['world', 'peace'])
 
     ## negate with:
 
+    'war'.should_not.be.within(['cosmos', 'universe', 'world'])
     'Bug'.shouldnt.be.within(['Sure 1.0'])
     'Bug'.should_not.be.within(['Sure 1.0'])
 
@@ -537,7 +406,6 @@ this takes a type name and checks if the class matches that name
 
 .. code:: python
 
-    import sure
 
     {}.should.be.a('dict')
     (5).should.be.an('int')
@@ -554,7 +422,6 @@ instance of it
 
 .. code:: python
 
-    import sure
     from six import PY3
 
     if PY3:
@@ -570,26 +437,15 @@ assert the instance value above and below ``num``
 
 .. code:: python
 
-    import sure
 
     (10).should.be.below(11)
     (10).should.be.above(9)
     (10).should_not.be.above(11)
     (10).should_not.be.below(9)
 
-``it()``, ``this()``, ``those()``, ``these()``
-----------------------------------------------
 
-``.should`` aliases to make your tests more idiomatic.
-
-Whether you don't like the ``object.should`` syntax or you are simply
-not running CPython, sure still allows you to use any of the assertions
-above, all you need to do is wrap the object that is being compared in
-one of the following options: ``it``, ``this``, ``those`` and ``these``.
-
-
-Too long, don't read
-~~~~~~~~~~~~~~~~~~~~
+Too long, didn't read
+~~~~~~~~~~~~~~~~~~~~~
 
 
 All those possibilities below work just as the same
@@ -634,7 +490,6 @@ Test if something is or not callable
 
 .. code:: python
 
-    import sure
 
     range.should.be.callable
     (lambda: None).should.be.callable
@@ -649,19 +504,18 @@ A note about the ``assert`` keyword
           assertion message so that you don't have to specify your own, but you
           can still use* ``assert`` *if you find it more semantic*
 
-Example:
+Examples:
 
 .. code:: python
 
-    import sure
 
     "Name".lower().should.equal('name')
 
-    ## or you can also use
+    # or
 
     assert "Name".lower().should.equal('name')
 
-    ## or still
+    # or
 
     from sure import this
 
@@ -741,47 +595,28 @@ Equality synonyms
     (2).should.equals(2)
     (2).should.eql(2)
 
+
 Positive boolean synonyms
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
-    import sure
-    (not None).should.be.ok
+    (not False).should.be.ok
     (not None).should.be.truthy
-    (not None).should.be.true
+    True.should.be.true
+    (7 * 8 == 72).should.be.true
 
 Negative boolean synonyms
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
-    import sure
     False.should.be.falsy
     False.should.be.false
     False.should_not.be.true
     False.should_not.be.ok
     None.should_not.be.true
     None.should_not.be.ok
-
-Holy guacamole, how did you implement that feature ?
-....................................................
-
-Differently of `ruby <http://www.ruby-lang.org>`__ python doesn't have
-`open classes
-<http://blog.aizatto.com/2007/06/01/ruby-and-open-classes/>`__, but
-`sure uses a technique
-<https://github.com/gabrielfalcao/sure/blob/master/sure/special.py>`_
-involving the module :py:mod:`ctypes` to write directly in the private
-``__dict__`` of in-memory objects.
-For more information check out the `Forbidden Fruit <https://github.com/clarete/forbiddenfruit>`_ project.
-
-Yes, it is dangerous, non-pythonic and should not be used in
-production code.
-
-Although ``sure`` is here to be used **ONLY** in test code, therefore
-it should be running in **ONLY** possible environments: your local
-machine or your continuous-integration server.
 
 Add custom assertions, chains and chain properties
 --------------------------------------------------
@@ -791,7 +626,7 @@ Add custom assertions, chains and chain properties
 Custom assertion methods
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-By default ``sure`` comes with a good amount of *assertion methods*. For example:
+By default :ref:`sure` comes with a good amount of *assertion methods*. For example:
 
 - ``equals()``
 - ``within()``
@@ -913,7 +748,6 @@ With the ``ensure`` context manager *sure* provides an easy to use way to overri
 
 .. code:: python
 
-    import sure
 
     name = myapi.do_something_that_returns_string()
 

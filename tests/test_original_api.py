@@ -19,7 +19,7 @@ from six import text_type
 from six.moves import xrange
 
 import sure
-from sure.original import that
+from sure import that
 from sure.special import is_cpython
 from sure import VariablesBag, expect
 from nose.tools import assert_equals, assert_raises

@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""original module from sure's inception prior to the creation of :py:mod:`sure.special`"""
+"""original module from sure's inception prior to the creation of :mod:`sure.special`"""
 import os
 import re
 import traceback
@@ -25,10 +25,6 @@ from pprint import pformat
 from functools import wraps
 from typing import Union
 
-try:
-    import __builtin__ as builtins
-except ImportError:
-    import builtins
 
 try:
     from re import Pattern
@@ -54,7 +50,7 @@ def identify_callable_location(callable_object):
 def is_iterable(obj):
     """returns ``True`` the given object is iterable
 
-    :param obj: :py:class:`object`
+    :param obj: :class:`object`
     """
     return hasattr(obj, '__iter__') and not isinstance(obj, string_types)
 
@@ -75,7 +71,7 @@ def all_integers(obj):
 
 
 def explanation(msg):
-    """Decorator for methods of :py:class:`~sure.original.AssertionHelper`.
+    """Decorator for methods of :class:`~sure.original.AssertionHelper`.
 
     :param msg: message to be interpolated with the operands of the comparison taking place within the decorated method.
     """
@@ -424,7 +420,7 @@ class AssertionHelper(object):
 
         return True
 
-    @builtins.property
+    @property
     def is_empty(self):
         try:
             lst = list(self._src)
@@ -440,7 +436,7 @@ class AssertionHelper(object):
         except TypeError:
             raise AssertionError("%r is not iterable" % self._src)
 
-    @builtins.property
+    @property
     def are_empty(self):
         return self.is_empty
 
@@ -468,6 +464,3 @@ class AssertionHelper(object):
             raise AssertionError('%r should NOT be in %r' % (what, self._src))
 
     doesnt_contain = does_not_contain
-
-
-that = AssertionHelper

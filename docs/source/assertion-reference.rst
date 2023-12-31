@@ -342,8 +342,8 @@ Assert the magnitude of objects with ``{X}.should.be.greater_than(Y)`` and ``{Y}
     (1).should_not.be.lower_than_or_equal_to(0)
 
 
-Callables
----------
+Testing Callables
+-----------------
 
 
 ``callable.when.called_with(arg1, kwarg1=2).should.have.raised(Exception)``

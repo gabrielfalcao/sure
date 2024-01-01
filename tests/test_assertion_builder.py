@@ -1,4 +1,3 @@
-## #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # <sure - utility belt for automated testing in python>
 # Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
@@ -21,13 +20,13 @@ import mock
 from collections import OrderedDict
 
 from datetime import datetime, timedelta
-from sure import this, these, those, it, expect, anything, AssertionBuilder
-from six import PY2
-from sure.compat import compat_repr
+from sure import AssertionBuilder
+from sure import this, those, it
+from sure import these, expect, anything
 
 
 def test_assertion_builder_synonyms():
-    ("this, it, these and those are all synonyms")
+    "this, it, these and those are all synonyms"
 
     assert isinstance(it, AssertionBuilder)
     assert isinstance(this, AssertionBuilder)
@@ -36,29 +35,29 @@ def test_assertion_builder_synonyms():
 
 
 def test_4_equal_2p2():
-    ("this(4).should.equal(2 + 2)")
+    "this(4).should.equal(2 + 2)"
 
     time = datetime.now() - timedelta(0, 60)
 
     assert this(4).should.equal(2 + 2)
     assert this(time).should_not.equal(datetime.now())
 
-    def opposite():
-        assert this(4).should.equal(8)
+    def incorrect_positive_comparison():
+        expect(-33).to.equal(33)
 
-    def opposite_not():
-        assert this(4).should_not.equal(4)
+    def incorrect_negative_expectation():
+        expect(88).should_not.equal(88)
 
-    expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw("X is 4 whereas Y is 8")
+    expect(incorrect_positive_comparison).when.called.to.throw(AssertionError)
+    expect(incorrect_positive_comparison).when.called.to.throw("X is -33 whereas Y is 33")
 
-    expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw(
-        "4 should differ from 4, but is the same thing")
+    expect(incorrect_negative_expectation).when.called.to.throw(AssertionError)
+    expect(incorrect_negative_expectation).when.called.to.throw(
+        "88 should differ from 88")
 
 
 def test_2_within_0a2():
-    ("this(1).should.be.within(0, 2)")
+    "this(1).should.be.within(0, 2)"
 
     assert this(1).should.be.within(0, 2)
     assert this(4).should_not.be.within(0, 2)
@@ -77,7 +76,7 @@ def test_2_within_0a2():
 
 
 def test_true_be_ok():
-    ("this(True).should.be.ok")
+    "this(True).should.be.ok"
 
     assert this(True).should.be.ok
     assert this(False).should_not.be.ok
@@ -96,7 +95,7 @@ def test_true_be_ok():
 
 
 def test_false_be_falsy():
-    ("this(False).should.be.false")
+    "this(False).should.be.false"
 
     assert this(False).should.be.falsy
     assert this(True).should_not.be.falsy
@@ -115,7 +114,7 @@ def test_false_be_falsy():
 
 
 def test_none():
-    ("this(None).should.be.none")
+    "this(None).should.be.none"
 
     assert this(None).should.be.none
     assert this(not None).should_not.be.none
@@ -134,10 +133,10 @@ def test_none():
 
 
 def test_should_be_a():
-    ("this(None).should.be.none")
+    "this(None).should.be.none"
 
     assert this(1).should.be.an(int)
-    assert this([]).should.be.a('sure.compat.Iterable')
+    assert this([]).should.be.a('collections.abc.Iterable')
     assert this({}).should_not.be.a(list)
 
     def opposite():
@@ -154,7 +153,7 @@ def test_should_be_a():
 
 
 def test_should_be_callable():
-    ("this(function).should.be.callable")
+    "this(function).should.be.callable"
 
     assert this(lambda: None).should.be.callable
     assert this("aa").should_not.be.callable
@@ -166,8 +165,8 @@ def test_should_be_callable():
         assert this(opposite).should_not.be.callable
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(compat_repr(
-        "expected 'foo' to be callable"))
+    expect(opposite).when.called.to.throw(
+        "expected 'foo' to be callable")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
@@ -175,7 +174,7 @@ def test_should_be_callable():
 
 
 def test_iterable_should_be_empty():
-    ("this(iterable).should.be.empty")
+    "this(iterable).should.be.empty"
 
     assert this([]).should.be.empty
     assert this([1, 2, 3]).should_not.be.empty
@@ -195,7 +194,7 @@ def test_iterable_should_be_empty():
 
 
 def test_iterable_should_have_length_of():
-    ("this(iterable).should.have.length_of(N)")
+    "this(iterable).should.have.length_of(N)"
 
     assert this({'foo': 'bar', 'a': 'b'}).should.have.length_of(2)
     assert this([1, 2, 3]).should_not.have.length_of(4)
@@ -207,8 +206,9 @@ def test_iterable_should_have_length_of():
         assert this([1, 2, 3]).should_not.have.length_of(3)
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(compat_repr(
-        "the length of ('foo', 'bar', 'a', 'b') should be 1, but is 4"))
+    expect(opposite).when.called.to.throw(
+        "the length of ('foo', 'bar', 'a', 'b') should be 1, but is 4"
+    )
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
@@ -216,7 +216,7 @@ def test_iterable_should_have_length_of():
 
 
 def test_greater_than():
-    ("this(X).should.be.greater_than(Y)")
+    "this(X).should.be.greater_than(Y)"
 
     assert this(5).should.be.greater_than(4)
     assert this(1).should_not.be.greater_than(2)
@@ -237,7 +237,7 @@ def test_greater_than():
 
 
 def test_greater_than_or_equal_to():
-    ("this(X).should.be.greater_than_or_equal_to(Y)")
+    "this(X).should.be.greater_than_or_equal_to(Y)"
 
     assert this(4).should.be.greater_than_or_equal_to(4)
     assert this(1).should_not.be.greater_than_or_equal_to(2)
@@ -258,7 +258,7 @@ def test_greater_than_or_equal_to():
 
 
 def test_lower_than():
-    ("this(X).should.be.lower_than(Y)")
+    "this(X).should.be.lower_than(Y)"
 
     assert this(4).should.be.lower_than(5)
     assert this(2).should_not.be.lower_than(1)
@@ -279,7 +279,7 @@ def test_lower_than():
 
 
 def test_lower_than_or_equal_to():
-    ("this(X).should.be.lower_than_or_equal_to(Y)")
+    "this(X).should.be.lower_than_or_equal_to(Y)"
 
     assert this(5).should.be.lower_than_or_equal_to(5)
     assert this(2).should_not.be.lower_than_or_equal_to(1)
@@ -300,7 +300,7 @@ def test_lower_than_or_equal_to():
 
 
 def test_be():
-    ("this(X).should.be(X) when X is a reference to the same object")
+    "this(X).should.be(X) when X is a reference to the same object"
 
     d1 = {}
     d2 = d1
@@ -327,7 +327,7 @@ def test_be():
 
 
 def test_have_property():
-    ("this(instance).should.have.property(property_name)")
+    "this(instance).should.have.property(property_name)"
 
     class Person(object):
         name = "John Doe"
@@ -347,8 +347,9 @@ def test_have_property():
         assert this(jay).should.have.property("age")
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(compat_repr(
-        "Person() should not have the property `name`, but it is 'John Doe'"))
+    expect(opposite).when.called.to.throw(
+        "Person() should not have the property `name`, but it is 'John Doe'"
+    )
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
@@ -379,36 +380,40 @@ def test_have_property_with_value():
             "Foo")
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(compat_repr(
-        "'John Doe' should differ from 'John Doe', but is the same thing"))
+    expect(opposite).when.called.to.throw(
+        "'John Doe' should differ from 'John Doe'"
+    )
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw(compat_repr(
-        "X is 'John Doe' whereas Y is 'Foo'"))
+    expect(opposite_not).when.called.to.throw(
+        "X is 'John Doe' whereas Y is 'Foo'"
+    )
 
 
 def test_have_key():
-    ("this(dictionary).should.have.key(key_name)")
+    "this(dictionary).should.have.key(key_name)"
 
-    jay = {'name': "John Doe"}
+    data_structure = {'name': "John Doe"}
 
-    assert this(jay).should.have.key("name")
-    assert this(jay).should_not.have.key("age")
+    assert this(data_structure).should.have.key("name")
+    assert this(data_structure).should_not.have.key("age")
 
     def opposite():
-        assert this(jay).should_not.have.key("name")
+        assert this(data_structure).should_not.have.key("name")
 
     def opposite_not():
-        assert this(jay).should.have.key("age")
+        assert this(data_structure).should.have.key("age")
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(compat_repr(
+    expect(opposite).when.called.to.throw(
         "{'name': 'John Doe'} should not have the key `name`, "
-        "but it is 'John Doe'"))
+        "but it is 'John Doe'"
+    )
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw(compat_repr(
-        "{'name': 'John Doe'} should have the key `age` but does not"))
+    expect(opposite_not).when.called.to.throw(
+        "{'name': 'John Doe'} should have the key `age` but does not"
+    )
 
 
 def test_have_key_with_value():
@@ -429,16 +434,18 @@ def test_have_key_with_value():
             "Foo")
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(compat_repr(
-        "'John Doe' should differ from 'John Doe', but is the same thing"))
+    expect(opposite).when.called.to.throw(
+        "'John Doe' should differ from 'John Doe'"
+    )
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw(compat_repr(
-        "X is 'John Doe' whereas Y is 'Foo'"))
+    expect(opposite_not).when.called.to.throw(
+        "X is 'John Doe' whereas Y is 'Foo'"
+    )
 
 
 def test_look_like():
-    ("this('   aa  \n  ').should.look_like('aa')")
+    "this('   aa  \n  ').should.look_like('aa')"
 
     assert this('   \n  aa \n  ').should.look_like('AA')
     assert this('   \n  bb \n  ').should_not.look_like('aa')
@@ -450,101 +457,93 @@ def test_look_like():
         assert this('\n aa \n').should_not.look_like('aa')
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(compat_repr(r"'\n aa \n' does not look like 'bb'"))
+    expect(opposite).when.called.to.throw(r"'\n aa \n' does not look like 'bb'")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw(compat_repr(r"'\n aa \n' should not look like 'aa' but does"))
+    expect(opposite_not).when.called.to.throw(r"'\n aa \n' should not look like 'aa' but does")
 
 
 def test_equal_with_repr_of_complex_types_and_unicode():
-    ("test usage of repr() inside expect(complex1).to.equal(complex2)")
+    "test usage of repr() inside expect(complex1).to.equal(complex2)"
 
     class Y(object):
         def __init__(self, x):
             self.x = x
 
         def __repr__(self):
-            if PY2:
-                # PY2 should return the regular (unicode) string
-                return self.x.encode('utf-8')
-            else:
-                return self.x
+            return self.x
 
         def __eq__(self, other):
             return self.x == other.x
 
     y1 = dict(
-        a=2,
-        b=Y('Gabriel Falcão'),
-        c='Foo',
+        G=1,
+        O=Y('Gabriel Falcão'),
+        T='skills',
     )
 
     expect(y1).to.equal(dict(
-        a=2,
-        b=Y('Gabriel Falcão'),
-        c='Foo',
+        G=1,
+        O=Y('Gabriel Falcão'),
+        T='skills',
     ))
 
 
 def test_equal_with_repr_of_complex_types_and_repr():
-    ("test usage of repr() inside expect(complex1).to.equal(complex2)")
+    "test usage of repr() inside expect(complex1).to.equal(complex2)"
 
     class Y(object):
         def __init__(self, x):
             self.x = x
 
         def __repr__(self):
-            if PY2:
-                # PY2 should return the regular (unicode) string
-                return self.x.encode('utf-8')
-            else:
-                return self.x
+            return self.x
 
         def __eq__(self, other):
             return self.x == other.x
 
     y1 = {
-        'a': 2,
-        'b': Y('Gabriel Falcão'),
-        'c': 'Foo',
+        'G': 1,
+        'O': Y('Gabriel Falcão'),
+        'T': 'skills',
     }
 
     expect(y1).to.equal({
-        'a': 2,
-        'b': Y('Gabriel Falcão'),
-        'c': 'Foo',
+        'G': 1,
+        'O': Y('Gabriel Falcão'),
+        'T': 'skills',
     })
 
     expect(y1).to_not.equal({
-        'a': 2,
-        'b': Y('Gabriel Falçao'),
-        'c': 'Foo',
+        'G': 1,
+        'O': Y('Gabriel Falçao'),
+        'T': 'skills',
     })
 
     def opposite():
         expect(y1).to.equal({
-            'a': 2,
-            'b': Y('Gabriel Falçao'),
-            'c': 'Foo',
+            'G': 1,
+            'O': Y('Gabriel Falçao'),
+            'T': 'skills',
         })
 
     def opposite_not():
         expect(y1).to_not.equal({
-            'a': 2,
-            'b': Y('Gabriel Falcão'),
-            'c': 'Foo',
+            'G': 1,
+            'O': Y('Gabriel Falcão'),
+            'T': 'skills',
         })
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw(compat_repr("X['b'] != Y['b']"))
+    expect(opposite).when.called.to.throw("X['O'] != Y['O']")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw(compat_repr(
-        "{'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'} should differ from {'a': 2, 'b': Gabriel Falcão, 'c': 'Foo'}, but is the same thing"))
+    expect(opposite_not).when.called.to.throw(
+        "{'G': 1, 'O': Gabriel Falcão, 'T': 'skills'} should differ from {'G': 1, 'O': Gabriel Falcão, 'T': 'skills'}")
 
 
 def test_match_regex():
-    ("expect('some string').to.match(r'\w{4} \w{6}') matches regex")
+    "expect('some string').to.match(r'\w{4} \w{6}') matches regex"
 
     assert this("some string").should.match(r"\w{4} \w{6}")
     assert this("some string").should_not.match(r"^\d*$")
@@ -565,7 +564,7 @@ def test_match_regex():
 
 
 def test_match_contain():
-    ("expect('some string').to.contain('tri')")
+    "expect('some string').to.contain('tri')"
 
     assert this("some string").should.contain("tri")
     assert this("some string").should_not.contain('foo')
@@ -577,20 +576,12 @@ def test_match_contain():
         assert this("some string").should_not.contain(r"string")
 
     expect(opposite).when.called.to.throw(AssertionError)
-    if PY2:
-        expect(opposite).when.called.to.throw(
-            "u'bar' should be in u'some string'")
-    else:
-        expect(opposite).when.called.to.throw(
-            "'bar' should be in 'some string'")
+    expect(opposite).when.called.to.throw(
+        "'bar' should be in 'some string'")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    if PY2:
-        expect(opposite_not).when.called.to.throw(
-            "u'string' should NOT be in u'some string'")
-    else:
-        expect(opposite_not).when.called.to.throw(
-            "'string' should NOT be in 'some string'")
+    expect(opposite_not).when.called.to.throw(
+        "'string' should NOT be in 'some string'")
 
 
 def test_catching_exceptions():
@@ -650,22 +641,17 @@ def test_throw_matching_regex():
         raise RuntimeError('should not have reached here')
 
     except AssertionError as e:
-        if PY2:
-            expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
-        else:
-            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
+        expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 626]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
 
     try:
         expect(blah).when.called_with(1).should.throw(ValueError, re.compile(r'invalid regex'))
         raise RuntimeError('should not have reached here')
     except AssertionError as e:
-        if PY2:
-            expect(str(e)).to.equal("When calling 'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: u'invalid regex'\n against:\n u'this message'")
-        else:
-            expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 635]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
+        expect(str(e)).to.equal("When calling b'blah [tests/test_assertion_builder.py line 626]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
+
 
 def test_should_not_be_different():
-    ("'something'.should_not.be.different('SOMETHING'.lower())")
+    "'something'.should_not.be.different('SOMETHING'.lower())"
 
     part1 = '''<root>
   <a-tag with-attribute="one">AND A VALUE</a-tag>
@@ -764,36 +750,18 @@ def test_ordereddict_comparison():
             ("name", "John"),
             ("age", "22"),
         ]),
-        "children": OrderedDict([]),
+        "unused": OrderedDict([]),
     }
 
     expectation = {
         "fields": OrderedDict([
-            ("age", "22"),
             ("name", "John"),
+            ("age", "22"),
         ]),
-        "children": OrderedDict([]),
+        "unused": OrderedDict([]),
     }
 
-    expect(result).shouldnt.be.equal(expectation)
-    expect(result).should.be.equal(result)
-
-    try:
-        expect(result).should.equal(expectation)
-        raise RuntimeError("should not have reached here")
-    except AssertionError as error:
-        if PY2:
-            expect(str(error)).should.be.equal("""given
-X = {u'children': {}, u'fields': {u'age': u'22', u'name': u'John'}}
-    and
-Y = {u'children': {}, u'fields': {u'age': u'22', u'name': u'John'}}
-X[u'fields'] and Y[u'fields'] are in a different order""")
-        else:
-            expect(str(error)).should.be.equal("""given
-X = {'children': {}, 'fields': {'age': '22', 'name': 'John'}}
-    and
-Y = {'children': {}, 'fields': {'age': '22', 'name': 'John'}}
-X['fields'] and Y['fields'] are in a different order""")
+    expect(result).should.equal(expectation)
 
 
 def test_equals_anything():
@@ -809,7 +777,8 @@ def test_equals_anything():
     val = [1, 2, 3, 4]
     expect(val).to.be.equal([1, anything, 3, anything])
 
+
 def test_equals_crosstype():
     class MyFloat(float):
         pass
-    expect(MyFloat(1.23)).to.be.equal(1.23)
+    expect(MyFloat(3.33)).to.be.equal(3.33)

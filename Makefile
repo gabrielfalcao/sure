@@ -55,7 +55,7 @@ docs: html-docs
 	$(OPEN_COMMAND) docs/build/html/index.html
 
 test tests: clean | $(VENV)/bin/pytest # $(VENV)/bin/nosetests	# @$(VENV)/bin/nosetests --rednose --immediate -vv --with-coverage --cover-package=sure
-	@$(VENV)/bin/pytest -vv --cov=sure --ignore tests/crashes tests
+	@$(VENV)/bin/pytest --cov=sure --ignore tests/crashes tests
 	$(MAIN_CLI_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure --immediate tests/
 
 # run main command-line tool

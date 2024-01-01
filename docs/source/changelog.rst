@@ -8,10 +8,10 @@ This project adheres to `Semantic Versioning <http://semver.org/>`__.
 --------
 
 -  Presents better documentation
--  Drops support to Python 2
+-  Drops support to Python 2 obliterates the ``sure.compat`` module
 -  Introduces the modules ``sure.doubles``, ``sure.doubles.fakes`` and
    ``sure.doubles.stubs``
--  Moves the class ``sure.compat.FakeOrderedDict`` into the module
+
    ``sure.doubles.fakes``
 -  Sure’s featured synctactic-sugar of injecting/monkey-patching
    ``.should``, ``.should_not``, et cetera methods into

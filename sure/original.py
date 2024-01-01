@@ -24,6 +24,7 @@ from copy import deepcopy
 from pprint import pformat
 from functools import wraps
 from typing import Union
+from collections.abc import Iterable
 
 
 try:
@@ -37,7 +38,6 @@ from sure.core import DeepComparison
 from sure.core import _get_file_name
 from sure.core import _get_line_number
 from sure.core import itemize_length
-from sure.compat import Iterable
 
 
 def identify_callable_location(callable_object):
@@ -160,7 +160,7 @@ class AssertionHelper(object):
                 if isinstance(msg, string_types) and msg not in err:
                     raise AssertionError('''
                     %r raised %s, but the exception message does not
-                    match.\n\nEXPECTED:\n%s\n\nGOT:\n%s'''.strip() % (
+                    match.\n\nEXPECTATION:\n%s\n\nACTUAL:\n%s'''.strip() % (
                             self._src,
                             type(e).__name__,
                             msg, err))

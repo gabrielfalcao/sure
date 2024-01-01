@@ -29,13 +29,12 @@ except ImportError:
     from unittest.mock import _CallList
 
 from sure.terminal import red, green, yellow
-from sure.compat import safe_repr
 from sure.doubles.dummies import Anything
 
 
 class DeepExplanation(text_type):
     def get_header(self, X, Y, suffix):
-        header = f"given\nX = {safe_repr(X)}\n    and\nY = {safe_repr(Y)}\n{text_type(suffix)}"
+        header = f"X = {repr(X)}\n    and\nY = {repr(Y)}\n{text_type(suffix)}"
         return yellow(header).strip()
 
     def get_assertion(self, X, Y):
@@ -49,10 +48,10 @@ class DeepComparison(object):
     def __init__(self, X, Y, epsilon=None, parent=None):
         self.complex_cmp_funcs = {
             float: self.compare_floats,
-            dict: self.compare_dicts,
+            dict: self.compare_ordered_dicts,
             list: self.compare_iterables,
             tuple: self.compare_iterables,
-            OrderedDict: self.compare_ordereddict
+            OrderedDict: self.compare_ordered_dicts
         }
 
         self.operands = X, Y
@@ -76,8 +75,8 @@ class DeepComparison(object):
         if X == Y:
             return True
         else:
-            m = msg_format.format(red(c.current_X_keys), green(c.current_Y_keys))
-            return DeepExplanation(m)
+            msg = msg_format.format(red(c.current_X_keys), green(c.current_Y_keys))
+            return DeepExplanation(msg)
 
     def compare_floats(self, X, Y):
         c = self.get_context()
@@ -87,11 +86,14 @@ class DeepComparison(object):
         if abs(X - Y) <= self.epsilon:
             return True
         else:
-            m = 'X{0}±{1} != Y{2}±{3}'.format(
-                red(c.current_X_keys), self.epsilon, green(c.current_Y_keys), self.epsilon)
-            return DeepExplanation(m)
+            msg = 'X{0}±{1} != Y{2}±{3}'.format(
+                red(c.current_X_keys),
+                self.epsilon, green(c.current_Y_keys),
+                self.epsilon
+            )
+            return DeepExplanation(msg)
 
-    def compare_dicts(self, X, Y):
+    def compare_ordered_dicts(self, X, Y):
         c = self.get_context()
 
         x_keys = list(X.keys())
@@ -102,7 +104,7 @@ class DeepComparison(object):
         if diff_x:
             msg = "X{0} has the key {1!r} whereas Y{2} does not".format(
                 red(c.current_X_keys),
-                safe_repr(diff_x[0]),
+                repr(diff_x[0]),
                 green(c.current_Y_keys),
             )
             return DeepExplanation(msg)
@@ -110,7 +112,7 @@ class DeepComparison(object):
         elif diff_y:
             msg = "X{0} does not have the key {1!r} whereas Y{2} has it".format(
                 red(c.current_X_keys),
-                safe_repr(diff_y[0]),
+                repr(diff_y[0]),
                 green(c.current_Y_keys)
             )
             return DeepExplanation(msg)
@@ -133,19 +135,10 @@ class DeepComparison(object):
                 if isinstance(instance, DeepExplanation):
                     return instance
 
-    def compare_ordereddict(self, X, Y):
-        """Compares two instances of an OrderedDict."""
-
-        # check if OrderedDict instances have the same keys and values
-        instance = self.compare_dicts(X, Y)
-        if isinstance(instance, DeepExplanation):
-            return instance
-
-        # check if the order of the keys is the same
         for i, j in zip(X.items(), Y.items()):
             if i[0] != j[0]:
                 c = self.get_context()
-                msg = "X{0} and Y{1} are in a different order".format(
+                msg = "X{0} and Y{1} appear have keys in different order".format(
                     red(c.current_X_keys), green(c.current_Y_keys)
                 )
                 return DeepExplanation(msg)
@@ -168,7 +161,7 @@ class DeepComparison(object):
             if not i:
                 return ''
 
-            return '[{0}]'.format(']['.join(map(safe_repr, i)))
+            return '[{0}]'.format(']['.join(map(repr, i)))
 
         class ComparisonContext:
             current_X_keys = get_keys(X_keys)

@@ -37,7 +37,6 @@ from sure.core import DeepComparison
 from sure.core import DeepExplanation
 from sure.core import _get_file_name
 from sure.core import _get_line_number
-from sure.core import safe_repr
 from sure.errors import SpecialSyntaxDisabledError
 from sure.errors import InternalRuntimeError
 from sure.doubles.dummies import anything
@@ -84,7 +83,7 @@ class VariablesBag(dict):
                     not_here_error
                     % (
                         attr,
-                        safe_repr(self.__varnames__),
+                        repr(self.__varnames__),
                     )
                 )
 
@@ -413,8 +412,8 @@ def assertionmethod(func):
 
         msg = "{0}({1}) failed".format(
             func.__name__,
-            ", ".join(map(safe_repr, args)),
-            ", ".join(["{0}={1}".format(k, safe_repr(kw[k])) for k in kw]),
+            ", ".join(map(repr, args)),
+            ", ".join(["{0}={1}".format(k, repr(kw[k])) for k in kw]),
         )
         assert value, msg
         return value
@@ -559,10 +558,10 @@ class AssertionBuilder(object):
         if self.negative:
             assert not callable(
                 self.obj
-            ), "expected `{0}` to not be callable but it is".format(safe_repr(self.obj))
+            ), "expected `{0}` to not be callable but it is".format(repr(self.obj))
         else:
             assert callable(self.obj), "expected {0} to be callable".format(
-                safe_repr(self.obj)
+                repr(self.obj)
             )
 
         return True
@@ -641,7 +640,7 @@ class AssertionBuilder(object):
     @assertionproperty
     def empty(self):
         obj = self.obj
-        representation = safe_repr(obj)
+        representation = repr(obj)
         length = len(obj)
         if self.negative:
             assert length > 0, "expected `{0}` to not be empty".format(representation)
@@ -784,8 +783,8 @@ class AssertionBuilder(object):
             if error:
                 return True
 
-            msg = "%s should differ from %s, but is the same thing"
-            raise AssertionError(msg % (safe_repr(obj), safe_repr(what)))
+            msg = "%s should differ from %s"
+            raise AssertionError(msg % (repr(obj), repr(what)))
 
         else:
             if not error:
@@ -1220,7 +1219,7 @@ def enable_special_syntax():
 
         if len(obj) > 1:
             raise TypeError(
-                "dir expected at most 1 arguments, got {0}".format(len(obj))
+                "builtins.dir expected at most 1 arguments, got {0}".format(len(obj))
             )
         patched = []
         try:

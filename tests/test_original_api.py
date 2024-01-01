@@ -21,31 +21,29 @@ from sure import expect
 from sure import VariablesBag
 from sure.special import is_cpython
 
-from sure.compat import compat_repr, safe_repr
-
 
 def test_setup_with_context():
     "sure.with_context() runs setup before the function itself"
 
     def setup(context):
-        context.name = "John Resig"
+        context.name = None
 
     @sure.that_with_context(setup)
-    def john_is_within_context(context):
+    def variable_is_within_context(context):
         assert isinstance(context, VariablesBag)
         assert hasattr(context, "name")
 
-    john_is_within_context()
-    expect(john_is_within_context.__name__).to.equal(
-        "john_is_within_context",
+    variable_is_within_context()
+    expect(variable_is_within_context.__name__).to.equal(
+        "variable_is_within_context",
     )
 
 
-def test_context_is_not_optional():
+def test_context_of_sure_that_with_context_decorated_functions_is_not_optional():
     "sure.that_with_context() when no context is given it fails"
 
     def setup(context):
-        context.name = "John Resig"
+        pass
 
     @sure.that_with_context(setup)
     def it_crashes():
@@ -54,7 +52,7 @@ def test_context_is_not_optional():
     assert that(it_crashes).raises(
         TypeError,
         (
-            "the function it_crashes defined at test_original_api.py line 51, is being "
+            "the function it_crashes defined at test_original_api.py line 49, is being "
             "decorated by either @that_with_context or @scenario, so it should "
             "take at least 1 parameter, which is the test context"
         ),
@@ -65,115 +63,115 @@ def test_setup_with_context_context_failing():
     "sure.that_with_context() in a failing test"
 
     def setup(context):
-        context.name = "John Resig"
+        context.name = None
 
     @sure.that_with_context(setup)
-    def it_fails(context):
+    def function(context):
         assert False, "should fail with this exception"
 
-    assert that(it_fails).raises("should fail with this exception")
+    assert that(function).raises("should fail with this exception")
 
 
 def test_teardown_with_context():
     "sure.with_context() runs teardown before the function itself"
 
-    class something:
+    class data_structure:
         pass
 
     def setup(context):
-        something.modified = True
+        data_structure.modified = True
 
     def teardown(context):
-        del something.modified
+        del data_structure.modified
 
     @sure.that_with_context(setup, teardown)
-    def something_was_modified(context):
-        assert hasattr(something, "modified")
-        assert something.modified
+    def data_structure_was_modified(context):
+        assert hasattr(data_structure, "modified")
+        assert data_structure.modified
 
-    something_was_modified()
-    assert not hasattr(something, "modified")
+    data_structure_was_modified()
+    assert not hasattr(data_structure, "modified")
 
 
 def test_that_is_a():
     "that() is_a(object)"
 
-    something = "something"
+    data_structure = "data_structure"
 
-    assert that(something).is_a(str)
-    assert isinstance(something, str)
+    assert that(data_structure).is_a(str)
+    assert isinstance(data_structure, str)
 
 
 def test_that_equals():
     "that() equals(string)"
 
-    something = "something"
+    data_structure = "data_structure"
 
-    assert that("something").equals(something)
-    assert something == "something"
+    assert that("data_structure").equals(data_structure)
+    assert data_structure == "data_structure"
 
 
 def test_that_differs():
     "that() differs(object)"
 
-    something = "something"
+    data_structure = "data_structure"
 
-    assert that(something).differs("23123%FYTUGIHOfdf")
-    assert something != "23123%FYTUGIHOfdf"
+    assert that(data_structure).differs("23123%FYTUGIHOfdf")
+    assert data_structure != "23123%FYTUGIHOfdf"
 
 
 def test_that_has():
     "that() has(object)"
 
     class Class:
-        name = "some class"
+        value = "some class"
 
     Object = Class()
     dictionary = {
-        "name": "John",
+        "value": "Value",
     }
-    name = "john"
+    value = "value"
 
-    assert hasattr(Class, "name")
-    assert that(Class).has("name")
-    assert that(Class).like("name")
-    assert "name" in that(Class)
+    assert hasattr(Class, "value")
+    expect(Class).has("value")
+    expect(Class).to.be.like("value")
+    assert "value" in that(Class)
 
-    assert hasattr(Object, "name")
-    assert that(Object).has("name")
-    assert that(Object).like("name")
-    assert "name" in that(Object)
+    assert hasattr(Object, "value")
+    expect(Object).has("value")
+    expect(Object).to.be.like("value")
+    assert "value" in that(Object)
 
-    assert "name" in dictionary
-    assert that(dictionary).has("name")
-    assert that(dictionary).like("name")
-    assert "name" in that(dictionary)
+    assert "value" in dictionary
+    expect(dictionary).has("value")
+    expect(dictionary).to.be.like("value")
+    assert "value" in that(dictionary)
 
-    assert that(name).has("john")
-    assert that(name).like("john")
-    assert "john" in that(name)
-    assert that(name).has("hn")
-    assert that(name).like("hn")
-    assert "hn" in that(name)
-    assert that(name).has("jo")
-    assert that(name).like("jo")
-    assert "jo" in that(name)
+    expect(value).has("value")
+    expect(value).to.be.like("value")
+    assert "value" in that(value)
+    expect(value).has("va")
+    expect(value).to.be.like("va")
+    assert "val" in that(value)
+    expect(value).has("val")
+    expect(value).to.be.like("ue")
+    assert "ue" in that(value)
 
 
 def test_that_at_key_equals():
     "that().at(object).equals(object)"
 
     class Class:
-        name = "some class"
+        attribute = "some class"
 
     Object = Class()
     dictionary = {
-        "name": "John",
+        "attribute": "data_structure",
     }
 
-    assert that(Class).at("name").equals("some class")
-    assert that(Object).at("name").equals("some class")
-    assert that(dictionary).at("name").equals("John")
+    assert that(Class).at("attribute").equals("some class")
+    assert that(Object).at("attribute").equals("some class")
+    assert that(dictionary).at("attribute").equals("data_structure")
 
 
 def test_that_len_is():
@@ -577,7 +575,7 @@ def test_that_none_contains_string():
 
 
 def test_that_some_iterable_is_empty():
-    "that(some_iterable).is_empty and that(something).are_empty"
+    "that(some_iterable).is_empty and that(data_structure).are_empty"
 
     assert that([]).is_empty
     assert that([]).are_empty
@@ -596,8 +594,8 @@ def test_that_some_iterable_is_empty():
     assert that(fail_plural).raises("(1, 2) is not empty, it has 2 items")
 
 
-def test_that_something_is_empty_raises():
-    "that(something_not_iterable).is_empty and that(something_not_iterable).are_empty raises"
+def test_that_data_structure_is_empty_raises():
+    "that(data_structure_not_iterable).is_empty and that(data_structure_not_iterable).are_empty raises"
 
     obj = object()
 
@@ -608,8 +606,8 @@ def test_that_something_is_empty_raises():
     assert that(fail).raises("%r is not iterable" % obj)
 
 
-def test_that_something_iterable_matches_another():
-    "that(something_iterable).matches(another_iterable)"
+def test_that_data_structure_iterable_matches_another():
+    "that(data_structure_iterable).matches(another_iterable)"
 
     KlassOne = type("KlassOne", (object,), {})
     KlassTwo = type("KlassTwo", (object,), {})
@@ -782,46 +780,48 @@ def test_accepts_setup_list():
     "sure.with_context() accepts a list of callbacks for setup"
 
     def setup1(context):
-        context.first_name = "John"
+        context.first_action = "seek"
 
     def setup2(context):
-        context.last_name = "Resig"
+        context.last_action = "truth"
 
     @sure.that_with_context([setup1, setup2])
-    def john_is_within_context(context):
-        assert context.first_name == "John"
-        assert context.last_name == "Resig"
+    def actions_are_within_context(context):
+        assert context.first_action == "seek"
+        assert context.last_action == "truth"
 
-    john_is_within_context()
-    expect(john_is_within_context.__name__).to.equal(
-        "john_is_within_context",
+    actions_are_within_context()
+
+    # expects the name of the decorated function to not undergo a name change
+    expect(actions_are_within_context.__name__).to.equal(
+        "actions_are_within_context",
     )
 
 
 def test_accepts_teardown_list():
     "sure.with_context() runs teardown before the function itself"
 
-    class something:
+    class data_structure:
         modified = True
         finished = "nope"
 
     def setup(context):
-        something.modified = False
+        data_structure.modified = False
 
     def teardown1(context):
-        something.modified = True
+        data_structure.modified = True
 
     def teardown2(context):
-        something.finished = "yep"
+        data_structure.finished = "yep"
 
     @sure.that_with_context(setup, [teardown1, teardown2])
-    def something_was_modified(context):
-        assert not something.modified
-        assert something.finished == "nope"
+    def data_structure_was_modified(context):
+        assert not data_structure.modified
+        assert data_structure.finished == "nope"
 
-    something_was_modified()
-    assert something.modified
-    assert something.finished == "yep"
+    data_structure_was_modified()
+    assert data_structure.modified
+    assert data_structure.finished == "yep"
 
 
 def test_scenario_is_alias_for_context_on_setup_and_teardown():
@@ -923,27 +923,27 @@ def test_fails_when_action_doesnt_fulfill_the_agreement_of_provides():
     assert the_providers_are_working()
 
 
-def test_depends_on_failing_due_nothing_found():
+def test_depends_on_failing_due_to_lack_of_attribute_in_context():
     "it fails when an action depends on some attribute that is not " "provided by any other previous action"
     import os
     from sure import action_for, scenario
 
-    fullpath = os.path.abspath(__file__).replace(".pyc", ".py")
+    fullpath = os.path.abspath(__file__)
     error = (
-        'the action "lonely_action" defined at %s:940 '
-        'depends on the attribute "something" to be available in the'
+        'the action "variant_action" defined at %s:940 '
+        'depends on the attribute "data_structure" to be available in the'
         " context. It turns out that there are no actions providing "
         "that. Please double-check the implementation" % fullpath
     )
 
     def with_setup(context):
-        @action_for(context, depends_on=["something"])
-        def lonely_action():
+        @action_for(context, depends_on=["data_structure"])
+        def variant_action():
             pass
 
     @scenario(with_setup)
     def depends_on_fails(the):
-        assert that(the.lonely_action).raises(AssertionError, error)
+        assert that(the.variant_action).raises(AssertionError, error)
         return True
 
     assert depends_on_fails()
@@ -955,7 +955,7 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
     import os
     from sure import action_for, scenario
 
-    fullpath = os.path.abspath(__file__).replace(".pyc", ".py")
+    fullpath = os.path.abspath(__file__)
     error = (
         'the action "my_action" defined at {0}:971 '
         'depends on the attribute "some_attr" to be available in the context.'
@@ -1018,21 +1018,21 @@ def test_variables_bag_provides_meaningful_error_on_nonexisting_attribute():
 
     context = VariablesBag()
 
-    context.name = "John"
-    context.foo = "bar"
+    context.bar = "bar"
+    context.foo = "foo"
 
-    assert that(context.name).equals("John")
-    assert that(context.foo).equals("bar")
+    assert that(context.bar).equals("bar")
+    assert that(context.foo).equals("foo")
 
-    def access_nonexisting_attr():
-        assert context.bleh == "crash :("
+    def access_nonexisting_attribute():
+        assert context.nonexisting == "attribute"
 
-    assert that(access_nonexisting_attr).raises(
+    assert that(access_nonexisting_attribute).raises(
         AssertionError,
-        "you have tried to access the attribute 'bleh' from the context "
+        "you have tried to access the attribute 'nonexisting' from the context "
         "(aka VariablesBag), but there is no such attribute assigned to it. "
         "Maybe you misspelled it ? Well, here are the options: "
-        "['name', 'foo']",
+        "['bar', 'foo']",
     )
 
 
@@ -1048,9 +1048,9 @@ def test_actions_providing_dinamically_named_variables():
 
     @scenario(with_setup)
     def the_providers_are_working(Then):
-        Then.the_context_has_variables("JohnDoe")
+        Then.the_context_has_variables("worker")
         assert hasattr(Then, "var1")
-        assert "JohnDoe" in Then
+        assert "worker" in Then
         assert hasattr(Then, "__sure_providers_of__")
 
         providers = Then.__sure_providers_of__
@@ -1059,8 +1059,8 @@ def test_actions_providing_dinamically_named_variables():
         providers_of_var1 = [p.__name__ for p in providers["var1"]]
         assert that(providers_of_var1).contains(action)
 
-        providers_of_JohnDoe = [p.__name__ for p in providers["JohnDoe"]]
-        assert that(providers_of_JohnDoe).contains(action)
+        providers_of_worker = [p.__name__ for p in providers["worker"]]
+        assert that(providers_of_worker).contains(action)
 
         return True
 
@@ -1070,11 +1070,11 @@ def test_actions_providing_dinamically_named_variables():
 def test_deep_equals_dict_level1_success():
     "that() deep_equals(dict) succeeding on level 1"
 
-    something = {
+    data_structure = {
         "one": "yeah",
     }
 
-    assert that(something).deep_equals(
+    assert that(data_structure).deep_equals(
         {
             "one": "yeah",
         }
@@ -1084,12 +1084,12 @@ def test_deep_equals_dict_level1_success():
 def test_deep_equals_dict_level1_fail():
     "that() deep_equals(dict) failing on level 1"
 
-    something = {
+    data_structure = {
         "one": "yeah",
     }
 
     def assertions():
-        assert that(something).deep_equals(
+        assert that(data_structure).deep_equals(
             {
                 "one": "oops",
             }
@@ -1097,106 +1097,91 @@ def test_deep_equals_dict_level1_fail():
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = {'one': 'yeah'}\n"
-            "    and\n"
-            "Y = {'one': 'oops'}\n"
-            "X['one'] is 'yeah' whereas Y['one'] is 'oops'",
-        ),
+        "X = {'one': 'yeah'}\n"
+        "    and\n"
+        "Y = {'one': 'oops'}\n"
+        "X['one'] is 'yeah' whereas Y['one'] is 'oops'",
     )
 
 
 def test_deep_equals_list_level1_success():
     "that(list) deep_equals(list) succeeding on level 1"
 
-    something = ["one", "yeah"]
-    assert that(something).deep_equals(["one", "yeah"])
+    data_structure = ["one", "yeah"]
+    assert that(data_structure).deep_equals(["one", "yeah"])
 
 
 def test_deep_equals_list_level1_fail_by_value():
     "that(list) deep_equals(list) failing on level 1"
 
-    something = ["one", "yeahs"]
+    data_structure = ["one", "yeahs"]
 
     def assertions():
-        assert that(something).deep_equals(["one", "yeah"])
+        assert that(data_structure).deep_equals(["one", "yeah"])
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = ['one', 'yeahs']\n"
-            "    and\n"
-            "Y = ['one', 'yeah']\n"
-            "X[1] is 'yeahs' whereas Y[1] is 'yeah'",
-        ),
+        "X = ['one', 'yeahs']\n"
+        "    and\n"
+        "Y = ['one', 'yeah']\n"
+        "X[1] is 'yeahs' whereas Y[1] is 'yeah'",
     )
 
 
 def test_deep_equals_list_level1_fail_by_length_x_gt_y():
     "that(list) deep_equals(list) failing by length (len(X) > len(Y))"
 
-    something = ["one", "yeah", "awesome!"]
+    data_structure = ["one", "yeah", "awesome!"]
 
     def assertions():
-        assert that(something).deep_equals(["one", "yeah"])
+        assert that(data_structure).deep_equals(["one", "yeah"])
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = ['one', 'yeah', 'awesome!']\n"
-            "    and\n"
-            "Y = ['one', 'yeah']\n"
-            "X has 3 items whereas Y has only 2",
-        ),
+        "X = ['one', 'yeah', 'awesome!']\n"
+        "    and\n"
+        "Y = ['one', 'yeah']\n"
+        "X has 3 items whereas Y has only 2",
     )
 
 
 def test_deep_equals_list_level1_fail_by_length_y_gt_x():
     "that(list) deep_equals(list) failing by length (len(Y) > len(X))"
 
-    something = ["one", "yeah"]
+    data_structure = ["one", "yeah"]
 
     def assertions():
-        assert that(something).deep_equals(["one", "yeah", "damn"])
+        assert that(data_structure).deep_equals(["one", "yeah", "damn"])
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = ['one', 'yeah']\n"
-            "    and\n"
-            "Y = ['one', 'yeah', 'damn']\n"
-            "Y has 3 items whereas X has only 2"
-        ),
+        "X = ['one', 'yeah']\n"
+        "    and\n"
+        "Y = ['one', 'yeah', 'damn']\n"
+        "Y has 3 items whereas X has only 2"
     )
 
 
 def test_deep_equals_dict_level1_fails_missing_key_on_y():
     "that(X) deep_equals(Y) fails when Y is missing a key that X has"
 
-    something = {
-        "one": "yeah",
+    data_structure = {
+        "three": "value",
     }
 
     def assertions():
-        assert that(something).deep_equals(
+        assert that(data_structure).deep_equals(
             {
-                "two": "yeah",
+                "two": "value",
             }
         )
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = {{'one': 'yeah'}}\n"
-            "    and\n"
-            "Y = {{'two': 'yeah'}}\n"
-            'X has the key "{0}" whereas Y does not'
-        ).format(safe_repr("one")),
+        "X = {'three': 'value'}\n"
+        "    and\n"
+        "Y = {'two': 'value'}\n"
+        "X has the key \"'three'\" whereas Y does not"
     )
 
 
@@ -1212,13 +1197,10 @@ def test_deep_equals_failing_basic_vs_complex():
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = 'two yeah'\n"
-            "    and\n"
-            "Y = {'two': 'yeah'}\n"
-            "X is a %s and Y is a dict instead" % str.__name__,
-        ),
+        "X = 'two yeah'\n"
+        "    and\n"
+        "Y = {'two': 'yeah'}\n"
+        "X is a %s and Y is a dict instead" % str.__name__,
     )
 
 
@@ -1230,80 +1212,68 @@ def test_deep_equals_failing_complex_vs_basic():
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = {'two': 'yeah'}\n"
-            "    and\n"
-            "Y = 'two yeah'\n"
-            "X is a dict and Y is a %s instead" % str.__name__,
-        ),
+        "X = {'two': 'yeah'}\n"
+        "    and\n"
+        "Y = 'two yeah'\n"
+        "X is a dict and Y is a %s instead" % str.__name__,
     )
 
 
 def test_deep_equals_tuple_level1_success():
     "that(tuple) deep_equals(tuple) succeeding on level 1"
 
-    something = ("one", "yeah")
-    assert that(something).deep_equals(("one", "yeah"))
+    data_structure = ("one", "yeah")
+    assert that(data_structure).deep_equals(("one", "yeah"))
 
 
 def test_deep_equals_tuple_level1_fail_by_value():
     "that(tuple) deep_equals(tuple) failing on level 1"
 
-    something = ("one", "yeahs")
+    data_structure = ("one", "yeahs")
 
     def assertions():
-        assert that(something).deep_equals(("one", "yeah"))
+        assert that(data_structure).deep_equals(("one", "yeah"))
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = ('one', 'yeahs')\n"
-            "    and\n"
-            "Y = ('one', 'yeah')\n"
-            "X[1] is 'yeahs' whereas Y[1] is 'yeah'",
-        ),
+        "X = ('one', 'yeahs')\n"
+        "    and\n"
+        "Y = ('one', 'yeah')\n"
+        "X[1] is 'yeahs' whereas Y[1] is 'yeah'",
     )
 
 
 def test_deep_equals_tuple_level1_fail_by_length_x_gt_y():
     "that(tuple) deep_equals(tuple) failing by length (len(X) > len(Y))"
 
-    something = ("one", "yeah", "awesome!")
+    data_structure = ("one", "yeah", "awesome!")
 
     def assertions():
-        assert that(something).deep_equals(("one", "yeah"))
+        assert that(data_structure).deep_equals(("one", "yeah"))
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = ('one', 'yeah', 'awesome!')\n"
-            "    and\n"
-            "Y = ('one', 'yeah')\n"
-            "X has 3 items whereas Y has only 2",
-        ),
+        "X = ('one', 'yeah', 'awesome!')\n"
+        "    and\n"
+        "Y = ('one', 'yeah')\n"
+        "X has 3 items whereas Y has only 2",
     )
 
 
 def test_deep_equals_tuple_level1_fail_by_length_y_gt_x():
     "that(tuple) deep_equals(tuple) failing by length (len(Y) > len(X))"
 
-    something = ("one", "yeah")
+    data_structure = ("one", "yeah")
 
     def assertions():
-        assert that(something).deep_equals(("one", "yeah", "damn"))
+        assert that(data_structure).deep_equals(("one", "yeah", "damn"))
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = ('one', 'yeah')\n"
-            "    and\n"
-            "Y = ('one', 'yeah', 'damn')\n"
-            "Y has 3 items whereas X has only 2",
-        ),
+        "X = ('one', 'yeah')\n"
+        "    and\n"
+        "Y = ('one', 'yeah', 'damn')\n"
+        "Y has 3 items whereas X has only 2",
     )
 
 
@@ -1312,12 +1282,12 @@ def test_deep_equals_fallsback_to_generic_comparator():
     from datetime import datetime
 
     now = datetime.now()
-    something = {
+    data_structure = {
         "one": "yeah",
         "date": now,
     }
 
-    assert that(something).deep_equals(
+    assert that(data_structure).deep_equals(
         {
             "one": "yeah",
             "date": now,
@@ -1331,12 +1301,12 @@ def test_deep_equals_fallsback_to_generic_comparator_failing():
 
     now = datetime(2012, 3, 5)
     tomorrow = datetime(2012, 3, 6)
-    something = {
+    data_structure = {
         "date": now,
     }
 
     def assertions():
-        assert that(something).deep_equals(
+        assert that(data_structure).deep_equals(
             {
                 "date": tomorrow,
             }
@@ -1344,13 +1314,10 @@ def test_deep_equals_fallsback_to_generic_comparator_failing():
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = {'date': datetime.datetime(2012, 3, 5, 0, 0)}\n"
-            "    and\n"
-            "Y = {'date': datetime.datetime(2012, 3, 6, 0, 0)}\n"
-            "X['date'] != Y['date']",
-        ),
+        "X = {'date': datetime.datetime(2012, 3, 5, 0, 0)}\n"
+        "    and\n"
+        "Y = {'date': datetime.datetime(2012, 3, 6, 0, 0)}\n"
+        "X['date'] != Y['date']",
     )
 
 
@@ -1359,12 +1326,12 @@ def test_deep_equals_fallsback_to_generic_comparator_failing_type():
     from datetime import datetime
 
     now = datetime(2012, 3, 5)
-    something = {
+    data_structure = {
         "date": now,
     }
 
     def assertions():
-        assert that(something).deep_equals(
+        assert that(data_structure).deep_equals(
             {
                 "date": None,
             }
@@ -1372,27 +1339,24 @@ def test_deep_equals_fallsback_to_generic_comparator_failing_type():
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = {'date': datetime.datetime(2012, 3, 5, 0, 0)}\n"
-            "    and\n"
-            "Y = {'date': None}\n"
-            "X['date'] is a datetime and Y['date'] is a NoneType instead",
-        ),
+        "X = {'date': datetime.datetime(2012, 3, 5, 0, 0)}\n"
+        "    and\n"
+        "Y = {'date': None}\n"
+        "X['date'] is a datetime and Y['date'] is a NoneType instead",
     )
 
 
 def test_deep_equals_dict_level2_success():
     "that() deep_equals(dict) succeeding on level 2"
 
-    something = {
+    data_structure = {
         "one": "yeah",
         "another": {
             "two": "cool",
         },
     }
 
-    assert that(something).deep_equals(
+    assert that(data_structure).deep_equals(
         {
             "one": "yeah",
             "another": {
@@ -1405,12 +1369,12 @@ def test_deep_equals_dict_level2_success():
 def test_deep_equals_dict_level2_list_success():
     "that() deep_equals(dict) succeeding on level 2"
 
-    something = {
+    data_structure = {
         "one": "yeah",
         "another": ["one", "two", 3],
     }
 
-    assert that(something).deep_equals(
+    assert that(data_structure).deep_equals(
         {
             "one": "yeah",
             "another": ["one", "two", 3],
@@ -1421,192 +1385,171 @@ def test_deep_equals_dict_level2_list_success():
 def test_deep_equals_dict_level2_fail():
     "that() deep_equals(dict) failing on level 2"
 
-    something = {
-        "one": "yeah",
+    data_structure = {
+        "word": "reasonable",
         "another": {
-            "two": "##",
+            "word": "unreason",
         },
     }
 
     def assertions():
-        assert that(something).deep_equals(
+        assert that(data_structure).deep_equals(
             {
-                "one": "yeah",
+                "word": "reasonable",
                 "another": {
-                    "two": "$$",
+                    "word": "reason",
                 },
             }
         )
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = {'another': {'two': '##'}, 'one': 'yeah'}\n"
-            "    and\n"
-            "Y = {'another': {'two': '$$'}, 'one': 'yeah'}\n"
-            "X['another']['two'] is '##' whereas Y['another']['two'] is '$$'",
-        ),
+        "X = {'word': 'reasonable', 'another': {'word': 'unreason'}}\n"
+        "    and\n"
+        "Y = {'word': 'reasonable', 'another': {'word': 'reason'}}\n"
+        "X['another']['word'] is 'unreason' whereas Y['another']['word'] is 'reason'",
     )
 
 
 def test_deep_equals_dict_level3_fail_values():
     "that() deep_equals(dict) failing on level 3"
 
-    something = {
-        "my::all_users": [
-            {"name": "John", "age": 33},
+    data_structure = {
+        "index": [
+            {"name": "JC", "age": 33},
         ],
     }
 
     def assertions():
-        assert that(something).deep_equals(
+        assert that(data_structure).deep_equals(
             {
-                "my::all_users": [
-                    {"name": "John", "age": 30},
+                "index": [
+                    {"name": "JC", "age": 31},
                 ],
             }
         )
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = {'my::all_users': [{'age': 33, 'name': 'John'}]}\n"
-            "    and\n"
-            "Y = {'my::all_users': [{'age': 30, 'name': 'John'}]}\n"
-            "X['my::all_users'][0]['age'] is 33 whereas Y['my::all_users'][0]['age'] is 30",
-        ),
+        "X = {'index': [{'name': 'JC', 'age': 33}]}\n"
+        "    and\n"
+        "Y = {'index': [{'name': 'JC', 'age': 31}]}\n"
+        "X['index'][0]['age'] is 33 whereas Y['index'][0]['age'] is 31",
     )
 
 
 def test_deep_equals_dict_level3_fails_missing_key():
     "that() deep_equals(dict) failing on level 3 when missing a key"
 
-    something = {
-        "my::all_users": [
-            {"name": "John", "age": 33},
+    data_structure = {
+        "index": [
+            {"age": 33, "name": "JC"},
         ],
     }
 
     def assertions():
-        assert that(something).deep_equals(
+        assert that(data_structure).deep_equals(
             {
-                "my::all_users": [
-                    {"name": "John", "age": 30, "foo": "bar"},
+                "index": [
+                    {"age": 31, "foo": "bar", "name": "JC"},
                 ],
             }
         )
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = {{'my::all_users': [{{'age': 33, 'name': 'John'}}]}}\n"
-            "    and\n"
-            "Y = {{'my::all_users': [{{'age': 30, 'foo': 'bar', 'name': 'John'}}]}}\n"
-            "X['my::all_users'][0] does not have the key \"{0}\" whereas Y['my::all_users'][0] has it"
-        ).format(safe_repr("foo")),
+        "X = {'index': [{'age': 33, 'name': 'JC'}]}\n"
+        "    and\n"
+        "Y = {'index': [{'age': 31, 'foo': 'bar', 'name': 'JC'}]}\n"
+        "X['index'][0] does not have the key \"'foo'\" whereas Y['index'][0] has it"
     )
 
 
 def test_deep_equals_dict_level3_fails_extra_key():
     "that() deep_equals(dict) failing on level 3 when has an extra key"
 
-    something = {
-        "my::all_users": [
-            {"name": "John", "age": 33, "foo": "bar"},
+    data_structure = {
+        "index": [
+            {"age": 33, "foo": "bar", "name": "JC"},
         ],
     }
 
     def assertions():
-        assert that(something).deep_equals(
+        assert that(data_structure).deep_equals(
             {
-                "my::all_users": [
-                    {"name": "John", "age": 30},
+                "index": [
+                    {"age": 31, "name": "JC"},
                 ],
             }
         )
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = {{'my::all_users': [{{'age': 33, 'foo': 'bar', 'name': 'John'}}]}}\n"
-            "    and\n"
-            "Y = {{'my::all_users': [{{'age': 30, 'name': 'John'}}]}}\n"
-            "X['my::all_users'][0] has the key \"{0}\" whereas Y['my::all_users'][0] does not"
-        ).format(safe_repr("foo")),
+        "X = {'index': [{'age': 33, 'foo': 'bar', 'name': 'JC'}]}\n"
+        "    and\n"
+        "Y = {'index': [{'age': 31, 'name': 'JC'}]}\n"
+        "X['index'][0] has the key \"'foo'\" whereas Y['index'][0] does not"
     )
 
 
 def test_deep_equals_dict_level3_fails_different_key():
     "that() deep_equals(dict) failing on level 3 when has an extra key"
 
-    something = {
-        "my::all_users": [
-            {"name": "John", "age": 33, "foo": "bar"},
+    data_structure = {
+        "index": [
+            {"age": 33, "foo": "bar", "name": "JC"},
         ],
     }
 
     def assertions():
-        assert that(something).deep_equals(
+        assert that(data_structure).deep_equals(
             {
-                "my::all_users": [
-                    {"name": "John", "age": 33, "bar": "foo"},
+                "index": [
+                    {"age": 33, "bar": "foo", "name": "JC"},
                 ],
             }
         )
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = {{'my::all_users': [{{'age': 33, 'foo': 'bar', 'name': 'John'}}]}}\n"
-            "    and\n"
-            "Y = {{'my::all_users': [{{'age': 33, 'bar': 'foo', 'name': 'John'}}]}}\n"
-            "X['my::all_users'][0] has the key \"{0}\" whereas Y['my::all_users'][0] does not"
-        ).format(safe_repr("foo")),
+        "X = {'index': [{'age': 33, 'foo': 'bar', 'name': 'JC'}]}\n"
+        "    and\n"
+        "Y = {'index': [{'age': 33, 'bar': 'foo', 'name': 'JC'}]}\n"
+        "X['index'][0] has the key \"'foo'\" whereas Y['index'][0] does not"
     )
 
 
 def test_deep_equals_list_level2_fail_by_length_x_gt_y():
     "that(list) deep_equals(list) failing by length (len(X) > len(Y))"
 
-    something = {"iterable": ["one", "yeah", "awesome!"]}
+    data_structure = {"iterable": ["one", "yeah", "awesome!"]}
 
     def assertions():
-        assert that(something).deep_equals({"iterable": ["one", "yeah"]})
+        assert that(data_structure).deep_equals({"iterable": ["one", "yeah"]})
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = {'iterable': ['one', 'yeah', 'awesome!']}\n"
-            "    and\n"
-            "Y = {'iterable': ['one', 'yeah']}\n"
-            "X has 3 items whereas Y has only 2",
-        ),
+        "X = {'iterable': ['one', 'yeah', 'awesome!']}\n"
+        "    and\n"
+        "Y = {'iterable': ['one', 'yeah']}\n"
+        "X has 3 items whereas Y has only 2",
     )
 
 
 def test_deep_equals_list_level2_fail_by_length_y_gt_x():
     "that(list) deep_equals(list) failing by length (len(Y) > len(X))"
 
-    something = ["one", "yeah"]
+    data_structure = ["one", "yeah"]
 
     def assertions():
-        assert that(something).deep_equals(["one", "yeah", "damn"])
+        assert that(data_structure).deep_equals(["one", "yeah", "damn"])
 
     assert that(assertions).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = ['one', 'yeah']\n"
-            "    and\n"
-            "Y = ['one', 'yeah', 'damn']\n"
-            "Y has 3 items whereas X has only 2",
-        ),
+        "X = ['one', 'yeah']\n"
+        "    and\n"
+        "Y = ['one', 'yeah', 'damn']\n"
+        "Y has 3 items whereas X has only 2",
     )
 
 
@@ -1633,13 +1576,10 @@ def test_that_equals_fails():
 
     assert that(fail).raises(
         AssertionError,
-        compat_repr(
-            "given\n"
-            "X = 'something'\n"
-            "    and\n"
-            "Y = 'else'\n"
-            "X is 'something' whereas Y is 'else'",
-        ),
+        "X = 'something'\n"
+        "    and\n"
+        "Y = 'else'\n"
+        "X is 'something' whereas Y is 'else'",
     )
 
 
@@ -1654,10 +1594,10 @@ def test_raises_with_string():
         raise RuntimeError("should not reach here")
     except AssertionError as e:
         assert that(str(e)).contains(
-            """EXPECTED:
+            """EXPECTATION:
 wrong msg
 
-GOT:
+ACTUAL:
 should fail with this exception"""
         )
 

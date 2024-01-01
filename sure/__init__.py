@@ -35,11 +35,11 @@ from sure.original import Iterable
 from sure import runtime
 from sure.core import DeepComparison
 from sure.core import DeepExplanation
-from sure.core import _get_file_name
-from sure.core import _get_line_number
 from sure.errors import SpecialSyntaxDisabledError
 from sure.errors import InternalRuntimeError
 from sure.doubles.dummies import anything
+from sure.loader import get_file_name
+from sure.loader import get_line_number
 from sure.version import version
 from sure.special import is_cpython, patchable_builtin
 from sure.registry import context as _registry
@@ -339,8 +339,8 @@ def action_for(context, provides=None, depends_on=None):
 
     def check_dependencies(func):
         action = func.__name__
-        filename = _get_file_name(func)
-        lineno = _get_line_number(func)
+        filename = get_file_name(func)
+        lineno = get_line_number(func)
 
         for dependency in depends_on:
             if dependency in context.__sure_providers_of__:
@@ -354,7 +354,7 @@ def action_for(context, provides=None, depends_on=None):
                 err += "\n".join(
                     [
                         " -> %s at %s:%d"
-                        % (p.__name__, _get_file_name(p), _get_line_number(p))
+                        % (p.__name__, get_file_name(p), get_line_number(p))
                         for p in providers
                     ]
                 )

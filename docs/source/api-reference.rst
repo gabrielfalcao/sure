@@ -30,8 +30,6 @@ API Reference
 .. autoclass:: sure.core.DeepExplanation
 .. _deep comparison:
 .. autoclass:: sure.core.DeepComparison
-.. autofunction:: sure.core._get_file_name
-.. autofunction:: sure.core._get_line_number
 .. autofunction:: sure.core.itemize_length
 
 
@@ -66,6 +64,7 @@ API Reference
 .. py:module:: sure.reporters
 .. autoclass:: sure.reporters.feature.FeatureReporter
 
+
 ``sure.original``
 -----------------
 
@@ -75,7 +74,6 @@ API Reference
 .. autofunction:: sure.original.all_integers
 .. autofunction:: sure.original.explanation
 
-
 ``sure.doubles``
 ----------------
 
@@ -83,6 +81,7 @@ API Reference
 .. autofunction:: sure.doubles.stub
 .. autoclass:: sure.doubles.FakeOrderedDict
 .. autoattribute:: sure.doubles.anything
+
 
 ``sure.doubles.dummies``
 ------------------------

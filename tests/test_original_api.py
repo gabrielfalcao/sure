@@ -15,11 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import sure
 from sure import that
 from sure import expect
 from sure import VariablesBag
 from sure.special import is_cpython
+from sure.loader import collapse_path
 
 
 def test_setup_with_context():
@@ -52,7 +54,7 @@ def test_context_of_sure_that_with_context_decorated_functions_is_not_optional()
     assert that(it_crashes).raises(
         TypeError,
         (
-            "the function it_crashes defined at test_original_api.py line 49, is being "
+            "the function it_crashes defined at test_original_api.py line 51, is being "
             "decorated by either @that_with_context or @scenario, so it should "
             "take at least 1 parameter, which is the test context"
         ),
@@ -925,12 +927,11 @@ def test_fails_when_action_doesnt_fulfill_the_agreement_of_provides():
 
 def test_depends_on_failing_due_to_lack_of_attribute_in_context():
     "it fails when an action depends on some attribute that is not " "provided by any other previous action"
-    import os
     from sure import action_for, scenario
 
-    fullpath = os.path.abspath(__file__)
+    fullpath = collapse_path(collapse_path(os.path.abspath(__file__)))
     error = (
-        'the action "variant_action" defined at %s:940 '
+        'the action "variant_action" defined at %s:941 '
         'depends on the attribute "data_structure" to be available in the'
         " context. It turns out that there are no actions providing "
         "that. Please double-check the implementation" % fullpath
@@ -952,10 +953,9 @@ def test_depends_on_failing_due_to_lack_of_attribute_in_context():
 def test_depends_on_failing_due_not_calling_a_previous_action():
     "it fails when an action depends on some attribute that is being " "provided by other actions"
 
-    import os
     from sure import action_for, scenario
 
-    fullpath = os.path.abspath(__file__)
+    fullpath = collapse_path(os.path.abspath(__file__))
     error = (
         'the action "my_action" defined at {0}:971 '
         'depends on the attribute "some_attr" to be available in the context.'

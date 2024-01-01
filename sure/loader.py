@@ -1,9 +1,11 @@
 import os
 import sys
 import ast
+import types
 import importlib
 import importlib.util
-from typing import Dict, List, Union, Tuple
+
+from typing import Dict, List, Optional, Tuple, Union
 from importlib.machinery import PathFinder
 from pathlib import Path
 from sure.errors import InternalRuntimeError
@@ -11,6 +13,42 @@ from sure.errors import InternalRuntimeError
 __MODULES__ = {}
 __ROOTS__ = {}
 __TEST_CLASSES__ = {}
+
+
+def get_file_name(func) -> str:
+    """returns the file name of a given function or method"""
+    return FunMeta.from_function_or_method(func).filename
+
+
+def get_line_number(func) -> str:
+    """returns the first line number of a given function or method"""
+    return FunMeta.from_function_or_method(func).line_number
+
+
+class FunMeta(object):
+    """container for metadata specific to Python functions or methods"""
+    filename: str
+    line_number: int
+    name: str
+
+    def __init__(self, filename: str, line_number: int, name: str):
+        self.filename = collapse_path(filename)
+        self.line_number = line_number
+        self.name = name
+
+    def __repr__(self):
+        return f'<FunMeta filename={repr(self.filename)} line_number={repr(self.line_number)} name={repr(self.name)}>'
+
+    @classmethod
+    def from_function_or_method(cls, func):
+        if not isinstance(func, (types.FunctionType, types.MethodType)):
+            raise TypeError(f'get_function_or_method_metadata received an unexpected object: {func}')
+
+        return cls(
+            filename=func.__code__.co_filename,
+            line_number=func.__code__.co_firstlineno,
+            name=func.__name__,
+        )
 
 
 def name_appears_to_indicate_test(name: str) -> bool:
@@ -91,6 +129,10 @@ def get_type_definition_filename_and_firstlineno(type_object: type) -> Tuple[Pat
 
 def resolve_path(path, relative_to="~") -> Path:
     return Path(path).absolute().relative_to(Path(relative_to).expanduser())
+
+
+def collapse_path(e: Union[str, Path]) -> str:
+    return str(e).replace(os.getenv("HOME"), "~")
 
 
 def get_package(path) -> Path:

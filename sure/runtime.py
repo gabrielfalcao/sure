@@ -38,6 +38,7 @@ from sure.errors import (
 )
 from sure.loader import (
     loader,
+    collapse_path,
     get_type_definition_filename_and_firstlineno,
 )
 from sure.reporter import Reporter
@@ -117,10 +118,12 @@ class TestLocation(object):
             self.name = test.__class__.__name__
             self.filename, self.line = get_type_definition_filename_and_firstlineno(test.__class__)
             self.kind = test.__class__
+
         elif isinstance(test, type):
             self.name = test.__name__
             self.filename, self.line = get_type_definition_filename_and_firstlineno(test)
             self.kind = test
+
         else:
             raise NotImplementedError(f"{test} of type {type(test)} is not yet supported by {TestLocation}")
 
@@ -765,7 +768,7 @@ class ScenarioResultSet(ScenarioResult):
         try:
             return self.__getattribute__(attr)
         except AttributeError:
-            return getattr(self.scenario_results[-1], attr, fallback)
+            return getattr(self.scenario_results[-1], attr)
 
     @property
     def is_failure(self):
@@ -843,7 +846,7 @@ class FeatureResult(BaseResult):
         try:
             return self.__getattribute__(attr)
         except AttributeError:
-            return getattr(self.scenario_results[-1], attr, fallback)
+            return getattr(self.scenario_results[-1], attr)
 
     @property
     def is_failure(self):
@@ -920,7 +923,7 @@ class FeatureResultSet(BaseResult):
         try:
             return self.__getattribute__(attr)
         except AttributeError:
-            return getattr(self.feature_results[-1], attr, fallback)
+            return getattr(self.feature_results[-1], attr)
 
     @property
     def is_failure(self):
@@ -957,7 +960,3 @@ class FeatureResultSet(BaseResult):
 
 def stripped(string):
     return collapse_path("\n".join(filter(bool, [s.strip() for s in string.splitlines()])))
-
-
-def collapse_path(e: str):
-    return str(e).replace(os.getenv("HOME"), "~")

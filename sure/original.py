@@ -35,9 +35,9 @@ except ImportError:
 from six import string_types, text_type
 
 from sure.core import DeepComparison
-from sure.core import _get_file_name
-from sure.core import _get_line_number
 from sure.core import itemize_length
+from sure.loader import get_file_name
+from sure.loader import get_line_number
 
 
 def identify_callable_location(callable_object):

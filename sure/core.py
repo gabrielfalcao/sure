@@ -14,10 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import os
-import inspect
-
 from collections import OrderedDict
+from functools import cache
 from six import (
     text_type, integer_types, string_types, binary_type,
     get_function_code
@@ -50,6 +48,8 @@ class DeepComparison(object):
             float: self.compare_floats,
             dict: self.compare_ordered_dicts,
             list: self.compare_iterables,
+            set: self.compare_iterables,
+            frozenset: self.compare_iterables,
             tuple: self.compare_iterables,
             OrderedDict: self.compare_ordered_dicts
         }
@@ -144,10 +144,8 @@ class DeepComparison(object):
                 return DeepExplanation(msg)
         return True
 
+    @cache
     def get_context(self):
-        if self._context:
-            return self._context
-
         X_keys = []
         Y_keys = []
 
@@ -168,8 +166,7 @@ class DeepComparison(object):
             current_Y_keys = get_keys(Y_keys)
             parent = comp
 
-        self._context = ComparisonContext()
-        return self._context
+        return ComparisonContext()
 
     def compare_iterables(self, X, Y):
         len_X, len_Y = map(len, (X, Y))
@@ -240,22 +237,6 @@ class DeepComparison(object):
 
     def explanation(self):
         return self._explanation
-
-
-def _get_file_name(func):
-    try:
-        name = inspect.getfile(func)
-    except AttributeError:
-        name = get_function_code(func).co_filename
-
-    return os.path.abspath(name)
-
-
-def _get_line_number(func):
-    try:
-        return inspect.getlineno(func)
-    except AttributeError:
-        return get_function_code(func).co_firstlineno
 
 
 def itemize_length(items):

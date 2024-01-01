@@ -83,6 +83,8 @@ def entrypoint(paths, reporter, immediate, log_level, log_file, special_syntax, 
             raise ExitError(runner.context, result)
 
         elif cov:
+            sys.stdout = sys.__stdout__
+            sys.stderr = sys.__stderr__
             cov.stop()
             cov.save()
             cov.report()

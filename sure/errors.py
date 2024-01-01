@@ -76,6 +76,16 @@ class InternalRuntimeError(Exception):
         context.reporter.on_internal_runtime_error(context, self)
 
 
+class WrongUsageError(Exception):
+    """raised when :class:`~sure.AssertionBuilder` is used
+    incorrectly, such as passing a value of the wrong type as argument
+    to an assertion method or as source of comparison.
+
+    This exception should be clearly indicated by reporters so that
+    the offending action can be understood and corrected quickly.
+    """
+
+
 class SpecialSyntaxDisabledError(Exception):
     """raised when a :class:`AttributeError` occurs and the traceback
     contains evidence indicating that the probable cause is an attempt

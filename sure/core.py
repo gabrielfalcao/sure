@@ -43,6 +43,12 @@ class DeepExplanation(text_type):
 
 
 class DeepComparison(object):
+    """Performs a deep comparison between Python objects in the sense
+    that complex or nested data-structures - such as mappings of
+    sequences, sequences of mappings, mappings of sequences of
+    mappings, sequences of mappings of sequences containing et cetera
+    - are recursively compared and reaching farthest accessible edges.
+    """
     def __init__(self, X, Y, epsilon=None, parent=None):
         self.complex_cmp_funcs = {
             float: self.compare_floats,
@@ -64,10 +70,34 @@ class DeepComparison(object):
             string_types, integer_types, binary_type, Anything
         ))
 
+    @cache
+    def get_context(self):
+        X_keys = []
+        Y_keys = []
+
+        comp = self
+        while comp.parent:
+            X_keys.insert(0, comp.parent.key_X)
+            Y_keys.insert(0, comp.parent.key_Y)
+            comp = comp.parent
+
+        def get_keys(i):
+            if not i:
+                return ''
+
+            return '[{0}]'.format(']['.join(map(repr, i)))
+
+        class ComparisonContext:
+            current_X_keys = get_keys(X_keys)
+            current_Y_keys = get_keys(Y_keys)
+            parent = comp
+
+        return ComparisonContext()
+
     def is_complex(self, obj):
         return isinstance(obj, tuple(self.complex_cmp_funcs.keys()))
 
-    def compare_complex_stuff(self, X, Y):
+    def compare_complex_instances(self, X, Y):
         return self.complex_cmp_funcs.get(type(X), self.compare_generic)(X, Y)
 
     def compare_generic(self, X, Y, msg_format='X{0} != Y{1}'):
@@ -138,43 +168,18 @@ class DeepComparison(object):
         for i, j in zip(X.items(), Y.items()):
             if i[0] != j[0]:
                 c = self.get_context()
-                msg = "X{0} and Y{1} appear have keys in different order".format(
-                    red(c.current_X_keys), green(c.current_Y_keys)
-                )
+                msg = f"X{red(c.current_X_keys)} and Y{green(c.current_Y_keys)} appear have keys in different order"
                 return DeepExplanation(msg)
         return True
 
-    @cache
-    def get_context(self):
-        X_keys = []
-        Y_keys = []
-
-        comp = self
-        while comp.parent:
-            X_keys.insert(0, comp.parent.key_X)
-            Y_keys.insert(0, comp.parent.key_Y)
-            comp = comp.parent
-
-        def get_keys(i):
-            if not i:
-                return ''
-
-            return '[{0}]'.format(']['.join(map(repr, i)))
-
-        class ComparisonContext:
-            current_X_keys = get_keys(X_keys)
-            current_Y_keys = get_keys(Y_keys)
-            parent = comp
-
-        return ComparisonContext()
-
     def compare_iterables(self, X, Y):
+        c = self.get_context()
         len_X, len_Y = map(len, (X, Y))
         if len_X > len_Y:
-            msg = "X has {0} items whereas Y has only {1}".format(len_X, len_Y)
+            msg = f"X{red(c.current_X_keys)} has {len_X} items whereas Y{green(c.current_Y_keys)} has only {len_Y}"
             return DeepExplanation(msg)
         elif len_X < len_Y:
-            msg = "Y has {0} items whereas X has only {1}".format(len_Y, len_X)
+            msg = f"Y{green(c.current_Y_keys)} has {len_Y} items whereas X{red(c.current_X_keys)} has only {len_X}"
             return DeepExplanation(msg)
         elif X == Y:
             return True
@@ -201,7 +206,7 @@ class DeepComparison(object):
 
         c = self.get_context()
         if self.is_complex(X) and type(X) is type(Y):
-            return self.compare_complex_stuff(X, Y)
+            return self.compare_complex_instances(X, Y)
 
         def safe_format_repr(string):
             "Escape '{' and '}' in string for use with str.format()"

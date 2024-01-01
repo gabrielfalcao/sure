@@ -47,22 +47,34 @@ Installing
 
 .. code:: bash
 
-    $ pip install sure
+   pip install sure
+
+Running tests
+-------------
+
+.. code:: bash
+
+   sure tests
+
+
+.. code:: bash
+
+   sure --help
+
 
 Documentation
 -------------
 
-Available in the `website <https://sure.readthedocs.io/en/latest/>`__ or under the
-``docs`` directory.
+Available on the `website <https://sure.readthedocs.io/en/latest/>`_.
 
-You can also build the documentation locally using sphinx:
+To build locally run:
 
 .. code:: bash
 
     make docs
 
-Here is a tease
----------------
+Quick Library Showcase
+----------------------
 
 Equality
 ~~~~~~~~
@@ -72,24 +84,29 @@ Equality
 
 .. code:: python
 
-    import sure
+   from sure import expect
 
-    (4).should.be.equal(2 + 2)
-    (7.5).should.eql(3.5 + 4)
+   expect(4).to.be.equal(2 + 2)
+   expect(7.5).to.be.eql(3.5 + 4)
 
-    (3).shouldnt.be.equal(5)
+   expect(3).to.not_be.equal(5)
+   expect(9).to_not.be.equal(11)
+
 
 Assert dictionary and its contents
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
-    {'foo': 'bar'}.should.equal({'foo': 'bar'})
-    {'foo': 'bar'}.should.have.key('foo').which.should.equal('bar')
+   from sure import expect
+
+   expect({'foo': 'bar'}).to.equal({'foo': 'bar'})
+   expect({'foo': 'bar'}).to.have.key('foo').being.equal('bar')
+
 
 "A string".lower().should.equal("a string") also works
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
-    "Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])
+   "Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])

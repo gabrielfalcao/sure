@@ -36,6 +36,7 @@ from sure import runtime
 from sure.core import DeepComparison
 from sure.core import DeepExplanation
 from sure.errors import SpecialSyntaxDisabledError
+from sure.errors import WrongUsageError, SpecialSyntaxDisabledError
 from sure.errors import InternalRuntimeError
 from sure.doubles.dummies import anything
 from sure.loader import get_file_name
@@ -597,6 +598,10 @@ class AssertionBuilder(object):
         return self
 
     @assertionproperty
+    def which(self):
+        return self
+
+    @assertionproperty
     def have(self):
         return self
 
@@ -691,7 +696,7 @@ class AssertionBuilder(object):
 
         return True
 
-    def __contains__(self, what):
+    def __contains__(self, expectation):
         if isinstance(self.obj, dict):
             items = self.obj.keys()
 
@@ -700,14 +705,14 @@ class AssertionBuilder(object):
         else:
             items = dir(self.obj)
 
-        return what in items
+        return expectation in items
 
     @assertionmethod
-    def contains(self, what):
-        if what in self.obj:
+    def contains(self, expectation):
+        if expectation in self.obj:
             return True
         else:
-            raise AssertionError('%r should be in %r' % (what, self.obj))
+            raise AssertionError('%r should be in %r' % (expectation, self.obj))
 
     @assertionmethod
     def within_range(self, start, end):
@@ -759,32 +764,32 @@ class AssertionBuilder(object):
             )
 
     @assertionmethod
-    def equal(self, what, epsilon=None):
+    def equal(self, expectation, epsilon=None):
         """compares given object ``X``  with an expected ``Y`` object.
 
         It primarily assures that the compared objects are absolute equal ``==``.
 
-        :param what: the expected value
+        :param expectation: the expected value
         :param epsilon: a delta to leverage upper-bound floating point permissiveness
         """
         obj = self.obj
 
         try:
-            comparison = DeepComparison(obj, what, epsilon).compare()
+            comparison = DeepComparison(obj, expectation, epsilon).compare()
             error = False
         except AssertionError as e:
             error = e
             comparison = None
 
         if isinstance(comparison, DeepExplanation):
-            error = comparison.get_assertion(obj, what)
+            error = comparison.get_assertion(obj, expectation)
 
         if self.negative:
             if error:
                 return True
 
             msg = "%s should differ from %s"
-            raise AssertionError(msg % (repr(obj), repr(what)))
+            raise AssertionError(msg % (repr(obj), repr(expectation)))
 
         else:
             if not error:
@@ -796,22 +801,27 @@ class AssertionBuilder(object):
     equal_to = equal
 
     @assertionmethod
-    def different_of(self, what):
+    def different_of(self, expectation):
         differ = difflib.Differ()
 
         obj = isinstance(self.obj, AssertionHelper) and self.obj.src or self.obj
+        if not isinstance(expectation, str):
+            raise WrongUsageError(f".different_of only works for string comparison but in this case is expecting {repr(expectation)} ({type(expectation)}) instead")
+
+        if not isinstance(self.obj, str):
+            raise WrongUsageError(f".different_of only works for string comparison but in this case the actual source comparison object is {repr(self.obj)} ({type(self.obj)}) instead")
 
         source = obj.strip().splitlines(True)
-        destination = what.strip().splitlines(True)
+        destination = expectation.strip().splitlines(True)
         result = differ.compare(source, destination)
         difference = "".join(result)
         if self.negative:
-            if obj != what:
+            if obj != expectation:
                 assert not difference, "Difference:\n\n{0}".format(difference)
         else:
-            if obj == what:
+            if obj == expectation:
                 raise AssertionError(
-                    "{0} should be different of {1}".format(obj, what)
+                    "{0} should be different of {1}".format(obj, expectation)
                 )
 
         return True
@@ -1006,12 +1016,12 @@ class AssertionBuilder(object):
         return self._that.looks_like(value)
 
     @assertionmethod
-    def contain(self, what):
+    def contain(self, expectation):
         obj = self.obj
         if self.negative:
-            return expect(what).to.not_be.within(obj)
+            return expect(expectation).to.not_be.within(obj)
         else:
-            return expect(what).to.be.within(obj)
+            return expect(expectation).to.be.within(obj)
 
     @assertionmethod
     def match(self, regex, *args):
@@ -1028,7 +1038,7 @@ class AssertionBuilder(object):
             re.S: "s",
             re.U: "u",
         }
-        modifiers = "".join([modifiers_map.get(x, "") for x in args])
+        modifiers = "".join(filter(bool, [modifiers_map.get(x, "") for x in args]))
         regex_representation = "/{0}/{1}".format(regex, modifiers)
 
         if self.negative:
@@ -1051,6 +1061,7 @@ class AssertionBuilder(object):
 assert_that = AssertionBuilder("assert_that")
 it = AssertionBuilder("it")
 expect = AssertionBuilder("expect")
+expects = AssertionBuilder("expect")
 that = AssertionBuilder("that")
 the = AssertionBuilder("the")
 these = AssertionBuilder("these")

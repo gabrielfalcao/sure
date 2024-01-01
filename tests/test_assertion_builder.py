@@ -17,21 +17,21 @@
 
 import re
 import mock
+
 from collections import OrderedDict
+from datetime import datetime
+from datetime import timedelta
 
-from datetime import datetime, timedelta
 from sure import AssertionBuilder
-from sure import this, those, it
-from sure import these, expect, anything
-
-
-def test_assertion_builder_synonyms():
-    "this, it, these and those are all synonyms"
-
-    assert isinstance(it, AssertionBuilder)
-    assert isinstance(this, AssertionBuilder)
-    assert isinstance(these, AssertionBuilder)
-    assert isinstance(those, AssertionBuilder)
+from sure import this
+from sure import those
+from sure import it
+from sure import expects
+from sure import that
+from sure import assert_that
+from sure import these
+from sure import expect
+from sure import anything
 
 
 def test_4_equal_2p2():
@@ -782,3 +782,17 @@ def test_equals_crosstype():
     class MyFloat(float):
         pass
     expect(MyFloat(3.33)).to.be.equal(3.33)
+
+
+def test_assertion_builder_variants():
+    """`this', `those', `it', `expects', `that', `assert_that',
+    `these' and `expect' should be instances of the AssertionBuilder class"""
+
+    assert isinstance(it, AssertionBuilder)
+    assert isinstance(this, AssertionBuilder)
+    assert isinstance(these, AssertionBuilder)
+    assert isinstance(those, AssertionBuilder)
+    assert isinstance(that, AssertionBuilder)
+    assert isinstance(expect, AssertionBuilder)
+    assert isinstance(expects, AssertionBuilder)
+    assert isinstance(assert_that, AssertionBuilder)

@@ -1532,7 +1532,7 @@ def test_deep_equals_list_level2_fail_by_length_x_gt_y():
         "X = {'iterable': ['one', 'yeah', 'awesome!']}\n"
         "    and\n"
         "Y = {'iterable': ['one', 'yeah']}\n"
-        "X has 3 items whereas Y has only 2",
+        "X['iterable'] has 3 items whereas Y['iterable'] has only 2",
     )
 
 
@@ -1602,7 +1602,7 @@ should fail with this exception"""
         )
 
 
-def test_deep_equals_weird():
+def test_deep_comparison_sequences_of_sequences():
     part1 = [
         ("Bootstraping Redis role", []),
         ("Restart scalarizr", []),
@@ -1643,4 +1643,12 @@ def test_deep_equals_weird():
         ("Restart farm", ["restart_farm"]),
     ]
 
-    expect(that(part1).equals).when.called_with(part2).should.throw("")
+    try:
+        expect(part1).equals(part2)
+    except AssertionError as e:
+        expect(str(e)).to_not.be.different_of("""
+X = [('Bootstraping Redis role', []), ('Restart scalarizr', []), ('Rebundle server', ['rebundle']), ('Use new role', ['rebundle']), ('Restart scalarizr after bundling', ['rebundle']), ('Bundling data', []), ('Modifying data', []), ('Reboot server', []), ('Backuping data on Master', []), ('Setup replication', []), ('Restart scalarizr in slave', []), ('Slave force termination', []), ('Slave delete EBS', ['ec2']), ('Setup replication for EBS test', ['ec2']), ('Writing on Master, reading on Slave', []), ('Slave -> Master promotion', []), ('Restart farm', ['restart_farm'])]
+    and
+Y = [('Bootstraping Redis role', ['rebundle', 'rebundle', 'rebundle']), ('Restart scalarizr', []), ('Rebundle server', ['rebundle']), ('Use new role', ['rebundle']), ('Restart scalarizr after bundling', ['rebundle']), ('Bundling data', []), ('Modifying data', []), ('Reboot server', []), ('Backuping data on Master', []), ('Setup replication', []), ('Restart scalarizr in slave', []), ('Slave force termination', []), ('Slave delete EBS', ['ec2']), ('Setup replication for EBS test', ['ec2']), ('Writing on Master, reading on Slave', []), ('Slave -> Master promotion', []), ('Restart farm', ['restart_farm'])]
+Y[0][1] has 3 items whereas X[0][1] has only 0
+""".strip())

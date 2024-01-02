@@ -203,7 +203,7 @@ def within(**units):
 
             try:
                 func(start, *args, **kw)
-            except TypeError as e:
+            except TypeError as e:  # TODO: test
                 fmt = "{0}() takes 0 positional arguments but 1 was given"
                 err = text_type(e)
                 if fmt.format(func.__name__) in err:
@@ -217,7 +217,7 @@ def within(**units):
             end = datetime.utcnow()
             delta = end - start
             took = convert_to(delta.microseconds)
-            print(took, timeout)
+
             if not took < timeout:
                 raise AssertionError(
                     "%s did not run within %s %s" % (
@@ -382,7 +382,8 @@ def action_for(context, provides=None, depends_on=None):
                     dependency,
                 )
 
-            assert dependency in context, err
+            if dependency not in context:
+                raise AssertionError(err)
 
     def decorate_and_absorb(func):
         [register_providers(func, attr) for attr in provides]
@@ -658,11 +659,11 @@ class AssertionBuilder(object):
     @assertionproperty
     def ok(self):
         if self.negative:
-            msg = f"expected `{self.actual}' to be `{False}'"
-            assert not bool(self.actual), msg
+            if bool(self.actual):
+                raise AssertionError(f"expected `{self.actual}' to be `{False}'")
         else:
-            msg = f"expected `{self.actual}' to be `{True}'"
-            assert bool(self.actual), msg
+            if not bool(self.actual):
+                raise AssertionError(f"expected `{self.actual}' to be `{True}'")
 
         return True
 
@@ -672,11 +673,11 @@ class AssertionBuilder(object):
     @assertionproperty
     def not_ok(self):
         if self.negative:
-            msg = f"expected `{self.actual}' to be `{True}'"
-            assert bool(self.actual), msg
+            if not bool(self.actual):
+                raise AssertionError(f"expected `{self.actual}' to be `{True}'")
         else:
-            msg = f"expected `{self.actual}' to be `{False}'"
-            assert not bool(self.actual), msg
+            if bool(self.actual):
+                raise AssertionError(f"expected `{self.actual}' to be `{False}'")
 
         return True
 
@@ -686,9 +687,11 @@ class AssertionBuilder(object):
     @assertionproperty
     def none(self):
         if self.negative:
-            assert self.actual is not None, f"expected `{self.actual}' to not be None"
+            if self.actual is None:
+                raise AssertionError(f"expected `{self.actual}' to not be None")
         else:
-            assert self.actual is None, f"expected `{self.actual}' to be None"
+            if self.actual is not None:
+                raise AssertionError(f"expected `{self.actual}' to be None")
 
         return True
 
@@ -883,94 +886,92 @@ class AssertionBuilder(object):
     an = a
 
     @assertionmethod
-    def greater_than(self, dest):
+    def greater_than(self, expectation):
         if self.negative:
-            msg = "expected `{0}' to not be greater than `{1}'".format(self.actual, dest)
+            msg = "expected `{0}' to not be greater than `{1}'".format(self.actual, expectation)
 
-            if self.actual > dest:
+            if self.actual > expectation:
                 raise AssertionError(msg)
 
         else:
-            msg = "expected `{0}' to be greater than `{1}'".format(self.actual, dest)
-            if not self.actual > dest:
+            msg = "expected `{0}' to be greater than `{1}'".format(self.actual, expectation)
+            if not self.actual > expectation:
                 raise AssertionError(msg)
 
         return True
 
     @assertionmethod
-    def greater_than_or_equal_to(self, dest):
+    def greater_than_or_equal_to(self, expectation):
         if self.negative:
-            msg = "expected `{0}' to not be greater than or equal to `{1}'".format(
-                self.actual, dest
-            )
-
-            assert not self.actual >= dest, msg
+            if self.actual >= expectation:
+                raise AssertionError(f"expected `{self.actual}' to not be greater than or equal to `{expectation}'")
 
         else:
-            msg = "expected `{0}' to be greater than or equal to `{1}'".format(
-                self.actual, dest
-            )
-            assert self.actual >= dest, msg
+            if not self.actual >= expectation:
+                raise AssertionError(
+                    f"expected `{self.actual}' to be greater than or equal to `{expectation}'"
+                )
 
         return True
 
     @assertionmethod
-    def lower_than(self, dest):
+    def lower_than(self, expectation):
         if self.negative:
-            msg = "expected `{0}' to not be lower than `{1}'".format(self.actual, dest)
-
-            assert not self.actual < dest, msg
+            if self.actual < expectation:
+                raise AssertionError(f"expected `{self.actual}' to not be lower than `{expectation}'")
 
         else:
-            msg = "expected `{0}' to be lower than `{1}'".format(self.actual, dest)
-            assert self.actual < dest, msg
+            if not  self.actual < expectation:
+                raise AssertionError(f"expected `{self.actual}' to be lower than `{expectation}'")
 
         return True
 
     @assertionmethod
-    def lower_than_or_equal_to(self, dest):
+    def lower_than_or_equal_to(self, expectation):
         if self.negative:
-            msg = "expected `{0}' to not be lower than or equal to `{1}'".format(
-                self.actual, dest
-            )
-
-            assert not self.actual <= dest, msg
+            if self.actual <= expectation:
+                raise AssertionError(
+                    f"expected `{self.actual}' to not be lower than or equal to `{expectation}'"
+                )
 
         else:
-            msg = "expected `{0}' to be lower than or equal to `{1}'".format(
-                self.actual, dest
-            )
-            assert self.actual <= dest, msg
+            if not self.actual <= expectation:
+                raise AssertionError(
+                    f"expected `{self.actual}' to be lower than or equal to `{expectation}'"
+                )
 
         return True
 
     @assertionmethod
-    def below(self, num):
+    def below(self, expectation):
         if self.negative:
-            msg = "{0} should not be below {1}".format(self.actual, num)
-            assert not self.actual < num, msg
+            if self.actual < expectation:
+                raise AssertionError(f"{self.actual} should not be below {expectation}")
         else:
-            msg = "{0} should be below {1}".format(self.actual, num)
-            assert self.actual < num, msg
+            if not self.actual < expectation:
+                raise AssertionError(f"{self.actual} should be below {expectation}")
 
         return True
 
     @assertionmethod
-    def above(self, num):
+    def above(self, expectation):
         if self.negative:
-            msg = "{0} should not be above {1}".format(self.actual, num)
-            assert not self.actual > num, msg
+            if self.actual > expectation:
+                raise AssertionError(
+                    f"{self.actual} should not be above {expectation}"
+                )
         else:
-            msg = "{0} should be above {1}".format(self.actual, num)
-            assert self.actual > num, msg
+            if not self.actual > expectation:
+                raise AssertionError(f"{self.actual} should be above {expectation}")
+
         return True
 
     @assertionmethod
-    def length_of(self, num):
+    def length_of(self, expectation):
         if self.negative:
-            return self._that.len_is_not(num)
+            return self._that.len_is_not(expectation)
 
-        return self._that.len_is(num)
+        return self._that.len_is(expectation)
 
     def called_with(self, *args, **kw):
         self._callable_args = args
@@ -1041,10 +1042,10 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def match(self, regex, *args):
-        obj_repr = repr(self.actual)
-        assert isinstance(
+        if not isinstance(
             self.actual, str
-        ), "{0} should be a string in order to compare using .match()".format(obj_repr)
+        ):
+            raise f"{repr(self.actual)} should be a string in order to compare using .match()"
         matched = re.search(regex, self.actual, *args)
 
         modifiers_map = {
@@ -1058,18 +1059,16 @@ class AssertionBuilder(object):
         regex_representation = "/{0}/{1}".format(regex, modifiers)
 
         if self.negative:
-            assert (
-                matched is None
-            ), "{0} should not match the regular expression {1}".format(
-                obj_repr, regex_representation
-            )
+            if matched is not None:
+                raise AssertionError(
+                    f"{repr(self.actual)} should not match the regular expression {regex_representation}"
+                )
 
         else:
-            assert (
-                matched is not None
-            ), "{0} doesn't match the regular expression {1}".format(
-                obj_repr, regex_representation
-            )
+            if matched is None:
+                raise AssertionError(
+                    f"{repr(self.actual)} doesn't match the regular expression {regex_representation}"
+                )
 
         return True
 

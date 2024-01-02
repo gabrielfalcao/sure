@@ -469,6 +469,7 @@ class PreparedTestSuiteContainer(BaseContainer):
         if context.runtime.immediate:
             if last_error is not None:
                 raise ImmediateError(last_error)
+
             if last_failure is not None:
                 raise ImmediateFailure(last_failure)
 

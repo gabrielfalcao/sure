@@ -16,10 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from collections import OrderedDict
 from functools import cache
-from six import (
-    text_type, integer_types, string_types, binary_type,
-    get_function_code
-)
 
 try:  # TODO: document the coupling with :mod:`mock` or :mod:`unittest.mock`
     from mock.mock import _CallList
@@ -30,16 +26,24 @@ from sure.terminal import red, green, yellow
 from sure.doubles.dummies import Anything
 
 
-class DeepExplanation(text_type):
+class Explanation(str):
     def get_header(self, X, Y, suffix):
-        header = f"X = {repr(X)}\n    and\nY = {repr(Y)}\n{text_type(suffix)}"
+        header = f"X = {repr(X)}\n    and\nY = {repr(Y)}\n{str(suffix)}"
         return yellow(header).strip()
 
-    def get_assertion(self, X, Y):
-        return AssertionError(self.get_header(X, Y, self))
+    def get_assertion(self, X, Y, prefix=""):
+        if not isinstance(prefix, str):
+            raise TypeError(
+                f"Explanation.get_assertion() takes a {str} as "
+                f"its `prefix' argument but received {prefix} ({type(prefix)}) instead"
+            )
+        else:
+            prefix = f"{prefix.strip()}\n"
 
-    def as_assertion(self, X, Y):
-        raise self.get_assertion(X, Y)
+        return AssertionError(f"{prefix}{self.get_header(X, Y, self)}")
+
+    def as_assertion(self, X, Y, *args, **kw):
+        raise self.get_assertion(X, Y, *args, **kw)
 
 
 class DeepComparison(object):
@@ -67,7 +71,7 @@ class DeepComparison(object):
 
     def is_simple(self, obj):
         return isinstance(obj, (
-            string_types, integer_types, binary_type, Anything
+            str, int, bytes, bytearray, Anything
         ))
 
     @cache
@@ -106,7 +110,7 @@ class DeepComparison(object):
             return True
         else:
             msg = msg_format.format(red(c.current_X_keys), green(c.current_Y_keys))
-            return DeepExplanation(msg)
+            return Explanation(msg)
 
     def compare_floats(self, X, Y):
         c = self.get_context()
@@ -121,7 +125,7 @@ class DeepComparison(object):
                 self.epsilon, green(c.current_Y_keys),
                 self.epsilon
             )
-            return DeepExplanation(msg)
+            return Explanation(msg)
 
     def compare_ordered_dicts(self, X, Y):
         c = self.get_context()
@@ -137,7 +141,7 @@ class DeepComparison(object):
                 repr(diff_x[0]),
                 green(c.current_Y_keys),
             )
-            return DeepExplanation(msg)
+            return Explanation(msg)
 
         elif diff_y:
             msg = "X{0} does not have the key {1!r} whereas Y{2} has it".format(
@@ -145,7 +149,7 @@ class DeepComparison(object):
                 repr(diff_y[0]),
                 green(c.current_Y_keys)
             )
-            return DeepExplanation(msg)
+            return Explanation(msg)
 
         elif X == Y:
             return True
@@ -162,14 +166,14 @@ class DeepComparison(object):
                     epsilon=self.epsilon,
                     parent=self,
                 ).compare()
-                if isinstance(instance, DeepExplanation):
+                if isinstance(instance, Explanation):
                     return instance
 
         for i, j in zip(X.items(), Y.items()):
             if i[0] != j[0]:
                 c = self.get_context()
                 msg = f"X{red(c.current_X_keys)} and Y{green(c.current_Y_keys)} appear have keys in different order"
-                return DeepExplanation(msg)
+                return Explanation(msg)
         return True
 
     def compare_iterables(self, X, Y):
@@ -177,10 +181,10 @@ class DeepComparison(object):
         len_X, len_Y = map(len, (X, Y))
         if len_X > len_Y:
             msg = f"X{red(c.current_X_keys)} has {len_X} items whereas Y{green(c.current_Y_keys)} has only {len_Y}"
-            return DeepExplanation(msg)
+            return Explanation(msg)
         elif len_X < len_Y:
             msg = f"Y{green(c.current_Y_keys)} has {len_Y} items whereas X{red(c.current_X_keys)} has only {len_X}"
-            return DeepExplanation(msg)
+            return Explanation(msg)
         elif X == Y:
             return True
         else:
@@ -192,7 +196,7 @@ class DeepComparison(object):
                     epsilon=self.epsilon,
                     parent=self,
                 ).compare()
-                if isinstance(instance, DeepExplanation):
+                if isinstance(instance, Explanation):
                     return instance
 
     def compare(self):
@@ -210,11 +214,11 @@ class DeepComparison(object):
 
         def safe_format_repr(string):
             "Escape '{' and '}' in string for use with str.format()"
-            if not isinstance(string, (string_types, binary_type)):
+            if not isinstance(string, (str, bytes)):
                 return string
 
             orig_str_type = type(string)
-            if isinstance(string, binary_type):
+            if isinstance(string, bytes):
                 safe_repr = string.replace(b'{', b'{{').replace(b'}', b'}}')
             else:
                 safe_repr = string.replace('{', '{{').replace('}', '}}')
@@ -234,7 +238,7 @@ class DeepComparison(object):
                 type(X).__name__, type(Y).__name__)
         exp = self.compare_generic(X, Y, **kwargs)
 
-        if isinstance(exp, DeepExplanation):
+        if isinstance(exp, Explanation):
             original_X, original_Y = c.parent.operands
             raise exp.as_assertion(original_X, original_Y)
 

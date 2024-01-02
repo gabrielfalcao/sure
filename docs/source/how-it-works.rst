@@ -32,6 +32,7 @@ statements below:
    from sure import assert_that
    from sure import it
    from sure import expect
+   from sure import expects
    from sure import that
    from sure import the
    from sure import these
@@ -161,7 +162,7 @@ details and instead bring as much detail as possible in the occasion
 of such exception, to the point of doing its best to show at what key
 or what index there is a difference in the case of testing equality
 between the datastructures :class:`dict` or :class:`list`,
-respectivelly in this case. (See :class:`sure.DeepExplanation` for more)
+respectivelly in this case. (See :class:`sure.Explanation` for more)
 
 Gabriel's initial idea came from believing that other programming
 languages suchs as Ruby or Javascript had tools or libraries such as

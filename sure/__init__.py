@@ -34,7 +34,7 @@ from sure.original import Iterable
 
 from sure import runtime
 from sure.core import DeepComparison
-from sure.core import DeepExplanation
+from sure.core import Explanation
 from sure.errors import SpecialSyntaxDisabledError
 from sure.errors import WrongUsageError, SpecialSyntaxDisabledError
 from sure.errors import InternalRuntimeError
@@ -54,6 +54,15 @@ not_here_error = (
 
 
 original_obj_attrs = dir(object)
+bugtracker = "https://github.com/gabrielfalcao/sure/issues"
+
+
+def unwrap_assertion_helper(obj) -> object:
+    while isinstance(obj, AssertionHelper):
+        obj = obj.src
+    while isinstance(obj, AssertionBuilder):
+        obj = obj.actual
+    return obj
 
 
 class VariablesBag(dict):
@@ -89,11 +98,11 @@ class VariablesBag(dict):
                 )
 
 
-def ensure_type(caller_name, cast, obj):  # TODO: test
+def ensure_type(caller_name, cast, actual):  # TODO: test
     try:
-        return cast(obj)
+        return cast(actual)
     except TypeError:
-        raise InternalRuntimeError(f"{caller_name} expected {cast} but received {obj} which is {type(obj)} instead")
+        raise InternalRuntimeError(f"{caller_name} expected {cast} but received {actual} which is {type(actual)} instead")
 
 
 class CallBack(object):
@@ -175,7 +184,11 @@ scenario = that_with_context
 
 def within(**units):
     if len(units) != 1:
-        raise AssertionError("use within(number=unit). e.g.: within(one=second)")
+        raise WrongUsageError(
+            "within() takes a single keyword argument where the argument must be "
+            "a numerical description from one to eighteen and the value. "
+            "For example: within(eighteen=miliseconds)"
+        )
 
     word, unit = list(units.items())[0]
     value = word_to_number(word)
@@ -299,11 +312,12 @@ def action_for(context, provides=None, depends_on=None):
             return  # ignore dynamically declared provides
 
         index = int(found.group(1))
-        assert index < len(args), (
-            "the dynamic provider index: {%d} is bigger than %d, which is "
-            "the length of the positional arguments passed to %s"
-            % (index, len(args), func.__name__)
-        )
+        if index > len(args):
+            raise AssertionError(
+                "the dynamic provider index: {%d} is greater than %d, which is "
+                "the length of the positional arguments passed to %s"
+                % (index, len(args), func.__name__)
+            )
 
         attr = args[index]
 
@@ -320,9 +334,9 @@ def action_for(context, provides=None, depends_on=None):
 
         if attr not in context:
             raise AssertionError(
-                'the action "%s" was supposed to provide the attribute "%s" '
-                "into the context, but it did not. Please double check its "
-                "implementation" % (func.__name__, attr)
+                f'the action "{func.__name__}" is supposed to provide the attribute "{attr}" '
+                "into the context but does not. Check its "
+                f"implementation for correctness or, if there is a bug in Sure, consider reporting that at {bugtracker}"
             )
 
     dependency_error_lonely = (
@@ -405,18 +419,20 @@ def assertionmethod(func):
 
     @wraps(func)
     def wrapper(self, *args, **kw):
-        self.obj = unwrap_assertion_helper(self.obj)
+        self.actual = unwrap_assertion_helper(self.actual)
         try:
             value = func(self, *args, **kw)
         except AssertionError as e:
-            raise AssertionError(e)
+            raise e
 
-        msg = "{0}({1}) failed".format(
-            func.__name__,
-            ", ".join(map(repr, args)),
-            ", ".join(["{0}={1}".format(k, repr(kw[k])) for k in kw]),
-        )
-        assert value, msg
+        if not value:
+            raise AssertionError(
+                f"{0}({1}{2}) failed".format(
+                    func.__name__,
+                    ", ".join(map(repr, args)),
+                    ", ".join(["{0}={1}".format(k, repr(kw[k])) for k in kw]),
+                )
+            )
         return value
 
     return wrapper
@@ -450,42 +466,11 @@ runtime.KNOWN_ASSERTIONS.extend(POSITIVES)
 runtime.KNOWN_ASSERTIONS.extend(NEGATIVES)
 
 
-class IdentityAssertion(object):
-    def __init__(self, assertion_builder):
-        self._ab = assertion_builder
-
-    def __call__(self, other):
-        if self._ab.negative:
-            assert (
-                self._ab.obj is not other
-            ), "{0} should not be the same object as {1}, but it is".format(
-                self._ab.obj, other
-            )
-            return True
-        assert (
-            self._ab.obj is other
-        ), "{0} should be the same object as {1}, but it is not".format(
-            self._ab.obj, other
-        )
-        return True
-
-    def __getattr__(self, name):
-        return getattr(self._ab, name)
-
-
-def unwrap_assertion_helper(obj) -> object:
-    while isinstance(obj, AssertionHelper):
-        obj = obj.src
-    while isinstance(obj, AssertionBuilder):
-        obj = obj.obj
-    return obj
-
-
 class AssertionBuilder(object):
     def __init__(
         self, name=None,
         negative=False,
-        obj=None,
+        actual=None,
         with_args=None,
         with_kwargs=None,
         and_kwargs=None
@@ -493,7 +478,7 @@ class AssertionBuilder(object):
         self._name = name
         self.negative = negative
 
-        self.obj = unwrap_assertion_helper(obj)
+        self.actual = unwrap_assertion_helper(actual)
         self._callable_args = []
         self._callable_kw = {}
         if isinstance(with_args, (list, tuple)):
@@ -506,12 +491,18 @@ class AssertionBuilder(object):
             self._callable_kw.update(and_kwargs)
 
     def __call__(self,
-                 obj,
+                 actual,
                  with_args=None,
                  with_kwargs=None,
                  and_kwargs=None,
                  *args, **kw):
-        self.obj = unwrap_assertion_helper(obj)
+
+        if isinstance(actual, self.__class__):
+            self.actual = actual.actual
+            self._callable_args = actual._callable_args
+            self._callable_kw = actual._callable_kw
+        else:
+            self.actual = unwrap_assertion_helper(actual)
 
         self._callable_args = []
         self._callable_kw = {}
@@ -524,12 +515,7 @@ class AssertionBuilder(object):
         if isinstance(and_kwargs, dict):
             self._callable_kw.update(and_kwargs)
 
-        if isinstance(obj, self.__class__):
-            self.obj = obj.obj
-            self._callable_args = obj._callable_args
-            self._callable_kw = obj._callable_kw
-
-        self._that = AssertionHelper(self.obj, *args, **kw)
+        self._that = AssertionHelper(self.actual, *args, **kw)
         return self
 
     def __getattr__(self, attr):
@@ -542,7 +528,7 @@ class AssertionBuilder(object):
             return AssertionBuilder(
                 attr,
                 negative=negative,
-                obj=self.obj,
+                actual=self.actual,
                 callable_args=self._callable_args,
                 callable_kw=self._callable_kw,
             )
@@ -553,31 +539,38 @@ class AssertionBuilder(object):
             return self.__getattribute__(attr)
         return super(AssertionBuilder, self).__getattribute__(attr)
 
-
     @assertionproperty
     def callable(self):
         if self.negative:
-            assert not callable(
-                self.obj
-            ), "expected `{0}` to not be callable but it is".format(repr(self.obj))
+            if callable(
+                self.actual
+            ):
+                raise AssertionError(
+                    f"expected {repr(self.actual)} to not be callable"
+                )
         else:
-            assert callable(self.obj), "expected {0} to be callable".format(
-                repr(self.obj)
-            )
+            if not callable(self.actual):
+                raise AssertionError(
+                    f"expected {repr(self.actual)} to be callable"
+                )
 
         return True
 
     @assertionproperty
     def be(self):
-        return IdentityAssertion(self)
+        return ObjectIdentityAssertion(self)
 
-    being = be
+    @assertionproperty
+    def being(self):
+        return ObjectIdentityAssertion(self)
 
     @assertionproperty
     def not_be(self):
-        return IdentityAssertion(self.should_not)
+        return ObjectIdentityAssertion(self.should_not)
 
-    not_being = not_be
+    @assertionproperty
+    def not_being(self):
+        return ObjectIdentityAssertion(self.should_not)
 
     @assertionproperty
     def not_have(self):
@@ -590,8 +583,6 @@ class AssertionBuilder(object):
     @assertionproperty
     def to(self):
         return self
-
-    which = to
 
     @assertionproperty
     def when(self):
@@ -610,115 +601,133 @@ class AssertionBuilder(object):
         return self
 
     def property(self, name):
-        has_it = hasattr(self.obj, name)
+        has_it = hasattr(self.actual, name)
         if self.negative:
-            assert (
-                not has_it
-            ), "%r should not have the property `%s`, " "but it is %r" % (
-                self.obj,
-                name,
-                getattr(self.obj, name),
-            )
-            return True
+            if not not has_it:
+                raise AssertionError(
+                    f"{self.actual} should not have the property `{name}' which is actually present and holds the value `{getattr(self.actual, name)}'"
+                )
+            else:
+                return True
+        else:
+            if not has_it:
+                raise AssertionError(
+                    f"{self.actual} should have the property `{name}' which is not present"
+                )
 
-        assert has_it, "%r should have the property `%s` but does not" % (
-            self.obj,
-            name,
-        )
-        return expect(getattr(self.obj, name))
+        return expect(getattr(self.actual, name))
 
     def key(self, name):
-        obj = self.obj
-        has_it = name in obj
+        actual = self.actual
+        has_it = name in actual
         if self.negative:
-            assert not has_it, "%r should not have the key `%s`, " "but it is %r" % (
-                obj,
-                name,
-                obj[name],
-            )
-            return True
-
-        assert has_it, "%r should have the key `%s` but does not" % (obj, name)
-
-        return expect(obj[name])
+            if has_it:
+                raise AssertionError(
+                    f"{actual} should not have the key `{name}' which is actually present and holds the value `{actual[name]}'"
+                )
+            else:
+                return True
+        else:
+            if not has_it:
+                raise AssertionError(
+                    f"{actual} should have the key `{name}' which is not present"
+                )
+            else:
+                return expect(actual[name])
 
     @assertionproperty
     def empty(self):
-        obj = self.obj
-        representation = repr(obj)
-        length = len(obj)
+        actual = self.actual
+        representation = repr(actual)
+        length = len(actual)
         if self.negative:
-            assert length > 0, "expected `{0}` to not be empty".format(representation)
+            if length == 0:
+                raise AssertionError(
+                    f"expected `{representation}' to not be empty"
+                )
+            else:
+                return True
         else:
-            assert (
-                length == 0
-            ), "expected `{0}` to be empty but it has {1} items".format(
-                representation, length
-            )
-
-        return True
+            if length > 0:
+                raise AssertionError(
+                    f"expected '{representation}' to be empty but contains {length} items"
+                )
+            else:
+                return True
 
     @assertionproperty
     def ok(self):
         if self.negative:
-            msg = "expected `{0}` to be falsy".format(self.obj)
-            assert not bool(self.obj), msg
+            msg = f"expected `{self.actual}' to be `{False}'"
+            assert not bool(self.actual), msg
         else:
-            msg = "expected `{0}` to be truthy".format(self.obj)
-            assert bool(self.obj), msg
+            msg = f"expected `{self.actual}' to be `{True}'"
+            assert bool(self.actual), msg
 
         return True
 
-    truthy = ok
     true = ok
+    truthy = ok
 
     @assertionproperty
-    def falsy(self):
+    def not_ok(self):
         if self.negative:
-            msg = "expected `{0}` to be truthy".format(self.obj)
-            assert bool(self.obj), msg
+            msg = f"expected `{self.actual}' to be `{True}'"
+            assert bool(self.actual), msg
         else:
-            msg = "expected `{0}` to be falsy".format(self.obj)
-            assert not bool(self.obj), msg
+            msg = f"expected `{self.actual}' to be `{False}'"
+            assert not bool(self.actual), msg
 
         return True
 
-    false = falsy
+    false = not_ok
+    falsy = not_ok
 
     @assertionproperty
     def none(self):
         if self.negative:
-            assert self.obj is not None, r"expected `{0}` to not be None".format(
-                self.obj
-            )
+            assert self.actual is not None, f"expected `{self.actual}' to not be None"
         else:
-            assert self.obj is None, r"expected `{0}` to be None".format(self.obj)
+            assert self.actual is None, f"expected `{self.actual}' to be None"
 
         return True
 
     def __contains__(self, expectation):
-        if isinstance(self.obj, dict):
-            items = self.obj.keys()
+        if isinstance(self.actual, dict):
+            items = self.actual.keys()
 
-        if isinstance(self.obj, Iterable):
-            items = self.obj
+        if isinstance(self.actual, Iterable):
+            items = self.actual
         else:
-            items = dir(self.obj)
+            items = dir(self.actual)
 
         return expectation in items
 
     @assertionmethod
     def contains(self, expectation):
-        if expectation in self.obj:
+        if expectation in self.actual:
             return True
         else:
-            raise AssertionError('%r should be in %r' % (expectation, self.obj))
+            raise Explanation(f'{expectation} should be in {self.actual}').as_assertion(self.actual, expectation, "Content Verification Error")
+
+    contain = contains
+    to_contain = contains
+
+    @assertionmethod
+    def does_not_contain(self, expectation):
+        if expectation not in self.actual:
+            return True
+        else:
+            raise Explanation(f'{expectation} should not be in {self.actual}').as_assertion(self.actual, expectation, "Content Verification Error")
+
+    doesnt_contain = does_not_contain
+    to_not_contain = does_not_contain
 
     @assertionmethod
     def within_range(self, start, end):
         start = ensure_type("within_range", int, start)
         end = ensure_type("within_range", int, end)
-        subject = ensure_type("within_range", int, self.obj)
+        subject = ensure_type("within_range", int, self.actual)
         is_within_range = subject >= start and subject <= end
 
         if self.negative:
@@ -740,19 +749,22 @@ class AssertionBuilder(object):
     @assertionmethod
     def within(self, first, *rest):
         if isinstance(first, Iterable):
-            collection_should = AssertionHelper(first)
+            verification_of_whether_collection = AssertionHelper(first)
             if self.negative:
-                return collection_should.does_not_contain(self.obj)
+                return verification_of_whether_collection.does_not_contain(self.actual)
             else:
-                return collection_should.contains(self.obj)
+                return verification_of_whether_collection.contain(self.actual)
 
         elif len(rest) == 1:
             return self.within_range(first, rest[0])
         else:
+            # TODO: return actual path to chain of attribute access
+            # instead of hardcoding ``.should_not.be.within`` and ``.should.be.within`` in the
+            # variable assignments below
             if self.negative:
-                ppath = "{0}.should_not.be.within".format(self.obj)
+                ppath = "{0}.should_not.be.within".format(self.actual)
             else:
-                ppath = "{0}.should.be.within".format(self.obj)
+                ppath = "{0}.should.be.within".format(self.actual)
 
             raise AssertionError(
                 (
@@ -765,31 +777,31 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def equal(self, expectation, epsilon=None):
-        """compares given object ``X``  with an expected ``Y`` object.
+        """compares given object ``X'`  with an expected '`Y'` object.
 
-        It primarily assures that the compared objects are absolute equal ``==``.
+        It primarily assures that the compared objects are absolute equal '`=='`.
 
         :param expectation: the expected value
         :param epsilon: a delta to leverage upper-bound floating point permissiveness
         """
-        obj = self.obj
+        actual = self.actual
 
         try:
-            comparison = DeepComparison(obj, expectation, epsilon).compare()
+            comparison = DeepComparison(actual, expectation, epsilon).compare()
             error = False
         except AssertionError as e:
             error = e
             comparison = None
 
-        if isinstance(comparison, DeepExplanation):
-            error = comparison.get_assertion(obj, expectation)
+        if isinstance(comparison, Explanation):
+            error = comparison.get_assertion(actual, expectation, "Equality Error")
 
         if self.negative:
             if error:
                 return True
 
             msg = "%s should differ from %s"
-            raise AssertionError(msg % (repr(obj), repr(expectation)))
+            raise AssertionError(msg % (repr(actual), repr(expectation)))
 
         else:
             if not error:
@@ -804,30 +816,30 @@ class AssertionBuilder(object):
     def different_of(self, expectation):
         differ = difflib.Differ()
 
-        obj = isinstance(self.obj, AssertionHelper) and self.obj.src or self.obj
+        actual = isinstance(self.actual, AssertionHelper) and self.actual.src or self.actual
         if not isinstance(expectation, str):
             raise WrongUsageError(f".different_of only works for string comparison but in this case is expecting {repr(expectation)} ({type(expectation)}) instead")
 
-        if not isinstance(self.obj, str):
-            raise WrongUsageError(f".different_of only works for string comparison but in this case the actual source comparison object is {repr(self.obj)} ({type(self.obj)}) instead")
+        if not isinstance(self.actual, str):
+            raise WrongUsageError(f".different_of only works for string comparison but in this case the actual source comparison object is {repr(self.actual)} ({type(self.actual)}) instead")
 
-        source = obj.strip().splitlines(True)
+        source = actual.strip().splitlines(True)
         destination = expectation.strip().splitlines(True)
         result = differ.compare(source, destination)
         difference = "".join(result)
         if self.negative:
-            if obj != expectation:
-                assert not difference, "Difference:\n\n{0}".format(difference)
+            if actual != expectation:
+                raise AssertionError("Difference:\n\n{0}".format(difference))
         else:
-            if obj == expectation:
+            if actual == expectation:
                 raise AssertionError(
-                    "{0} should be different of {1}".format(obj, expectation)
+                    "{0} should be different of {1}".format(actual, expectation)
                 )
 
         return True
 
     @assertionmethod
-    def an(self, klass):
+    def a(self, klass):
         if isinstance(klass, type):
             class_name = klass.__name__
         elif isinstance(klass, string_types):
@@ -835,7 +847,7 @@ class AssertionBuilder(object):
         else:
             class_name = text_type(klass)
 
-        is_vowel = class_name[0] in "aeiou"
+        is_vowel = class_name.lower()[0] in "aeiou"
 
         if isinstance(klass, string_types):
             if "." in klass:
@@ -856,97 +868,101 @@ class AssertionBuilder(object):
         suffix = is_vowel and "n" or ""
 
         if self.negative:
-            assert not isinstance(
-                self.obj, klass
-            ), "expected `{0}` to not be a{1} {2}".format(self.obj, suffix, class_name)
+            if isinstance(
+                self.actual, klass
+            ):
+                raise AssertionError("expected `{0}' to not be a{1} `{2}'".format(self.actual, suffix, class_name))
 
         else:
-            assert isinstance(self.obj, klass), "expected `{0}` to be a{1} {2}".format(
-                self.obj, suffix, class_name
-            )
+            if not isinstance(self.actual, klass):
+                raise AssertionError("expected `{0}' to be a{1} `{2}'".format(
+                    self.actual, suffix, class_name
+                ))
         return True
 
-    a = an
+    an = a
 
     @assertionmethod
     def greater_than(self, dest):
         if self.negative:
-            msg = "expected `{0}` to not be greater than `{1}`".format(self.obj, dest)
+            msg = "expected `{0}' to not be greater than `{1}'".format(self.actual, dest)
 
-            assert not self.obj > dest, msg
+            if self.actual > dest:
+                raise AssertionError(msg)
 
         else:
-            msg = "expected `{0}` to be greater than `{1}`".format(self.obj, dest)
-            assert self.obj > dest, msg
+            msg = "expected `{0}' to be greater than `{1}'".format(self.actual, dest)
+            if not self.actual > dest:
+                raise AssertionError(msg)
 
         return True
 
     @assertionmethod
     def greater_than_or_equal_to(self, dest):
         if self.negative:
-            msg = "expected `{0}` to not be greater than or equal to `{1}`".format(
-                self.obj, dest
+            msg = "expected `{0}' to not be greater than or equal to `{1}'".format(
+                self.actual, dest
             )
 
-            assert not self.obj >= dest, msg
+            assert not self.actual >= dest, msg
 
         else:
-            msg = "expected `{0}` to be greater than or equal to `{1}`".format(
-                self.obj, dest
+            msg = "expected `{0}' to be greater than or equal to `{1}'".format(
+                self.actual, dest
             )
-            assert self.obj >= dest, msg
+            assert self.actual >= dest, msg
 
         return True
 
     @assertionmethod
     def lower_than(self, dest):
         if self.negative:
-            msg = "expected `{0}` to not be lower than `{1}`".format(self.obj, dest)
+            msg = "expected `{0}' to not be lower than `{1}'".format(self.actual, dest)
 
-            assert not self.obj < dest, msg
+            assert not self.actual < dest, msg
 
         else:
-            msg = "expected `{0}` to be lower than `{1}`".format(self.obj, dest)
-            assert self.obj < dest, msg
+            msg = "expected `{0}' to be lower than `{1}'".format(self.actual, dest)
+            assert self.actual < dest, msg
 
         return True
 
     @assertionmethod
     def lower_than_or_equal_to(self, dest):
         if self.negative:
-            msg = "expected `{0}` to not be lower than or equal to `{1}`".format(
-                self.obj, dest
+            msg = "expected `{0}' to not be lower than or equal to `{1}'".format(
+                self.actual, dest
             )
 
-            assert not self.obj <= dest, msg
+            assert not self.actual <= dest, msg
 
         else:
-            msg = "expected `{0}` to be lower than or equal to `{1}`".format(
-                self.obj, dest
+            msg = "expected `{0}' to be lower than or equal to `{1}'".format(
+                self.actual, dest
             )
-            assert self.obj <= dest, msg
+            assert self.actual <= dest, msg
 
         return True
 
     @assertionmethod
     def below(self, num):
         if self.negative:
-            msg = "{0} should not be below {1}".format(self.obj, num)
-            assert not self.obj < num, msg
+            msg = "{0} should not be below {1}".format(self.actual, num)
+            assert not self.actual < num, msg
         else:
-            msg = "{0} should be below {1}".format(self.obj, num)
-            assert self.obj < num, msg
+            msg = "{0} should be below {1}".format(self.actual, num)
+            assert self.actual < num, msg
 
         return True
 
     @assertionmethod
     def above(self, num):
         if self.negative:
-            msg = "{0} should not be above {1}".format(self.obj, num)
-            assert not self.obj > num, msg
+            msg = "{0} should not be above {1}".format(self.actual, num)
+            assert not self.actual > num, msg
         else:
-            msg = "{0} should be above {1}".format(self.obj, num)
-            assert self.obj > num, msg
+            msg = "{0} should be above {1}".format(self.actual, num)
+            assert self.actual > num, msg
         return True
 
     @assertionmethod
@@ -966,7 +982,7 @@ class AssertionBuilder(object):
     @assertionmethod
     def throw(self, *args, **kw):
         _that = AssertionHelper(
-            self.obj, with_args=self._callable_args, and_kwargs=self._callable_kw
+            self.actual, with_args=self._callable_args, and_kwargs=self._callable_kw
         )
 
         if self.negative:
@@ -977,11 +993,11 @@ class AssertionBuilder(object):
 
             exc = args and args[0] or Exception
             try:
-                self.obj(*self._callable_args, **self._callable_kw)
+                self.actual(*self._callable_args, **self._callable_kw)
                 return True
             except Exception as e:
                 err = msg.format(
-                    self.obj,
+                    self.actual,
                     self._that._callable_args,
                     self._that._callable_kw,
                     exc,
@@ -997,7 +1013,7 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def return_value(self, value):
-        return_value = self.obj(*self._callable_args, **self._callable_kw)
+        return_value = self.actual(*self._callable_args, **self._callable_kw)
         return this(return_value).should.equal(value)
 
     returned_the_value = return_value
@@ -1011,25 +1027,25 @@ class AssertionBuilder(object):
                 return True
             else:
                 msg = "%r should not look like %r but does"
-                raise AssertionError(msg % (self.obj, value))
+                raise AssertionError(msg % (self.actual, value))
 
         return self._that.looks_like(value)
 
     @assertionmethod
     def contain(self, expectation):
-        obj = self.obj
+        actual = self.actual
         if self.negative:
-            return expect(expectation).to.not_be.within(obj)
+            return expect(expectation).to.not_be.within(actual)
         else:
-            return expect(expectation).to.be.within(obj)
+            return expect(expectation).to.be.within(actual)
 
     @assertionmethod
     def match(self, regex, *args):
-        obj_repr = repr(self.obj)
+        obj_repr = repr(self.actual)
         assert isinstance(
-            self.obj, str
+            self.actual, str
         ), "{0} should be a string in order to compare using .match()".format(obj_repr)
-        matched = re.search(regex, self.obj, *args)
+        matched = re.search(regex, self.actual, *args)
 
         modifiers_map = {
             re.I: "i",
@@ -1058,6 +1074,43 @@ class AssertionBuilder(object):
         return True
 
 
+class ObjectIdentityAssertion(object):
+    """Accompanies :class:`AssertionBuilder' in checking whether the
+    actual object is entirely identical to the destination object,
+    raising a :exc:`AssertionError' in case of identity mismatch.
+    """
+    def __init__(self, assertion_builder: AssertionBuilder):
+        self.assertion_builder = assertion_builder
+
+    def __call__(self, expectation):
+        if self.assertion_builder.negative:
+            return self.assure_nonidentical(expectation)
+        else:
+            return self.assure_identical(expectation)
+
+    def assure_nonidentical(self, nonidentical):
+        if self.assertion_builder.actual is nonidentical:
+            raise AssertionError(
+                f"{self.assertion_builder.actual} should not be the same object as {nonidentical}"
+            )
+        else:
+            return True
+
+    def assure_identical(self, identical):
+        if self.assertion_builder.actual is not identical:
+            raise AssertionError(
+                f"{self.assertion_builder.actual} should be the same object as {identical}"
+            )
+        else:
+            return True
+
+    def __getattr__(self, name):
+        return getattr(self.assertion_builder, name)
+
+    def __repr__(self):
+        return f"<ObjectIdentityAssertion assertion_builder={repr(self.assertion_builder)}>"
+
+
 assert_that = AssertionBuilder("assert_that")
 it = AssertionBuilder("it")
 expect = AssertionBuilder("expect")
@@ -1070,20 +1123,20 @@ those = AssertionBuilder("those")
 
 
 def assertion(func):
-    """Extends :mod:`sure` with a custom assertion method."""
+    """Extends :mod:`sure' with a custom assertion method."""
     func = assertionmethod(func)
     setattr(AssertionBuilder, func.__name__, func)
     return func
 
 
 def chain(func):
-    """Extends :mod:`sure` with a custom chaining method."""
+    """Extends :mod:`sure' with a custom chaining method."""
     setattr(AssertionBuilder, func.__name__, func)
     return func
 
 
 def chainproperty(func):
-    """Extends :mod:`sure` with a custom chain property."""
+    """Extends :mod:`sure' with a custom chain property."""
     func = assertionproperty(func)
     setattr(AssertionBuilder, func.fget.__name__, func)
     return func
@@ -1092,10 +1145,10 @@ def chainproperty(func):
 class ensure(object):
     """
     Contextmanager to ensure that the given assertion message
-    is printed upon a raised ``AssertionError`` exception.
+    is printed upon a raised '`AssertionError'` exception.
 
-    The ``args`` and ``kwargs`` are used to format
-    the message using ``format()``.
+    The '`args'` and '`kwargs'` are used to format
+    the message using '`format()'`.
     """
 
     def __init__(self, msg, *args, **kwargs):
@@ -1108,7 +1161,7 @@ class ensure(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         """
-        Catch all ``AsertionError`` exceptions and reraise
+        Catch all '`AsertionError'` exceptions and reraise
         them with the message provided to the context manager.
         """
         if exc_type is not AssertionError:
@@ -1118,10 +1171,43 @@ class ensure(object):
         raise AssertionError(msg)
 
 
-allows_new_syntax = os.getenv("SURE_ENABLE_NEW_SYNTAX")
+old_dir = dir
 
 
-def do_enable():
+def enable_special_syntax():
+    """enables :mod:`sure''s "special syntax" as documented in :ref:'Special Syntax`
+
+    .. danger:: Enabling the special syntax in production code may cause unintended consequences.
+    """
+    @wraps(builtins.dir)
+    def _new_dir(*obj):
+        if not obj:
+            frame = inspect.currentframe()
+            return sorted(frame.f_back.f_locals.keys())
+
+        if len(obj) > 1:
+            raise TypeError(
+                f"builtins.dir expected at most 1 arguments, got {len(obj)}"
+            )
+        patched = []
+        try:
+            import pytest
+        except ImportError:
+            pytest = None
+
+        if not pytest:
+            try:
+                patched = [
+                    x
+                    for x in old_dir(obj[0])
+                    if isinstance(getattr(obj[0], x, None), AssertionBuilder)
+                ]
+            except Exception:
+                pass
+        return sorted(set(old_dir(obj[0])).difference(set(patched)))
+
+    builtins.dir = _new_dir
+
     def make_safe_property(method, name, should_be_property=True):
         if not should_be_property:
             return method(None)
@@ -1129,7 +1215,7 @@ def do_enable():
         def deleter(method, self, *args, **kw):
             if isinstance(self, type):
                 # if the attribute has to be deleted from a class object
-                # we cannot use ``del self.__dict__[name]`` directly because we cannot
+                # we cannot use '`del self.__dict__[name]'` directly because we cannot
                 # modify a mappingproxy object. Thus, we have to delete it in our
                 # proxy __dict__.
                 overwritten_object_handlers.pop((id(self), method.__name__), None)
@@ -1141,7 +1227,7 @@ def do_enable():
         def setter(method, self, other):
             if isinstance(self, type):
                 # if the attribute has to be set to a class object
-                # we cannot use ``self.__dict__[name] = other`` directly because we cannot
+                # we cannot use '`self.__dict__[name] = other'` directly because we cannot
                 # modify a mappingproxy object. Thus, we have to set it in our
                 # proxy __dict__.
                 overwritten_object_handlers[(id(self), method.__name__)] = other
@@ -1160,7 +1246,7 @@ def do_enable():
         """Build assertion property
 
         This is the assertion property which is usually patched
-        to the built-in ``object`` and ``NoneType``.
+        to the built-in '`object'` and '`NoneType'`.
         """
 
         def method(self):
@@ -1171,7 +1257,7 @@ def do_enable():
                     return self.__dict__[name]
             except AttributeError:
                 # we do not have an object with __dict__, thus
-                # it's safe to just continue and patch the `name`.
+                # it's safe to just continue and patch the `name'.
                 pass
 
             overwritten_object_handler = overwritten_object_handlers.get(
@@ -1195,7 +1281,7 @@ def do_enable():
 
     object_handler = patchable_builtin(object)
     # We have to keep track of all objects which
-    # should overwrite a ``POSITIVES`` or ``NEGATIVES``
+    # should overwrite a '`POSITIVES'` or '`NEGATIVES'`
     # property. If we wouldn't do that in the
     # make_safe_property.setter method we would loose
     # the newly assigned object reference.
@@ -1212,48 +1298,3 @@ def do_enable():
     for name in NEGATIVES:
         object_handler[name] = build_assertion_property(name, is_negative=True)
         none[name] = build_assertion_property(name, is_negative=True, prop=False)
-
-
-old_dir = dir
-
-
-def enable_special_syntax():
-    """enables :mod:`sure`'s "special syntax" as documented in :ref:`Special Syntax`
-
-    .. danger:: Enabling the special syntax in production code may cause unintended consequences.
-"""
-    @wraps(builtins.dir)
-    def _new_dir(*obj):
-        if not obj:
-            frame = inspect.currentframe()
-            return sorted(frame.f_back.f_locals.keys())
-
-        if len(obj) > 1:
-            raise TypeError(
-                "builtins.dir expected at most 1 arguments, got {0}".format(len(obj))
-            )
-        patched = []
-        try:
-            import pytest
-        except ImportError:
-            pytest = None
-
-        if not pytest:
-            try:
-                patched = [
-                    x
-                    for x in old_dir(obj[0])
-                    if isinstance(getattr(obj[0], x, None), AssertionBuilder)
-                ]
-            except Exception:
-                pass
-        return sorted(set(old_dir(obj[0])).difference(set()))
-
-    builtins.dir = _new_dir
-    do_enable()
-
-
-enable = enable_special_syntax
-
-if is_cpython and allows_new_syntax:
-    enable_special_syntax()

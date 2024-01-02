@@ -13,6 +13,7 @@ Contents:
 
    intro
    getting-started
+   definitions
    assertion-reference
    how-it-works
    api-reference

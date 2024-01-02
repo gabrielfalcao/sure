@@ -84,11 +84,11 @@ class FeatureReporter(Reporter):
             raise RuntimeError(
                 f"{self.__class__}.on_failure() called with a {ScenarioResult} which does not contain a failure"
             )
-        sh.bold_yellow(f"Failure: {result.failure}\n{result.succinct_failure}")
+        sh.yellow(f"Failure: {result.failure}\n{result.succinct_failure}")
         sh.reset(" " * self.indentation)
         if result.location.description.strip():
-            sh.bold_yellow(f"\n{' ' * self.indentation} Scenario:")
-            sh.bold_yellow(f"\n{' ' * self.indentation}     {result.location.description}")
+            sh.bold_blue(f"\n{' ' * self.indentation} Scenario:")
+            sh.bold_blue(f"\n{' ' * self.indentation}     {result.location.description}")
         if result.location:
             sh.bold_red(f"\n{' ' * self.indentation} outer location {result.location.ort}")
         sh.reset("\n")

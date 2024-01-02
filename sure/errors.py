@@ -52,7 +52,7 @@ class ImmediateError(RuntimeInterruption):
 class ImmediateFailure(RuntimeInterruption):
     def __init__(self, scenario_result):
         self.args = scenario_result.failure.args
-        self.message = self.result.succinct_failure
+        self.message = scenario_result.succinct_failure
         super().__init__(scenario_result)
 
 

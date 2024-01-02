@@ -15,7 +15,7 @@ API Reference
 .. autofunction:: sure.word_to_number
 .. autofunction:: sure.assertionmethod
 .. autofunction:: sure.assertionproperty
-.. autoclass:: sure.IdentityAssertion
+.. autoclass:: sure.ObjectIdentityAssertion
 .. autoclass:: sure.AssertionBuilder
 .. autofunction:: sure.assertion
 .. autofunction:: sure.chain
@@ -27,7 +27,7 @@ API Reference
 -------------
 
 .. automodule:: sure.core
-.. autoclass:: sure.core.DeepExplanation
+.. autoclass:: sure.core.Explanation
 .. _deep comparison:
 .. autoclass:: sure.core.DeepComparison
 .. autofunction:: sure.core.itemize_length

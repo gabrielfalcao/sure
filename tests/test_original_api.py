@@ -17,9 +17,18 @@
 
 import os
 import sure
-from sure import that
-from sure import expect
+import time
+
+from datetime import datetime
+
+from sure import that, this
+from sure import expects
+from sure import action_for
+from sure import scenario
+from sure import within
+from sure import miliseconds
 from sure import VariablesBag
+
 from sure.special import is_cpython
 from sure.loader import collapse_path
 
@@ -36,7 +45,7 @@ def test_setup_with_context():
         assert hasattr(context, "name")
 
     variable_is_within_context()
-    expect(variable_is_within_context.__name__).to.equal(
+    expects(variable_is_within_context.__name__).to.equal(
         "variable_is_within_context",
     )
 
@@ -54,7 +63,7 @@ def test_context_of_sure_that_with_context_decorated_functions_is_not_optional()
     assert that(it_crashes).raises(
         TypeError,
         (
-            "the function it_crashes defined at test_original_api.py line 51, is being "
+            "the function it_crashes defined at test_original_api.py line 60, is being "
             "decorated by either @that_with_context or @scenario, so it should "
             "take at least 1 parameter, which is the test context"
         ),
@@ -135,28 +144,28 @@ def test_that_has():
     value = "value"
 
     assert hasattr(Class, "value")
-    expect(Class).has("value")
-    expect(Class).to.be.like("value")
+    expects(Class).has("value")
+    expects(Class).to.be.like("value")
     assert "value" in that(Class)
 
     assert hasattr(Object, "value")
-    expect(Object).has("value")
-    expect(Object).to.be.like("value")
+    expects(Object).has("value")
+    expects(Object).to.be.like("value")
     assert "value" in that(Object)
 
     assert "value" in dictionary
-    expect(dictionary).has("value")
-    expect(dictionary).to.be.like("value")
+    expects(dictionary).has("value")
+    expects(dictionary).to.be.like("value")
     assert "value" in that(dictionary)
 
-    expect(value).has("value")
-    expect(value).to.be.like("value")
+    expects(value).has("value")
+    expects(value).to.be.like("value")
     assert "value" in that(value)
-    expect(value).has("va")
-    expect(value).to.be.like("va")
+    expects(value).has("va")
+    expects(value).to.be.like("va")
     assert "val" in that(value)
-    expect(value).has("val")
-    expect(value).to.be.like("ue")
+    expects(value).has("val")
+    expects(value).to.be.like("ue")
     assert "ue" in that(value)
 
 
@@ -204,7 +213,7 @@ def test_that_len_greater_than_should_raise_assertion_error():
     try:
         that(lst).len_greater_than(1000)
     except AssertionError as e:
-        expect(str(e)).to.equal(
+        expects(str(e)).to.equal(
             "the length of the list should be greater then %d, but is %d" % (1000, 1000)
         )
 
@@ -229,7 +238,7 @@ def test_that_len_greater_than_or_equals_should_raise_assertion_error():
     try:
         that(lst).len_greater_than_or_equals(1001)
     except AssertionError as e:
-        expect(str(e)).to.equal(
+        expects(str(e)).to.equal(
             "the length of %r should be greater then or equals %d, but is %d"
             % (lst, 1001, 1000)
         )
@@ -253,7 +262,7 @@ def test_that_len_lower_than_should_raise_assertion_error():
     try:
         that(lst).len_lower_than(1000)
     except AssertionError as e:
-        expect(str(e)).to.equal(
+        expects(str(e)).to.equal(
             "the length of %r should be lower then %d, but is %d" % (lst, 1000, 1000)
         )
 
@@ -275,10 +284,11 @@ def test_that_len_lower_than_or_equals_should_raise_assertion_error():
     "that() len_lower_than_or_equals(number) raise AssertionError"
 
     lst = list(range(1000))
+
     try:
         that(lst).len_lower_than_or_equals(100)
     except AssertionError as e:
-        expect(str(e)).to.equal(
+        expects(str(e)).to.equal(
             "the length of %r should be lower then or equals %d, but is %d"
             % (lst, 100, 1000)
         )
@@ -433,7 +443,7 @@ def test_that_raises():
         called = False
 
     called = False
-    expect(function(3, 5)).to.equal("OK")
+    expects(function(3, 5)).to.equal("OK")
     assert called
 
     called = False
@@ -573,7 +583,7 @@ def test_that_none_contains_string():
             if is_cpython
             else "'NoneType' object is not iterable"
         )
-        expect(str(e)).when.called_with(error_msg)
+        expects(str(e)).when.called_with(error_msg)
 
 
 def test_that_some_iterable_is_empty():
@@ -647,15 +657,12 @@ def test_that_data_structure_iterable_matches_another():
 
 def test_within_pass():
     "within(five=miliseconds) will pass"
-    from sure import within, miliseconds
 
     within(five=miliseconds)(lambda *a: None)()
 
 
 def test_within_fail():
     "within(five=miliseconds) will fail"
-    import time
-    from sure import within, miliseconds
 
     def sleepy(*a):
         time.sleep(0.7)
@@ -665,28 +672,28 @@ def test_within_fail():
         within(five=miliseconds)(sleepy)()
     except AssertionError as e:
         failed = True
-        expect("sleepy did not run within five miliseconds").to.equal(str(e))
+        expects("sleepy did not run within five miliseconds").to.equal(str(e))
 
     assert failed, "within(five=miliseconds)(sleepy) did not fail"
 
 
 def test_word_to_number():
-    expect(sure.word_to_number("one")).to.equal(1)
-    expect(sure.word_to_number("two")).to.equal(2)
-    expect(sure.word_to_number("three")).to.equal(3)
-    expect(sure.word_to_number("four")).to.equal(4)
-    expect(sure.word_to_number("five")).to.equal(5)
-    expect(sure.word_to_number("six")).to.equal(6)
-    expect(sure.word_to_number("seven")).to.equal(7)
-    expect(sure.word_to_number("eight")).to.equal(8)
-    expect(sure.word_to_number("nine")).to.equal(9)
-    expect(sure.word_to_number("ten")).to.equal(10)
-    expect(sure.word_to_number("eleven")).to.equal(11)
-    expect(sure.word_to_number("twelve")).to.equal(12)
-    expect(sure.word_to_number("thirteen")).to.equal(13)
-    expect(sure.word_to_number("fourteen")).to.equal(14)
-    expect(sure.word_to_number("fifteen")).to.equal(15)
-    expect(sure.word_to_number("sixteen")).to.equal(16)
+    expects(sure.word_to_number("one")).to.equal(1)
+    expects(sure.word_to_number("two")).to.equal(2)
+    expects(sure.word_to_number("three")).to.equal(3)
+    expects(sure.word_to_number("four")).to.equal(4)
+    expects(sure.word_to_number("five")).to.equal(5)
+    expects(sure.word_to_number("six")).to.equal(6)
+    expects(sure.word_to_number("seven")).to.equal(7)
+    expects(sure.word_to_number("eight")).to.equal(8)
+    expects(sure.word_to_number("nine")).to.equal(9)
+    expects(sure.word_to_number("ten")).to.equal(10)
+    expects(sure.word_to_number("eleven")).to.equal(11)
+    expects(sure.word_to_number("twelve")).to.equal(12)
+    expects(sure.word_to_number("thirteen")).to.equal(13)
+    expects(sure.word_to_number("fourteen")).to.equal(14)
+    expects(sure.word_to_number("fifteen")).to.equal(15)
+    expects(sure.word_to_number("sixteen")).to.equal(16)
 
 
 def test_word_to_number_fail():
@@ -695,7 +702,7 @@ def test_word_to_number_fail():
         sure.word_to_number("twenty")
     except AssertionError as e:
         failed = True
-        expect(str(e)).to.equal(
+        expects(str(e)).to.equal(
             "sure supports only literal numbers from one "
             'to sixteen, you tried the word "twenty"'
         )
@@ -707,58 +714,56 @@ def test_microsecond_unit():
     "testing microseconds convertion"
     cfrom, cto = sure.UNITS[sure.microsecond]
 
-    expect(cfrom(1)).to.equal(100000)
-    expect(cto(1)).to.equal(1)
+    expects(cfrom(1)).to.equal(100000)
+    expects(cto(1)).to.equal(1)
 
     cfrom, cto = sure.UNITS[sure.microseconds]
 
-    expect(cfrom(1)).to.equal(100000)
-    expect(cto(1)).to.equal(1)
+    expects(cfrom(1)).to.equal(100000)
+    expects(cto(1)).to.equal(1)
 
 
 def test_milisecond_unit():
     "testing miliseconds convertion"
     cfrom, cto = sure.UNITS[sure.milisecond]
 
-    expect(cfrom(1)).to.equal(1000)
-    expect(cto(100)).to.equal(1)
+    expects(cfrom(1)).to.equal(1000)
+    expects(cto(100)).to.equal(1)
 
     cfrom, cto = sure.UNITS[sure.miliseconds]
 
-    expect(cfrom(1)).to.equal(1000)
-    expect(cto(100)).to.equal(1)
+    expects(cfrom(1)).to.equal(1000)
+    expects(cto(100)).to.equal(1)
 
 
 def test_second_unit():
     "testing seconds convertion"
     cfrom, cto = sure.UNITS[sure.second]
 
-    expect(cfrom(1)).to.equal(1)
-    expect(cto(100000)).to.equal(1)
+    expects(cfrom(1)).to.equal(1)
+    expects(cto(100000)).to.equal(1)
 
     cfrom, cto = sure.UNITS[sure.seconds]
 
-    expect(cfrom(1)).to.equal(1)
-    expect(cto(100000)).to.equal(1)
+    expects(cfrom(1)).to.equal(1)
+    expects(cto(100000)).to.equal(1)
 
 
 def test_minute_unit():
     "testing minutes convertion"
     cfrom, cto = sure.UNITS[sure.minute]
 
-    expect(cfrom(60)).to.equal(1)
-    expect(cto(1)).to.equal(6000000)
+    expects(cfrom(60)).to.equal(1)
+    expects(cto(1)).to.equal(6000000)
 
     cfrom, cto = sure.UNITS[sure.minutes]
 
-    expect(cfrom(60)).to.equal(1)
-    expect(cto(1)).to.equal(6000000)
+    expects(cfrom(60)).to.equal(1)
+    expects(cto(1)).to.equal(6000000)
 
 
 def test_within_pass_utc():
     "within(five=miliseconds) gives utc parameter"
-    from sure import within, miliseconds
-    from datetime import datetime
 
     def assert_utc(utc):
         assert isinstance(utc, datetime)
@@ -775,7 +780,7 @@ def test_that_is_a_matcher_should_absorb_callables_to_be_used_as_matcher():
         return "foobar"
 
     assert that("friend").is_truthful()
-    expect(that("friend").is_truthful()).to.equal("foobar")
+    expects(that("friend").is_truthful()).to.equal("foobar")
 
 
 def test_accepts_setup_list():
@@ -795,7 +800,7 @@ def test_accepts_setup_list():
     actions_are_within_context()
 
     # expects the name of the decorated function to not undergo a name change
-    expect(actions_are_within_context.__name__).to.equal(
+    expects(actions_are_within_context.__name__).to.equal(
         "actions_are_within_context",
     )
 
@@ -828,30 +833,28 @@ def test_accepts_teardown_list():
 
 def test_scenario_is_alias_for_context_on_setup_and_teardown():
     "@scenario aliases @that_with_context for setup and teardown"
-    from sure import scenario
 
     def setup(context):
         context.name = "Robert C. Martin"
 
     def teardown(context):
-        expect(context.name).to.equal("Robert C. Martin")
+        expects(context.name).to.equal("Robert C. Martin")
 
     @scenario([setup], [teardown])
     def robert_is_within_context(context):
         "Robert is within context"
         assert isinstance(context, VariablesBag)
         assert hasattr(context, "name")
-        expect(context.name).to.equal("Robert C. Martin")
+        expects(context.name).to.equal("Robert C. Martin")
 
     robert_is_within_context()
-    expect(robert_is_within_context.__name__).to.equal(
+    expects(robert_is_within_context.__name__).to.equal(
         "robert_is_within_context",
     )
 
 
 def test_actions_returns_context():
     "the actions always returns the context"
-    from sure import action_for, scenario
 
     def with_setup(context):
         @action_for(context)
@@ -873,7 +876,6 @@ def test_actions_returns_context():
 
 def test_actions_providing_variables_in_the_context():
     "the actions should be able to declare the variables they provide"
-    from sure import action_for, scenario
 
     def with_setup(context):
         @action_for(context, provides=["var1", "foobar"])
@@ -902,36 +904,36 @@ def test_actions_providing_variables_in_the_context():
     assert the_providers_are_working()
 
 
-def test_fails_when_action_doesnt_fulfill_the_agreement_of_provides():
+def test_fails_when_action_doesnt_fulfill_the_agreement_of_its_provides_argument():
     "it fails when an action doesn't fulfill its agreements"
-    from sure import action_for, scenario
 
     error = (
-        'the action "bad_action" was supposed to provide the '
-        'attribute "two" into the context, but it did not. Please '
-        "double check its implementation"
+        'the action "unreasonable_action" is supposed to provide the '
+        'attribute "two" into the context but does not. '
+        'Check its implementation for correctness or, if '
+        'there is a bug in Sure, consider reporting that at '
+        'https://github.com/gabrielfalcao/sure/issues'
     )
 
     def with_setup(context):
         @action_for(context, provides=["one", "two"])
-        def bad_action():
+        def unreasonable_action():
             context.one = 123
 
     @scenario(with_setup)
-    def the_providers_are_working(the):
-        assert that(the.bad_action).raises(AssertionError, error)
-        return True
+    def reasoning_of_an_unreasonable_action(context):
+        expects(context.unreasonable_action).to.have.raised(AssertionError, error)
+        return 'relativist'
 
-    assert the_providers_are_working()
+    expects(reasoning_of_an_unreasonable_action).when.called.to.return_value('relativist')
 
 
 def test_depends_on_failing_due_to_lack_of_attribute_in_context():
     "it fails when an action depends on some attribute that is not " "provided by any other previous action"
-    from sure import action_for, scenario
 
-    fullpath = collapse_path(collapse_path(os.path.abspath(__file__)))
+    fullpath = collapse_path(os.path.abspath(__file__))
     error = (
-        'the action "variant_action" defined at %s:941 '
+        f'the action "variant_action" defined at %s:943 '
         'depends on the attribute "data_structure" to be available in the'
         " context. It turns out that there are no actions providing "
         "that. Please double-check the implementation" % fullpath
@@ -952,8 +954,6 @@ def test_depends_on_failing_due_to_lack_of_attribute_in_context():
 
 def test_depends_on_failing_due_not_calling_a_previous_action():
     "it fails when an action depends on some attribute that is being " "provided by other actions"
-
-    from sure import action_for, scenario
 
     fullpath = collapse_path(os.path.abspath(__file__))
     error = (
@@ -1038,7 +1038,6 @@ def test_variables_bag_provides_meaningful_error_on_nonexisting_attribute():
 
 def test_actions_providing_dinamically_named_variables():
     "the actions should be able to declare the variables they provide"
-    from sure import action_for, scenario
 
     def with_setup(context):
         @action_for(context, provides=["var1", "{0}"])
@@ -1585,20 +1584,20 @@ def test_that_equals_fails():
 
 def test_raises_with_string():
     "that(callable).raises('message') should compare the message"
-
     def it_fails():
-        assert False, "should fail with this exception"
+        raise AssertionError("should fail with this exception")
 
     try:
-        that(it_fails).raises("wrong msg")
-        raise RuntimeError("should not reach here")
+        expects(it_fails).raises("wrong msg")
+        raise AssertionError("should not reach here")
     except AssertionError as e:
-        assert that(str(e)).contains(
-            """EXPECTATION:
-wrong msg
+        error = e
+        expects(str(error)).to.contain(
+            """ACTUAL:
+should fail with this exception
 
-ACTUAL:
-should fail with this exception"""
+EXPECTATION:
+wrong msg"""
         )
 
 
@@ -1644,9 +1643,9 @@ def test_deep_comparison_sequences_of_sequences():
     ]
 
     try:
-        expect(part1).equals(part2)
+        expects(part1).equals(part2)
     except AssertionError as e:
-        expect(str(e)).to_not.be.different_of("""
+        expects(str(e)).to_not.be.different_of("""Equality Error
 X = [('Bootstraping Redis role', []), ('Restart scalarizr', []), ('Rebundle server', ['rebundle']), ('Use new role', ['rebundle']), ('Restart scalarizr after bundling', ['rebundle']), ('Bundling data', []), ('Modifying data', []), ('Reboot server', []), ('Backuping data on Master', []), ('Setup replication', []), ('Restart scalarizr in slave', []), ('Slave force termination', []), ('Slave delete EBS', ['ec2']), ('Setup replication for EBS test', ['ec2']), ('Writing on Master, reading on Slave', []), ('Slave -> Master promotion', []), ('Restart farm', ['restart_farm'])]
     and
 Y = [('Bootstraping Redis role', ['rebundle', 'rebundle', 'rebundle']), ('Restart scalarizr', []), ('Rebundle server', ['rebundle']), ('Use new role', ['rebundle']), ('Restart scalarizr after bundling', ['rebundle']), ('Bundling data', []), ('Modifying data', []), ('Reboot server', []), ('Backuping data on Master', []), ('Setup replication', []), ('Restart scalarizr in slave', []), ('Slave force termination', []), ('Slave delete EBS', ['ec2']), ('Setup replication for EBS test', ['ec2']), ('Writing on Master, reading on Slave', []), ('Slave -> Master promotion', []), ('Restart farm', ['restart_farm'])]

@@ -124,11 +124,11 @@ class Runner(object):
         try:
             return self.execute(*args, **kwargs)
         except ImmediateFailure as failure:
-            # self.reporter.on_failure(failure.scenario, failure)
+            self.reporter.on_failure(failure.scenario, failure.result)
             return failure.result
 
         except ImmediateError as error:
-            # self.reporter.on_error(failure.scenario, error)
+            self.reporter.on_error(error.scenario, error.result)
             return error.result
 
     @cached_property

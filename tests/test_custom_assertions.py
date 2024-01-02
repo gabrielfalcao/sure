@@ -19,10 +19,10 @@ def test_custom_assertion():
     @assertion
     def return_code(self, return_code):
         if self.negative:
-            assert return_code != self.obj.return_code, "Expected was a return code different from {0}.".format(return_code)
+            assert return_code != self.actual.return_code, "Expected was a return code different from {0}.".format(return_code)
         else:
-            assert return_code == self.obj.return_code, "Expected return code is: {0}\nGiven return code was: {1}".format(
-                return_code, self.obj.return_code)
+            assert return_code == self.actual.return_code, "Expected return code is: {0}\nGiven return code was: {1}".format(
+                return_code, self.actual.return_code)
 
         return True
 
@@ -42,8 +42,8 @@ def test_custom_chain_method():
 
     @chain
     def header(self, header_name):
-        expect(self.obj.headers).should.have.key(header_name)
-        return self.obj.headers[header_name]
+        expect(self.actual.headers).should.have.key(header_name)
+        return self.actual.headers[header_name]
 
 
     # FIXME(TF): 'must' does not sound right in this method chain.
@@ -73,13 +73,13 @@ def test_custom_chain_property():
 
     @assertion
     def attribute(self, name):
-        has_it = hasattr(self.obj, name)
+        has_it = hasattr(self.actual, name)
         if self.negative:
             assert not has_it, "Expected was that object {0} does not have attribute {1}".format(
-                self.obj, name)
+                self.actual, name)
         else:
             assert has_it, "Expected was that object {0} has attribute {1}".format(
-                self.obj, name)
+                self.actual, name)
 
         return True
 

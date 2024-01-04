@@ -422,12 +422,7 @@ instance of it
 
 .. code:: python
 
-    from six import PY3
-
-    if PY3:
-        u"".should.be.an(str)
-    else:
-        u"".should.be.an(unicode)
+    "".should.be.an(str)
     [].should.be.a(list)
 
 ``.be.above(num) and .be.below(num)``

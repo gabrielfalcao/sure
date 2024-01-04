@@ -21,7 +21,6 @@ Test fix of bug described in GitHub Issue #134.
 """
 
 from sure import expect
-from six import PY2
 
 
 def test_issue_132():
@@ -50,19 +49,13 @@ def test_issue_132():
     def __great_test_bytes():
         expect(b'hello{42world }}').should.be.equal(b'hello{42foo }}')
 
-    if PY2:
-        error_msg = "X is 'hello{42world }}' whereas Y is 'hello{42foo }}'"
-    else:
-        error_msg = "X is b'hello{42world }}' whereas Y is b'hello{42foo }}'"
+    error_msg = "X is b'hello{42world }}' whereas Y is b'hello{42foo }}'"
 
     expect(__great_test_bytes).when.called.to.throw(AssertionError, error_msg)
 
     def __great_test_unicode():
         expect(u'hello{42world }}').should.be.equal(u'hello{42foo }}')
 
-    if PY2:
-        error_msg = "X is u'hello{42world }}' whereas Y is u'hello{42foo }}'"
-    else:
-        error_msg = "X is 'hello{42world }}' whereas Y is 'hello{42foo }}'"
+    error_msg = "X is 'hello{42world }}' whereas Y is 'hello{42foo }}'"
 
     expect(__great_test_unicode).when.called.to.throw(AssertionError, error_msg)

@@ -81,7 +81,7 @@ def read_readme():
         return __doc__
 
 
-install_requires = ["mock", "six", "coverage==7.3.3", "click==8.1.7", "couleur==0.7.4"]
+install_requires = ["mock", "coverage==7.3.3", "click==8.1.7", "couleur==0.7.4"]
 tests_require = []
 version = read_version()
 

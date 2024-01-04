@@ -54,31 +54,27 @@ html-docs: clean-docs
 docs: html-docs
 	$(OPEN_COMMAND) docs/build/html/index.html
 
-test tests: clean | $(VENV)/bin/pytest # $(VENV)/bin/nosetests	# @$(VENV)/bin/nosetests --rednose --immediate -vv --with-coverage --cover-package=sure
+test tests: clean | $(VENV)/bin/pytest # $(VENV)/bin/sure
 	@$(VENV)/bin/pytest --cov=sure --ignore tests/crashes tests
 
-# run main command-line tool
+# runs main command-line tool
 run: | $(MAIN_CLI_PATH)
 	$(MAIN_CLI_PATH) --reporter=test tests/crashes || true
-	$(MAIN_CLI_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure.core  --cover-module=sure tests/runner
+	$(MAIN_CLI_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure.core --cover-module=sure tests/runner
 	$(MAIN_CLI_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure --immediate --cover-module=sure tests
 
-# Pushes release of this package to pypi
 push-release: dist  # pushes distribution tarballs of the current version
 	$(VENV)/bin/twine upload dist/*.tar.gz
 
-# Prepares release of this package prior to pushing to pypi
 build-release:
 	$(VENV)/bin/python setup.py build sdist
 	$(VENV)/bin/twine check dist/*.tar.gz
 
-# Convenience target that runs all tests then builds and pushes a release to pypi
 release: tests
 	@./.release
 	$(MAKE) build-release
 	$(MAKE) push-release
 
-# Convenience target to delete the virtualenv
 clean:
 	@rm -rf .coverage
 
@@ -123,7 +119,7 @@ $(VENV)/bin/flake8: | $(VENV)/bin/pip
 
 # installs this package in "edit" mode after ensuring its requirements are installed
 
-$(VENV)/bin/nosetests $(VENV)/bin/pytest $(MAIN_CLI_PATH): | $(VENV) $(VENV)/bin/pip $(VENV)/bin/python $(REQUIREMENTS_PATH)
+$(VENV)/bin/sure $(VENV)/bin/pytest $(MAIN_CLI_PATH): | $(VENV) $(VENV)/bin/pip $(VENV)/bin/python $(REQUIREMENTS_PATH)
 	$(VENV)/bin/pip install -r $(REQUIREMENTS_PATH)
 	$(VENV)/bin/pip install -e .
 

@@ -37,12 +37,12 @@ from sure.errors import ExitError, ExitFailure, InternalRuntimeError
 
 @click.command(no_args_is_help=True)
 @click.argument("paths", nargs=-1)
-@click.option("-r", "--reporter", default="feature", help='default=feature', type=click.Choice(gather_reporter_names()))
-@click.option("-i", "--immediate", is_flag=True)
-@click.option("-l", "--log-level", type=click.Choice(['debug', 'info', 'warning', 'error']), help="default='info'")
-@click.option("-F", "--log-file", help='path to a log file. Default to SURE_LOG_FILE')
-@click.option("-s", "--special-syntax", is_flag=True)
 @click.option("-c", "--with-coverage", is_flag=True)
+@click.option("-s", "--special-syntax", is_flag=True)
+@click.option("-f", "--log-file", help='path to a log file. Default to SURE_LOG_FILE')
+@click.option("-l", "--log-level", type=click.Choice(['debug', 'info', 'warning', 'error']), help="default='info'")
+@click.option("-i", "--immediate", is_flag=True)
+@click.option("-r", "--reporter", default="feature", help='default=feature', type=click.Choice(gather_reporter_names()))
 @click.option("--cover-branches", is_flag=True)
 @click.option("--cover-module", multiple=True, help="specify module names to cover")
 def entrypoint(paths, reporter, immediate, log_level, log_file, special_syntax, with_coverage, cover_branches, cover_module):
@@ -60,6 +60,7 @@ def entrypoint(paths, reporter, immediate, log_level, log_file, special_syntax, 
         'branch': cover_branches,
         'config_file': True,
     }
+
     cov = with_coverage and coverage.Coverage(**coverageopts) or None
     if cov:
         cov.erase()

@@ -32,7 +32,7 @@ and because it is apparent that students of the discipline of
 Automated Software Testing in Python facing the sorts of obstacles
 that eventually lead to the discovery of the concept of "Mocks" and
 consequently stumble upon the :mod:`mock` module often fail to realize
-the values of a thorough and clear understanding of concept of
+the values of a thorough and clear understanding of the concept of
 "test-doubles" both in terms of theory and practice, as well as the
 surmounting costs of writing inconcise, liable tests that generate
 unwarranted tech-debt.
@@ -49,7 +49,6 @@ seek to hone their software-craftsmanship skills.
 <https://martinfowler.com/articles/mocksArentStubs.html>`_ is great
 source of knowledge to dispel the sorts of harmful misconceptions made
 salient in this section.
-
 """
 
 from sure.doubles.fakes import FakeOrderedDict

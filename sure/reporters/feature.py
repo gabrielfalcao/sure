@@ -28,7 +28,7 @@ ballot = "✗"
 
 
 class FeatureReporter(Reporter):
-    """Test Reporter inspired by the output of Behaviour-driven-development tools du jour"""
+    """Test Reporter inspired by the output of Behaviour-driven-development tools *du jour*"""
     name = "feature"
 
     def on_start(self):

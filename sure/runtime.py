@@ -63,6 +63,7 @@ class RuntimeRole:
 def object_name(so: object) -> str:
     """
     :param so: stands for "some object" - a :class:`object` from which some kind of "name" - :class:`str` can be derived.
+    :returns: string with the name of the object
     """
     if isinstance(so, type):
         return f"{so.__module__}.{so.__name__}"
@@ -85,7 +86,7 @@ def seem_to_indicate_teardown(name: str) -> bool:
 
 
 def seem_to_indicate_test(name: str) -> bool:
-    return re.search(r"^(Ensure|Test|Spec|Scenario)", name or "", re.I)
+    return re.search(r"^(Ensure|Test|Spec|Scenario)[\w_]+$", name or "", re.I)
 
 
 def appears_to_be_runnable(name: str) -> bool:
@@ -484,7 +485,7 @@ class PreparedTestSuiteContainer(BaseContainer):
         :class:`~sure.runtime.ScenarioResult` as "failure" or
         "error", respectively.
 
-        .. note:: The given :attr:`~sure.runtime.Container.unit` may optionally take one argument: ``context`` which may or may not be an instance of :class:`~sure.VariablesBag`
+        .. note:: The given :attr:`~sure.runtime.Container.unit` may optionally take one argument: ``context`` which may or may not be an instance of :class:`~sure.StagingArea`
 
         :param container: :class:`~sure.runtime.Container`
         :param context: :class:`~sure.runtime.RuntimeContext`

@@ -14,6 +14,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+"""
+
 import re
 import os
 import sys
@@ -23,11 +26,8 @@ import difflib
 import inspect
 import traceback
 
-from functools import wraps, partial
+from functools import wraps, partial, reduce
 from datetime import datetime
-
-from six import string_types, text_type, get_function_code
-from six.moves import reduce
 
 from sure.original import AssertionHelper
 from sure.original import Iterable
@@ -36,21 +36,19 @@ from sure import runtime
 from sure.core import DeepComparison
 from sure.core import Explanation
 from sure.errors import SpecialSyntaxDisabledError
-from sure.errors import WrongUsageError, SpecialSyntaxDisabledError
+from sure.errors import (
+    WrongUsageError,
+    SpecialSyntaxDisabledError,
+)
 from sure.errors import InternalRuntimeError
 from sure.doubles.dummies import anything
 from sure.loader import get_file_name
 from sure.loader import get_line_number
+from sure.loader import resolve_path
 from sure.version import version
 from sure.special import is_cpython, patchable_builtin
 from sure.registry import context as _registry
 import sure.reporters
-
-not_here_error = (
-    "you have tried to access the attribute %r from the context "
-    "(aka VariablesBag), but there is no such attribute assigned to it. "
-    "Maybe you misspelled it ? Well, here are the options: %s"
-)
 
 
 original_obj_attrs = dir(object)
@@ -65,36 +63,50 @@ def unwrap_assertion_helper(obj) -> object:
     return obj
 
 
-class VariablesBag(dict):
-    __varnames__ = None
+class StagingArea(dict):
+    """A :external+python:ref:`mapping <mapping>` primarily designated for providing
+    a kind of "staging area" for test functions or methods decorated
+    with :func:`~sure.scenario` so that in-memory test assets can be stored
+    and retrieved within a `scenario's <https://en.wikipedia.org/wiki/Scenario_(computing)>`_ lifecycle.
+
+    Test assets can be stored and retrieved both via :external+python:ref:`attribute-references` and :external+python:ref:`subscriptions`.
+
+    An :exc:`AssertionError` is raised in the event of attempting to
+    retrive a test asset not explicitly assigned to a
+    :class:`StagingArea` instance. The error message contains a clear
+    indication of the mistake along with a list of valid test assets
+    presently available that particular instance of
+    :class:`StagingArea`.
+
+    Staging areas can contain specific actions defined through the :func:`~sure.action_for` :external+python:term:`decorator`.
+    """
+    __asset_names__ = None
     __sure_actions_ran__ = None
     __sure_action_results__ = None
     __sure_providers_of__ = None
 
     def __init__(self, *args, **kw):
-        self.__varnames__ = []
+        self.__asset_names__ = []
         self.__sure_actions_ran__ = []
         self.__sure_action_results__ = []
         self.__sure_providers_of__ = {}
-        return super(VariablesBag, self).__init__(*args, **kw)
+        return super(StagingArea, self).__init__(*args, **kw)
 
     def __setattr__(self, attr, value):
-        if attr not in dir(VariablesBag):
+        if attr not in dir(StagingArea):
             self[attr] = value
-            self.__varnames__.append(attr)
-        return super(VariablesBag, self).__setattr__(attr, value)
+            self.__asset_names__.append(attr)
+        return super(StagingArea, self).__setattr__(attr, value)
 
     def __getattr__(self, attr):
         try:
-            return super(VariablesBag, self).__getattribute__(attr)
+            return super(StagingArea, self).__getattribute__(attr)
         except AttributeError:
-            if attr not in dir(VariablesBag):
+            if attr not in dir(self) and attr not in self:
                 raise AssertionError(
-                    not_here_error
-                    % (
-                        attr,
-                        repr(self.__varnames__),
-                    )
+                    f"attempt to access attribute with name `{attr}' from the context "
+                    f"(also known as `StagingArea'), but there is no such attribute assigned to it. "
+                    f"The presently available attributes in this context are: {repr(self.__asset_names__)}"
                 )
 
 
@@ -117,8 +129,8 @@ class CallBack(object):
         self.args = args or []
         self.kwargs = kwargs or {}
         self.callback_name = cb.__name__
-        self.callback_filename = os.path.split(get_function_code(cb).co_filename)[-1]
-        self.callback_lineno = get_function_code(cb).co_firstlineno + 1
+        self.callback_filename = resolve_path(get_file_name(cb), os.getcwd())
+        self.callback_lineno = get_line_number(cb) + 1
 
     def apply(self, *optional_args):
         args = list(optional_args)
@@ -144,11 +156,79 @@ class CallBack(object):
             raise
 
 
-def that_with_context(setup=None, teardown=None):
+def scenario(setup=None, teardown=None):
+    """
+Turns a test function or method into a kind of `scenario <https://en.wikipedia.org/wiki/Scenario_(computing)>`_
+
+This :term:`python:decorator` that adds setup and teardown methods to a test
+function.
+
+The decorated function along with the provided setup and
+teardown methods are required to take at least one position
+argument ``context`` being an instance of
+:class:`~sure.StagingArea`, an ephemeral object that only
+exists within the scope of each test function decorated
+thusly.
+
+The conceptual function of the ``context`` argument is to
+provide a kind of "staging area" wherewith assets pertaining
+to the scope of a particular test can be added during the
+"setup" phase, used during the "test" phase and properly
+disposed during the "teardown" phase.
+
+A hypothetical example of the utility or applicability of this
+behavior would be a situation where a test requires a database
+schema to be created before a test and dropped after a test in
+order to prevent a race-condition between tests running
+against a shared database.
+
+The code below takes the :ref:`basic usage of psycopg2 module
+<psycopg2:Usage>` as way to illustrate the example above:
+
+.. code::
+
+  import psycopg2
+  from sure import expects, scenario
+
+
+  def setup_database(context):
+      context.conn = psycopg2.connect("dbname=test user=postgres")
+      context.cursor = context.conn.cursor()
+      # drop table in case that already exists
+      context.cursor.execute(
+          "DROP TABLE silly;"
+      )
+      context.cursor.execute(
+          "CREATE TABLE silly (id serial PRIMARY KEY, num integer, data varchar);"
+      )
+      context.cursor.execute(
+          "INSERT INTO silly (num, data) VALUES (%s, %s)", (100, "abc'def")
+      )
+
+
+  def teardown_database(context):
+      context.cursor.close()
+      context.conn.close()
+
+
+  @scenario([setup_database], [teardown_database])
+  def test_querying_for_one_column(context):
+      context.cursor.execute("SELECT num FROM silly;")
+      row = context.cur.fetchone()
+      expects(row).to.equal((100, ))
+
+  @scenario([setup_database], [teardown_database])
+  def test_querying_for_two_columns(context):
+      context.cursor.execute("SELECT num, data FROM silly;")
+      row = context.cur.fetchone()
+      expects(row).to.equal((100, "abc'def"))
+
+.. seealso:: The documentation of :class:`StagingArea` contains more details about intrinsic behaviors to be expected in using a ``context``, in special the fact that trying to access attributes not explicitly assigned causes an :exc:`AsserionError` to be raised indicating the mistake.
+    """
     def dec(func):
         @wraps(func)
         def wrap(*args, **kw):
-            context = VariablesBag()
+            context = StagingArea()
 
             if callable(setup):
                 cb = CallBack(setup, args, kw)
@@ -179,7 +259,7 @@ def that_with_context(setup=None, teardown=None):
     return dec
 
 
-scenario = that_with_context
+that_with_context = scenario
 
 
 def within(**units):
@@ -205,7 +285,7 @@ def within(**units):
                 func(start, *args, **kw)
             except TypeError as e:  # TODO: test
                 fmt = "{0}() takes 0 positional arguments but 1 was given"
-                err = text_type(e)
+                err = str(e)
                 if fmt.format(func.__name__) in err:
                     func(*args, **kw)
                 else:
@@ -291,6 +371,10 @@ def word_to_number(word):
 
 
 def action_for(context, provides=None, depends_on=None):
+    """function decorator for defining functions which might provide a
+    list of assets to the staging area and might declare a list of
+    dependencies expected to exist within a :class:`StagingArea`
+    """
     if not provides:
         provides = []
 
@@ -803,7 +887,7 @@ class AssertionBuilder(object):
             if error:
                 return True
 
-            msg = "%s should differ from %s"
+            msg = "expecting %s to be different of %s"
             raise AssertionError(msg % (repr(actual), repr(expectation)))
 
         else:
@@ -845,14 +929,14 @@ class AssertionBuilder(object):
     def a(self, klass):
         if isinstance(klass, type):
             class_name = klass.__name__
-        elif isinstance(klass, string_types):
+        elif isinstance(klass, (str, )):
             class_name = klass.strip()
         else:
-            class_name = text_type(klass)
+            class_name = str(klass)
 
         is_vowel = class_name.lower()[0] in "aeiou"
 
-        if isinstance(klass, string_types):
+        if isinstance(klass, (str, )):
             if "." in klass:
                 items = klass.split(".")
                 first = items.pop(0)
@@ -1074,9 +1158,9 @@ class AssertionBuilder(object):
 
 
 class ObjectIdentityAssertion(object):
-    """Accompanies :class:`AssertionBuilder' in checking whether the
+    """Accompanies :class:`AssertionBuilder` in checking whether the
     actual object is entirely identical to the destination object,
-    raising a :exc:`AssertionError' in case of identity mismatch.
+    raising a :exc:`AssertionError` in case of identity mismatch.
     """
     def __init__(self, assertion_builder: AssertionBuilder):
         self.assertion_builder = assertion_builder
@@ -1122,32 +1206,37 @@ those = AssertionBuilder("those")
 
 
 def assertion(func):
-    """Extends :mod:`sure' with a custom assertion method."""
+    """Extends :mod:`sure` with a custom assertion method."""
     func = assertionmethod(func)
     setattr(AssertionBuilder, func.__name__, func)
     return func
 
 
 def chain(func):
-    """Extends :mod:`sure' with a custom chaining method."""
+    """Extends :mod:`sure` with a custom chaining method."""
     setattr(AssertionBuilder, func.__name__, func)
     return func
 
 
 def chainproperty(func):
-    """Extends :mod:`sure' with a custom chain property."""
+    """Extends :mod:`sure` with a custom chain property."""
     func = assertionproperty(func)
     setattr(AssertionBuilder, func.fget.__name__, func)
     return func
 
 
 class ensure(object):
-    """
-    Contextmanager to ensure that the given assertion message
-    is printed upon a raised '`AssertionError'` exception.
+    """A :external+python:ref:`context-managers` that catches
+:exc:`AssertionError` raised within it, substituting that initial
+:exc:`AssertionError` one that contains the positional arguments and
+keyword arguments passed to the context-manager.
 
-    The '`args'` and '`kwargs'` are used to format
-    the message using '`format()'`.
+    :param msg: :class:`str` passed to the :exc:`AssertionError`
+    :param args: positional arguments used to format the assertion error message
+    :param kwargs: keyword arguments used to format the assertion error message
+
+    The `args'` and '`kwargs'` are used to format
+    the message using :meth:`str.format`.
     """
 
     def __init__(self, msg, *args, **kwargs):
@@ -1159,9 +1248,8 @@ class ensure(object):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        """
-        Catch all '`AsertionError'` exceptions and reraise
-        them with the message provided to the context manager.
+        """Catch all `AsertionError' exceptions and reraise them with
+        the message provided to the context manager.
         """
         if exc_type is not AssertionError:
             return
@@ -1174,7 +1262,7 @@ old_dir = dir
 
 
 def enable_special_syntax():
-    """enables :mod:`sure''s "special syntax" as documented in :ref:'Special Syntax`
+    """enables :mod:`sure`'s :ref:`Special Syntax`
 
     .. danger:: Enabling the special syntax in production code may cause unintended consequences.
     """
@@ -1296,4 +1384,10 @@ def enable_special_syntax():
 
     for name in NEGATIVES:
         object_handler[name] = build_assertion_property(name, is_negative=True)
-        none[name] = build_assertion_property(name, is_negative=True, prop=False)
+        none[name] = build_assertion_property(name, is_negative=not False, prop=False)
+
+    _registry['special_syntax_enabled'] = not False
+
+
+def is_special_syntax_enabled():
+    return _registry.get('special_syntax_enabled')

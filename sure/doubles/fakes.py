@@ -15,10 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""The :mod:`sure.doubles.fakes` module provides test-doubles of the type "Fake"
+'''The :mod:`sure.doubles.fakes` module provides test-doubles of the type "Fake"
 
 **"Fake objects actually have working implementations, but usually take some shortcut which makes them not suitable for production..."**
-"""
+'''
 from collections import OrderedDict
 
 

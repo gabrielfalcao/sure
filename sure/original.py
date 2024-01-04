@@ -23,31 +23,28 @@ import re
 import traceback
 import inspect
 import typing
+import types
+
 from copy import deepcopy
 from pprint import pformat
 from functools import wraps
 from typing import Union
 from collections.abc import Iterable
 
-try:
-    from re import Pattern
-except ImportError:
-    Pattern = re._pattern_type
-
-from six import string_types, text_type
 
 from sure.core import Explanation
 from sure.core import DeepComparison
 from sure.core import itemize_length
 from sure.loader import get_file_name
 from sure.loader import get_line_number
+from sure.loader import resolve_path
 
 
-def identify_callable_location(callable_object):
-    filename = os.path.relpath(callable_object.__code__.co_filename)
-    lineno = callable_object.__code__.co_firstlineno
-    callable_name = callable_object.__code__.co_name
-    return '{0} [{1} line {2}]'.format(callable_name, filename, lineno).encode()
+def identify_caller_location(caller: Union[types.FunctionType, types.MethodType]):
+    callable_name = caller.__name__
+    filename = resolve_path(get_file_name(caller), os.getcwd())
+    lineno = get_line_number(caller)
+    return f'{callable_name} [{filename} line {lineno}]'
 
 
 def is_iterable(obj):
@@ -55,7 +52,7 @@ def is_iterable(obj):
 
     :param obj: :class:`object`
     """
-    return hasattr(obj, '__iter__') and not isinstance(obj, string_types)
+    return not isinstance(obj, (str, )) and hasattr(obj, '__iter__')
 
 
 def all_integers(obj):
@@ -147,15 +144,15 @@ class AssertionHelper(object):
         try:
             self.actual(*self._callable_args, **self._callable_kw)
         except BaseException as e:
-            if isinstance(exc, string_types):
+            if isinstance(exc, (str, )):
                 msg = exc
                 exc = type(e)
 
-            elif isinstance(exc, Pattern):
+            elif isinstance(exc, re.Pattern):
                 msg = exc
                 exc = type(e)
 
-            err = text_type(e)
+            err = str(e)
 
             if isinstance(exc, type) and issubclass(exc, BaseException):
                 if not isinstance(e, exc):
@@ -163,25 +160,27 @@ class AssertionHelper(object):
                         '%r should raise %r, but raised %r:\nORIGINAL EXCEPTION:\n\n%s' % (
                             self.actual, exc, e.__class__, traceback.format_exc()))
 
-                if isinstance(msg, string_types) and msg not in err:
+                if isinstance(msg, (str, )) and msg not in err:
                     raise AssertionError(
-                        f'{identify_callable_location(self.actual)} raised {type(e).__name__}, but the exception message does not match.\n\nACTUAL:\n{err}\n\nEXPECTATION:\n{msg}\n'
+                        f'{identify_caller_location(self.actual)} raised {type(e).__name__}, but the exception message does not match.\n\nACTUAL:\n{err}\n\nEXPECTATION:\n{msg}\n'
                     )
 
-                elif isinstance(msg, Pattern) and not msg.search(err):
+                elif isinstance(msg, re.Pattern) and not msg.search(err):
                     raise AssertionError(
                         'When calling %r the exception message does not match. ' \
-                        'Expected to match regex: %r\n against:\n %r' % (identify_callable_location(self.actual), msg.pattern, err))
+                        'Expected to match regex: %r\n against:\n %r' % (identify_caller_location(self.actual), msg.pattern, err))
 
-            elif isinstance(msg, string_types) and msg not in err:
+            elif isinstance(msg, (str, )) and msg not in err:
                 raise AssertionError(
                     'When calling %r the exception message does not match. ' \
-                    'Expected: %r\n got:\n %r' % (self.actual, msg, err))
+                    'Expected: %r\n got:\n %r' % (self.actual, msg, err)
+                )
 
-            elif isinstance(msg, Pattern) and not msg.search(err):
+            elif isinstance(msg, re.Pattern) and not msg.search(err):
                 raise AssertionError(
                     'When calling %r the exception message does not match. ' \
-                    'Expected to match regex: %r\n against:\n %r' % (identify_callable_location(self.actual), msg.pattern, err))
+                    'Expected to match regex: %r\n against:\n %r' % (identify_caller_location(self.actual), msg.pattern, err)
+                )
 
             else:
                 raise e
@@ -398,7 +397,7 @@ class AssertionHelper(object):
         )
 
         if self._eval and is_iterable(self.actual):
-            if isinstance(items, string_types):
+            if isinstance(items, (str, )):
                 items = [items for x in range(len(items))]
             else:
                 if len(items) != len(self.actual):

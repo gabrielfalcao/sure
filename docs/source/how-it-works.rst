@@ -1,10 +1,10 @@
 .. _How Sure Works:
 
-How it :ref:`Sure` works
-========================
+How :ref:`Sure` Works
+=====================
 
-As an automated testing library
--------------------------------
+Automated Testing Library
+-------------------------
 
 .. _Standard Behavior:
 
@@ -121,12 +121,115 @@ Special Syntax
 
 The :ref:`sure` module presents the concept of "special syntax"
 defined as the optional feature of, during runtime, extending every
-:class:`object` with assertion methods with the purpose of enabling
-a kind of fluent writing of automated tests.
+:class:`object` in Python's runtime with properties that are
+themselves instances of :class:`AssertionBuilder` binding the object
+in case as its "source" object. That effectively allows performing
+assertions directly on values with the purpose of enabling a kind of
+fluent writing of automated tests.
+
+The sequence of instructions below demonstrate in practical terms how
+enabling the special syntax changes the behavior of Python during runtime (and hopefully bring to light some initial evidence of why this feature could cause unintended consequences if used in production code)
+
+.. doctest::
+
+   >>> value = 3.14
+   >>> [attr for attr in dir(value) if not attr.startswith('__')]
+   ['as_integer_ratio', 'conjugate', 'fromhex', 'hex', 'imag', 'is_integer', 'real']
+
+   >>> import sure
+   >>> sure.enable_special_syntax()
+   >>> del value
+   >>> value = 3.14
+   >>> [attr for attr in dir(value) if not attr.startswith('__')]
+   ['do', 'do_not', 'does', 'does_not', 'doesnt', 'dont', 'must', 'must_not', 'mustnt', 'should', 'should_not', 'shouldnt', 'when']
 
 
-First, a bit of history
-.......................
+As can be observed in the examples above, there are two kinds of
+properties: positives and negatives
+
+
+Positive Assertion Properties
+.............................
+
+Used for building assertions wherewith the comparison to a
+"destination" object resolves to ``True``
+
+The list of properties presently available upon enabling the special
+syntax are:
+
+- ``do``
+- ``does``
+- ``must``
+- ``should``
+- ``when``
+
+Example:
+
+.. doctest::
+
+   >>> import sure
+   >>> sure.enable_special_syntax()
+   >>> source = {
+   ...     "structured information": [
+   ...         "string",
+   ...         {
+   ...             "first key": 75,
+   ...             "second key": 107,
+   ...         },
+   ...         [0x6e, 0x75, 0x6d, 0x62, 0x65, 0x72, {
+   ...             "outmost": "list",
+   ...         }],
+   ...     ]
+   ... }
+   >>> destination = {
+   ...     "structured information": [
+   ...         "string",
+   ...         {
+   ...             "first key": 107,
+   ...             "second key": 75,
+   ...         },
+   ...         [0x6e, 0x75, 0x6d, 0x62, 0x65, 0x72, {
+   ...             "outmost": "list",
+   ...         }],
+   ...     ]
+   ... }
+   >>> source.should.equal(destination)
+   AssertionError:
+   X = {'structured information': ['string', [110, 117, 109, 98, 101, 114, {'outmost': 'list'}], {'first key': 75, 'second key': 107}]}
+       and
+   Y = {'structured information': ['string', [110, 117, 109, 98, 101, 114, {'outmost': 'list'}], {'first key': 76, 'second key': 107}]}
+   X['structured information'][1]['first key'] is 75 whereas Y['structured information'][1]['first key'] is 107
+
+
+Negative Assertion Properties
+.............................
+
+Used for building assertions wherewith the comparison to a
+"destination" object resolves to ``False``
+
+The list of properties presently available upon enabling the special
+syntax are:
+
+- ``do_not``
+- ``dont``
+- ``does_not``
+- ``doesnt``
+- ``must_not``
+- ``mustnt``
+- ``should_not``
+- ``shouldnt``
+
+.. doctest::
+
+   >>> import sure
+   >>> sure.enable_special_syntax()
+   >>>
+   >>> (42).should_not.equal(42)
+   AssertionError: expecting 42 to be different of 42
+
+
+A bit of history
+................
 
 From Sure's absolute ideation, its original author - Gabriel Falcão -
 had envisioned to somehow expand Python's :class:`object` with
@@ -180,7 +283,7 @@ and recruited two colleagues, one of whom was Lincoln Clarete which
 had been known to Gabriel to know quite a bit about the internals of
 the Python language. Then Gabriel not so much as asked whether it was
 possible to inject methods into :class:`object` during runtime but
-actually challenged Lincoln to do try and do so.
+actually challenged Lincoln to try and do so.
 
 As Gabriel imagined, it wouldn't take long for Lincoln Clarete to
 achieve that goal, he then presently wrote most if not all the code
@@ -206,19 +309,74 @@ available to other implementations of Python such as `Jython
 the features required by Sure.
 
 
-Chainability
-............
+Test Runner
+-----------
 
-Some specific assertion methods are chainable, it can be useful for
-short assertions like:
+Sure provides the command-line tool ``sure`` which takes one or more
+test paths as positional arguments, locates ``test*.py`` files in
+those paths, then load loads and executes all functions matching the
+regular expression ``^(Ensure|Test|Spec|Scenario)[\w_]+$``.
 
-.. code:: python
+Example:
 
-   PERSON = {
-     "name": "John",
-     "facebook_info": {
-       "token": "abcd"
-     }
-   }
 
-   PERSON.should.have.key("facebook_info").being.a(dict)
+.. code:: sh
+
+   sure --special-syntax --immediate path/to/tests
+
+
+The option ``-s`` or ``--special-syntax`` enables the :ref:`Special Syntax`
+
+The option ``-i`` or ``--immediate`` causes the session to fail fast which can
+be particularly useful, for example, when testing large codebases or slow tests.
+
+
+.. code:: sh
+
+   sure --special-syntax --immediate path/to/tests
+
+
+Use the ``--help`` option for a full list of options
+
+
+Coverage Support
+~~~~~~~~~~~~~~~~
+
+Test coverage is supported through the :mod:`coverage` and can be
+enabled adwith the option ``--with-coverage``
+
+The options ``--cover-branches`` and ``--cover-module=<module_name>`` further configures the test execution.
+
+Example:
+
+
+.. code:: sh
+
+   sure --with-coverage --cover-branches --cover-module=yourmodulename tests
+
+
+Further Help
+~~~~~~~~~~~~
+
+
+.. code:: sh
+
+   sure --help
+
+
+.. code:: sh
+
+   Usage: sure [OPTIONS] [PATHS]...
+
+   Options:
+     -c, --with-coverage
+     -s, --special-syntax
+     -f, --log-file TEXT             path to a log file. Default to SURE_LOG_FILE
+     -l, --log-level [debug|info|warning|error]
+                                     default='info'
+     -i, --immediate
+     -r, --reporter [logger|feature|test]
+                                     default=feature
+     --cover-branches
+     --cover-module TEXT             specify module names to cover
+     --help                          Show this message and exit.

@@ -27,7 +27,7 @@ from sure import action_for
 from sure import scenario
 from sure import within
 from sure import miliseconds
-from sure import VariablesBag
+from sure import StagingArea
 
 from sure.special import is_cpython
 from sure.loader import collapse_path
@@ -41,7 +41,7 @@ def test_setup_with_context():
 
     @sure.that_with_context(setup)
     def variable_is_within_context(context):
-        assert isinstance(context, VariablesBag)
+        assert isinstance(context, StagingArea)
         assert hasattr(context, "name")
 
     variable_is_within_context()
@@ -63,7 +63,7 @@ def test_context_of_sure_that_with_context_decorated_functions_is_not_optional()
     assert that(it_crashes).raises(
         TypeError,
         (
-            "the function it_crashes defined at test_original_api.py line 60, is being "
+            "the function it_crashes defined at tests/test_original_api.py line 60, is being "
             "decorated by either @that_with_context or @scenario, so it should "
             "take at least 1 parameter, which is the test context"
         ),
@@ -843,7 +843,7 @@ def test_scenario_is_alias_for_context_on_setup_and_teardown():
     @scenario([setup], [teardown])
     def robert_is_within_context(context):
         "Robert is within context"
-        assert isinstance(context, VariablesBag)
+        assert isinstance(context, StagingArea)
         assert hasattr(context, "name")
         expects(context.name).to.equal("Robert C. Martin")
 
@@ -1013,10 +1013,10 @@ def test_that_contains_tuple():
     assert that(data).contains("foobar")
 
 
-def test_variables_bag_provides_meaningful_error_on_nonexisting_attribute():
-    "VariablesBag() provides a meaningful error when attr does not exist"
+def test_staging_area_provides_meaningful_error_on_nonexisting_attribute():
+    "StagingArea() provides a meaningful error when attr does not exist"
 
-    context = VariablesBag()
+    context = StagingArea()
 
     context.bar = "bar"
     context.foo = "foo"
@@ -1029,9 +1029,9 @@ def test_variables_bag_provides_meaningful_error_on_nonexisting_attribute():
 
     assert that(access_nonexisting_attribute).raises(
         AssertionError,
-        "you have tried to access the attribute 'nonexisting' from the context "
-        "(aka VariablesBag), but there is no such attribute assigned to it. "
-        "Maybe you misspelled it ? Well, here are the options: "
+        "attempt to access attribute with name `nonexisting' from the context "
+        "(also known as `StagingArea'), but there is no such attribute assigned to it. "
+        "The presently available attributes in this context are: "
         "['bar', 'foo']",
     )
 

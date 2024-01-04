@@ -15,6 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+'''The :mod:`sure.doubles.stubs` module provides test-doubles of the type "Stub"
+
+**Stubs** provide canned answers to calls made during the test, usually not responding at all to anything outside what's programmed in for the test.
+'''
+
 
 def stub(base_class=None, metaclass=None, **attributes):
     """creates a python class "on-the-fly" with the given keyword-arguments

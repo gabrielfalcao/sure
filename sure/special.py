@@ -22,7 +22,6 @@ is_cpython = (
     and platform.python_implementation().lower() == 'cpython')
 
 if is_cpython:
-
     import ctypes
     DictProxyType = type(object.__dict__)
 

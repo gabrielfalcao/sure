@@ -53,7 +53,7 @@ def test_4_equal_2p2():
 
     expect(incorrect_negative_expectation).when.called.to.throw(AssertionError)
     expect(incorrect_negative_expectation).when.called.to.throw(
-        "88 should differ from 88")
+        "expecting 88 to be different of 88")
 
 
 def test_2_within_0a2():
@@ -382,13 +382,13 @@ def test_have_property_with_value():
         expect(chemical_element).should.have.property("name").being.equal(
             "Foo")
 
-    expect(opposite).when.called.to.throw(AssertionError)
     expect(opposite).when.called.to.throw(
-        "'Uranium' should differ from 'Uranium'"
+        AssertionError,
+        "expecting 'Uranium' to be different of 'Uranium'"
     )
 
-    expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
+        AssertionError,
         "X is 'Uranium' whereas Y is 'Foo'"
     )
 
@@ -438,13 +438,13 @@ def test_have_key_with_value():
             "Foo"
         )
 
-    expect(opposite).when.called.to.throw(AssertionError)
     expect(opposite).when.called.to.throw(
-        "'Uranium' should differ from 'Uranium'"
+        AssertionError,
+        "'Uranium' to be different of 'Uranium'"
     )
 
-    expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
+        AssertionError,
         "X is 'Uranium' whereas Y is 'Foo'"
     )
 
@@ -539,16 +539,19 @@ def test_equal_with_repr_of_complex_types_and_repr():
             'T': 'skills',
         })
 
-    expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw("X['O'] != Y['O']")
+    expect(opposite).when.called.to.throw(
+        AssertionError,
+        "X['O'] != Y['O']"
+    )
 
-    expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
-        "{'G': 1, 'O': Gabriel Falcão, 'T': 'skills'} should differ from {'G': 1, 'O': Gabriel Falcão, 'T': 'skills'}")
+        AssertionError,
+        "expecting {'G': 1, 'O': Gabriel Falcão, 'T': 'skills'} to be different of {'G': 1, 'O': Gabriel Falcão, 'T': 'skills'}"
+    )
 
 
 def test_match_regex():
-    "expect('some string').to.match(r'\w{4} \w{6}') matches regex"
+    "expect('some string').to.match(r'\\w{4} \\w{6}') matches regex"
 
     expect("some string").should.match(r"\w{4} \w{6}")
     expect("some string").should_not.match(r"^\d*$")
@@ -644,13 +647,13 @@ def test_throw_matching_regex():
         raise RuntimeError('should not have reached here')
 
     except AssertionError as e:
-        expect(str(e)).to.equal("When calling b'function [tests/test_assertion_builder.py line 629]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
+        expect(str(e)).to.equal("When calling 'function [tests/test_assertion_builder.py line 632]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
 
     try:
         expect(function).when.called_with(1).should.throw(ValueError, re.compile(r'invalid regex'))
         raise RuntimeError('should not have reached here')
     except AssertionError as e:
-        expect(str(e)).to.equal("When calling b'function [tests/test_assertion_builder.py line 629]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
+        expect(str(e)).to.equal("When calling 'function [tests/test_assertion_builder.py line 632]' the exception message does not match. Expected to match regex: 'invalid regex'\n against:\n 'this message'")
 
 
 def test_should_not_be_different():

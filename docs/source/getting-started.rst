@@ -39,13 +39,12 @@ Behavior` is likely to work well.
    expect("this".replace("is", "at")).to.equal("that")
 
 
-:ref:`Special Syntax` Example (cpython-only)
---------------------------------------------
+:ref:`Special Syntax` Example
+-----------------------------
 
 .. code:: python
 
    "this".replace("is", "at").should.equal("that")
-
 
 .. note::
    The :ref:`Special Syntax` can be enabled via command-line with the

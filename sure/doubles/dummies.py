@@ -15,6 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+'''The :mod:`sure.doubles.dummies` module provides test-doubles of the type "Dummy"
+
+"**Dummy objects are passed around but never actually used. Usually they are just used to fill parameter lists.**"
+'''
+
+
 class Anything(object):
     """Dummy class whose entire purpose is to serve as sentinel in assertion
     statements where the :meth:`operator.__eq__` is employed under the
@@ -24,6 +30,4 @@ class Anything(object):
         return True
 
 
-"""
-"""
 anything = Anything()

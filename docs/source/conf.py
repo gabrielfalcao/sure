@@ -29,7 +29,7 @@ extensions = [
 source_suffix = ".rst"
 master_doc = "index"
 project = "sure"
-copyright = "2015-2023, Gabriel Falcão"
+copyright = "2010-2024, Gabriel Falcão"
 author = "Gabriel Falcão"
 version = "3.0dev0"
 release = "3.0dev0"
@@ -63,8 +63,11 @@ epub_author = author
 epub_publisher = author
 epub_copyright = copyright
 epub_exclude_files = ["search.html"]
+intersphinx_disabled_reftypes = []
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/", None),
+    "python": ("https://docs.python.org/3/", None),
     "mock": ("https://mock.readthedocs.io/en/latest/", None),
+    "psycopg2": ("https://www.psycopg.org/docs/", None),
+    "coverage": ("https://coverage.readthedocs.io/en/7.3.3/", None),
 }
 pygments_style = 'xcode'

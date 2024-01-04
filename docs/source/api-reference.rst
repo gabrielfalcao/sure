@@ -8,9 +8,9 @@ API Reference
 
 .. automodule:: sure
 .. autofunction:: sure.enable_special_syntax
-.. autoclass:: sure.VariablesBag
+.. autoclass:: sure.StagingArea
 .. autoclass:: sure.CallBack
-.. autofunction:: sure.that_with_context
+.. autofunction:: sure.scenario
 .. autofunction:: sure.within
 .. autofunction:: sure.word_to_number
 .. autofunction:: sure.assertionmethod
@@ -36,20 +36,29 @@ API Reference
 ``sure.runner``
 ---------------
 
-.. py:module:: sure.runner
+.. automodule:: sure.runner
 .. autoclass:: sure.runner.Runner
 
 
 ``sure.loader``
------------------
+---------------
 
-.. py:module:: sure.loader
+.. automodule:: sure.loader
 .. autoclass:: sure.loader.loader
 .. autofunction:: sure.loader.resolve_path
 .. autofunction:: sure.loader.get_package
 .. autofunction:: sure.loader.name_appears_to_indicate_test
 .. autofunction:: sure.loader.appears_to_be_test_class
-.. autofunction:: sure.loader.read_file_from_path
+
+
+``sure.loader.astutil``
+-----------------------
+
+.. automodule:: sure.loader.astutil
+.. autofunction:: sure.loader.astutil.is_classdef
+.. autofunction:: sure.loader.astutil.resolve_base_names
+.. autofunction:: sure.loader.astutil.gather_class_definitions_node
+.. autofunction:: sure.loader.astutil.gather_class_definitions_from_module_path
 
 
 ``sure.reporter``
@@ -69,7 +78,7 @@ API Reference
 -----------------
 
 .. automodule:: sure.original
-.. autofunction:: sure.original.identify_callable_location
+.. autofunction:: sure.original.identify_caller_location
 .. autofunction:: sure.original.is_iterable
 .. autofunction:: sure.original.all_integers
 .. autofunction:: sure.original.explanation
@@ -80,7 +89,7 @@ API Reference
 .. automodule:: sure.doubles
 .. autofunction:: sure.doubles.stub
 .. autoclass:: sure.doubles.FakeOrderedDict
-.. autoattribute:: sure.doubles.anything
+.. autoattribute:: sure.doubles.dummies.anything
 
 
 ``sure.doubles.dummies``

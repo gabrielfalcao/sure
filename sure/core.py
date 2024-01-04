@@ -48,10 +48,9 @@ class Explanation(str):
 
 class DeepComparison(object):
     """Performs a deep comparison between Python objects in the sense
-    that complex or nested data-structures - such as mappings of
-    sequences, sequences of mappings, mappings of sequences of
-    mappings, sequences of mappings of sequences containing et cetera
-    - are recursively compared and reaching farthest accessible edges.
+that complex or nested datastructures, such as :external+python:ref:`mappings <mapping>` of
+:external+python:ref:`sequences <sequence>`, :external+python:ref:`sequences <sequence>` of :external+python:ref:`mappings <mapping>`, :external+python:ref:`mappings <mapping>` of :external+python:ref:`sequences <sequence>` containing
+:external+python:ref:`mappings <mapping>` or sequences :external+python:ref:`sequences <sequence>` and so on, are recursively compared and reaching farthest accessible edges.
     """
     def __init__(self, X, Y, epsilon=None, parent=None):
         self.complex_cmp_funcs = {

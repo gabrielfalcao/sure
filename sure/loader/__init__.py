@@ -1,3 +1,20 @@
+# -*- coding: utf-8 -*-
+# <sure - utility belt for automated testing in python>
+# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import os
 import sys
 import ast
@@ -9,6 +26,8 @@ from typing import Dict, List, Optional, Tuple, Union
 from importlib.machinery import PathFinder
 from pathlib import Path
 from sure.errors import InternalRuntimeError
+
+from .astutil import gather_class_definitions_from_module_path
 
 __MODULES__ = {}
 __ROOTS__ = {}
@@ -23,6 +42,32 @@ def get_file_name(func) -> str:
 def get_line_number(func) -> str:
     """returns the first line number of a given function or method"""
     return FunMeta.from_function_or_method(func).line_number
+
+
+def resolve_path(path, relative_to="~") -> Path:
+    return Path(path).expanduser().absolute().relative_to(Path(relative_to).expanduser())
+
+
+def collapse_path(e: Union[str, Path]) -> str:
+    return str(e).replace(os.getenv("HOME"), "~")
+
+
+def get_package(path) -> Path:
+    if not isinstance(path, Path):
+        path = Path(path)
+
+    if not path.is_dir():
+        path = path.parent
+
+    counter = 0
+    found = None
+    while not found:
+        counter += 1
+        if not path.parent.joinpath('__init__.py').exists():
+            found = path
+        path = path.parent
+
+    return found
 
 
 class FunMeta(object):
@@ -63,50 +108,6 @@ def appears_to_be_test_class(type_object: type) -> bool:
     return issubclass(type_object, unittest.TestCase) or name_appears_to_indicate_test(name)
 
 
-def read_file_from_path(path: Path) -> str:
-    with path.open() as f:
-        return f.read()
-
-
-def is_classdef(node: ast.stmt) -> bool:
-    return isinstance(node, ast.ClassDef)
-
-
-def resolve_base_names(bases: List[ast.stmt]) -> Tuple[str]:
-    names = []
-    for base in bases:
-        if isinstance(base, ast.Name):
-            names.append(base.id)
-            continue
-        if isinstance(base, ast.Attribute):
-            names.append(f"{base.value.id}.{base.attr}")
-            continue
-        raise NotImplementedError(f"{base} of type {type(base)} not yet supported")
-
-    return tuple(names)
-
-
-def gather_class_definitions_node(node: Union[ast.stmt, str], acc: dict) -> Dict[str, Tuple[int, Tuple[str]]]:
-    classes = dict(acc)
-
-    if is_classdef(node):
-        classes[node.name] = (node.lineno, resolve_base_names(node.bases))
-    elif isinstance(node, str):
-        return classes
-
-    for name, subnode in ast.iter_fields(node):
-        if isinstance(subnode, list):
-            for subnode in subnode:
-                classes.update(gather_class_definitions_node(subnode, classes))
-
-    return classes
-
-
-def gather_class_definitions_from_module_path(path: Path) -> Dict[str, int]:
-    node = ast.parse(read_file_from_path(path))
-    return gather_class_definitions_node(node, {})
-
-
 def get_type_definition_filename_and_firstlineno(type_object: type) -> Tuple[Path, int]:
     if not isinstance(type_object, type):
         raise TypeError(f'{type_object} ({type(type_object)}) is not a {type}')
@@ -125,32 +126,6 @@ def get_type_definition_filename_and_firstlineno(type_object: type) -> Tuple[Pat
             f"no class definitions found for {module}"
         )
     return path, classes[name]
-
-
-def resolve_path(path, relative_to="~") -> Path:
-    return Path(path).absolute().relative_to(Path(relative_to).expanduser())
-
-
-def collapse_path(e: Union[str, Path]) -> str:
-    return str(e).replace(os.getenv("HOME"), "~")
-
-
-def get_package(path) -> Path:
-    if not isinstance(path, Path):
-        path = Path(path)
-
-    if not path.is_dir():
-        path = path.parent
-
-    counter = 0
-    found = None
-    while not found:
-        counter += 1
-        if not path.parent.joinpath('__init__.py').exists():
-            found = path
-        path = path.parent
-
-    return found
 
 
 class loader(object):

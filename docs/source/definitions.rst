@@ -3,7 +3,6 @@
 Definitions
 ===========
 
-
 This section defines terms used across :ref:`Sure`'s documentation,
 code and run-time error messages and must be interpreted accordingly
 as to prevent confusion, misunderstanding and abuse of any manner,

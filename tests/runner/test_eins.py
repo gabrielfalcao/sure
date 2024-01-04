@@ -25,7 +25,7 @@ def test_function_ok():
 
 
 class TestClass(TestCase):
-    "`sure' should work seamlessly with a unittest.TestCase"
+    "`sure' should work seamlessly with a :class:`unittest.TestCase`"
 
     def setUp(self):
         self.one_attribute = {

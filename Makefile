@@ -3,12 +3,12 @@ GIT_ROOT		:= $(shell dirname $(MAKEFILE_PATH))
 VENV_ROOT		:= $(GIT_ROOT)/.venv
 
 PACKAGE_NAME		:= sure
-MAIN_CLI_NAME		:= sure
+LIBEXEC_NAME		:= sure
 REQUIREMENTS_FILE	:= development.txt
 
 PACKAGE_PATH		:= $(GIT_ROOT)/$(PACKAGE_NAME)
 REQUIREMENTS_PATH	:= $(GIT_ROOT)/$(REQUIREMENTS_FILE)
-MAIN_CLI_PATH		:= $(VENV_ROOT)/bin/$(MAIN_CLI_NAME)
+LIBEXEC_PATH		:= $(VENV_ROOT)/bin/$(LIBEXEC_NAME)
 export VENV		?= $(VENV_ROOT)
 
 OSNAME			:= $(shell uname)
@@ -28,7 +28,7 @@ AUTO_STYLE_TARGETS	:= sure/runtime.py sure/runner.py sure/meta.py sure/meta.py s
 ######################################################################
 
 # default target when running `make` without arguments
-all: | $(MAIN_CLI_PATH)
+all: | $(LIBEXEC_PATH)
 
 # creates virtualenv
 venv: | $(VENV)
@@ -37,12 +37,12 @@ venv: | $(VENV)
 develop: | $(VENV)/bin/python $(VENV)/bin/pip
 
 # installs the requirements and the package dependencies
-setup: | $(MAIN_CLI_PATH)
+setup: | $(LIBEXEC_PATH)
 
 # Convenience target to ensure that the venv exists and all
 # requirements are installed
-dependencies:
-	@rm -f $(MAIN_CLI_PATH) # remove MAIN_CLI_PATH to trigger pip install
+dependencies: $(VENV)/bin/pytest
+	@rm -f $(LIBEXEC_PATH) # remove LIBEXEC_PATH to trigger pip install
 	$(MAKE) develop setup
 
 clean-docs:
@@ -58,10 +58,10 @@ test tests:
 	@$(VENV)/bin/pytest --cov=sure --ignore tests/crashes tests
 
 # runs main command-line tool
-run: | $(MAIN_CLI_PATH)
-	$(MAIN_CLI_PATH) --reporter=test tests/crashes || true
-	$(MAIN_CLI_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure.core --cover-module=sure tests/runner
-	$(MAIN_CLI_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure --immediate --cover-module=sure --ignore=crashes tests
+run: | $(LIBEXEC_PATH)
+	$(LIBEXEC_PATH) --reporter=test tests/crashes || true
+	$(LIBEXEC_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure.core --cover-module=sure tests/runner
+	$(LIBEXEC_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure --immediate --cover-module=sure --ignore=crashes tests
 
 push-release: dist  # pushes distribution tarballs of the current version
 	$(VENV)/bin/twine upload dist/*.tar.gz
@@ -119,7 +119,7 @@ $(VENV)/bin/flake8: | $(VENV)/bin/pip
 
 # installs this package in "edit" mode after ensuring its requirements are installed
 
-$(VENV)/bin/sure $(VENV)/bin/pytest $(MAIN_CLI_PATH): | $(VENV) $(VENV)/bin/pip $(VENV)/bin/python $(REQUIREMENTS_PATH)
+install $(VENV)/bin/pytest $(LIBEXEC_PATH): | $(VENV) $(VENV)/bin/pip $(VENV)/bin/python $(REQUIREMENTS_PATH)
 	$(VENV)/bin/pip install -r $(REQUIREMENTS_PATH)
 	$(VENV)/bin/pip install .
 
@@ -140,20 +140,21 @@ $(REQUIREMENTS_PATH):
 
 .PHONY: \
 	all \
-	black \
-	isort \
-	flake8 \
 	autostyle \
+	black \
 	build-release \
 	clean \
+	clean-docs \
 	dependencies \
 	develop \
+	docs \
+	flake8 \
+	html-docs \
+	install \
+	isort \
 	push-release \
 	release \
-	setup \
 	run \
+	setup \
 	test \
-	tests \
-	clean-docs \
-	html-docs \
-	docs
+	tests

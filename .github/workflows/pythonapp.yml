@@ -19,20 +19,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Install python version
+    - name: Install Python
       uses: gabrielfalcao/pyenv-action@v18
       with:
         default: "${{ matrix.python }}"
-        command: pip install -U pip setuptools
-
-    - name: Install dependencies
-      run: pip install -r development.txt
-
-    - name: Install sure
-      run: pip install -e .
+        command: make dependencies
 
     - name: Test with PyTest
-      run: make tests
+      run: make dependencies tests
 
     - name: Self/Auto Test
-      run: make run
+      run: make dependencies run

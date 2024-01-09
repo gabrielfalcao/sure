@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,19 +19,24 @@ import os
 import sys
 import ast
 import types
+import inspect
+import traceback
 import importlib
 import importlib.util
-
+from fnmatch import fnmatch
+from _frozen_importlib import ModuleSpec
 from typing import Dict, List, Optional, Tuple, Union
 from importlib.machinery import PathFinder
 from pathlib import Path
-from sure.errors import InternalRuntimeError
+from sure.errors import InternalRuntimeError, FileSystemError
 
 from .astutil import gather_class_definitions_from_module_path
 
 __MODULES__ = {}
 __ROOTS__ = {}
 __TEST_CLASSES__ = {}
+
+__sure_package_path__ = str(Path(__file__).parent.parent)
 
 
 def get_file_name(func) -> str:
@@ -45,7 +50,9 @@ def get_line_number(func) -> str:
 
 
 def resolve_path(path, relative_to="~") -> Path:
-    return Path(path).expanduser().absolute().relative_to(Path(relative_to).expanduser())
+    return (
+        Path(path).expanduser().absolute().relative_to(Path(relative_to).expanduser())
+    )
 
 
 def collapse_path(e: Union[str, Path]) -> str:
@@ -63,7 +70,7 @@ def get_package(path) -> Path:
     found = None
     while not found:
         counter += 1
-        if not path.parent.joinpath('__init__.py').exists():
+        if not path.parent.joinpath("__init__.py").exists():
             found = path
         path = path.parent
 
@@ -72,6 +79,7 @@ def get_package(path) -> Path:
 
 class FunMeta(object):
     """container for metadata specific to Python functions or methods"""
+
     filename: str
     line_number: int
     name: str
@@ -82,12 +90,14 @@ class FunMeta(object):
         self.name = name
 
     def __repr__(self):
-        return f'<FunMeta filename={repr(self.filename)} line_number={repr(self.line_number)} name={repr(self.name)}>'
+        return f"<FunMeta filename={repr(self.filename)} line_number={repr(self.line_number)} name={repr(self.name)}>"
 
     @classmethod
     def from_function_or_method(cls, func):
         if not isinstance(func, (types.FunctionType, types.MethodType)):
-            raise TypeError(f'get_function_or_method_metadata received an unexpected object: {func}')
+            raise TypeError(
+                f"get_function_or_method_metadata received an unexpected object: {func}"
+            )
 
         return cls(
             filename=func.__code__.co_filename,
@@ -97,82 +107,125 @@ class FunMeta(object):
 
 
 def name_appears_to_indicate_test(name: str) -> bool:
-    return name.startswith('Test') or name.endswith('Test')
+    return name.startswith("Test") or name.endswith("Test")
 
 
 def appears_to_be_test_class(type_object: type) -> bool:
     if not isinstance(type_object, type):
-        raise TypeError(f'{type_object} ({type(type_object)}) is not a {type}')
+        raise TypeError(f"{type_object} ({type(type_object)}) is not a {type}")
 
     name = type_object.__name__
-    return issubclass(type_object, unittest.TestCase) or name_appears_to_indicate_test(name)
+    return issubclass(type_object, unittest.TestCase) or name_appears_to_indicate_test(
+        name
+    )
 
 
 def get_type_definition_filename_and_firstlineno(type_object: type) -> Tuple[Path, int]:
     if not isinstance(type_object, type):
-        raise TypeError(f'{type_object} ({type(type_object)}) is not a {type}')
+        raise TypeError(f"{type_object} ({type(type_object)}) is not a {type}")
 
     name = type_object.__name__
     module_name = type_object.__module__
     module = sys.modules.get(module_name)
     if not module:
-        raise InternalRuntimeError(
-            f"{module_name} does not appear within `sys.modules'. Perhaps Sure is not being used the right way or there is a bug in the current version"
+        raise RuntimeError(
+            f"{module_name} does not appear within `sys.modules'. Perhaps Sure is not being used the right way or there is a bug in the current version",
         )
     path = Path(module.__file__)
-    classes = __TEST_CLASSES__.get(path)
-    if not classes:
-        raise InternalRuntimeError(
-            f"no class definitions found for {module}"
+    frames = list(
+        filter(
+            lambda fs: not fs.filename.startswith(__sure_package_path__),
+            traceback.extract_stack(inspect.currentframe()),
         )
-    return path, classes[name]
+    )
+    recent_frame = frames[-1]
+    frame_lineno = recent_frame.lineno
+    classes = gather_class_definitions_from_module_path(path, nearest_line=frame_lineno)
+    __TEST_CLASSES__[path] = classes
+    lineno, base_class_names = classes[name]
+
+    return collapse_path(path), lineno
 
 
 class loader(object):
     @classmethod
-    def load_recursive(cls, path, ignore_errors=True, glob_pattern='*.py'):
+    def load_recursive(
+        cls,
+        path,
+        ignore_errors=True,
+        glob_pattern="*.py",
+        excludes: Optional[List[Union[str, Path]]] = None,
+    ):
         modules = []
+        excludes = excludes or []
         path = Path(path)
         if path.is_file():
-            return cls.load_python_path(path)
+            if fnmatch(path, glob_pattern):
+                return cls.load_python_path(path)
+            else:
+                raise FileSystemError(f"{path} does not match pattern {glob_pattern:r}")
 
         base_path = Path(path).expanduser().absolute()
-        targets = list(base_path.glob(glob_pattern))
-        for path in targets:
-            modules.extend(cls.load_python_path(path))
+        for directory, _, files in os.walk(base_path):
+            if any(
+                [path in directory or fnmatch(directory, path) for path in excludes]
+            ):
+                continue
+
+            directory = Path(directory)
+            for path in files:
+                if any([e in path or fnmatch(path, e) for e in excludes]):
+                    continue
+
+                if fnmatch(path, glob_pattern):
+                    path = directory.joinpath(path)
+                    modules.extend(cls.load_python_path(path))
 
         return modules
 
     @classmethod
     def load_python_path(cls, path):
         if path.is_dir():
-            logger.debug(f'ignoring directory {path}')
+            logger.debug(f"ignoring directory {path}")
             return []
 
-        if path.name.startswith('_') or path.name.endswith('_'):
+        if path.name.startswith("_") or path.name.endswith("_"):
             return []
 
         module, root = cls.load_package(path)
         return [module]
 
     @classmethod
-    def load_package(cls, path):
+    def load_module(
+        cls, path: Union[str, Path]
+    ) -> Tuple[types.ModuleType, ModuleSpec, str, Path]:
+        path = Path(path)
         package = get_package(path)
-        fqdn, _ = os.path.splitext(str(path.relative_to(package.parent)).replace(os.sep, "."))
+        fqdn, _ = os.path.splitext(
+            str(path.relative_to(package.parent)).replace(os.sep, ".")
+        )
 
         spec = importlib.util.spec_from_file_location(fqdn, path)
+
         module = importlib.util.module_from_spec(spec)
         __MODULES__[fqdn] = module
         cdfs = {}
-        for name, metadata in gather_class_definitions_from_module_path(path).items():
+        for name, metadata in gather_class_definitions_from_module_path(
+            path, None
+        ).items():
             lineno, bases = metadata
             if any(filter(name_appears_to_indicate_test, [name] + list(bases))):
                 cdfs[name] = lineno
 
         __TEST_CLASSES__[path] = cdfs
+        return module, spec, fqdn, package.absolute()
+
+    @classmethod
+    def load_package(cls, path: Union[str, Path]) -> Tuple[types.ModuleType, Path]:
+        module, spec, fqdn, package_path = cls.load_module(path)
         sys.modules[fqdn] = module
         try:
             spec.loader.exec_module(module)
         except Exception as e:
             raise e
-        return module, package.absolute()
+        return module, package_path

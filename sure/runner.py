@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,10 +48,10 @@ from sure.reporter import Reporter
 class Runner(object):
     """Manages I/O operations in regards to finding tests and executing them"""
 
-    def __init__(self, base_path: Path, reporter: str, plugin_paths=None, **kwds):
+    def __init__(self, base_path: Path, reporter: str, options: RuntimeOptions, **kwds):
         self.base_path = base_path
         self.reporter = self.get_reporter(reporter)
-        self.plugin_paths = plugin_paths
+        self.options = options
         self.kwds = kwds
 
     def __repr__(self):
@@ -63,7 +63,9 @@ class Runner(object):
     def find_candidates(self, lookup_paths):
         candidate_modules = []
         for path in lookup_paths:
-            modules = loader.load_recursive(path, glob_pattern="test*.py")
+            modules = loader.load_recursive(
+                path, glob_pattern="test*.py", excludes=self.options.ignore
+            )
             candidate_modules.extend(modules)
 
         return candidate_modules
@@ -97,17 +99,16 @@ class Runner(object):
 
         return features
 
-    def execute(self, lookup_paths, immediate: bool = False):
+    def execute(self, lookup_paths):
         results = []
         self.reporter.on_start()
 
         for feature in self.load_features(lookup_paths):
             self.reporter.on_feature(feature)
-            runtime = RuntimeOptions(immediate=immediate)
-            context = RuntimeContext(self.reporter, runtime)
+            context = RuntimeContext(self.reporter, self.options)
 
-            result = feature.run(self.reporter, runtime=runtime)
-            if runtime.immediate:
+            result = feature.run(self.reporter, runtime=self.options)
+            if self.options.immediate:
                 if result.is_failure:
                     raise ExitFailure(context, result)
 
@@ -132,9 +133,5 @@ class Runner(object):
             return error.result
 
     @cached_property
-    def runtime(self, immediate: bool = False):
-        return RuntimeOptions(immediate=immediate)
-
-    @cached_property
     def context(self):
-        return RuntimeContext(self.reporter, self.runtime)
+        return RuntimeContext(self.reporter, self.options)

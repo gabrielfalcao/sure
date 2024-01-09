@@ -12,13 +12,13 @@ Introduction
 Sure is a both a library and a test-runner for for the Python Programming Languages, featuring a DSL for writing
 assertions. Sure's original author is `Gabriel Falcão <https://github.com/gabrielfalcao>`_.
 
-Sure provides a :ref:`Special Syntax` for writing tests in a
+Sure provides a :ref:`special syntax definition` for writing tests in a
 human-friendly, fluent and easy-to-use manner, In the context of the
 Python Programming language, Sure is a pioneer at extending every
 object with test-specific methods at test-runtime. This feature is
 disabled by default starting on version 3.0.0 and MAY be optionally
 enabled programmatically or via command-line. Read the section
-:ref:`Special Syntax` for more information.
+:ref:`special syntax definition` for more information.
 
 Whether the :ref:`Special Syntax` is enabled or not, :ref:`sure`
 generally aims at enabling software developers to writing tests in a

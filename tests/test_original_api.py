@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -340,7 +340,7 @@ def test_that_checking_all_atributes_of_range():
 
 
 def test_that_checking_all_elements():
-    "that(iterable).every_one_is('value')"
+    "that(iterable).every_item_is('value')"
     shapes = [
         "cube",
         "ball",
@@ -354,7 +354,7 @@ def test_that_checking_all_elements():
     assert shapes[1] == "ball"
     assert shapes[2] == "ball"
 
-    assert that(shapes, within_range=(1, 2)).every_one_is("ball")
+    assert that(shapes, within_range=(1, 2)).every_item_is("ball")
 
 
 def test_that_checking_each_matches():

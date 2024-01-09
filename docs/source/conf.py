@@ -54,7 +54,7 @@ texinfo_documents = [
         "Sure Documentation",
         author,
         "Sure",
-        "utility belt for automated testing in python for python.",
+        "sophisticated automated test library and runner for python.",
         "Automated Testing",
     ),
 ]

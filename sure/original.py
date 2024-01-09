@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -188,10 +188,10 @@ class AssertionHelper(object):
             if inspect.isbuiltin(self.actual):
                 _src_filename = '<built-in function>'
             else:
-                _src_filename = _get_file_name(self.actual)
+                _src_filename = get_file_name(self.actual)
 
             if inspect.isfunction(self.actual):
-                _src_lineno = _get_line_number(self.actual)
+                _src_lineno = get_line_number(self.actual)
                 raise AssertionError(
                     'calling function %s(%s at line: "%d") with args %r and kwargs %r did not raise %r' % (
                         self.actual.__name__,
@@ -249,7 +249,7 @@ class AssertionHelper(object):
         else:
             raise AssertionError(error)
 
-    def every_one_is(self, expectation):
+    def every_item_is(self, expectation):
         msg = 'all members of %r should be %r, but the %dth is %r'
         for index, item in enumerate(self.actual):
             if self._range:

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
+# <sure - sophisticated automated test library and runner>
 # Copyright (C) <2012-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
 # Copyright (C) <2012>  Lincoln Clarete <lincoln@comum.org>
 #
@@ -17,36 +17,63 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import platform
 
-is_cpython = (
-    hasattr(platform, 'python_implementation')
-    and platform.python_implementation().lower() == 'cpython')
 
-if is_cpython:
-    import ctypes
-    DictProxyType = type(object.__dict__)
+def load_ctypes():
+    try:
+        import ctypes
+    except (ImportError, ModuleNotFoundError):
+        ctypes = None
+    return ctypes
 
-    Py_ssize_t = \
-        hasattr(ctypes.pythonapi, 'Py_InitModule4_64') \
-            and ctypes.c_int64 or ctypes.c_int
+
+DictProxyType = type(object.__dict__)
+
+
+def determine_python_implementation():
+    return getattr(platform, "python_implementation", lambda: "")().lower()
+
+
+def runtime_is_cpython():
+    if not load_ctypes():
+        return False
+
+    return determine_python_implementation() == "cpython"
+
+
+def get_py_ssize_t():
+    ctypes = load_ctypes()
+    pythonapi = getattr(ctypes, 'pythonapi', None)
+    if hasattr(pythonapi, "Py_InitModule4_64"):
+        return ctypes.c_int64
+    else:
+        return ctypes.c_int
+
+
+def noop_patchable_builtin(*args, **kw):
+    pass
+
+
+def craft_patchable_builtin():
+    ctypes = load_ctypes()
+    if not runtime_is_cpython():
+        return noop_patchable_builtin
 
     class PyObject(ctypes.Structure):
         pass
 
     PyObject._fields_ = [
-        ('ob_refcnt', Py_ssize_t),
-        ('ob_type', ctypes.POINTER(PyObject)),
+        ("ob_refcnt", get_py_ssize_t()),
+        ("ob_type", ctypes.POINTER(PyObject)),
     ]
-
-    class SlotsProxy(PyObject):
-        _fields_ = [('dict', ctypes.POINTER(PyObject))]
 
     def patchable_builtin(klass):
         name = klass.__name__
-        target = getattr(klass, '__dict__', name)
+        target = getattr(klass, "__dict__", name)
 
-        if not isinstance(target, DictProxyType):
-            return target
-
+        class SlotsProxy(PyObject):
+            _fields_ = [
+                ("dict", ctypes.POINTER(PyObject))
+            ]
         proxy_dict = SlotsProxy.from_address(id(target))
         namespace = {}
 
@@ -57,5 +84,9 @@ if is_cpython:
         )
 
         return namespace[name]
-else:
-    patchable_builtin = lambda *args, **kw: None
+
+    return patchable_builtin
+
+
+patchable_builtin = craft_patchable_builtin()
+is_cpython = runtime_is_cpython()

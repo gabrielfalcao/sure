@@ -37,10 +37,11 @@ sure
 .. image:: https://img.shields.io/badge/pydoc-web-ff69b4.svg
    :target: http://pydoc.net/sure
 
-An idiomatic testing library for python with powerful and flexible assertions, created by `Gabriel Falcão <https://github.com/gabrielfalcao>`_.
-Sure's developer experience is inspired and modeled after `RSpec Expectations
-<http://rspec.info/documentation/3.5/rspec-expectations/>`_ and
-`should.js <https://github.com/shouldjs/should.js>`_.
+The sophisticated automated test tool for Python, featuring a test
+runner and a library with powerful and flexible assertions.
+
+Originally authored by `Gabriel Falcão <https://github.com/gabrielfalcao>`_.
+
 
 Installing
 ----------
@@ -48,6 +49,7 @@ Installing
 .. code:: bash
 
    pip install sure
+
 
 Running tests
 -------------
@@ -73,39 +75,26 @@ To build locally run:
 
     make docs
 
+
 Quick Library Showcase
 ----------------------
 
-Equality
-~~~~~~~~
+.. code:: python
 
-(number).should.equal(number)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   from sure import expects
+
+   expects(4).to.be.equal(2 + 2)
+   expects(7.5).to.be.eql(3.5 + 4)
+
+   expects(3).to.not_be.equal(5)
+   expects(9).to_not.be.equal(11)
 
 .. code:: python
 
-   from sure import expect
+   from sure import expects
 
-   expect(4).to.be.equal(2 + 2)
-   expect(7.5).to.be.eql(3.5 + 4)
-
-   expect(3).to.not_be.equal(5)
-   expect(9).to_not.be.equal(11)
-
-
-Assert dictionary and its contents
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code:: python
-
-   from sure import expect
-
-   expect({'foo': 'bar'}).to.equal({'foo': 'bar'})
-   expect({'foo': 'bar'}).to.have.key('foo').being.equal('bar')
-
-
-"A string".lower().should.equal("a string") also works
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   expects({'foo': 'bar'}).to.equal({'foo': 'bar'})
+   expects({'foo': 'bar'}).to.have.key('foo').being.equal('bar')
 
 .. code:: python
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,13 +17,17 @@
 from collections import OrderedDict
 from functools import cache
 
-try:  # TODO: document the coupling with :mod:`mock` or :mod:`unittest.mock`
-    from mock.mock import _CallList
-except ImportError:
-    from unittest.mock import _CallList
-
-from sure.terminal import red, green, yellow
+from sure.terminal import yellow, red, green
 from sure.doubles.dummies import Anything
+
+from unittest.mock import _CallList as UnitTestMockCallList
+
+try:  # TODO: document the coupling with :mod:`mock` or :mod:`unittest.mock`
+    from mock.mock import _CallList as MockCallList
+except ImportError:
+    MockCallList = None
+
+MockCallListType = tuple(filter(bool, (UnitTestMockCallList, MockCallList)))
 
 
 class Explanation(str):
@@ -201,10 +205,10 @@ that complex or nested datastructures, such as :external+python:ref:`mappings <m
     def compare(self):
         X, Y = self.operands
 
-        if isinstance(X, _CallList):
+        if isinstance(X, MockCallListType):
             X = list(X)
 
-        if isinstance(Y, _CallList):
+        if isinstance(Y, MockCallListType):
             X = list(Y)
 
         c = self.get_context()

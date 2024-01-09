@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,25 @@
 '''
 
 
-class Anything(object):
+class Dummy(object):
+    """class for creating Dummy objects with a string identity
+    """
+    def __init__(self, dummy_id: str):
+        if not isinstance(dummy_id, str):
+            raise TypeError(
+                f'dummy() takes string as argument, received {dummy_id} ({type(dummy_id)}) instead'
+            )
+
+        self.__dummy_id__ = id
+
+    def __repr__(self):
+        return f'<Dummy {self.__dummy_id__}>'
+
+    def __str__(self):
+        return f'<Dummy {self.__dummy_id__}>'
+
+
+class Anything(Dummy):
     """Dummy class whose entire purpose is to serve as sentinel in assertion
     statements where the :meth:`operator.__eq__` is employed under the
     specific circumstance of expecting the :class:`bool` value ``True``
@@ -30,4 +48,4 @@ class Anything(object):
         return True
 
 
-anything = Anything()
+anything = Anything('sure.doubles.dummies.Anything')

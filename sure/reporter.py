@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 from pathlib import Path
 from typing import Dict
 from sure.meta import MetaReporter, get_reporter, gather_reporter_names
+from sure.types import Runner, Feature, FeatureResult
 
 __path__ = Path(__file__).absolute().parent
 
@@ -46,7 +47,7 @@ class Reporter(object, metaclass=MetaReporter):
     __metaclass__ = MetaReporter
     name = None
 
-    def __init__(self, runner, *args, **kw):
+    def __init__(self, runner: Runner, *args, **kw):
         self.runner = runner
         self.tests_started = []
         self.tests_finished = []
@@ -76,11 +77,10 @@ class Reporter(object, metaclass=MetaReporter):
         """
         raise NotImplementedError
 
-    def on_feature(self, feature):
+    def on_feature(self, feature: Feature):
         """Called when a scenario feature is about to run
 
         .. code:: python
-
            from sure.reporter import Reporter
 
            class FeatureReporter(Reporter):
@@ -94,7 +94,7 @@ class Reporter(object, metaclass=MetaReporter):
         """
         raise NotImplementedError
 
-    def on_feature_done(self, feature, result):
+    def on_feature_done(self, feature: Feature, result: FeatureResult):
         """Called when a scenario feature_done is about to run
 
         .. code:: python
@@ -253,7 +253,7 @@ class Reporter(object, metaclass=MetaReporter):
         found = get_reporter(name)
         if not found:
             raise RuntimeError(
-                "no reporter found with name {}, options are: {}".format(
+                "no reporter found with name `{}', options are: {}".format(
                     name, ", ".join(gather_reporter_names())
                 )
             )
@@ -262,7 +262,8 @@ class Reporter(object, metaclass=MetaReporter):
 
     @classmethod
     def from_name_and_runner(cls, name, runner):
-        """
+        """Shorthand for calling:
+
         .. code:: python
 
            from sure.runner import Runner
@@ -279,8 +280,4 @@ class Reporter(object, metaclass=MetaReporter):
 
            reporter = Reporter.from_name_and_runner('feature', runner)
         """
-        cls.loader.load_recursive(
-            __path__.joinpath("reporters"),
-            ignore_errors=False,
-        )
         return cls.from_name(name)(runner)

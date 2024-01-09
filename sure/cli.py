@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ import sure.reporters
 
 from sure.loader import resolve_path
 from sure.runner import Runner
+from sure.runtime import RuntimeOptions
 from sure.reporters import gather_reporter_names
 from sure.errors import ExitError, ExitFailure, InternalRuntimeError
 
@@ -41,11 +42,12 @@ from sure.errors import ExitError, ExitFailure, InternalRuntimeError
 @click.option("-s", "--special-syntax", is_flag=True)
 @click.option("-f", "--log-file", help='path to a log file. Default to SURE_LOG_FILE')
 @click.option("-l", "--log-level", type=click.Choice(['debug', 'info', 'warning', 'error']), help="default='info'")
-@click.option("-i", "--immediate", is_flag=True)
+@click.option("-x", "--immediate", is_flag=True, help="quit test execution immediately at first failure")
+@click.option("-i", "--ignore", help="paths to ignore", multiple=True)
 @click.option("-r", "--reporter", default="feature", help='default=feature', type=click.Choice(gather_reporter_names()))
 @click.option("--cover-branches", is_flag=True)
 @click.option("--cover-module", multiple=True, help="specify module names to cover")
-def entrypoint(paths, reporter, immediate, log_level, log_file, special_syntax, with_coverage, cover_branches, cover_module):
+def entrypoint(paths, reporter, immediate, ignore, log_level, log_file, special_syntax, with_coverage, cover_branches, cover_module):
     if not paths:
         paths = glob('test*/**')
     else:
@@ -70,9 +72,10 @@ def entrypoint(paths, reporter, immediate, log_level, log_file, special_syntax, 
     if special_syntax:
         sure.enable_special_syntax()
 
-    runner = Runner(resolve_path(os.getcwd()), reporter)
+    options = RuntimeOptions(immediate=immediate, ignore=ignore)
+    runner = Runner(resolve_path(os.getcwd()), reporter, options)
     try:
-        result = runner.run(paths, immediate=immediate)
+        result = runner.run(paths)
     except Exception as e:
         raise InternalRuntimeError(runner.context, e)
 

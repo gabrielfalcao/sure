@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,15 +45,14 @@ def resolve_base_names(bases: List[ast.stmt]) -> Tuple[str]:
     return tuple(names)
 
 
-def gather_class_definitions_node(node: Union[ast.stmt, str], acc: dict) -> Dict[str, Tuple[int, Tuple[str]]]:
+def gather_class_definitions_node(node: Union[ast.stmt, str], classes: dict, nearest_line: Optional[int]=None) -> Dict[str, Tuple[int, Tuple[str]]]:
     """Recursively scans all class definitions of an :class:`node <ast.AST>`
 
     Primarily designed to find nested :class:`unittest.TestCase` classes.
 
     :returns: :class:`dict` containing a 2-item tuple: (line number, tuple of base class names), keyed with the class name
-
     """
-    classes = dict(acc)
+    classes = dict(classes)
 
     if is_classdef(node):
         classes[node.name] = (node.lineno, resolve_base_names(node.bases))
@@ -68,7 +67,7 @@ def gather_class_definitions_node(node: Union[ast.stmt, str], acc: dict) -> Dict
     return classes
 
 
-def gather_class_definitions_from_module_path(path: Path) -> Dict[str, Tuple[int, Tuple[str]]]:
+def gather_class_definitions_from_module_path(path: Path, nearest_line: Optional[int]=None) -> Dict[str, Tuple[int, Tuple[str]]]:
     """parses the Python file at the given path and returns a mapping
     of class names to tuples indicating the line number in which the
     class is defined and a tuple with the names of its base classes.
@@ -77,4 +76,4 @@ def gather_class_definitions_from_module_path(path: Path) -> Dict[str, Tuple[int
     with path.open() as f:
         node = ast.parse(f.read())
 
-    return gather_class_definitions_node(node, {})
+    return gather_class_definitions_node(node, {}, nearest_line=nearest_line)

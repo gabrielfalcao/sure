@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
+"""Sure the sophisticated automated test library and runner for Python
 """
 
 import re
@@ -1005,7 +1005,7 @@ class AssertionBuilder(object):
                 raise AssertionError(f"expected `{self.actual}' to not be lower than `{expectation}'")
 
         else:
-            if not  self.actual < expectation:
+            if not self.actual < expectation:
                 raise AssertionError(f"expected `{self.actual}' to be lower than `{expectation}'")
 
         return True
@@ -1301,27 +1301,36 @@ def enable_special_syntax():
 
         def deleter(method, self, *args, **kw):
             if isinstance(self, type):
-                # if the attribute has to be deleted from a class object
-                # we cannot use '`del self.__dict__[name]'` directly because we cannot
-                # modify a mappingproxy object. Thus, we have to delete it in our
-                # proxy __dict__.
+                # In the event of deleting attributes from a "class
+                # object" the call to ``self.__dict__.pop(name)`` would
+                # not work because that would be equivalent to modifying a
+                # mappingproxy object directly. Instead the expected
+                # behavior is achieved in deleting the attribute
+                # inside the ``overwritten_object_handlers`` dict.
                 overwritten_object_handlers.pop((id(self), method.__name__), None)
             else:
-                # if the attribute has to be deleted from an instance object
-                # we are able to directly delete it from the object's __dict__.
+                # Nevertheless, in the event of deleting attributes
+                # from an "instance object the expected behavior is
+                # achieved in a more common and straightforward
+                # manner: pop directly at the instance's __dict__
                 self.__dict__.pop(name, None)
 
-        def setter(method, self, other):
+        def setter(method, self, value):
             if isinstance(self, type):
-                # if the attribute has to be set to a class object
-                # we cannot use '`self.__dict__[name] = other'` directly because we cannot
-                # modify a mappingproxy object. Thus, we have to set it in our
-                # proxy __dict__.
-                overwritten_object_handlers[(id(self), method.__name__)] = other
+                # In the event of setting attributes from a "class
+                # object" the direct assignment ``self.__dict__[name] = value`` would
+                # not work because that would be equivalent to modifying a
+                # mappingproxy object directly. Instead the expected
+                # behavior is achieved in deleting the attribute
+                # inside the ``overwritten_object_handlers`` dict.
+                overwritten_object_handlers[(id(self), method.__name__)] = value
             else:
-                # if the attribute has to be set to an instance object
-                # we are able to directly set it in the object's __dict__.
-                self.__dict__[name] = other
+                # Nevertheless, in the event of deleting attributes
+                # from an "instance object the expected behavior is
+                # achieved in a more common and straightforward
+                # manner: set the attribute directly at instance's
+                # __dict__
+                self.__dict__[name] = value
 
         return builtins.property(
             fget=method,
@@ -1337,14 +1346,13 @@ def enable_special_syntax():
         """
 
         def method(self):
-            # check if the given object already has an attribute with the
-            # given name. If yes return it instead of patching it.
+            # avoid overwriting, patching attributes, methods or
+            # properties that already exist in the type's __dict__
             try:
                 if name in self.__dict__:
                     return self.__dict__[name]
             except AttributeError:
-                # we do not have an object with __dict__, thus
-                # it's safe to just continue and patch the `name'.
+                # nevertheless objects that do not have a __dict__ can be patched
                 pass
 
             overwritten_object_handler = overwritten_object_handlers.get(
@@ -1363,19 +1371,19 @@ def enable_special_syntax():
                 instance._callable_kw = callable_kw
             return instance
 
-        method.__name__ = str(name)
+        method.__name__ = name
         return make_safe_property(method, name, prop)
 
     object_handler = patchable_builtin(object)
-    # We have to keep track of all objects which
-    # should overwrite a '`POSITIVES'` or '`NEGATIVES'`
-    # property. If we wouldn't do that in the
-    # make_safe_property.setter method we would loose
-    # the newly assigned object reference.
+    # Keeping track of all special properties of both `POSITIVES' and
+    # `NEGATIVES' categories is paramount to avoid losing the newly
+    # assigned object reference in the ``setter`` function within the
+    # ``make_safe_property`` function.
     overwritten_object_handlers = {}
 
-    # None does not have a tp_dict associated to its PyObject, so this
-    # is the only way we could make it work like we expected.
+    # The `None' type does not have a "tp_dict" associated to its
+    # PyObject. One way to patch Nonetypes is via its ``__class__``
+    # attribute.
     none = patchable_builtin(None.__class__)
 
     for name in POSITIVES:

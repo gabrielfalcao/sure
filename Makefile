@@ -54,14 +54,14 @@ html-docs: clean-docs
 docs: html-docs
 	$(OPEN_COMMAND) docs/build/html/index.html
 
-test tests: clean | $(VENV)/bin/pytest # $(VENV)/bin/sure
+test tests:
 	@$(VENV)/bin/pytest --cov=sure --ignore tests/crashes tests
 
 # runs main command-line tool
 run: | $(MAIN_CLI_PATH)
 	$(MAIN_CLI_PATH) --reporter=test tests/crashes || true
 	$(MAIN_CLI_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure.core --cover-module=sure tests/runner
-	$(MAIN_CLI_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure --immediate --cover-module=sure tests
+	$(MAIN_CLI_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure --immediate --cover-module=sure --ignore=crashes tests
 
 push-release: dist  # pushes distribution tarballs of the current version
 	$(VENV)/bin/twine upload dist/*.tar.gz
@@ -121,7 +121,7 @@ $(VENV)/bin/flake8: | $(VENV)/bin/pip
 
 $(VENV)/bin/sure $(VENV)/bin/pytest $(MAIN_CLI_PATH): | $(VENV) $(VENV)/bin/pip $(VENV)/bin/python $(REQUIREMENTS_PATH)
 	$(VENV)/bin/pip install -r $(REQUIREMENTS_PATH)
-	$(VENV)/bin/pip install -e .
+	$(VENV)/bin/pip install .
 
 # ensure that REQUIREMENTS_PATH exists
 $(REQUIREMENTS_PATH):

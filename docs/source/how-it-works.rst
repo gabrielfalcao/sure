@@ -148,6 +148,8 @@ As can be observed in the examples above, there are two kinds of
 properties: positives and negatives
 
 
+.. _positive assertion properties:
+
 Positive Assertion Properties
 .............................
 
@@ -200,6 +202,7 @@ Example:
    Y = {'structured information': ['string', [110, 117, 109, 98, 101, 114, {'outmost': 'list'}], {'first key': 76, 'second key': 107}]}
    X['structured information'][1]['first key'] is 75 whereas Y['structured information'][1]['first key'] is 107
 
+.. _negative assertion properties:
 
 Negative Assertion Properties
 .............................

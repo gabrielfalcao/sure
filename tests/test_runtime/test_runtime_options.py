@@ -14,23 +14,21 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-"""
-Test fix of bug described in GitHub Issue #139.
-"""
-
-from sure import expect
+from sure import expects
+from sure.runtime import RuntimeOptions
 
 
-def test_issue_139():
-    "Test for GitHub Issue #139"
-    # test with big epsilon
-    expect(1.).should.equal(5., 4.)
+description = "tests for :class:`sure.runtime.RuntimeOptions`"
 
-    # shouldn't raise IndexError: tuple index out of range
-    try:
-        expect(1.).should.equal(5., 3.)
-    except AssertionError:
-        pass
-    else:
-        raise RuntimeError('should not be equal')
+
+def test_runtime_options():
+    """sure.runtime.RuntimeOptions"""
+
+    expects(RuntimeOptions(0).immediate).to.be.false
+    expects(RuntimeOptions(1).immediate).to.be.true
+    expects(repr(RuntimeOptions(1))).to.equal(
+        "<RuntimeOptions immediate=True>"
+    )
+    expects(repr(RuntimeOptions(0))).to.equal(
+        "<RuntimeOptions immediate=False>"
+    )

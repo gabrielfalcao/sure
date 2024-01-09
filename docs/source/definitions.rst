@@ -18,6 +18,8 @@ These terms might be updated in the event of emerging incorrectness or
 general evolution of the :ref:`Sure` project.
 
 
+.. _truthy:
+
 truthy
 ------
 
@@ -30,6 +32,8 @@ More specifically, any valid Python code evaluted by :class:`bool` as
 
 Synonyms: ``true``, ``truthy``, ``ok``
 
+
+.. _falsy:
 
 falsy
 -----
@@ -44,6 +48,8 @@ More specifically, any valid Python code evaluted by :class:`bool` as
 Synonyms: ``false``, ``falsy``, ``not_ok``
 
 
+.. _none:
+
 none
 ----
 
@@ -51,3 +57,17 @@ Defines Python objects whose logical value is equivalent to the
 boolean value of ``False``.
 
 Synonyms: ``none``, ``None``
+
+
+.. _special syntax definition:
+
+special syntax
+--------------
+
+:ref:`Special Syntax` refers to the unique feature of giving *special
+properties* to every in-memory Python :class:`python:object` from
+which to build assertions.
+
+Such special properties are semantically divided in two categories:
+:ref:`positive <positive assertion properties>` (``do``, ``does``,  ``must``, ``should``,  ``when``) and :ref:`negative
+<negative assertion properties>` (``do_not``, ``dont``, ``does_not``, ``doesnt``, ``must_not``, ``mustnt``, ``should_not``, ``shouldnt``).

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,6 +39,8 @@ from sure.errors import (
 from sure.loader import (
     loader,
     collapse_path,
+    get_file_name,
+    get_line_number,
     get_type_definition_filename_and_firstlineno,
 )
 from sure.reporter import Reporter
@@ -71,22 +73,19 @@ def object_name(so: object) -> str:
     elif hasattr(so, "__name__"):
         return so.__name__
 
-    elif hasattr(so, "__class__"):
-        return so.__class__.__name__
-
-    return getattr(so, "__name__", repr(so))
+    return f"{so.__class__.__module__}.{so.__class__.__name__}"
 
 
 def seem_to_indicate_setup(name: str) -> bool:
-    return re.search(r"^(setUp|setup|set_up)$", name or "")
+    return bool(re.search(r"^(setUp|setup|set_up)$", name or ""))
 
 
 def seem_to_indicate_teardown(name: str) -> bool:
-    return re.search(r"^(tearDown|teardown|tear_down)$", name or "")
+    return bool(re.search(r"^(tearDown|teardown|tear_down)$", name or ""))
 
 
 def seem_to_indicate_test(name: str) -> bool:
-    return re.search(r"^(Ensure|Test|Spec|Scenario)[\w_]+$", name or "", re.I)
+    return bool(re.search(r"^(Ensure|Test|Spec|Scenario)[\w_]+$", name or "", re.I))
 
 
 def appears_to_be_runnable(name: str) -> bool:
@@ -110,47 +109,35 @@ class TestLocation(object):
 
         if isinstance(test, (types.FunctionType, types.MethodType)):
             self.name = test.__name__
-            code = test.__code__
-            self.filename = code.co_filename
-            self.line = code.co_firstlineno
-            self.kind = self.test.__class__
+            self.filename = get_file_name(test)
+            self.line = get_line_number(test)
+            self.kind = test.__class__
 
         elif isinstance(test, unittest.TestCase):
             self.name = test.__class__.__name__
             self.filename, self.line = get_type_definition_filename_and_firstlineno(test.__class__)
-            self.kind = test.__class__
+            self.kind = unittest.TestCase
 
         elif isinstance(test, type):
             self.name = test.__name__
             self.filename, self.line = get_type_definition_filename_and_firstlineno(test)
-            self.kind = test
+            if issubclass(test, unittest.TestCase):
+                self.kind = unittest.TestCase
 
         else:
             raise NotImplementedError(f"{test} of type {type(test)} is not yet supported by {TestLocation}")
 
+        self.description = getattr(self.test, "description", inspect.getdoc(self.test))
         self.module_or_instance = module_or_instance
-        self.ancestral_description = ""
-        self.module_or_instance_repr = ""
-        if module_or_instance:
-            self.ancestral_description = getattr(
-                module_or_instance, "description",
-                getattr(
-                    module_or_instance, "__doc__", ""
-                )
-            )
-            if isinstance(module_or_instance, type):
-                self.module_or_instance_repr = (
-                    f"({self.module_or_instance.__module__}.{self.module_or_instance.__name__})"
-                )
-            elif isinstance(module_or_instance, str):
-                self.module_or_instance_repr = module_or_instance
-            else:
-                raise NotImplementedError
-
-        self.description = getattr(self.test, '__func__', self.test).__doc__ or ""
+        self.ancestral_description = getattr(
+            module_or_instance,
+            "description",
+            inspect.getdoc(module_or_instance)
+        )
 
     def __repr__(self):
-        return " ".join([self.name, "at", self.ort])
+        test = " ".join([self.name, "at", self.ort])
+        return f"<TestLocation {test}>"
 
     def __str__(self):
         return "\n".join(
@@ -180,88 +167,64 @@ class ErrorStack(object):
 
     def location_specific_error(self) -> str:
         stack = self.location_specific_stack()
-        return collapse_path(stack and stack[-1] or str(self.exception))
+        return collapse_path(stack[-1])
 
     def nonlocation_specific_stack(self) -> List[str]:
         return [collapse_path(e) for e in traceback.format_tb(self.traceback) if self.location.name not in e]
 
     def nonlocation_specific_error(self) -> List[str]:
         stack = self.nonlocation_specific_stack()
-        return collapse_path(stack and stack[-1] or str(self.exception))
+        return collapse_path(stack[-1])
 
     def __str__(self):
-        return "\n".join(self.location_specific_stack())
-
-
-class Logort(object):
-    def __init__(self, scenario):
-        self.internal = logging.getLogger(".".join((__name__, object_name(scenario))))
-        self.internal.handlers = []
-        self.internal.addHandler(self.log_handler())
-        scenario_id = getattr(scenario, "id", None)
-        scenario_id = callable(scenario_id) and scenario_id() or scenario_id
-        self.external = logging.getLogger(scenario_id)
-        self.locations = []
-
-        self.history = [
-            self.internal,
-            self.external,
-        ]
-
-    @classmethod
-    def log_handler(cls):
-        return logging.FileHandler(f"/tmp/sure%{os.getpid()}.log")
-
-    @property
-    def current(self):
-        return self.history[-1]
-
-    def set_location(self, location):
-        default_logger = logging.getLogger()
-        self.locations.append(location)
-        self.history.append(logging.getLogger(location.ort))
-        for logger in self.history:
-            logger.setLevel(default_logger.level)
-            logger.handlers = default_logger.handlers
+        return self.full()
 
 
 class RuntimeOptions(object):
-    immediate: bool
+    """Container for command-line options which originate at
+    :mod:`sure.cli`. The goal is to isolate options specific to
+    test-runtime into a hermetically sealed object which in its turn
+    is kept and handled exclusively by each instance of
+    :class:`sure.runtime.RuntimeContext` which in its turn is
+    contextual to each executable test.
 
-    def __init__(self, immediate: bool):
-        self.immediate = immediate
+    .. note:: In the mid-to-long-term future :class:`sure.runtime.RuntimeOptions` class *might* also receive options provided by plugins.
+
+
+    List of Options:
+
+    - ``immediate`` - quit entire test-run session immediately after a failure
+    - ``ignore`` - optional list of paths to be ignored
+    """
+    immediate: bool
+    ignore: Optional[List[Union[str, Path]]]
+
+    def __init__(self, immediate: bool, ignore: Optional[List[Union[str, Path]]]=None):
+        self.immediate = bool(immediate)
+        self.ignore = ignore and list(ignore) or []
 
     def __repr__(self):
         return f"<RuntimeOptions immediate={self.immediate}>"
 
 
 class RuntimeContext(object):
+    """Provides a runtime context for each executable test. Contains a
+    reference to the instance of :class:`~sure.RuntimeOptions` given
+    by a :class:`~sure.runner.Runner` as well as reference to the
+    :class:`~sure.reporter.Reporter` chosen.
+    """
+
     reporter: Reporter
-    runtime: RuntimeOptions
+    options: RuntimeOptions
     unittest_testcase_method_name: str
 
-    def __init__(self, reporter: Reporter, runtime: RuntimeOptions, unittest_testcase_method_name: str = 'runTest'):
+    def __init__(self, reporter: Reporter, options: RuntimeOptions, unittest_testcase_method_name: str = 'runTest'):
         self.reporter = reporter
-        self.runtime = runtime
+        self.options = options
         self.unittest_testcase_method_name = unittest_testcase_method_name
 
     def __repr__(self):
-        return f"<RuntimeContext reporter={self.reporter} runtime={self.runtime}>"
-
-
-class BaseResult(object):
-    def __init__(self, results, reporter: Reporter):
-        self.results = results
-        self.reporter = reporter
-
-    def __nonzero__(self):
-        return self.ok
-
-    @property
-    def ok(self):
-        errors = set([x.is_error for x in self.results])
-        failures = set([x.is_failure for x in self.results])
-        return len(errors.union(failures)) == 0
+        return f"<RuntimeContext reporter={self.reporter} options={self.options}>"
 
 
 class Container(BaseContainer):
@@ -273,7 +236,7 @@ class Container(BaseContainer):
     def __init__(
         self,
         name: str,
-        runnable: Union[callable, unittest.TestCase, object],  # TODO: think whether it's reasonable to support a subclass of some kind of future :class:`~sure.Scenario`, hypothetically speaking.
+        runnable: Union[callable, unittest.TestCase, object],  # TODO: think about enhanced interoperability with :func:`sure.scenario`
         module_or_instance: Optional[object] = None,
     ):
         self.name = name
@@ -331,7 +294,7 @@ class PreparedTestSuiteContainer(BaseContainer):
         else:
             raise NotImplementedError(f"PreparedTestSuiteContainer received unexpected type: {source} ({type(source)})")
 
-        self.log = Logort(self.source_instance)
+        self.log = logging.getLogger(self.location.ort)
         self.context = context
         self.setup_methods = setup_methods
         self.teardown_methods = teardown_methods
@@ -467,7 +430,7 @@ class PreparedTestSuiteContainer(BaseContainer):
         if result.error:
             last_error = result
 
-        if context.runtime.immediate:
+        if context.options.immediate:
             if last_error is not None:
                 raise ImmediateError(last_error)
 
@@ -494,9 +457,6 @@ class PreparedTestSuiteContainer(BaseContainer):
         """
         if not isinstance(container, BaseContainer):
             raise InternalRuntimeError(f"expected {container} to be an instance of BaseContainer in this instance")
-
-        location = container.location
-        self.log.set_location(location)
 
         try:
             return_value = container.unit()
@@ -556,7 +516,7 @@ class Feature(object):
 class Scenario(object):
     def __init__(self, class_or_callable, feature):
         self.name = class_or_callable.__name__
-        self.log = Logort(self)
+        self.log = logging.getLogger(self.name)
         self.description = stripped(class_or_callable.__doc__ or "")
 
         self.object = class_or_callable
@@ -583,12 +543,12 @@ class Scenario(object):
                 elif not result.is_success:
                     if result.is_failure:
                         context.reporter.on_failure(result.scenario, result)
-                        if context.runtime.immediate:
+                        if context.options.immediate:
                             raise ExitFailure(context, result)
 
                     elif result.is_error:
                         context.reporter.on_error(result.scenario, result)
-                        if context.runtime.immediate:
+                        if context.options.immediate:
                             raise ExitError(context, result)
 
             context.reporter.on_scenario_done(collector.location, ScenarioResultSet(collector_results, context))
@@ -638,6 +598,11 @@ class ExceptionManager(object):
 def treat_error(error: Exception, location: TestLocation) -> Exception:
     manager = ExceptionManager(error, location)
     return manager.perform_handoff()
+
+
+class BaseResult:
+    """Base class for results of scenarios and features. Its entire
+purpose is to allow for distinguishing result-containing objects."""
 
 
 class ScenarioResult(BaseResult):

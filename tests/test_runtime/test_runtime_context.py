@@ -38,5 +38,5 @@ def test_runtime_context():
     )
 
     expects(repr(context)).to.equal(
-        '<RuntimeContext reporter=<ReporterStub> options=<RuntimeOptions immediate=False>>'
+        "<RuntimeContext reporter=<ReporterStub> options=<RuntimeOptions immediate=False glob_pattern='**test*.py'>>"
     )

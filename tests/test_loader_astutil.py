@@ -14,3 +14,29 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import unittest
+from unittest import TestCase
+from sure import expects
+from sure.loader.astutil import gather_class_definitions_from_module_path, gather_class_definitions_node
+
+
+class TestLoaderAstUtilBaseClassName(TestCase):
+    def test_gather_class_definitions_from_module_path(self):
+        classes = gather_class_definitions_from_module_path(__file__)
+        expects(classes).to.equal(
+            {'TestLoaderAstUtilBaseClassName': (23, ('TestCase',)), 'TestLoaderAstUtilBaseClassAttributeAndName': (31, ('unittest.TestCase',))}
+        )
+
+
+class TestLoaderAstUtilBaseClassAttributeAndName(unittest.TestCase):
+    def test_gather_class_definitions_from_module_path(self):
+        classes = gather_class_definitions_from_module_path(__file__)
+        expects(classes).to.equal(
+            {'TestLoaderAstUtilBaseClassName': (23, ('TestCase',)), 'TestLoaderAstUtilBaseClassAttributeAndName': (31, ('unittest.TestCase',))}
+        )
+
+
+def test_gather_class_definitions_node_with_string():
+    "sure.laoder.astutil.gather_class_definitions_node() with a string"
+
+    expects(gather_class_definitions_node("string", classes={})).to.equal({})

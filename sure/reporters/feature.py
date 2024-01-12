@@ -16,10 +16,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from couleur import Shell
-
-from sure.errors import ImmediateFailure, InternalRuntimeError, SpecialSyntaxDisabledError
+from typing import Union
+from sure.errors import (
+    ImmediateFailure,
+    InternalRuntimeError,
+    SpecialSyntaxDisabledError,
+    BaseSureError,
+)
 from sure.reporter import Reporter
-from sure.runtime import ScenarioResult
+from sure.runtime import (
+    Feature,
+    FeatureResult,
+    Scenario,
+    ScenarioResult,
+    ScenarioResultSet,
+    TestLocation,
+)
 
 
 checkmark = "✓"
@@ -28,6 +40,7 @@ ballot = "✗"
 
 class FeatureReporter(Reporter):
     """Test Reporter inspired by the output of Behaviour-driven-development tools *du jour*"""
+
     name = "feature"
 
     def initialize(self, *args, **kw):
@@ -38,7 +51,7 @@ class FeatureReporter(Reporter):
     def on_start(self):
         self.sh.reset("\n")
 
-    def on_feature(self, feature):
+    def on_feature(self, feature: Feature):
         self.indentation += 2
         self.sh.reset(" " * self.indentation)
         self.sh.bold_blue("Feature: ")
@@ -47,11 +60,12 @@ class FeatureReporter(Reporter):
         self.sh.yellow("'")
         self.sh.reset(" ")
 
-    def on_feature_done(self, feature, result):
+    def on_feature_done(self, feature: Feature, result: FeatureResult):
         self.sh.reset("\n\n")
         self.indentation = 0
 
-    def on_scenario(self, test):
+    def on_scenario(self, scenario: Scenario):
+        test = scenario.location
         if test in self.tests_started:
             return
         self.tests_started.append(test)
@@ -62,20 +76,29 @@ class FeatureReporter(Reporter):
             self.sh.normal(test.description)
         else:
             self.indentation += 2
-            self.sh.green(f"\n{' ' * self.indentation} Variant: ")
+            self.sh.green(f"\n{' ' * self.indentation} Test: ")
             self.sh.normal(test.name)
         self.sh.reset(" ")
 
-    def on_scenario_done(self, test, result):
-        if test in self.tests_finished:
+    def on_scenario_done(
+        self, scenario: Scenario, result: Union[ScenarioResult, ScenarioResultSet]
+    ):
+        if scenario in self.tests_finished:
             return
         self.indentation -= 2
-        if not test.description:
+        if not scenario.description:
             self.indentation -= 2
 
         if result.is_success:
-            self.on_success(test)
-        self.tests_finished.append(test)
+            self.successes.append(scenario)
+            self.sh.bold_green(checkmark)
+            self.sh.reset("")
+        elif result.is_failure:
+            pass  # handled by :meth:`~sure.reporters.feature.FeatureReporter.on_failure`
+        elif result.is_error:
+            pass  # handled by :meth:`~sure.reporters.feature.FeatureReporter.on_error`
+
+        self.tests_finished.append(scenario)
 
     def on_failure(self, test, result):
         self.failures.append(test)
@@ -87,13 +110,18 @@ class FeatureReporter(Reporter):
             raise RuntimeError(
                 f"{self.__class__}.on_failure() called with a {ScenarioResult} which does not contain a failure"
             )
+
         self.sh.yellow(f"Failure: {result.failure}\n{result.succinct_failure}")
         self.sh.reset(" " * self.indentation)
         if result.location.description.strip():
             self.sh.bold_blue(f"\n{' ' * self.indentation} Scenario:")
-            self.sh.bold_blue(f"\n{' ' * self.indentation}     {result.location.description}")
+            self.sh.bold_blue(
+                f"\n{' ' * self.indentation}     {result.location.description}"
+            )
         if result.location:
-            self.sh.bold_red(f"\n{' ' * self.indentation} outer location {result.location.ort}")
+            self.sh.bold_red(
+                f"\n{' ' * self.indentation} outer location {result.location.path_and_lineno}"
+            )
         self.sh.reset("\n")
         self.indentation -= 4
 
@@ -111,14 +139,16 @@ class FeatureReporter(Reporter):
         self.indentation += 2
         self.sh.reset("\n")
         self.sh.bold_red(f"Error {repr(result.error)}\n")
-        self.sh.bold_red(f"{fullstack}")
-        self.sh.reset(" " * self.indentation)
-        self.sh.reset("\n")
-        self.sh.bold_red(f"{result.location.ort}\n")
+        if not isinstance(result.error, BaseSureError):
+            self.sh.bold_red(f"{fullstack}")
+            self.sh.reset(" " * self.indentation)
+            self.sh.reset("\n")
+            self.sh.bold_red(f"{result.location.path_and_lineno}\n")
+
         self.indentation -= 2
-        self.reported_errors.append(fullstack)
         self.errors.append(test)
         self.failures.append(test)
+        self.reported_errors.append(fullstack)
 
     def on_internal_runtime_error(self, context, error):
         if isinstance(error.exception, SpecialSyntaxDisabledError):

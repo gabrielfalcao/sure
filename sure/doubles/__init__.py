@@ -53,6 +53,6 @@ salient in this section.
 
 from sure.doubles.fakes import FakeOrderedDict
 from sure.doubles.stubs import stub
-from sure.doubles.dummies import anything, Dummy
+from sure.doubles.dummies import anything, Dummy, AnythingOfType, anything_of_type
 
-__all__ = ['FakeOrderedDict', 'stub', 'anything', 'Dummy']
+__all__ = ['FakeOrderedDict', 'stub', 'anything', 'Dummy', 'AnythingOfType', 'anything_of_type']

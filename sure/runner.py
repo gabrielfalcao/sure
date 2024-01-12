@@ -23,7 +23,14 @@ import unittest
 import traceback
 
 from pathlib import Path
-from typing import List, Optional
+from typing import (
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    Iterable,
+)
 from functools import lru_cache, cached_property
 
 from sure.errors import ExitError, ExitFailure, ImmediateError, ImmediateFailure
@@ -41,8 +48,14 @@ from sure.runtime import (
     stripped,
     seem_to_indicate_test,
 )
-from sure.loader import loader
+from sure.loader import (
+    loader,
+    object_belongs_to_sure,
+)
 from sure.reporter import Reporter
+
+
+Candidate = TypeVar("Candidate")
 
 
 class Runner(object):
@@ -55,54 +68,69 @@ class Runner(object):
         self.kwds = kwds
 
     def __repr__(self):
-        return "<Runner: {} {}>".format(self.base_path, self.reporter)
+        return f"<Runner base_path={repr(self.base_path)} reporter={self.reporter}>"
 
-    def get_reporter(self, name):
+    def get_reporter(self, name) -> Reporter:
         return Reporter.from_name_and_runner(name, self)
 
-    def find_candidates(self, lookup_paths):
+    def find_candidates(
+        self, lookup_paths: Iterable[Union[str, Path]]
+    ) -> List[types.ModuleType]:
         candidate_modules = []
         for path in lookup_paths:
             modules = loader.load_recursive(
-                path, glob_pattern="test*.py", excludes=self.options.ignore
+                path,
+                glob_pattern=self.options.glob_pattern,
+                excludes=self.options.ignore,
             )
             candidate_modules.extend(modules)
 
         return candidate_modules
 
     def is_runnable_test(self, item) -> bool:
+        if object_belongs_to_sure(item):
+            return False
+        try:
+            name = getattr(item, "__name__", None)
+        except RecursionError:
+            return False
         if isinstance(item, type):
             if not issubclass(item, unittest.TestCase):
+                return seem_to_indicate_test(name)
+            elif item == unittest.TestCase:
                 return False
-            if item == unittest.TestCase:
-                return False
+            else:
+                return True
 
         elif not isinstance(item, types.FunctionType):
             return False
 
-        name = getattr(item, "__name__", None)
         return seem_to_indicate_test(name)
 
-    def extract_members(self, candidate):
+    def extract_members(
+        self, candidate: Candidate
+    ) -> Tuple[
+        Candidate,
+        Iterable[Union[types.MethodType, types.FunctionType, unittest.TestCase, type]],
+    ]:
         all_members = [m[1] for m in inspect.getmembers(candidate)]
         members = list(filter(self.is_runnable_test, all_members))
         return candidate, members
 
-    def load_features(self, lookup_paths):
+    def load_features(self, lookup_paths: List[Union[Path, str]]) -> List[Feature]:
         features = []
-        cases = []
         candidates = self.find_candidates(lookup_paths)
         for module, executables in map(self.extract_members, candidates):
             feature = Feature(module)
-            cases.extend(feature.read_scenarios(executables))
+            feature.read_scenarios(executables)
             features.append(feature)
 
         return features
 
-    def execute(self, lookup_paths):
+    def execute(self, lookup_paths=Iterable[Union[Path, str]]) -> FeatureResultSet:
         results = []
         self.reporter.on_start()
-
+        lookup_paths = list(lookup_paths)
         for feature in self.load_features(lookup_paths):
             self.reporter.on_feature(feature)
             context = RuntimeContext(self.reporter, self.options)
@@ -116,14 +144,15 @@ class Runner(object):
                     raise ExitError(context, result)
 
             results.append(result)
+
             self.reporter.on_feature_done(feature, result)
 
         self.reporter.on_finish()
         return FeatureResultSet(results)
 
-    def run(self, *args, **kwargs):
+    def run(self, *args, **kws):
         try:
-            return self.execute(*args, **kwargs)
+            return self.execute(*args, **kws)
         except ImmediateFailure as failure:
             self.reporter.on_failure(failure.scenario, failure.result)
             return failure.result

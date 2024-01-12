@@ -415,7 +415,7 @@ def test_that_checking_each_matches():
 
 
 def test_that_raises():
-    "that(callable, with_args=[arg1], and_kwargs={'arg2': 'value'}).raises(SomeException)"
+    "that(callable, with_args=[arg1], and_kws={'arg2': 'value'}).raises(SomeException)"
     global called
 
     called = False
@@ -447,41 +447,41 @@ def test_that_raises():
     assert called
 
     called = False
-    assert that(function, with_args=[1], and_kwargs={"arg2": 2}).raises(RuntimeError)
+    assert that(function, with_args=[1], and_kws={"arg2": 2}).raises(RuntimeError)
     assert called
 
     called = False
-    assert that(function, with_args=[1], and_kwargs={"arg2": 2}).raises(
+    assert that(function, with_args=[1], and_kws={"arg2": 2}).raises(
         RuntimeError, "yeah, it failed"
     )
     assert called
 
     called = False
-    assert that(function, with_args=[1], and_kwargs={"arg2": 2}).raises(
+    assert that(function, with_args=[1], and_kws={"arg2": 2}).raises(
         "yeah, it failed"
     )
     assert called
 
     called = False
-    assert that(function, with_kwargs={"arg1": 1, "arg2": 2}).raises(RuntimeError)
+    assert that(function, with_kws={"arg1": 1, "arg2": 2}).raises(RuntimeError)
     assert called
 
     called = False
-    assert that(function, with_kwargs={"arg1": 1, "arg2": 2}).raises(
+    assert that(function, with_kws={"arg1": 1, "arg2": 2}).raises(
         RuntimeError, "yeah, it failed"
     )
     assert called
 
     called = False
-    assert that(function, with_kwargs={"arg1": 1, "arg2": 2}).raises("yeah, it failed")
+    assert that(function, with_kws={"arg1": 1, "arg2": 2}).raises("yeah, it failed")
     assert called
 
     called = False
-    assert that(function, with_kwargs={"arg1": 1, "arg2": 2}).raises(r"it fail")
+    assert that(function, with_kws={"arg1": 1, "arg2": 2}).raises(r"it fail")
     assert called
 
     called = False
-    assert that(function, with_kwargs={"arg1": 1, "arg2": 2}).raises(
+    assert that(function, with_kws={"arg1": 1, "arg2": 2}).raises(
         RuntimeError, r"it fail"
     )
     assert called

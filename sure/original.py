@@ -35,6 +35,7 @@ from collections.abc import Iterable
 from sure.core import Explanation
 from sure.core import DeepComparison
 from sure.core import itemize_length
+from sure.errors import treat_error, CallerLocation
 from sure.loader import get_file_name
 from sure.loader import get_line_number
 from sure.loader import resolve_path
@@ -96,8 +97,8 @@ class AssertionHelper(object):
     def __init__(self, src,
                  within_range=None,
                  with_args=None,
-                 with_kwargs=None,
-                 and_kwargs=None):
+                 with_kws=None,
+                 and_kws=None):
 
         self.actual = src
         self._attribute = None
@@ -116,11 +117,11 @@ class AssertionHelper(object):
             self._callable_args = list(with_args)
 
         self._callable_kw = {}
-        if isinstance(with_kwargs, dict):
-            self._callable_kw.update(with_kwargs)
+        if isinstance(with_kws, dict):
+            self._callable_kw.update(with_kws)
 
-        if isinstance(and_kwargs, dict):
-            self._callable_kw.update(and_kwargs)
+        if isinstance(and_kws, dict):
+            self._callable_kw.update(and_kws)
 
     @property
     def src(self):
@@ -144,33 +145,34 @@ class AssertionHelper(object):
         try:
             self.actual(*self._callable_args, **self._callable_kw)
         except BaseException as e:
+            e = err = treat_error(e)
             if isinstance(exc, (str, )):
                 msg = exc
-                exc = type(e)
+                exc = type(err)
 
             elif isinstance(exc, re.Pattern):
                 msg = exc
-                exc = type(e)
+                exc = type(err)
 
-            err = str(e)
-
+            caller = CallerLocation.most_recent()
             if isinstance(exc, type) and issubclass(exc, BaseException):
                 if not isinstance(e, exc):
                     raise AssertionError(
-                        '%r should raise %r, but raised %r:\nORIGINAL EXCEPTION:\n\n%s' % (
-                            self.actual, exc, e.__class__, traceback.format_exc()))
-
-                if isinstance(msg, (str, )) and msg not in err:
-                    raise AssertionError(
-                        f'{identify_caller_location(self.actual)} raised {type(e).__name__}, but the exception message does not match.\n\nACTUAL:\n{err}\n\nEXPECTATION:\n{msg}\n'
+                        f'{self.actual} should raise {exc}, but raised {e.__class__}:\nORIGINAL EXCEPTION:\n\n{traceback.format_exc()}'
                     )
 
-                elif isinstance(msg, re.Pattern) and not msg.search(err):
+                if isinstance(msg, (str, )) and msg not in str(err):
                     raise AssertionError(
-                        'When calling %r the exception message does not match. ' \
-                        'Expected to match regex: %r\n against:\n %r' % (identify_caller_location(self.actual), msg.pattern, err))
+                        f'{caller.path_and_lineno} raised {type(e).__name__}, but the exception message does not match.\n\nACTUAL:\n{str(err)}\n\nEXPECTATION:\n{msg}\n'
+                    )
 
-            elif isinstance(msg, (str, )) and msg not in err:
+                elif isinstance(msg, re.Pattern) and not msg.search(str(err)):
+                    raise AssertionError(
+                        f"When calling {repr(identify_caller_location(self.actual))} the exception message does not match. "
+                        f'Expected to match regex: {repr(msg.pattern)}\n against:\n {repr(str(err))}'
+                    )
+
+            elif isinstance(msg, (str, )) and msg not in str(err):
                 raise AssertionError(
                     'When calling %r the exception message does not match. ' \
                     'Expected: %r\n got:\n %r' % (self.actual, msg, err)
@@ -193,14 +195,14 @@ class AssertionHelper(object):
             if inspect.isfunction(self.actual):
                 _src_lineno = get_line_number(self.actual)
                 raise AssertionError(
-                    'calling function %s(%s at line: "%d") with args %r and kwargs %r did not raise %r' % (
+                    'calling function %s(%s at line: "%d") with args %r and kws %r did not raise %r' % (
                         self.actual.__name__,
                         _src_filename, _src_lineno,
                         self._callable_args,
                         self._callable_kw, exc))
             else:
                 raise AssertionError(
-                    'at %s:\ncalling %s() with args %r and kwargs %r did not raise %r' % (
+                    'at %s:\ncalling %s() with args %r and kws %r did not raise %r' % (
                         _src_filename,
                         self.actual.__name__,
                         self._callable_args,

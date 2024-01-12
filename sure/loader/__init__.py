@@ -28,15 +28,18 @@ from _frozen_importlib import ModuleSpec
 from typing import Dict, List, Optional, Tuple, Union
 from importlib.machinery import PathFinder
 from pathlib import Path
-from sure.errors import InternalRuntimeError, FileSystemError
+from sure.errors import (
+    InternalRuntimeError,
+    FileSystemError,
+    CallerLocation,
+    collapse_path,
+)
 
 from .astutil import gather_class_definitions_from_module_path
 
 __MODULES__ = {}
 __ROOTS__ = {}
 __TEST_CLASSES__ = {}
-
-__sure_package_path__ = str(Path(__file__).parent.parent)
 
 
 def get_file_name(func) -> str:
@@ -55,10 +58,6 @@ def resolve_path(path, relative_to="~") -> Path:
     )
 
 
-def collapse_path(e: Union[str, Path]) -> str:
-    return str(e).replace(os.getenv("HOME"), "~")
-
-
 def get_package(path) -> Path:
     if not isinstance(path, Path):
         path = Path(path)
@@ -66,10 +65,8 @@ def get_package(path) -> Path:
     if not path.is_dir():
         path = path.parent
 
-    counter = 0
     found = None
     while not found:
-        counter += 1
         if not path.parent.joinpath("__init__.py").exists():
             found = path
         path = path.parent
@@ -95,13 +92,14 @@ class FunMeta(object):
     @classmethod
     def from_function_or_method(cls, func):
         if not isinstance(func, (types.FunctionType, types.MethodType)):
-            raise TypeError(
-                f"get_function_or_method_metadata received an unexpected object: {func}"
-            )
+            path, lineno = get_type_definition_filename_and_firstlineno(func)
+        else:
+            path = func.__code__.co_filename
+            lineno = func.__code__.co_firstlineno
 
         return cls(
-            filename=func.__code__.co_filename,
-            line_number=func.__code__.co_firstlineno,
+            filename=path,
+            line_number=lineno,
             name=func.__name__,
         )
 
@@ -132,15 +130,10 @@ def get_type_definition_filename_and_firstlineno(type_object: type) -> Tuple[Pat
             f"{module_name} does not appear within `sys.modules'. Perhaps Sure is not being used the right way or there is a bug in the current version",
         )
     path = Path(module.__file__)
-    frames = list(
-        filter(
-            lambda fs: not fs.filename.startswith(__sure_package_path__),
-            traceback.extract_stack(inspect.currentframe()),
-        )
+    called_location = CallerLocation.most_recent()
+    classes = gather_class_definitions_from_module_path(
+        path, nearest_line=called_location.lineno
     )
-    recent_frame = frames[-1]
-    frame_lineno = recent_frame.lineno
-    classes = gather_class_definitions_from_module_path(path, nearest_line=frame_lineno)
     __TEST_CLASSES__[path] = classes
     lineno, base_class_names = classes[name]
 
@@ -151,9 +144,9 @@ class loader(object):
     @classmethod
     def load_recursive(
         cls,
-        path,
-        ignore_errors=True,
-        glob_pattern="*.py",
+        path: Union[str, Path],
+        ignore_errors: bool = True,
+        glob_pattern: str = "***.py",
         excludes: Optional[List[Union[str, Path]]] = None,
     ):
         modules = []
@@ -163,7 +156,9 @@ class loader(object):
             if fnmatch(path, glob_pattern):
                 return cls.load_python_path(path)
             else:
-                raise FileSystemError(f"{path} does not match pattern {glob_pattern:r}")
+                raise FileSystemError(
+                    f"{path} does not match pattern {repr(glob_pattern)}"
+                )
 
         base_path = Path(path).expanduser().absolute()
         for directory, _, files in os.walk(base_path):
@@ -229,3 +224,24 @@ class loader(object):
         except Exception as e:
             raise e
         return module, package_path
+
+
+def object_belongs_to_sure(object: object) -> bool:
+    """
+    :param object: an :class:`object` object
+    :returns: ``True`` if the given ``object`` passes this function heuristics to verify that the object belongs to :mod:`sure`
+    """
+    module_name = (
+        getattr(
+            object,
+            "__module__",
+            getattr(getattr(object, "__class__", object), "__module__", ""),
+        )
+        or ""
+    )
+    heuristics = [
+        lambda: module_name == "sure",
+        lambda: module_name.startswith("sure."),
+    ]
+
+    return any([heuristic() is True for heuristic in heuristics])

@@ -26,41 +26,67 @@ from pathlib import Path
 
 import click
 import coverage
-
+import threading
 import sure.reporters
 
 from sure.loader import resolve_path
 from sure.runner import Runner
 from sure.runtime import RuntimeOptions
 from sure.reporters import gather_reporter_names
-from sure.errors import ExitError, ExitFailure, InternalRuntimeError
+from sure.errors import ExitError, ExitFailure, InternalRuntimeError, treat_error
 
 
 @click.command(no_args_is_help=True)
 @click.argument("paths", nargs=-1)
 @click.option("-c", "--with-coverage", is_flag=True)
 @click.option("-s", "--special-syntax", is_flag=True)
-@click.option("-f", "--log-file", help='path to a log file. Default to SURE_LOG_FILE')
-@click.option("-l", "--log-level", type=click.Choice(['debug', 'info', 'warning', 'error']), help="default='info'")
-@click.option("-x", "--immediate", is_flag=True, help="quit test execution immediately at first failure")
+@click.option("-f", "--log-file", help="path to a log file. Default to SURE_LOG_FILE")
+@click.option(
+    "-l",
+    "--log-level",
+    type=click.Choice(["debug", "info", "warning", "error"]),
+    help="default='info'",
+)
+@click.option(
+    "-x",
+    "--immediate",
+    is_flag=True,
+    help="quit test execution immediately at first failure",
+)
 @click.option("-i", "--ignore", help="paths to ignore", multiple=True)
-@click.option("-r", "--reporter", default="feature", help='default=feature', type=click.Choice(gather_reporter_names()))
+@click.option(
+    "-r",
+    "--reporter",
+    default="feature",
+    help="default=feature",
+    type=click.Choice(gather_reporter_names()),
+)
 @click.option("--cover-branches", is_flag=True)
 @click.option("--cover-module", multiple=True, help="specify module names to cover")
-def entrypoint(paths, reporter, immediate, ignore, log_level, log_file, special_syntax, with_coverage, cover_branches, cover_module):
+def entrypoint(
+    paths,
+    reporter,
+    immediate,
+    ignore,
+    log_level,
+    log_file,
+    special_syntax,
+    with_coverage,
+    cover_branches,
+    cover_module,
+):
     if not paths:
-        paths = glob('test*/**')
+        paths = glob("test*/**")
     else:
         paths = flatten(*list(map(glob, paths)))
 
     configure_logging(log_level, log_file)
-
     coverageopts = {
-        'auto_data': True,
-        'cover_pylib': False,
-        'source': cover_module,
-        'branch': cover_branches,
-        'config_file': True,
+        "auto_data": True,
+        "cover_pylib": False,
+        "source": cover_module,
+        "branch": cover_branches,
+        "config_file": True,
     }
 
     cov = with_coverage and coverage.Coverage(**coverageopts) or None
@@ -77,7 +103,7 @@ def entrypoint(paths, reporter, immediate, ignore, log_level, log_file, special_
     try:
         result = runner.run(paths)
     except Exception as e:
-        raise InternalRuntimeError(runner.context, e)
+        raise InternalRuntimeError(runner.context, treat_error(e))
 
     if result:
         if result.is_failure:
@@ -102,14 +128,16 @@ def configure_logging(log_level: str, log_file: str):
         raise TypeError(
             f"log_level should be a string but is {log_level}({type(log_level)}) instead"
         )
-    log_level = log_level.lower() == 'none' and 'info' or log_level
+    log_level = log_level.lower() == "none" and "info" or log_level
 
     level = getattr(logging, log_level.upper())
 
     if log_file:
         log_directory = Path(log_file).parent()
         if log_directory.exists():
-            raise RuntimeError(f'the log path {log_directory} exists but is not a directory')
+            raise RuntimeError(
+                f"the log path {log_directory} exists but is not a directory"
+            )
         log_directory.mkdir(parents=True, exists_ok=True)
 
         handler = logging.FileHandler(log_file)
@@ -118,7 +146,9 @@ def configure_logging(log_level: str, log_file: str):
 
     handler.setLevel(level)
 
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
 
     handler.setFormatter(formatter)
     logging.getLogger().addHandler(handler)

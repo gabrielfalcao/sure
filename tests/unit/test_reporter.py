@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from sure import expects
 from sure.reporter import Reporter
-from sure.reporters import FeatureReporter, TestReporter
+from sure.reporters import FeatureReporter
 from sure.runner import Runner
 from sure.doubles import stub, anything
 from unittest.mock import patch
@@ -27,10 +27,9 @@ description = "tests for :class:`sure.reporter`"
 def test_reporter_from_name():
     'sure.reporter.Reporter.from_name should return presently existing "reporters"'
     expects(Reporter.from_name('feature')).to.be(FeatureReporter)
-    expects(Reporter.from_name('test')).to.be(TestReporter)
     expects(Reporter.from_name).when.called_with('dummy').to.throw(
         RuntimeError,
-        "no reporter found with name `dummy', options are: feature, test"
+        "no reporter found with name `dummy', options are: feature"
     )
 
 

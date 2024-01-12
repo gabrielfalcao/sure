@@ -15,20 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from sure import expects
-from sure.runtime import RuntimeOptions
+
+from sure.loader import collapse_path
+from sure.runtime import is_class_initializable_without_params
 
 
-description = "tests for :class:`sure.runtime.RuntimeOptions`"
+description = "tests generally heuristic functions within :mod:`sure.runtime`"
 
 
-def test_runtime_options():
-    """sure.runtime.RuntimeOptions"""
+def test_is_class_initializable_without_params():
+    class ParamFreeClass(object):
+        def __init__(self):
+            pass
 
-    expects(RuntimeOptions(0).immediate).to.be.false
-    expects(RuntimeOptions(1).immediate).to.be.true
-    expects(repr(RuntimeOptions(1))).to.equal(
-        "<RuntimeOptions immediate=True glob_pattern='**test*.py'>"
-    )
-    expects(repr(RuntimeOptions(0))).to.equal(
-        "<RuntimeOptions immediate=False glob_pattern='**test*.py'>"
-    )
+    class ParamClass(object):
+        def __init__(self, param: object):
+            self.__param__ = param
+
+    expects(is_class_initializable_without_params(ParamFreeClass)).to.not_be.false
+    expects(is_class_initializable_without_params(ParamClass)).to.not_be.true
+    expects(is_class_initializable_without_params({})).to.not_be.true

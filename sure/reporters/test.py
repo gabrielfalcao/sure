@@ -29,31 +29,31 @@ class TestReporter(Reporter):
     name = "test"
 
     def on_start(self):
-        events['on_start'].append((time.time(), ))
+        events["on_start"].append((time.time(),))
 
     def on_feature(self, feature):
-        events['on_feature'].append((time.time(), feature))
+        events["on_feature"].append((time.time(), feature.name))
 
     def on_feature_done(self, feature, result):
-        events['on_feature_done'].append((time.time(), feature, result))
+        events["on_feature_done"].append((time.time(), feature.name, result.label.lower()))
 
     def on_scenario(self, test):
-        events['on_scenario'].append((time.time(), test))
+        events["on_scenario"].append((time.time(), test.name))
 
     def on_scenario_done(self, test, result):
-        events['on_scenario_done'].append((time.time(), test, result))
+        events["on_scenario_done"].append((time.time(), test.name, result.label.lower()))
 
     def on_failure(self, test, result):
-        events['on_failure'].append((time.time(), test, result))
+        events["on_failure"].append((time.time(), test.name, result.label.lower()))
 
     def on_success(self, test):
-        events['on_test'].append((time.time(), test))
+        events["on_test"].append((time.time(), test.name))
 
     def on_error(self, test, result):
-        events['on_error'].append((time.time(), test, result))
+        events["on_error"].append((time.time(), test.name, result.label.lower()))
 
     def on_internal_runtime_error(self, context, error):
-        events['on_internal_runtime_error'].append((time.time(), context, error))
+        events["on_internal_runtime_error"].append((time.time(), context, error))
 
     def on_finish(self):
-        events['on_finish'].append((time.time(), ))
+        events["on_finish"].append((time.time(),))

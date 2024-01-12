@@ -30,7 +30,7 @@ from sure.runtime import RuntimeContext
 from sure.runtime import RuntimeOptions
 from sure.runtime import BaseResult
 from sure.runtime import Container
-from sure.runtime import PreparedTestSuiteContainer
+from sure.runtime import ScenarioArrangement
 from sure.runtime import Feature
 from sure.runtime import Scenario
 from sure.runtime import ExceptionManager

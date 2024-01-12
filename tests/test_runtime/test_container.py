@@ -17,8 +17,8 @@
 from sure import expects
 from collections import OrderedDict
 from sure.loader import collapse_path
-from sure.runtime import Container, TestLocation
-from sure.doubles.dummies import Dummy
+from sure.runtime import Container, TestLocation, Scenario
+from sure.doubles import Dummy, stub
 
 
 description = "tests for :class:`sure.runtime.Container`"
@@ -30,14 +30,17 @@ def test_container_unit():
     def dynamic():
         return "balance"
 
-    module_dummy = Dummy('module_or_instance')
-    container = Container('test', dynamic, module_dummy)
+    module_dummy = Dummy("module_or_instance")
+    scenario_stub = stub(Scenario, name="Scenario Stub")
+    container = Container(
+        "test", dynamic, scenario=scenario_stub, module_or_instance=module_dummy
+    )
 
-    expects(container.unit()).to.equal('balance')
-    expects(container.name).to.equal('test')
+    expects(container.unit()).to.equal("balance")
+    expects(container.name).to.equal("test")
     expects(container.runnable).to.equal(dynamic)
     expects(container.module_or_instance).to.equal(module_dummy)
     expects(container.location).to.be.a(TestLocation)
     expects(repr(container)).to.equal(
-        f'<Container of {dynamic} at {collapse_path(__file__)}:30>'
+        f"<Container of {dynamic} at {collapse_path(__file__)}:30>"
     )

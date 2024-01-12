@@ -14,21 +14,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"unit tests for :mod:`sure.errors`"
+
 from sure import expects
-from sure.runtime import RuntimeOptions
+from sure.errors import CallerLocation
+from sure.loader import collapse_path
 
 
-description = "tests for :class:`sure.runtime.RuntimeOptions`"
+def test_caller_location_most_recent_path_and_lineno():
+    "sure.errors.Callerlocation.most_recent().path_and_lineno should point to the path and line number"
 
-
-def test_runtime_options():
-    """sure.runtime.RuntimeOptions"""
-
-    expects(RuntimeOptions(0).immediate).to.be.false
-    expects(RuntimeOptions(1).immediate).to.be.true
-    expects(repr(RuntimeOptions(1))).to.equal(
-        "<RuntimeOptions immediate=True glob_pattern='**test*.py'>"
-    )
-    expects(repr(RuntimeOptions(0))).to.equal(
-        "<RuntimeOptions immediate=False glob_pattern='**test*.py'>"
-    )
+    caller_location = CallerLocation.most_recent()
+    expects(caller_location.path_and_lineno).to.equal(f"{collapse_path(__file__)}:27")

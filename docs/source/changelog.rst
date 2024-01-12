@@ -7,10 +7,16 @@ This project adheres to `Semantic Versioning <http://semver.org/>`__.
 [v3.0.0]
 --------
 
--  Presents better documentation
--  Drops support to Python 2 obliterates the ``sure.compat`` module
--  Introduces the modules ``sure.doubles``, ``sure.doubles.fakes``,
-   ``sure.doubles.stubs`` and ``sure.doubles.dummies``
+- Presents better documentation
+- Drops support to Python 2 obliterates the ``sure.compat`` module
+- Introduces the modules:
+  - :mod:`sure.doubles`
+    - :mod:`sure.doubles.fakes`
+    - :mod:`sure.doubles.stubs`
+    - :mod:`sure.doubles.dummies`
+- Introduces the classes:
+  - :class:`sure.doubles.dummies.Anything` (moved from ``sure.Anything``)
+  - :class:`sure.doubles.dummies.AnythingOfType`
 -  Sure’s featured synctactic-sugar of injecting/monkey-patching
    ``.should``, ``.should_not``, et cetera methods into
    :class:``object`` and its subclasses is disabled by default and
@@ -21,7 +27,9 @@ This project adheres to `Semantic Versioning <http://semver.org/>`__.
    an instance of :class:``sure.original.AssertionHelper`` rather
    than an alias to the class.
 -  ``AssertionHelper.every_one_is()`` renamed to ``AssertionHelper.every_item_is()``
-
+-  Renames :class:`sure.AssertionBuilder` constructor parameters:
+   - ``with_kwargs`` to ``with_kws``
+   - ``and_kwargs`` to ``and_kws``
 
 [v2.0.0]
 --------

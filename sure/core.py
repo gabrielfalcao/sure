@@ -233,13 +233,13 @@ that complex or nested datastructures, such as :external+python:ref:`mappings <m
         safe_X, safe_Y = safe_format_repr(X), safe_format_repr(Y)
 
         # maintaining backwards compatibility between error messages
-        kwargs = {}
+        kws = {}
         if self.is_simple(X) and self.is_simple(Y):
-            kwargs['msg_format'] = 'X{{0}} is {0!r} whereas Y{{1}} is {1!r}'.format(safe_X, safe_Y)
+            kws['msg_format'] = 'X{{0}} is {0!r} whereas Y{{1}} is {1!r}'.format(safe_X, safe_Y)
         elif type(X) is not type(Y):
-            kwargs['msg_format'] = 'X{{0}} is a {0} and Y{{1}} is a {1} instead'.format(
+            kws['msg_format'] = 'X{{0}} is a {0} and Y{{1}} is a {1} instead'.format(
                 type(X).__name__, type(Y).__name__)
-        exp = self.compare_generic(X, Y, **kwargs)
+        exp = self.compare_generic(X, Y, **kws)
 
         if isinstance(exp, Explanation):
             original_X, original_Y = c.parent.operands

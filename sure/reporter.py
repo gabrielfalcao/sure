@@ -248,7 +248,9 @@ class Reporter(object, metaclass=MetaReporter):
         ```
         """
         if not isinstance(name, str):
-            raise TypeError(f'name should be a {str.__name__} but got the {type(name).__name__} {name} instead')
+            raise TypeError(
+                f"name should be a {str.__name__} but got the {type(name).__name__} {name} instead"
+            )
 
         found = get_reporter(name)
         if not found:

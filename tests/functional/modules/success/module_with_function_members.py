@@ -14,21 +14,28 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from sure import expects
-from sure.runtime import RuntimeOptions
+import unittest
 
 
-description = "tests for :class:`sure.runtime.RuntimeOptions`"
+def test_function_A():
+    pass
 
 
-def test_runtime_options():
-    """sure.runtime.RuntimeOptions"""
+def test_function_B():
+    pass
 
-    expects(RuntimeOptions(0).immediate).to.be.false
-    expects(RuntimeOptions(1).immediate).to.be.true
-    expects(repr(RuntimeOptions(1))).to.equal(
-        "<RuntimeOptions immediate=True glob_pattern='**test*.py'>"
-    )
-    expects(repr(RuntimeOptions(0))).to.equal(
-        "<RuntimeOptions immediate=False glob_pattern='**test*.py'>"
-    )
+
+def test_function_C():
+    pass
+
+
+def test_function_X():
+    pass
+
+
+def test_function_Y():
+    pass
+
+
+def test_function_Z():
+    pass

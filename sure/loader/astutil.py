@@ -23,15 +23,14 @@ from pathlib import Path
 
 def is_classdef(node: ast.stmt) -> bool:
     """
-:param node: a :class:`node <ast.AST>` instance
-:returns: ``True`` if the given :class:`node <ast.AST>` is a :class:`ast.ClassDef`
+    :param node: a :class:`node <ast.AST>` instance
+    :returns: ``True`` if the given :class:`node <ast.AST>` is a :class:`ast.ClassDef`
     """
     return isinstance(node, ast.ClassDef)
 
 
 def resolve_base_names(bases: List[ast.stmt]) -> Tuple[str]:
-    """returns a tuple with the names of base classes of an :class:`node <ast.AST>`
-    """
+    """returns a tuple with the names of base classes of an :class:`node <ast.AST>`"""
     names = []
     for base in bases:
         if isinstance(base, ast.Name):
@@ -40,12 +39,13 @@ def resolve_base_names(bases: List[ast.stmt]) -> Tuple[str]:
         if isinstance(base, ast.Attribute):
             names.append(f"{base.value.id}.{base.attr}")
             continue
-        raise NotImplementedError(f"{base} of type {type(base)} not yet supported")
 
     return tuple(names)
 
 
-def gather_class_definitions_node(node: Union[ast.stmt, str], classes: dict, nearest_line: Optional[int]=None) -> Dict[str, Tuple[int, Tuple[str]]]:
+def gather_class_definitions_node(
+    node: Union[ast.stmt, str], classes: dict, nearest_line: Optional[int] = None
+) -> Dict[str, Tuple[int, Tuple[str]]]:
     """Recursively scans all class definitions of an :class:`node <ast.AST>`
 
     Primarily designed to find nested :class:`unittest.TestCase` classes.
@@ -67,13 +67,15 @@ def gather_class_definitions_node(node: Union[ast.stmt, str], classes: dict, nea
     return classes
 
 
-def gather_class_definitions_from_module_path(path: Path, nearest_line: Optional[int]=None) -> Dict[str, Tuple[int, Tuple[str]]]:
+def gather_class_definitions_from_module_path(
+    path: Path, nearest_line: Optional[int] = None
+) -> Dict[str, Tuple[int, Tuple[str]]]:
     """parses the Python file at the given path and returns a mapping
     of class names to tuples indicating the line number in which the
     class is defined and a tuple with the names of its base classes.
     """
 
-    with path.open() as f:
+    with Path(path).open() as f:
         node = ast.parse(f.read())
 
     return gather_class_definitions_node(node, {}, nearest_line=nearest_line)

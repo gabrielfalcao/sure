@@ -14,15 +14,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 """this module tests some aspects of attempting to use the
 :ref:`Special Syntax` of :mod:`sure` with that feature disabled
-
-This module SHALL be tested *with* the command-line flags ``--reporter=test`` and **without** the command-line flags ``--special-syntax``
 """
 
-from sure import expect, that, SpecialSyntaxDisabledError
-from sure.reporters.test import events
+from sure import expects, SpecialSyntaxDisabledError
 
 description = "Special Syntax Disabled"
 
@@ -34,7 +30,7 @@ def try_special_syntax():
 def test_report_special_syntax_disabled():
     "SpecialSyntaxDisabledError should be raised when its use is incorrect"
 
-    expect(try_special_syntax).when.called.to.have.raised(
+    expects(try_special_syntax).when.called.to.have.raised(
         SpecialSyntaxDisabledError,
-        "test_special_syntax_disabled.py:31"
+        "test_special_syntax_disabled.py:33"
     )

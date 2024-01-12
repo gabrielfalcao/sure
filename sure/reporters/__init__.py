@@ -17,4 +17,3 @@
 
 from ..meta import get_reporter, gather_reporter_names
 from .feature import FeatureReporter
-from .test import TestReporter

@@ -69,10 +69,10 @@ def test_2_within_0a2():
         expect(1).should_not.be.within(0, 2)
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw("expected 1 to be within 2 and 4")
+    expect(opposite).when.called.to.throw("expects 1 to be within 2 and 4")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw("expected 1 to NOT be within 0 and 2")
+    expect(opposite_not).when.called.to.throw("expects 1 to NOT be within 0 and 2")
 
 
 def test_true_to_be_ok():
@@ -88,10 +88,10 @@ def test_true_to_be_ok():
         expect(True).should_not.be.ok
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw("expected `False' to be `True'")
+    expect(opposite).when.called.to.throw("expects `False' to be `True'")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw("expected `True' to be `False'")
+    expect(opposite_not).when.called.to.throw("expects `True' to be `False'")
 
 
 def test_falsy():
@@ -107,10 +107,10 @@ def test_falsy():
         expect(False).should_not.be.falsy
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw("expected `True' to be `False'")
+    expect(opposite).when.called.to.throw("expects `True' to be `False'")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw("expected `False' to be `True'")
+    expect(opposite_not).when.called.to.throw("expects `False' to be `True'")
 
 
 def test_none():
@@ -126,10 +126,10 @@ def test_none():
         expect(None).should_not.be.none
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw("expected `cool' to be None")
+    expect(opposite).when.called.to.throw("expects `cool' to be None")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw("expected `None' to not be None")
+    expect(opposite_not).when.called.to.throw("expects `None' to not be None")
 
 
 def test_should_be_a():
@@ -146,10 +146,10 @@ def test_should_be_a():
         expect([]).should_not.be.a('list')
 
     expect(opposite).when.called.to.throw(AssertionError)
-    expect(opposite).when.called.to.throw("expected `1' to not be an `int'")
+    expect(opposite).when.called.to.throw("expects `1' to not be an `int'")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw("expected `[]' to not be a `list'")
+    expect(opposite_not).when.called.to.throw("expects `[]' to not be a `list'")
 
 
 def test_should_be_callable():
@@ -166,11 +166,11 @@ def test_should_be_callable():
 
     expect(opposite).when.called.to.throw(AssertionError)
     expect(opposite).when.called.to.throw(
-        "expected 'string' to be callable")
+        "expects 'string' to be callable")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
-        f"expected {repr(opposite)} to not be callable"
+        f"expects {repr(opposite)} to not be callable"
     )
 
 
@@ -188,11 +188,11 @@ def test_iterable_should_be_empty():
 
     expect(opposite).when.called.to.throw(AssertionError)
     expect(opposite).when.called.to.throw(
-        "expected '[3, 2, 1]' to be empty but contains 3 items"
+        "expects '[3, 2, 1]' to be empty but contains 3 items"
     )
 
     expect(opposite_not).when.called.to.throw(AssertionError)
-    expect(opposite_not).when.called.to.throw("expected `{}' to not be empty")
+    expect(opposite_not).when.called.to.throw("expects `{}' to not be empty")
 
 
 def test_iterable_should_have_length_of():
@@ -231,11 +231,11 @@ def test_greater_than():
 
     expect(opposite).when.called.to.throw(AssertionError)
     expect(opposite).when.called.to.throw(
-        "expected `4' to be greater than `5'")
+        "expects `4' to be greater than `5'")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
-        "expected `2' to not be greater than `1'")
+        "expects `2' to not be greater than `1'")
 
 
 def test_greater_than_or_equal_to():
@@ -252,11 +252,11 @@ def test_greater_than_or_equal_to():
 
     expect(opposite).when.called.to.throw(AssertionError)
     expect(opposite).when.called.to.throw(
-        "expected `4' to be greater than or equal to `5'")
+        "expects `4' to be greater than or equal to `5'")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
-        "expected `2' to not be greater than or equal to `1'")
+        "expects `2' to not be greater than or equal to `1'")
 
 
 def test_lower_than():
@@ -273,11 +273,11 @@ def test_lower_than():
 
     expect(opposite).when.called.to.throw(AssertionError)
     expect(opposite).when.called.to.throw(
-        "expected `5' to be lower than `4'")
+        "expects `5' to be lower than `4'")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
-        "expected `1' to not be lower than `2'")
+        "expects `1' to not be lower than `2'")
 
 
 def test_lower_than_or_equal_to():
@@ -294,11 +294,11 @@ def test_lower_than_or_equal_to():
 
     expect(opposite).when.called.to.throw(AssertionError)
     expect(opposite).when.called.to.throw(
-        "expected `5' to be lower than or equal to `4'")
+        "expects `5' to be lower than or equal to `4'")
 
     expect(opposite_not).when.called.to.throw(AssertionError)
     expect(opposite_not).when.called.to.throw(
-        "expected `1' to not be lower than or equal to `2'")
+        "expects `1' to not be lower than or equal to `2'")
 
 
 def test_assertion_builder_be__call__():

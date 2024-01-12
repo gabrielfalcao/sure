@@ -28,19 +28,28 @@ def stub(base_class=None, metaclass=None, **attributes):
     The new class inherits from ``base_class`` and defaults to ``object``
     Use this to mock rather than stub in instances where such approach seems reasonable.
     """
+    if not isinstance(metaclass, type):
+        attributes['metaclass'] = metaclass
+
+    if not isinstance(base_class, type):
+        attributes['base_class'] = base_class
+        base_class = object
     if base_class is None:
         base_class = object
+
+    stub_name = f"{base_class.__name__}Stub"
 
     members = {
         "__init__": lambda self: None,
         "__new__": lambda *args, **kw: object.__new__(
             *args, *kw
         ),
+        "__repr__": lambda self: f"<{stub_name}>",
     }
     kwds = {}
     if metaclass is not None:
-        kwds["metaclass"] =  metaclass
+        kwds["metaclass"] = metaclass
         members["__metaclass__"] = metaclass  # TODO: remove this line
 
     members.update(attributes)
-    return type(f"{base_class.__name__}Stub", (base_class,), members, **kwds)()
+    return type(stub_name, (base_class,), members, **kwds)()

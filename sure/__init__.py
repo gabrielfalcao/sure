@@ -32,7 +32,7 @@ from datetime import datetime
 from sure.original import AssertionHelper
 from sure.original import Iterable
 
-from sure import runtime
+from sure import registry
 from sure.core import DeepComparison
 from sure.core import Explanation
 from sure.errors import SpecialSyntaxDisabledError
@@ -45,6 +45,7 @@ from sure.doubles.dummies import anything
 from sure.loader import get_file_name
 from sure.loader import get_line_number
 from sure.loader import resolve_path
+from sure.loader import CallerLocation
 from sure.version import version
 from sure.special import is_cpython, patchable_builtin
 from sure.registry import context as _registry
@@ -80,6 +81,7 @@ class StagingArea(dict):
 
     Staging areas can contain specific actions defined through the :func:`~sure.action_for` :external+python:term:`decorator`.
     """
+
     __asset_names__ = None
     __sure_actions_ran__ = None
     __sure_action_results__ = None
@@ -92,12 +94,6 @@ class StagingArea(dict):
         self.__sure_providers_of__ = {}
         return super(StagingArea, self).__init__(*args, **kw)
 
-    def __setattr__(self, attr, value):
-        if attr not in dir(StagingArea):
-            self[attr] = value
-            self.__asset_names__.append(attr)
-        return super(StagingArea, self).__setattr__(attr, value)
-
     def __getattr__(self, attr):
         try:
             return super(StagingArea, self).__getattribute__(attr)
@@ -109,12 +105,18 @@ class StagingArea(dict):
                     f"The presently available attributes in this context are: {repr(self.__asset_names__)}"
                 )
 
+    def __setattr__(self, attr, value):
+        if attr not in dir(StagingArea):
+            self[attr] = value
+            self.__asset_names__.append(attr)
+        return super(StagingArea, self).__setattr__(attr, value)
 
-def ensure_type(caller_name, cast, actual):  # TODO: test
+
+def ensure_type(caller_name, cast, actual):
     try:
         return cast(actual)
     except TypeError:
-        raise InternalRuntimeError(f"{caller_name} expected {cast} but received {actual} which is {type(actual)} instead")
+        raise InternalRuntimeError(f"{caller_name} expects {cast} but received {actual} which is {type(actual)} instead")
 
 
 class CallBack(object):
@@ -124,10 +126,10 @@ class CallBack(object):
         "take at least 1 parameter, which is the test context"
     )
 
-    def __init__(self, cb, args, kwargs):
+    def __init__(self, cb, args, kws):
         self.callback = cb
         self.args = args or []
-        self.kwargs = kwargs or {}
+        self.kws = kws or {}
         self.callback_name = cb.__name__
         self.callback_filename = resolve_path(get_file_name(cb), os.getcwd())
         self.callback_lineno = get_line_number(cb) + 1
@@ -136,7 +138,7 @@ class CallBack(object):
         args = list(optional_args)
         args.extend(self.args)
         try:
-            return self.callback(*args, **self.kwargs)
+            return self.callback(*args, **self.kws)
         except Exception:
             exc_klass, exc_value, tb = sys.exc_info()
             err = traceback.format_exc().splitlines()[-1]
@@ -196,13 +198,13 @@ The code below takes the :ref:`basic usage of psycopg2 module
       context.cursor = context.conn.cursor()
       # drop table in case that already exists
       context.cursor.execute(
-          "DROP TABLE silly;"
+          "DROP TABLE test;"
       )
       context.cursor.execute(
-          "CREATE TABLE silly (id serial PRIMARY KEY, num integer, data varchar);"
+          "CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar);"
       )
       context.cursor.execute(
-          "INSERT INTO silly (num, data) VALUES (%s, %s)", (100, "abc'def")
+          "INSERT INTO test (num, data) VALUES (%s, %s)", (100, "abc'def")
       )
 
 
@@ -213,13 +215,13 @@ The code below takes the :ref:`basic usage of psycopg2 module
 
   @scenario([setup_database], [teardown_database])
   def test_querying_for_one_column(context):
-      context.cursor.execute("SELECT num FROM silly;")
+      context.cursor.execute("SELECT num FROM test;")
       row = context.cur.fetchone()
       expects(row).to.equal((100, ))
 
   @scenario([setup_database], [teardown_database])
   def test_querying_for_two_columns(context):
-      context.cursor.execute("SELECT num, data FROM silly;")
+      context.cursor.execute("SELECT num, data FROM test;")
       row = context.cur.fetchone()
       expects(row).to.equal((100, "abc'def"))
 
@@ -390,7 +392,7 @@ def action_for(context, provides=None, depends_on=None):
 
         context.__sure_providers_of__[attr].append(func)
 
-    def register_dynamic_providers(func, attr, args, kwargs):
+    def register_dynamic_providers(func, attr, args, kws):
         found = re.search(r"^[{](\d+)[}]$", attr)
         if not found:
             return  # ignore dynamically declared provides
@@ -410,7 +412,7 @@ def action_for(context, provides=None, depends_on=None):
 
         context.__sure_providers_of__[attr].append(func)
 
-    def ensure_providers(func, attr, args, kwargs):
+    def ensure_providers(func, attr, args, kws):
         found = re.search(r"^[{](\d+)[}]$", attr)
         if found:
             index = int(found.group(1))
@@ -490,9 +492,9 @@ def action_for(context, provides=None, depends_on=None):
 
 def work_in_progress(func):
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kws):
         _registry["is_running"] = True
-        ret = func(*args, **kwargs)
+        ret = func(*args, **kws)
         _registry["is_running"] = False
         return ret
 
@@ -500,7 +502,7 @@ def work_in_progress(func):
 
 
 def assertionmethod(func):
-    runtime.KNOWN_ASSERTIONS.append(func.__name__)
+    registry.KNOWN_ASSERTIONS.append(func.__name__)
 
     @wraps(func)
     def wrapper(self, *args, **kw):
@@ -524,41 +526,19 @@ def assertionmethod(func):
 
 
 def assertionproperty(func):
-    runtime.KNOWN_ASSERTIONS.append(func.__name__)
+    registry.KNOWN_ASSERTIONS.append(func.__name__)
     return builtins.property(assertionmethod(func))
-
-
-POSITIVES = [
-    "do",
-    "does",
-    "must",
-    "should",
-    "when",
-]
-
-NEGATIVES = [
-    "do_not",
-    "dont",
-    "does_not",
-    "doesnt",
-    "must_not",
-    "mustnt",
-    "should_not",
-    "shouldnt",
-]
-
-runtime.KNOWN_ASSERTIONS.extend(POSITIVES)
-runtime.KNOWN_ASSERTIONS.extend(NEGATIVES)
 
 
 class AssertionBuilder(object):
     def __init__(
-        self, name=None,
+        self,
+        name=None,
         negative=False,
         actual=None,
         with_args=None,
-        with_kwargs=None,
-        and_kwargs=None
+        with_kws=None,
+        and_kws=None
     ):
         self._name = name
         self.negative = negative
@@ -569,18 +549,21 @@ class AssertionBuilder(object):
         if isinstance(with_args, (list, tuple)):
             self._callable_args = list(with_args)
 
-        if isinstance(with_kwargs, dict):
-            self._callable_kw.update(with_kwargs)
+        if isinstance(with_kws, dict):
+            self._callable_kw.update(with_kws)
 
-        if isinstance(and_kwargs, dict):
-            self._callable_kw.update(and_kwargs)
+        if isinstance(and_kws, dict):
+            self._callable_kw.update(and_kws)
+
+        self.__caller__ = None
 
     def __call__(self,
                  actual,
                  with_args=None,
-                 with_kwargs=None,
-                 and_kwargs=None,
+                 with_kws=None,
+                 and_kws=None,
                  *args, **kw):
+        self.__caller__ = CallerLocation.most_recent()
 
         if isinstance(actual, self.__class__):
             self.actual = actual.actual
@@ -594,11 +577,11 @@ class AssertionBuilder(object):
         if isinstance(with_args, (list, tuple)):
             self._callable_args = list(with_args)
 
-        if isinstance(with_kwargs, dict):
-            self._callable_kw.update(with_kwargs)
+        if isinstance(with_kws, dict):
+            self._callable_kw.update(with_kws)
 
-        if isinstance(and_kwargs, dict):
-            self._callable_kw.update(and_kwargs)
+        if isinstance(and_kws, dict):
+            self._callable_kw.update(and_kws)
 
         self._that = AssertionHelper(self.actual, *args, **kw)
         return self
@@ -614,8 +597,8 @@ class AssertionBuilder(object):
                 attr,
                 negative=negative,
                 actual=self.actual,
-                callable_args=self._callable_args,
-                callable_kw=self._callable_kw,
+                with_args=self._callable_args,
+                with_kws=self._callable_kw,
             )
 
         try:
@@ -631,12 +614,12 @@ class AssertionBuilder(object):
                 self.actual
             ):
                 raise AssertionError(
-                    f"expected {repr(self.actual)} to not be callable"
+                    f"{self.__caller__.display_info} expects {repr(self.actual)} to not be callable"
                 )
         else:
             if not callable(self.actual):
                 raise AssertionError(
-                    f"expected {repr(self.actual)} to be callable"
+                    f"{self.__caller__.display_info} expects {repr(self.actual)} to be callable"
                 )
 
         return True
@@ -685,7 +668,13 @@ class AssertionBuilder(object):
     def with_value(self):
         return self
 
+    @assertionmethod
     def property(self, name):
+        """performs an assertion of whether the ``source`` object has an
+        instance property with ``name``
+
+        :param name: a string
+        """
         has_it = hasattr(self.actual, name)
         if self.negative:
             if not not has_it:
@@ -702,6 +691,7 @@ class AssertionBuilder(object):
 
         return expect(getattr(self.actual, name))
 
+    @assertionmethod
     def key(self, name):
         actual = self.actual
         has_it = name in actual
@@ -728,14 +718,14 @@ class AssertionBuilder(object):
         if self.negative:
             if length == 0:
                 raise AssertionError(
-                    f"expected `{representation}' to not be empty"
+                    f"{self.__caller__.display_info} expects `{representation}' to not be empty"
                 )
             else:
                 return True
         else:
             if length > 0:
                 raise AssertionError(
-                    f"expected '{representation}' to be empty but contains {length} items"
+                    f"{self.__caller__.display_info} expects '{representation}' to be empty but contains {length} items"
                 )
             else:
                 return True
@@ -744,10 +734,10 @@ class AssertionBuilder(object):
     def ok(self):
         if self.negative:
             if bool(self.actual):
-                raise AssertionError(f"expected `{self.actual}' to be `{False}'")
+                raise AssertionError(f"{self.__caller__.display_info} expects `{self.actual}' to be `{False}'")
         else:
             if not bool(self.actual):
-                raise AssertionError(f"expected `{self.actual}' to be `{True}'")
+                raise AssertionError(f"{self.__caller__.display_info} expects `{self.actual}' to be `{True}'")
 
         return True
 
@@ -758,10 +748,10 @@ class AssertionBuilder(object):
     def not_ok(self):
         if self.negative:
             if not bool(self.actual):
-                raise AssertionError(f"expected `{self.actual}' to be `{True}'")
+                raise AssertionError(f"{self.__caller__.display_info} expects `{self.actual}' to be `{True}'")
         else:
             if bool(self.actual):
-                raise AssertionError(f"expected `{self.actual}' to be `{False}'")
+                raise AssertionError(f"{self.__caller__.display_info} expects `{self.actual}' to be `{False}'")
 
         return True
 
@@ -772,10 +762,10 @@ class AssertionBuilder(object):
     def none(self):
         if self.negative:
             if self.actual is None:
-                raise AssertionError(f"expected `{self.actual}' to not be None")
+                raise AssertionError(f"{self.__caller__.display_info} expects `{self.actual}' to not be None")
         else:
             if self.actual is not None:
-                raise AssertionError(f"expected `{self.actual}' to be None")
+                raise AssertionError(f"{self.__caller__.display_info} expects `{self.actual}' to be None")
 
         return True
 
@@ -820,16 +810,14 @@ class AssertionBuilder(object):
         if self.negative:
             if is_within_range:
                 raise AssertionError(
-                    "expected {0} to NOT be within {1} and {2}".format(
-                        subject, start, end
-                    )
+                    f"{self.__caller__.display_info} expects {subject} to NOT be within {start} and {end}"
                 )
             return not is_within_range
 
         else:
             if not is_within_range:
                 raise AssertionError(
-                    "expected {0} to be within {1} and {2}".format(subject, start, end)
+                    f"{self.__caller__.display_info} expects {subject} to be within {start} and {end}"
                 )
             return is_within_range
 
@@ -958,13 +946,12 @@ class AssertionBuilder(object):
             if isinstance(
                 self.actual, klass
             ):
-                raise AssertionError("expected `{0}' to not be a{1} `{2}'".format(self.actual, suffix, class_name))
+                raise AssertionError(f"expects `{self.actual}' to not be a{suffix} `{class_name}'")
 
         else:
             if not isinstance(self.actual, klass):
-                raise AssertionError("expected `{0}' to be a{1} `{2}'".format(
-                    self.actual, suffix, class_name
-                ))
+                raise AssertionError(f"expects `{self.actual}' to be a{suffix} `{class_name}'")
+
         return True
 
     an = a
@@ -972,13 +959,13 @@ class AssertionBuilder(object):
     @assertionmethod
     def greater_than(self, expectation):
         if self.negative:
-            msg = "expected `{0}' to not be greater than `{1}'".format(self.actual, expectation)
+            msg = f"{self.__caller__.display_info} expects `{self.actual}' to not be greater than `{expectation}'"
 
             if self.actual > expectation:
                 raise AssertionError(msg)
 
         else:
-            msg = "expected `{0}' to be greater than `{1}'".format(self.actual, expectation)
+            msg = f"{self.__caller__.display_info} expects `{self.actual}' to be greater than `{expectation}'"
             if not self.actual > expectation:
                 raise AssertionError(msg)
 
@@ -988,12 +975,12 @@ class AssertionBuilder(object):
     def greater_than_or_equal_to(self, expectation):
         if self.negative:
             if self.actual >= expectation:
-                raise AssertionError(f"expected `{self.actual}' to not be greater than or equal to `{expectation}'")
+                raise AssertionError(f"{self.__caller__.display_info} expects `{self.actual}' to not be greater than or equal to `{expectation}'")
 
         else:
             if not self.actual >= expectation:
                 raise AssertionError(
-                    f"expected `{self.actual}' to be greater than or equal to `{expectation}'"
+                    f"{self.__caller__.display_info} expects `{self.actual}' to be greater than or equal to `{expectation}'"
                 )
 
         return True
@@ -1002,11 +989,11 @@ class AssertionBuilder(object):
     def lower_than(self, expectation):
         if self.negative:
             if self.actual < expectation:
-                raise AssertionError(f"expected `{self.actual}' to not be lower than `{expectation}'")
+                raise AssertionError(f"{self.__caller__.display_info} expects `{self.actual}' to not be lower than `{expectation}'")
 
         else:
             if not self.actual < expectation:
-                raise AssertionError(f"expected `{self.actual}' to be lower than `{expectation}'")
+                raise AssertionError(f"{self.__caller__.display_info} expects `{self.actual}' to be lower than `{expectation}'")
 
         return True
 
@@ -1015,13 +1002,13 @@ class AssertionBuilder(object):
         if self.negative:
             if self.actual <= expectation:
                 raise AssertionError(
-                    f"expected `{self.actual}' to not be lower than or equal to `{expectation}'"
+                    f"{self.__caller__.display_info} expects `{self.actual}' to not be lower than or equal to `{expectation}'"
                 )
 
         else:
             if not self.actual <= expectation:
                 raise AssertionError(
-                    f"expected `{self.actual}' to be lower than or equal to `{expectation}'"
+                    f"{self.__caller__.display_info} expects `{self.actual}' to be lower than or equal to `{expectation}'"
                 )
 
         return True
@@ -1067,12 +1054,12 @@ class AssertionBuilder(object):
     @assertionmethod
     def throw(self, *args, **kw):
         _that = AssertionHelper(
-            self.actual, with_args=self._callable_args, and_kwargs=self._callable_kw
+            self.actual, with_args=self._callable_args, and_kws=self._callable_kw
         )
 
         if self.negative:
             msg = (
-                "{0} called with args {1} and kwargs {2} should "
+                "{0} called with args {1} and keyword-args {2} should "
                 "not raise {3} but raised {4}"
             )
 
@@ -1233,16 +1220,16 @@ keyword arguments passed to the context-manager.
 
     :param msg: :class:`str` passed to the :exc:`AssertionError`
     :param args: positional arguments used to format the assertion error message
-    :param kwargs: keyword arguments used to format the assertion error message
+    :param kws: keyword arguments used to format the assertion error message
 
-    The `args'` and '`kwargs'` are used to format
+    The `args'` and '`kws'` are used to format
     the message using :meth:`str.format`.
     """
 
-    def __init__(self, msg, *args, **kwargs):
+    def __init__(self, msg, *args, **kws):
         self.msg = msg
         self.args = args
-        self.kwargs = kwargs
+        self.kws = kws
 
     def __enter__(self):
         return self
@@ -1254,7 +1241,7 @@ keyword arguments passed to the context-manager.
         if exc_type is not AssertionError:
             return
 
-        msg = self.msg.format(*self.args, **self.kwargs)
+        msg = self.msg.format(*self.args, **self.kws)
         raise AssertionError(msg)
 
 
@@ -1395,6 +1382,29 @@ def enable_special_syntax():
         none[name] = build_assertion_property(name, is_negative=not False, prop=False)
 
     _registry['special_syntax_enabled'] = not False
+
+
+POSITIVES = [
+    "do",
+    "does",
+    "must",
+    "should",
+    "when",
+]
+
+NEGATIVES = [
+    "do_not",
+    "dont",
+    "does_not",
+    "doesnt",
+    "must_not",
+    "mustnt",
+    "should_not",
+    "shouldnt",
+]
+
+registry.KNOWN_ASSERTIONS.extend(POSITIVES)
+registry.KNOWN_ASSERTIONS.extend(NEGATIVES)
 
 
 def is_special_syntax_enabled():

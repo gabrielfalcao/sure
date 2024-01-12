@@ -55,13 +55,13 @@ docs: html-docs
 	$(OPEN_COMMAND) docs/build/html/index.html
 
 test tests:
-	@$(VENV)/bin/pytest --cov=sure --ignore tests/crashes tests
+	@$(VENV)/bin/pytest --cov=sure tests
 
 # runs main command-line tool
 run: | $(LIBEXEC_PATH)
-	$(LIBEXEC_PATH) --reporter=test tests/crashes || true
+	$(LIBEXEC_PATH) tests/crashes
 	$(LIBEXEC_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure.core --cover-module=sure tests/runner
-	$(LIBEXEC_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure --immediate --cover-module=sure --ignore=crashes tests
+	$(LIBEXEC_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure --immediate --cover-module=sure --ignore tests/crashes tests
 
 push-release: dist  # pushes distribution tarballs of the current version
 	$(VENV)/bin/twine upload dist/*.tar.gz

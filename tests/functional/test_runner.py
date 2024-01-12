@@ -108,25 +108,26 @@ def test_runner_load_features_from_module_path_recursively():
     expects(featureA).to.equal
     expects(featureA).to.be.a(Feature)
     expects(featureA).to.have.property("name").being.equal(
-        "tests.functional.modules.success.module_with_nonunittest_test_cases"
+        "tests.functional.modules.success.module_with_function_members"
     )
     expects(featureA).to.have.property("ready").being.equal(True)
     expects(featureA).to.have.property("scenarios").being.a(list)
-    expects(featureA.scenarios).to.have.length_of(2)
+    expects(featureA.scenarios).to.have.length_of(6)
 
     expects(featureB).to.equal
     expects(featureB).to.be.a(Feature)
     expects(featureB).to.have.property("name").being.equal(
-        "tests.functional.modules.success.module_with_function_members"
+        "tests.functional.modules.success.module_with_members"
+
     )
     expects(featureB).to.have.property("ready").being.equal(True)
     expects(featureB).to.have.property("scenarios").being.a(list)
-    expects(featureB.scenarios).to.have.length_of(6)
+    expects(featureB.scenarios).to.have.length_of(5)
 
     expects(featureC).to.equal
     expects(featureC).to.be.a(Feature)
     expects(featureC).to.have.property("name").being.equal(
-        "tests.functional.modules.success.module_with_unittest_test_cases"
+        "tests.functional.modules.success.module_with_nonunittest_test_cases"
     )
     expects(featureC).to.have.property("ready").being.equal(True)
     expects(featureC).to.have.property("scenarios").being.a(list)
@@ -135,11 +136,11 @@ def test_runner_load_features_from_module_path_recursively():
     expects(featureX).to.equal
     expects(featureX).to.be.a(Feature)
     expects(featureX).to.have.property("name").being.equal(
-        "tests.functional.modules.success.module_with_members"
+        "tests.functional.modules.success.module_with_unittest_test_cases"
     )
     expects(featureX).to.have.property("ready").being.equal(True)
     expects(featureX).to.have.property("scenarios").being.a(list)
-    expects(featureX.scenarios).to.have.length_of(5)
+    expects(featureX.scenarios).to.have.length_of(2)
 
 
 def test_runner_load_features_from_directory_with_python_files():
@@ -211,85 +212,80 @@ def test_runner_execute_success_tests():
             "on_feature": [
                 (
                     anything_of_type(float),
-                    "tests.functional.modules.success.module_with_nonunittest_test_cases",
-                ),
-                (
-                    anything_of_type(float),
                     "tests.functional.modules.success.module_with_function_members",
-                ),
-                (
-                    anything_of_type(float),
-                    "tests.functional.modules.success.module_with_unittest_test_cases",
                 ),
                 (
                     anything_of_type(float),
                     "tests.functional.modules.success.module_with_members",
                 ),
+                (
+                    anything_of_type(float),
+                    "tests.functional.modules.success.module_with_nonunittest_test_cases",
+                ),
+                (
+                    anything_of_type(float),
+                    "tests.functional.modules.success.module_with_unittest_test_cases",
+                ),
             ],
             "on_scenario": [
-                (anything_of_type(float), "TestCaseA"),
-                (anything_of_type(float), "TestCaseA"),
-                (anything_of_type(float), "TestCaseA"),
-                (anything_of_type(float), "TestCaseA"),
-                (anything_of_type(float), "TestCaseB"),
-                (anything_of_type(float), "TestCaseB"),
-                (anything_of_type(float), "TestCaseB"),
-                (anything_of_type(float), "TestCaseB"),
                 (anything_of_type(float), "test_function_A"),
                 (anything_of_type(float), "test_function_B"),
                 (anything_of_type(float), "test_function_C"),
                 (anything_of_type(float), "test_function_X"),
                 (anything_of_type(float), "test_function_Y"),
                 (anything_of_type(float), "test_function_Z"),
-                (anything_of_type(float), "TestCaseA"),
-                (anything_of_type(float), "TestCaseA"),
-                (anything_of_type(float), "TestCaseA"),
-                (anything_of_type(float), "TestCaseA"),
-                (anything_of_type(float), "TestCaseB"),
-                (anything_of_type(float), "TestCaseB"),
-                (anything_of_type(float), "TestCaseB"),
-                (anything_of_type(float), "TestCaseB"),
                 (anything_of_type(float), "TestCase"),
                 (anything_of_type(float), "UnitCase"),
                 (anything_of_type(float), "test_function_A"),
                 (anything_of_type(float), "test_function_B"),
                 (anything_of_type(float), "test_function_C"),
+                (anything_of_type(float), "TestCaseA"),
+                (anything_of_type(float), "TestCaseA"),
+                (anything_of_type(float), "TestCaseA"),
+                (anything_of_type(float), "TestCaseA"),
+                (anything_of_type(float), "TestCaseB"),
+                (anything_of_type(float), "TestCaseB"),
+                (anything_of_type(float), "TestCaseB"),
+                (anything_of_type(float), "TestCaseB"),
+                (anything_of_type(float), "TestCaseA"),
+                (anything_of_type(float), "TestCaseA"),
+                (anything_of_type(float), "TestCaseA"),
+                (anything_of_type(float), "TestCaseA"),
+                (anything_of_type(float), "TestCaseB"),
+                (anything_of_type(float), "TestCaseB"),
+                (anything_of_type(float), "TestCaseB"),
+                (anything_of_type(float), "TestCaseB"),
             ],
             "on_scenario_done": [
-                (anything_of_type(float), "TestCaseA", "ok"),
-                (anything_of_type(float), "TestCaseA", "ok"),
-                (anything_of_type(float), "TestCaseA", "ok"),
-                (anything_of_type(float), "TestCaseA", "ok"),
-                (anything_of_type(float), "TestCaseB", "ok"),
-                (anything_of_type(float), "TestCaseB", "ok"),
-                (anything_of_type(float), "TestCaseB", "ok"),
-                (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "test_function_A", "ok"),
                 (anything_of_type(float), "test_function_B", "ok"),
                 (anything_of_type(float), "test_function_C", "ok"),
                 (anything_of_type(float), "test_function_X", "ok"),
                 (anything_of_type(float), "test_function_Y", "ok"),
                 (anything_of_type(float), "test_function_Z", "ok"),
-                (anything_of_type(float), "TestCaseA", "ok"),
-                (anything_of_type(float), "TestCaseA", "ok"),
-                (anything_of_type(float), "TestCaseA", "ok"),
-                (anything_of_type(float), "TestCaseA", "ok"),
-                (anything_of_type(float), "TestCaseB", "ok"),
-                (anything_of_type(float), "TestCaseB", "ok"),
-                (anything_of_type(float), "TestCaseB", "ok"),
-                (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "TestCase", "ok"),
                 (anything_of_type(float), "UnitCase", "ok"),
                 (anything_of_type(float), "test_function_A", "ok"),
                 (anything_of_type(float), "test_function_B", "ok"),
                 (anything_of_type(float), "test_function_C", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
             ],
             "on_feature_done": [
-                (
-                    anything_of_type(float),
-                    "tests.functional.modules.success.module_with_nonunittest_test_cases",
-                    "ok",
-                ),
                 (
                     anything_of_type(float),
                     "tests.functional.modules.success.module_with_function_members",
@@ -297,12 +293,17 @@ def test_runner_execute_success_tests():
                 ),
                 (
                     anything_of_type(float),
-                    "tests.functional.modules.success.module_with_unittest_test_cases",
+                    "tests.functional.modules.success.module_with_members",
                     "ok",
                 ),
                 (
                     anything_of_type(float),
-                    "tests.functional.modules.success.module_with_members",
+                    "tests.functional.modules.success.module_with_nonunittest_test_cases",
+                    "ok",
+                ),
+                (
+                    anything_of_type(float),
+                    "tests.functional.modules.success.module_with_unittest_test_cases",
                     "ok",
                 ),
             ],

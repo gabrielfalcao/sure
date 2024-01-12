@@ -176,7 +176,7 @@ class loader(object):
                     path = directory.joinpath(path)
                     modules.extend(cls.load_python_path(path))
 
-        return modules
+        return sorted(modules, key=lambda mod: mod.__file__)
 
     @classmethod
     def load_python_path(cls, path):

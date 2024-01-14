@@ -1,5 +1,10 @@
+---
 name: Sure Tests
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+      - runner
 
 jobs:
   python:
@@ -8,23 +13,19 @@ jobs:
     strategy:
       matrix:
         python:
-          - "3.9"
+          - "3.6"
           - "3.7"
+          - "3.8"
+          - "3.9"
           - "3.10"
           - "3.11"
-          - "3.6"
-          - "3.8"
+          - "3.12"
+          # IMPORTANT: update the documentation file ../../docs/source/getting-started.rst when adding more python versions to the list above
 
     steps:
     - uses: actions/checkout@v3
-    - name: Install python version
+    - name: Run Tests
       uses: gabrielfalcao/pyenv-action@v18
       with:
         default: "${{ matrix.python }}"
-        command: pip install -U pip setuptools
-
-    - name: Install dependencies
-      run: pip install -r development.txt
-
-    - name: Install sure
-      run: pip install -e .
+        command: make dependencies tests

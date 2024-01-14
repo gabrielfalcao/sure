@@ -17,39 +17,29 @@
 
 '''The :mod:`sure.doubles.stubs` module provides test-doubles of the type "Stub"
 
-**Stubs** provide canned answers to calls made during the test, usually not responding at all to anything outside what's programmed in for the test.
+**Stubs provide canned answers to calls made during the test, usually not responding at all to anything outside what's programmed in for the test.**
 '''
 
 
-def stub(base_class=None, metaclass=None, **attributes):
+def stub(base_class=None, **attributes):
     """creates a python class "on-the-fly" with the given keyword-arguments
     as class-attributes accessible with .attrname.
 
     The new class inherits from ``base_class`` and defaults to ``object``
     Use this to mock rather than stub in instances where such approach seems reasonable.
     """
-    if not isinstance(metaclass, type):
-        attributes['metaclass'] = metaclass
-
     if not isinstance(base_class, type):
         attributes['base_class'] = base_class
-        base_class = object
-    if base_class is None:
         base_class = object
 
     stub_name = f"{base_class.__name__}Stub"
 
     members = {
         "__init__": lambda self: None,
-        "__new__": lambda *args, **kw: object.__new__(
+        "__new__": lambda *args, **kw: base_class.__new__(
             *args, *kw
         ),
         "__repr__": lambda self: f"<{stub_name}>",
     }
-    kwds = {}
-    if metaclass is not None:
-        kwds["metaclass"] = metaclass
-        members["__metaclass__"] = metaclass  # TODO: remove this line
-
     members.update(attributes)
-    return type(stub_name, (base_class,), members, **kwds)()
+    return type(stub_name, (base_class,), members)()

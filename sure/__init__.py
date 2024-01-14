@@ -35,11 +35,9 @@ from sure.original import Iterable
 from sure import registry
 from sure.core import DeepComparison
 from sure.core import Explanation
+from sure.core import identify_caller_location
 from sure.errors import SpecialSyntaxDisabledError
-from sure.errors import (
-    WrongUsageError,
-    SpecialSyntaxDisabledError,
-)
+from sure.errors import WrongUsageError
 from sure.errors import InternalRuntimeError
 from sure.doubles.dummies import anything
 from sure.loader import get_file_name
@@ -54,14 +52,6 @@ import sure.reporters
 
 original_obj_attrs = dir(object)
 bugtracker = "https://github.com/gabrielfalcao/sure/issues"
-
-
-def unwrap_assertion_helper(obj) -> object:
-    while isinstance(obj, AssertionHelper):
-        obj = obj.src
-    while isinstance(obj, AssertionBuilder):
-        obj = obj.actual
-    return obj
 
 
 class StagingArea(dict):
@@ -110,13 +100,6 @@ class StagingArea(dict):
             self[attr] = value
             self.__asset_names__.append(attr)
         return super(StagingArea, self).__setattr__(attr, value)
-
-
-def ensure_type(caller_name, cast, actual):
-    try:
-        return cast(actual)
-    except TypeError:
-        raise InternalRuntimeError(f"{caller_name} expects {cast} but received {actual} which is {type(actual)} instead")
 
 
 class CallBack(object):
@@ -277,24 +260,19 @@ def within(**units):
 
     convert_from, convert_to = UNITS[unit]
     timeout = convert_from(value)
-    exc = []
 
     def dec(func):
+        exc = []
+
+        @wraps(func)
         def wrap(*args, **kw):
             start = datetime.utcnow()
 
             try:
-                func(start, *args, **kw)
-            except TypeError as e:  # TODO: test
-                fmt = "{0}() takes 0 positional arguments but 1 was given"
-                err = str(e)
-                if fmt.format(func.__name__) in err:
-                    func(*args, **kw)
-                else:
-                    exc.append(traceback.format_exc())
+                func(*args, **kw)
 
-            except Exception:
-                exc.append(traceback.format_exc())
+            except Exception as e:
+                exc.append(e)
 
             end = datetime.utcnow()
             delta = end - start
@@ -302,13 +280,10 @@ def within(**units):
 
             if not took < timeout:
                 raise AssertionError(
-                    "%s did not run within %s %s" % (
-                        func.__name__,
-                        word,
-                        unit,
-                    ))
+                    f"{identify_caller_location(func)} did not run within {word} {unit}"
+                )
             if exc:
-                raise AssertionError(exc.pop(0))
+                raise exc.pop(0)
 
         wrap.__name__ = func.__name__
         wrap.__doc__ = func.__doc__
@@ -506,7 +481,6 @@ def assertionmethod(func):
 
     @wraps(func)
     def wrapper(self, *args, **kw):
-        self.actual = unwrap_assertion_helper(self.actual)
         try:
             value = func(self, *args, **kw)
         except AssertionError as e:
@@ -543,7 +517,7 @@ class AssertionBuilder(object):
         self._name = name
         self.negative = negative
 
-        self.actual = unwrap_assertion_helper(actual)
+        self.actual = actual
         self._callable_args = []
         self._callable_kw = {}
         if isinstance(with_args, (list, tuple)):
@@ -570,7 +544,7 @@ class AssertionBuilder(object):
             self._callable_args = actual._callable_args
             self._callable_kw = actual._callable_kw
         else:
-            self.actual = unwrap_assertion_helper(actual)
+            self.actual = actual
 
         self._callable_args = []
         self._callable_kw = {}
@@ -801,10 +775,10 @@ class AssertionBuilder(object):
     to_not_contain = does_not_contain
 
     @assertionmethod
-    def within_range(self, start, end):
-        start = ensure_type("within_range", int, start)
-        end = ensure_type("within_range", int, end)
-        subject = ensure_type("within_range", int, self.actual)
+    def within_range(self, start: int, end: int):
+        start = int(start)
+        end = int(end)
+        subject = int(self.actual)
         is_within_range = subject >= start and subject <= end
 
         if self.negative:

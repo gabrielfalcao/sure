@@ -20,10 +20,50 @@
 from sure import expects
 from sure.doubles.dummies import Dummy, anything_of_type, AnythingOfType
 from sure.doubles.fakes import FakeOrderedDict
+from sure.doubles.stubs import stub
+
+
+class AutoMobile(object):
+    def __init__(self, model: str, manufacturer: str, year: int, color: str, features: dict):
+        self.model = model
+        self.year = year
+        self.color = color
+
+
+def test_stub():
+    ":func:`sure.doubles.stubs.stub` should create a stub with the given type and keyword-args"
+
+    veraneio = stub(
+        AutoMobile,
+        model="Omega",
+        manufacturer="Chevrolet",
+        year=1993,
+        color="Graphite",
+    )
+    expects(veraneio).to.be.an(AutoMobile)
+    expects(veraneio).to.have.property("year").being.equal(1993)
+    expects(veraneio).to.have.property("model").being.equal("Omega")
+    expects(veraneio).to.have.property("color").being.equal("Graphite")
+    expects(veraneio).to.have.property("manufacturer").being.equal("Chevrolet")
+
+
+def test_stub_without_base_class():
+    ":func:`sure.doubles.stubs.stub` should create an opaque object when not providing a `base_class' param"
+
+    auto = stub(
+        model="Opala",
+        manufacturer="Chevrolet",
+        year=71,
+        color="White",
+        features={"vinyl_roof": "black"},
+    )
+    expects(auto).to.have.property("model").being.equal("Opala")
+    expects(auto).to.have.property("manufacturer").being.equal("Chevrolet")
+    expects(auto).to.have.property("color").being.equal("White")
 
 
 def test_fake_ordered_dict_str():
-    ":meth:`sure.doubles.fakes.FakeOrderedDict.__str__` similar to that of :meth:`dict.__str__`"
+    ":meth:`sure.doubles.fakes.FakeOrderedDict.__str__` should be similar to that of :meth:`dict.__str__`"
 
     fake_ordered_dict = FakeOrderedDict([("a", "A"), ("z", "Z")])
     expects(str(fake_ordered_dict)).to.equal("{'a': 'A', 'z': 'Z'}")
@@ -31,7 +71,7 @@ def test_fake_ordered_dict_str():
 
 
 def test_fake_ordered_dict_repr():
-    ":meth:`sure.doubles.fakes.FakeOrderedDict.__repr__` similar to that of :meth:`dict.__repr__`"
+    ":meth:`sure.doubles.fakes.FakeOrderedDict.__repr__` should be similar to that of :meth:`dict.__repr__`"
 
     fake_ordered_dict = FakeOrderedDict([("a", "A"), ("z", "Z")])
     expects(repr(fake_ordered_dict)).to.equal("{'a': 'A', 'z': 'Z'}")
@@ -42,9 +82,7 @@ def test_dummy():
     "Dummy() should return the dummy_id"
 
     dummy = Dummy("some dummy id")
-    expects(dummy).to.have.property('__dummy_id__').being.equal(
-        "some dummy id"
-    )
+    expects(dummy).to.have.property("__dummy_id__").being.equal("some dummy id")
 
     expects(str(dummy)).to.equal("<Dummy some dummy id>")
     expects(repr(dummy)).to.equal("<Dummy some dummy id>")
@@ -55,7 +93,7 @@ def test_dummy_takes_exclusively_string_as_id():
 
     expects(Dummy).when.called_with(299).should.throw(
         TypeError,
-        "sure.doubles.dummies.Dummy() takes string as argument, received 299 (<class 'int'>) instead"
+        "sure.doubles.dummies.Dummy() takes string as argument, received 299 (<class 'int'>) instead",
     )
 
 
@@ -63,8 +101,12 @@ def test_anything_of_type_should_return_an_instance_of_the_anythingoftype_class(
     "anything_of_type() should return an instance of the AnythingOfType class"
 
     expects(anything_of_type(str)).to.be.an(AnythingOfType)
-    expects(str(anything_of_type(str))).to.equal('<AnythingOfType[builtins.str] anything_of_type(builtins.str)>')
-    expects(repr(anything_of_type(str))).to.equal('<AnythingOfType[builtins.str] anything_of_type(builtins.str)>')
+    expects(str(anything_of_type(str))).to.equal(
+        "<AnythingOfType[builtins.str] anything_of_type(builtins.str)>"
+    )
+    expects(repr(anything_of_type(str))).to.equal(
+        "<AnythingOfType[builtins.str] anything_of_type(builtins.str)>"
+    )
 
 
 def test_anything_of_type_should_equal_any_python_object_of_the_given_type():
@@ -82,5 +124,5 @@ def test_anything_of_type_should_raise_type_error_when_receiving_a_nontype_type_
 
     expects(anything_of_type).when.called_with("anything_of_type(str)").to.have.raised(
         TypeError,
-        "'anything_of_type(str)' should be a class but is a <class 'str'> instead"
+        "'anything_of_type(str)' should be a class but is a <class 'str'> instead",
     )

@@ -30,6 +30,10 @@ This project adheres to `Semantic Versioning <http://semver.org/>`__.
 -  Renames :class:`sure.AssertionBuilder` constructor parameters:
    - ``with_kwargs`` to ``with_kws``
    - ``and_kwargs`` to ``and_kws``
+- Functions or methods decorated with the :func:`sure.within`
+   decorator no longer receive a :class:`datetime.datetime` object as
+   first argument.
+
 
 [v2.0.0]
 --------

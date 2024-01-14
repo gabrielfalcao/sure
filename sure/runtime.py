@@ -550,19 +550,12 @@ class ScenarioArrangement(BaseContainer):
             container=container,
             context=context,
         )
-        last_error = None
-        last_failure = None
-        if result.failure:
-            last_failure = result
-        if result.error:
-            last_error = result
-
         if context.options.immediate:
-            if last_error is not None:
-                raise ImmediateError(last_error)
+            if result.error is not None:
+                raise ImmediateError(result)
 
-            if last_failure is not None:
-                raise ImmediateFailure(last_failure)
+            if result.failure is not None:
+                raise ImmediateFailure(result)
 
         yield result, RuntimeRole.Unit
 

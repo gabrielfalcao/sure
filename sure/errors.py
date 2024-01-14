@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 from functools import reduce
 from sure import registry
-from sure.types import TestLocation
+from sure.types import TestLocation, ScenarioResult
 
 
 __sure_package_path__ = str(Path(__file__).parent)
@@ -72,10 +72,10 @@ class BaseSureError(Exception):
         super().__init__(message)
 
     def __str__(self):
-        return self.message
+        return getattr(self, 'message', self.__class__.__name__)
 
     def __repr__(self):
-        return self.message
+        return getattr(self, 'message', self.__class__.__name__)
 
 
 class FileSystemError(IOError):
@@ -90,7 +90,7 @@ class ImmediateExit(BaseSureError):
 
 
 class RuntimeInterruption(BaseSureError):
-    def __init__(self, scenario_result):
+    def __init__(self, scenario_result: ScenarioResult):
         self.result = scenario_result
         self.scenario = scenario_result.scenario
         self.context = scenario_result.context
@@ -98,17 +98,17 @@ class RuntimeInterruption(BaseSureError):
 
 
 class ImmediateError(RuntimeInterruption):
-    def __init__(self, scenario_result):
+    def __init__(self, scenario_result: ScenarioResult):
+        super().__init__(scenario_result)
         self.args = scenario_result.error.args
         self.message = "".join(self.args)
-        super().__init__(scenario_result)
 
 
 class ImmediateFailure(RuntimeInterruption):
-    def __init__(self, scenario_result):
+    def __init__(self, scenario_result: ScenarioResult):
+        super().__init__(scenario_result)
         self.args = scenario_result.failure.args
         self.message = scenario_result.succinct_failure
-        super().__init__(scenario_result)
 
 
 class ExitError(ImmediateExit):

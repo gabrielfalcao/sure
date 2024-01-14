@@ -14,17 +14,23 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import os
+import types
+from typing import Union, List, Dict, Tuple
 from collections import OrderedDict
 from functools import cache
 
 from sure.terminal import yellow, red, green
 from sure.doubles.dummies import Anything
+from sure.loader import get_file_name
+from sure.loader import get_line_number
+from sure.loader import resolve_path
 
 from unittest.mock import _CallList as UnitTestMockCallList
 
 try:  # TODO: document the coupling with :mod:`mock` or :mod:`unittest.mock`
     from mock.mock import _CallList as MockCallList
-except ImportError:
+except ImportError:  # pragma: no cover
     MockCallList = None
 
 MockCallListType = tuple(filter(bool, (UnitTestMockCallList, MockCallList)))
@@ -36,13 +42,7 @@ class Explanation(str):
         return yellow(header).strip()
 
     def get_assertion(self, X, Y, prefix=""):
-        if not isinstance(prefix, str):
-            raise TypeError(
-                f"Explanation.get_assertion() takes a {str} as "
-                f"its `prefix' argument but received {prefix} ({type(prefix)}) instead"
-            )
-        else:
-            prefix = f"{prefix.strip()}\n"
+        prefix = f"{str(prefix or '').strip()}\n"
 
         return AssertionError(f"{prefix}{self.get_header(X, Y, self)}")
 
@@ -247,10 +247,14 @@ that complex or nested datastructures, such as :external+python:ref:`mappings <m
 
         return exp
 
-    def explanation(self):
-        return self._explanation
-
 
 def itemize_length(items):
     length = len(items)
     return '{0} item{1}'.format(length, length > 1 and "s" or "")
+
+
+def identify_caller_location(caller: Union[types.FunctionType, types.MethodType]):
+    callable_name = caller.__name__
+    filename = resolve_path(get_file_name(caller), os.getcwd())
+    lineno = get_line_number(caller)
+    return f'{callable_name} [{filename} line {lineno}]'

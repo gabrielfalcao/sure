@@ -14,16 +14,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 import re
+import time
 import mock
-
+import unittest
 from collections import OrderedDict
 from datetime import datetime
 from datetime import timedelta
-
 from sure import AssertionBuilder
 from sure import this
+from sure import within, microsecond
 from sure import those
 from sure import it
 from sure import expects
@@ -694,8 +694,8 @@ def test_should_not_be_different():
   </root>''')
 
 
-def test_equals_handles_mock_call_list():
-    ".equal() Should convert mock._CallList instances to lists"
+def test_equals_handles_mock_mock_call_list():
+    ".equal() Should convert :mod:`mock._CallList` instances to lists"
 
     # Given the following mocked callback
     callback = mock.Mock()
@@ -711,6 +711,25 @@ def test_equals_handles_mock_call_list():
         mock.call(a=1, b=2),
         mock.call(a=3, b=4),
     ])
+
+
+def test_equals_handles_unittest_mock_call_list():
+    ".equal() Should convert :mod:`unittest.mock._CallList` instances to lists"
+
+    # Given the following mocked callback
+    callback = unittest.mock.Mock()
+
+    # When I call the callback with a few parameters twice
+    callback(a=1, b=2)
+    callback(a=3, b=4)
+
+    # Then I see I can compare the call list without manually
+    # converting anything
+
+    expect(callback.call_args_list).should.equal(unittest.mock._CallList([
+        mock.call(a=1, b=2),
+        mock.call(a=3, b=4),
+    ]))
 
 
 def test_equals_handles_float_with_epsilon():
@@ -753,21 +772,45 @@ def test_ordereddict_comparison():
     ".equal(OrderedDict) should check if two ordered dicts are the same"
     result = {
         "fields": OrderedDict([
-            ("name", "John"),
-            ("mass", "22"),
+            ("name", "Helium"),
+            ("mass", "4.002602"),
         ]),
         "unused": OrderedDict([]),
     }
 
     expectation = {
         "fields": OrderedDict([
-            ("name", "John"),
-            ("mass", "22"),
+            ("name", "Helium"),
+            ("mass", "4.002602"),
         ]),
         "unused": OrderedDict([]),
     }
 
     expect(result).should.equal(expectation)
+
+
+def test_ordereddict_comparison_differing_order():
+    ".equal(OrderedDict) should raise error when on differing order"
+    result = {
+        "fields": OrderedDict([
+            ("mass", "4.002602"),
+            ("name", "Helium"),
+        ]),
+        "unused": OrderedDict([]),
+    }
+
+    expectation = {
+        "fields": OrderedDict([
+            ("name", "Helium"),
+            ("mass", "4.002602"),
+        ]),
+        "unused": OrderedDict([]),
+    }
+
+    expects(expect(result).should.equal).when.called_with(expectation).to.have.raised(
+        AssertionError,
+        "X['fields'] and Y['fields'] appear have keys in different order"
+    )
 
 
 def test_equals_anything():
@@ -802,3 +845,19 @@ def test_assertion_builder_variants():
     assert isinstance(expect, AssertionBuilder)
     assert isinstance(expects, AssertionBuilder)
     assert isinstance(assert_that, AssertionBuilder)
+
+
+def test_within_time():
+    "@sure.within() decorator should raise error if the decorated function takes longer than the amount of time specified through its keyword-argument DSL"
+
+    @within(one=microsecond)
+    def test():
+        time.sleep(0.1)
+
+    def trigger():
+        test()
+
+    expects(trigger).when.called.to.have.raised(
+        AssertionError,
+        "test [tests/test_assertion_builder.py line 853] did not run within one microseconds"
+    )

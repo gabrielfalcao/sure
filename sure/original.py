@@ -35,17 +35,11 @@ from collections.abc import Iterable
 from sure.core import Explanation
 from sure.core import DeepComparison
 from sure.core import itemize_length
+from sure.core import identify_caller_location
 from sure.errors import treat_error, CallerLocation
 from sure.loader import get_file_name
 from sure.loader import get_line_number
 from sure.loader import resolve_path
-
-
-def identify_caller_location(caller: Union[types.FunctionType, types.MethodType]):
-    callable_name = caller.__name__
-    filename = resolve_path(get_file_name(caller), os.getcwd())
-    lineno = get_line_number(caller)
-    return f'{callable_name} [{filename} line {lineno}]'
 
 
 def is_iterable(obj):

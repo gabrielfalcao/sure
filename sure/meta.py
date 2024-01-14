@@ -14,35 +14,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 from typing import List
 from pathlib import Path
-
 from sure.loader import loader
 
-module_root = Path(__file__).parent.absolute()
-
 REPORTERS = {}
-
-
-def add_reporter(reporter: type) -> type:
-    if reporter.name == "__meta__":
-        return reporter
-
-    REPORTERS[reporter.name] = reporter
-    return reporter
-
-
-def get_reporter(name: str) -> type:
-    return REPORTERS.get(name)
-
-
-def gather_reporter_names() -> List[str]:
-    return list(filter(bool, REPORTERS.keys()))
-
-
-def internal_module_name(name):
-    return __name__.replace(".meta", f".{name}.")
 
 
 def register_class(cls, identifier):
@@ -55,11 +31,17 @@ def register_class(cls, identifier):
         return cls
 
 
-MODULE_REGISTERS = dict(
-    (
-        ("reporter", add_reporter),
-    )
-)
+def add_reporter(reporter: type) -> type:
+    REPORTERS[reporter.name] = reporter
+    return reporter
+
+
+def get_reporter(name: str) -> type:
+    return REPORTERS.get(name)
+
+
+def gather_reporter_names() -> List[str]:
+    return list(filter(bool, REPORTERS.keys()))
 
 
 class MetaReporter(type):
@@ -67,3 +49,6 @@ class MetaReporter(type):
         if cls.__module__ != __name__:
             cls = register_class(cls, "reporter")
         super(MetaReporter, cls).__init__(name, bases, attrs)
+
+
+MODULE_REGISTERS = dict((("reporter", add_reporter),))

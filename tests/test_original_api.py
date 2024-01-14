@@ -26,9 +26,9 @@ from sure import expects
 from sure import action_for
 from sure import scenario
 from sure import within
-from sure import miliseconds
+from sure import second, miliseconds
 from sure import StagingArea
-
+from sure.errors import WrongUsageError
 from sure.special import is_cpython
 from sure.loader import collapse_path
 
@@ -656,23 +656,23 @@ def test_that_data_structure_iterable_matches_another():
 
 
 def test_within_pass():
-    "within(five=miliseconds) will pass"
+    "within(four=miliseconds) will pass"
 
-    within(five=miliseconds)(lambda *a: None)()
+    within(four=miliseconds)(lambda *a: None)()
 
 
-def test_within_fail():
-    "within(five=miliseconds) will fail"
+def test_within_five_milicesonds_fails_when_function_takes_six_miliseconds():
+    "within(five=miliseconds) should fail when the decorated function takes six miliseconds to run"
 
     def sleepy(*a):
-        time.sleep(0.7)
+        time.sleep(0.6)
 
     failed = False
     try:
         within(five=miliseconds)(sleepy)()
     except AssertionError as e:
         failed = True
-        expects("sleepy did not run within five miliseconds").to.equal(str(e))
+        expects("sleepy [tests/test_original_api.py line 667] did not run within five miliseconds").to.equal(str(e))
 
     assert failed, "within(five=miliseconds)(sleepy) did not fail"
 
@@ -762,13 +762,13 @@ def test_minute_unit():
     expects(cto(1)).to.equal(6000000)
 
 
-def test_within_pass_utc():
-    "within(five=miliseconds) gives utc parameter"
+def test_within_wrong_usage():
+    "within(three=miliseconds, one=second) should raise WrongUsageError"
 
-    def assert_utc(utc):
-        assert isinstance(utc, datetime)
-
-    within(five=miliseconds)(assert_utc)()
+    expects(within).when.called_with(three=miliseconds, one=second).to.have.raised(
+        WrongUsageError,
+        "within() takes a single keyword argument where the argument must be a numerical description from one to eighteen and the value. For example: within(eighteen=miliseconds)"
+    )
 
 
 def test_that_is_a_matcher_should_absorb_callables_to_be_used_as_matcher():
@@ -1651,3 +1651,16 @@ X = [('Bootstraping Redis role', []), ('Restart scalarizr', []), ('Rebundle serv
 Y = [('Bootstraping Redis role', ['rebundle', 'rebundle', 'rebundle']), ('Restart scalarizr', []), ('Rebundle server', ['rebundle']), ('Use new role', ['rebundle']), ('Restart scalarizr after bundling', ['rebundle']), ('Bundling data', []), ('Modifying data', []), ('Reboot server', []), ('Backuping data on Master', []), ('Setup replication', []), ('Restart scalarizr in slave', []), ('Slave force termination', []), ('Slave delete EBS', ['ec2']), ('Setup replication for EBS test', ['ec2']), ('Writing on Master, reading on Slave', []), ('Slave -> Master promotion', []), ('Restart farm', ['restart_farm'])]
 Y[0][1] has 3 items whereas X[0][1] has only 0
 """.strip())
+
+
+def test_within_failing_due_to_internally_raised_exception():
+    "within(ten=miliseconds) should fail when the decorated function raises an unrelated exception"
+
+    def crash(*a):
+        time.sleep(0.1)
+        raise RuntimeError('unrelated exception')
+
+    expects(within(five=miliseconds)(crash)).when.called.to.have.raised(
+        RuntimeError,
+        "unrelated exception"
+    )

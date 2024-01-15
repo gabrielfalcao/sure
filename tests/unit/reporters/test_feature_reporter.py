@@ -15,14 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "unit tests for :mod:`sure.reporters.feature`"
-
+import sys
 from unittest.mock import patch, call
 from unittest.mock import Mock as Spy
 from sure import expects
 from sure.runner import Runner
-from sure.runtime import Feature, Scenario, TestLocation, ScenarioResult
+from sure.runtime import (
+    Feature,
+    Scenario,
+    TestLocation,
+    RuntimeContext,
+    ScenarioResult,
+    ErrorStack,
+    collapse_path,
+)
 from sure.reporters import FeatureReporter
-from sure.doubles import stub
+from sure.doubles import stub, anything
+from sure.errors import SpecialSyntaxDisabledError, InternalRuntimeError, exit_code
 
 
 def test_feature_reporter_on_start():
@@ -38,18 +47,18 @@ def test_feature_reporter_on_start():
 
 def test_feature_reporter_on_feature():
     "FeatureReporter.on_feature"
-
     sh = Spy(name="Shell")
     reporter = FeatureReporter(stub(Runner))
     reporter.sh = sh
-    reporter.on_feature(stub(Feature, name="stubbed feature"))
+
+    reporter.on_feature(stub(Feature, name="Conflicts"))
 
     expects(sh.mock_calls).to.equal(
         [
             call.reset("  "),
             call.bold_blue("Feature: "),
             call.yellow("'"),
-            call.green("stubbed feature"),
+            call.green("Conflicts"),
             call.yellow("'"),
             call.reset(" "),
         ]
@@ -58,10 +67,10 @@ def test_feature_reporter_on_feature():
 
 def test_feature_reporter_on_feature_done():
     "FeatureReporter.on_feature_done"
-
     sh = Spy(name="Shell")
     reporter = FeatureReporter(stub(Runner))
     reporter.sh = sh
+
     reporter.on_feature_done(
         stub(Feature, name="stubbed feature"),
         Spy(name="feature_result"),
@@ -147,6 +156,7 @@ def test_feature_reporter_on_scenario_done_success():
     sh = Spy(name="Shell")
     reporter = FeatureReporter(stub(Runner))
     reporter.sh = sh
+    reporter.indentation = 5
     reporter.on_scenario_done(scenario_stub, scenario_result_stub)
 
     expects(sh.mock_calls).to.equal(
@@ -163,6 +173,37 @@ def test_feature_reporter_on_scenario_done_success():
             call.reset(""),
         ]
     )
+    expects(reporter.indentation).to.equal(3)
+
+
+def test_feature_reporter_on_scenario_done_without_description():
+    "FeatureReporter.on_scenario_done() on success without scenario description"
+
+    location_stub = stub(TestLocation)
+    scenario_stub = stub(Scenario, location=location_stub, description="")
+    scenario_result_stub = stub(ScenarioResult, __error__=None, __failure__=None)
+
+    sh = Spy(name="Shell")
+    reporter = FeatureReporter(stub(Runner))
+    reporter.sh = sh
+    reporter.indentation = 5
+    reporter.on_scenario_done(scenario_stub, scenario_result_stub)
+
+    expects(sh.mock_calls).to.equal(
+        [
+            call.bold_green("✓"),
+            call.reset(""),
+        ]
+    )
+    # should not report twice
+    reporter.on_scenario_done(scenario_stub, scenario_result_stub)
+    expects(sh.mock_calls).to.equal(
+        [
+            call.bold_green("✓"),
+            call.reset(""),
+        ]
+    )
+    expects(reporter.indentation).to.equal(1)
 
 
 def test_feature_reporter_on_scenario_done_failure():
@@ -201,3 +242,193 @@ def test_feature_reporter_on_scenario_done_error():
     reporter.on_scenario_done(scenario_stub, scenario_result_stub)
 
     expects(sh.mock_calls).to.be.empty
+
+
+def test_feature_reporter_on_failure_failure():
+    "FeatureReporter.on_failure() on failure should not failure error because that's done by on_failure"
+
+    def contrive_exception_info():
+        """contrives an exception to retrieve a list of traceback objects"""
+        try:
+            ErrorStack()
+        except Exception as e:
+            return e, sys.exc_info()
+
+    exc, exc_info = contrive_exception_info()
+    location = TestLocation(contrive_exception_info)
+    error = ErrorStack(location=location, exc=exc, exception_info=exc_info)
+    scenario_stub = stub(
+        Scenario, location=location, description="Description of Scenario Stub"
+    )
+    scenario_result_stub = stub(
+        ScenarioResult,
+        __error__=None,
+        __failure__=AssertionError("contrived failure"),
+        stack=error,
+        location=location,
+    )
+
+    sh = Spy(name="Shell")
+    reporter = FeatureReporter(stub(Runner))
+    reporter.indentation = 5
+    reporter.sh = sh
+    reporter.on_failure(scenario_stub, scenario_result_stub)
+
+    expects(sh.mock_calls).to.equal(
+        [
+            call.reset("\n"),
+            call.reset("       "),
+            call.yellow(
+                f'Failure: contrived failure\n  File "{collapse_path(__file__)}", line 253, in contrive_exception_info\n    ErrorStack()\n'
+            ),
+            call.reset("         "),
+            call.bold_blue("\n          Scenario:"),
+            call.bold_blue(
+                "\n              contrives an exception to retrieve a list of traceback objects"
+            ),
+            anything,
+            call.reset("\n"),
+        ]
+    )
+
+
+def test_feature_reporter_on_success():
+    "FeatureReporter.on_success"
+
+    location_stub = stub(TestLocation, description="Location of Scenario Stub")
+    scenario_stub = stub(Scenario, location=location_stub)
+    sh = Spy(name="Shell")
+    reporter = FeatureReporter(stub(Runner))
+    reporter.sh = sh
+    reporter.on_success(scenario_stub)
+
+    expects(sh.mock_calls).to.equal(
+        [
+            call.bold_green("✓"),
+            call.reset(""),
+        ]
+    )
+
+
+def test_feature_reporter_on_error():
+    "FeatureReporter.on_error"
+
+    def contrive_exception_info():
+        """contrives an exception to retrieve a list of traceback objects"""
+        try:
+            sys.exc_info(sys)
+        except Exception as e:
+            return e, sys.exc_info()
+
+    exc, exc_info = contrive_exception_info()
+    location = TestLocation(contrive_exception_info)
+    scenario_stub = stub(Scenario, location=location)
+    error = ErrorStack(location=location, exc=exc, exception_info=exc_info)
+    scenario_result_stub = stub(
+        ScenarioResult,
+        __error__=exc,
+        __failure__=None,
+        stack=error,
+        location=location,
+    )
+
+    sh = Spy(name="Shell")
+    reporter = FeatureReporter(stub(Runner))
+    reporter.sh = sh
+    reporter.on_error(scenario_stub, scenario_result_stub)
+    reporter.on_error(scenario_stub, scenario_result_stub)
+
+    expects(sh.mock_calls).to.equal(
+        [
+            call.reset("\n"),
+            call.bold_red(
+                "Error TypeError('sys.exc_info() takes no arguments (1 given)')\n"
+            ),
+            call.bold_red(
+                f'  File "{collapse_path(__file__)}", line 319, in contrive_exception_info\n    sys.exc_info(sys)\n'
+            ),
+            call.reset("  "),
+            call.reset("\n"),
+            call.bold_red(f"{collapse_path(__file__)}:316\n"),
+        ]
+    )
+
+
+@patch("sure.reporters.feature.sys")
+def test_feature_reporter_on_internal_runtime_error_special_syntax_error(sys):
+    "FeatureReporter.on_internal_runtime_error() displays SpecialSyntaxDisabledError in yellow"
+
+    def contrive_special_syntax_disabled_error():
+        try:
+            raise SpecialSyntaxDisabledError("yellow")
+        except Exception as e:
+            return e, sys.exc_info()
+
+    exc, exc_info = contrive_special_syntax_disabled_error()
+    location = TestLocation(contrive_special_syntax_disabled_error)
+    sh = Spy(name="Shell")
+    reporter = FeatureReporter(stub(Runner))
+    reporter.sh = sh
+    context = stub(RuntimeContext, name="runtime-context-stub-name", reporter=reporter)
+    error = ErrorStack(location=location, exc=exc, exception_info=exc_info)
+
+    reporter.on_internal_runtime_error(context, error)
+
+    expects(sh.mock_calls).to.equal([call.bold_yellow("\n yellow")])
+    sys.exit.assert_called_once_with(exit_code(str(exc)))
+
+
+@patch("sure.reporters.feature.sys.exit")
+def test_feature_reporter_on_internal_runtime_error(exit):
+    "FeatureReporter.on_internal_runtime_error() displays InternalRuntimeError in red"
+
+    reporter = FeatureReporter(stub(Runner))
+    context = stub(RuntimeContext, name="runtime-context-stub-name", reporter=reporter)
+    sh = Spy(name="Shell")
+    reporter.sh = sh
+
+    def contrive_special_syntax_disabled_error():
+        try:
+            raise InternalRuntimeError(context, RuntimeError("fail"))
+        except Exception as e:
+            return e, sys.exc_info()
+
+    exc, exc_info = contrive_special_syntax_disabled_error()
+    location = TestLocation(contrive_special_syntax_disabled_error)
+    error = ErrorStack(location=location, exc=exc, exception_info=exc_info)
+
+    reporter.on_internal_runtime_error(context, error)
+
+    expects(sh.mock_calls).to.equal(
+        [
+            call.bold_red(
+                f'  File "{collapse_path(__file__)}", line 392, in contrive_special_syntax_disabled_error\n    raise InternalRuntimeError(context, RuntimeError("fail"))\n'
+            )
+        ]
+    )
+    exit.assert_called_once_with(exit_code(str(exc)))
+
+
+def test_feature_reporter_on_finish():
+    "FeatureReporter.on_internal_runtime_error() displays InternalRuntimeError in red"
+
+    reporter = FeatureReporter(stub(Runner))
+    sh = Spy(name="Shell")
+    reporter.sh = sh
+    reporter.failures = {None}
+    reporter.errors = {None}
+    reporter.successes = list(range(8))
+
+    reporter.on_finish()
+    expects(sh.mock_calls).to.equal(
+        [
+            call.reset(""),
+            call.yellow("1 failed"),
+            call.reset("\n"),
+            call.red("1 errors"),
+            call.reset("\n"),
+            call.green("8 successful"),
+            call.reset("\n"),
+            call.reset(" "),
+        ]
+    )

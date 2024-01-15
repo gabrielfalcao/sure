@@ -59,6 +59,8 @@ Running tests
    sure tests
 
 
+For More Information:
+
 .. code:: bash
 
    sure --help

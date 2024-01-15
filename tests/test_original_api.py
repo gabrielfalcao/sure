@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 import os
 import sure
 import time
@@ -31,6 +30,7 @@ from sure import StagingArea
 from sure.errors import WrongUsageError
 from sure.special import is_cpython
 from sure.loader import collapse_path
+from sure.original import all_integers
 
 
 def test_setup_with_context():
@@ -1664,3 +1664,15 @@ def test_within_failing_due_to_internally_raised_exception():
         RuntimeError,
         "unrelated exception"
     )
+
+
+def test_all_integers_at_least_one_element_not_an_integer():
+    ":func:`sure.original.all_integers` returns False when at least one of the elements in the given iterable is not a :class:`int`"
+
+    expects(all_integers([1, 2, 3, "four"])).to.be.false
+
+
+def test_all_integers_not_iterable():
+    ":func:`sure.original.all_integers` returns False when receiving a non-iterable param"
+
+    expects(all_integers(9)).to.be.false

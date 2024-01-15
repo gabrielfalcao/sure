@@ -91,7 +91,7 @@ def test_scenario_arrangement_nonunittest_testcase_test():
     expects(scenario_arrangement).to.have.property("source_instance").being.a(TestCaseA)
 
     expects(repr(scenario_arrangement)).to.equal(
-        f'<ScenarioArrangement:TestCaseA scenario "None" \ndefined at {collapse_path(__file__)}:76>'
+        f'<ScenarioArrangement:TestCaseA scenario "" \ndefined at {collapse_path(__file__)}:76>'
     )
 
 

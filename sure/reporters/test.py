@@ -17,7 +17,18 @@
 
 import time
 from collections import defaultdict
+from typing import Union
 from sure.reporter import Reporter
+from sure.runtime import (
+    Feature,
+    FeatureResult,
+    Scenario,
+    ScenarioResult,
+    ScenarioResultSet,
+    TestLocation,
+    ErrorStack,
+    RuntimeContext,
+)
 
 
 events = defaultdict(list)
@@ -31,28 +42,30 @@ class TestReporter(Reporter):
     def on_start(self):
         events["on_start"].append((time.time(),))
 
-    def on_feature(self, feature):
+    def on_feature(self, feature: Feature):
         events["on_feature"].append((time.time(), feature.name))
 
-    def on_feature_done(self, feature, result):
+    def on_feature_done(self, feature: Feature, result: FeatureResult):
         events["on_feature_done"].append((time.time(), feature.name, result.label.lower()))
 
-    def on_scenario(self, test):
-        events["on_scenario"].append((time.time(), test.name))
+    def on_scenario(self, scenario: Scenario):
+        events["on_scenario"].append((time.time(), scenario.name))
 
-    def on_scenario_done(self, test, result):
-        events["on_scenario_done"].append((time.time(), test.name, result.label.lower()))
+    def on_scenario_done(
+        self, scenario: Scenario, result: Union[ScenarioResult, ScenarioResultSet]
+    ):
+        events["on_scenario_done"].append((time.time(), scenario.name, result.label.lower()))
 
-    def on_failure(self, test, result):
+    def on_failure(self, test: Scenario, result: ScenarioResult):
         events["on_failure"].append((time.time(), test.name, result.label.lower()))
 
-    def on_success(self, test):
-        events["on_test"].append((time.time(), test.name))
+    def on_success(self, test: Scenario):
+        events["on_success"].append((time.time(), test.name))
 
-    def on_error(self, test, result):
+    def on_error(self, test: Scenario, result: ScenarioResult):
         events["on_error"].append((time.time(), test.name, result.label.lower()))
 
-    def on_internal_runtime_error(self, context, error):
+    def on_internal_runtime_error(self, context: RuntimeContext, error: ErrorStack):
         events["on_internal_runtime_error"].append((time.time(), context, error))
 
     def on_finish(self):

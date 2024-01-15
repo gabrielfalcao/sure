@@ -47,8 +47,7 @@ API Reference
 .. autoclass:: sure.loader.loader
 .. autofunction:: sure.loader.resolve_path
 .. autofunction:: sure.loader.get_package
-.. autofunction:: sure.loader.name_appears_to_indicate_test
-.. autofunction:: sure.loader.appears_to_be_test_class
+.. autofunction:: sure.loader.get_type_definition_filename_and_firstlineno
 
 
 ``sure.loader.astutil``

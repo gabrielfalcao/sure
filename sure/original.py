@@ -50,7 +50,7 @@ def is_iterable(obj):
     return not isinstance(obj, (str, )) and hasattr(obj, '__iter__')
 
 
-def all_integers(obj):
+def all_integers(obj: typing.Iterable) -> bool:
     """returns ``True`` if all members of the given iterable are integers
 
     :param obj: an iterable object
@@ -60,22 +60,23 @@ def all_integers(obj):
 
     for element in obj:
         if not isinstance(element, int):
-            return
+            return False
 
     return True
 
 
-def explanation(msg):
+def explanation(msg: str) -> typing.Callable:
     """Decorator for methods of :class:`~sure.original.AssertionHelper`.
 
     :param msg: message to be interpolated with the operands of the comparison taking place within the decorated method.
+    :returns: a decorator function
     """
     def dec(func):
         @wraps(func)
         def wrap(self, expectation):
             ret = func(self, expectation)
-            if ret:
-                return True
+            if bool(ret) is True:
+                return ret
             else:
                 raise AssertionError(msg % (self.actual, expectation))
 

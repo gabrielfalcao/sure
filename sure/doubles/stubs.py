@@ -32,7 +32,7 @@ def stub(base_class=None, **attributes):
         attributes['base_class'] = base_class
         base_class = object
 
-    stub_name = f"{base_class.__name__}Stub"
+    stub_name = attributes.get('__name__', f"{base_class.__name__}Stub")
 
     members = {
         "__init__": lambda self: None,

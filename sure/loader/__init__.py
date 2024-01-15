@@ -33,6 +33,7 @@ from sure.errors import (
     FileSystemError,
     CallerLocation,
     collapse_path,
+    send_runtime_warning
 )
 
 from .astutil import gather_class_definitions_from_module_path
@@ -58,9 +59,8 @@ def resolve_path(path, relative_to="~") -> Path:
     )
 
 
-def get_package(path) -> Path:
-    if not isinstance(path, Path):
-        path = Path(path)
+def get_package(path: Union[str, Path]) -> Path:
+    path = Path(path).expanduser().absolute()
 
     if not path.is_dir():
         path = path.parent
@@ -90,45 +90,39 @@ class FunMeta(object):
         return f"<FunMeta filename={repr(self.filename)} line_number={repr(self.line_number)} name={repr(self.name)}>"
 
     @classmethod
-    def from_function_or_method(cls, func):
-        if not isinstance(func, (types.FunctionType, types.MethodType)):
-            path, lineno = get_type_definition_filename_and_firstlineno(func)
+    def from_function_or_method(cls, target):
+        if isinstance(target, (types.FunctionType, types.MethodType)):
+            path = target.__code__.co_filename
+            lineno = target.__code__.co_firstlineno
+            name = target.__name__
+        elif inspect.isclass(target):
+            path, lineno = get_type_definition_filename_and_firstlineno(target)
+            name = target.__name__
         else:
-            path = func.__code__.co_filename
-            lineno = func.__code__.co_firstlineno
+            name = target.__class__.__name__
+            path, lineno = get_type_definition_filename_and_firstlineno(target.__class__)
 
         return cls(
             filename=path,
             line_number=lineno,
-            name=func.__name__,
+            name=name,
         )
 
 
-def name_appears_to_indicate_test(name: str) -> bool:
-    return name.startswith("Test") or name.endswith("Test")
-
-
-def appears_to_be_test_class(type_object: type) -> bool:
-    if not isinstance(type_object, type):
-        raise TypeError(f"{type_object} ({type(type_object)}) is not a {type}")
-
-    name = type_object.__name__
-    return issubclass(type_object, unittest.TestCase) or name_appears_to_indicate_test(
-        name
-    )
-
-
 def get_type_definition_filename_and_firstlineno(type_object: type) -> Tuple[Path, int]:
-    if not isinstance(type_object, type):
-        raise TypeError(f"{type_object} ({type(type_object)}) is not a {type}")
+    if not inspect.isclass(type_object):
+        raise TypeError(f"{type_object} ({type(type_object)}) is not a class")
 
     name = type_object.__name__
     module_name = type_object.__module__
     module = sys.modules.get(module_name)
     if not module:
         raise RuntimeError(
-            f"{module_name} does not appear within `sys.modules'. Perhaps Sure is not being used the right way or there is a bug in the current version",
+            f"module `{module_name}' does not appear within `sys.modules'. Perhaps Sure is not being used the right way or there is a bug in the current version",
         )
+    if not hasattr(module, '__file__'):
+        return f"<{module_name}>", -1
+
     path = Path(module.__file__)
     called_location = CallerLocation.most_recent()
     classes = gather_class_definitions_from_module_path(
@@ -136,7 +130,6 @@ def get_type_definition_filename_and_firstlineno(type_object: type) -> Tuple[Pat
     )
     __TEST_CLASSES__[path] = classes
     lineno, base_class_names = classes[name]
-
     return collapse_path(path), lineno
 
 
@@ -151,6 +144,8 @@ class loader(object):
     ):
         modules = []
         excludes = excludes or []
+        if not isinstance(excludes, list):
+            raise TypeError(f"sure.loader.load_recursive() param `excludes' must be a {list} but is {repr(excludes)} ({type(excludes)}) instead")
         path = Path(path)
         if path.is_file():
             if fnmatch(path, glob_pattern):
@@ -179,12 +174,15 @@ class loader(object):
         return sorted(modules, key=lambda mod: mod.__file__)
 
     @classmethod
-    def load_python_path(cls, path):
+    def load_python_path(cls, path: Union[str, Path]) -> List[types.ModuleType]:
+        path = Path(path)
         if path.is_dir():
-            logger.debug(f"ignoring directory {path}")
+            send_runtime_warning(f"ignoring {path} for being a directory")
             return []
 
-        if path.name.startswith("_") or path.name.endswith("_"):
+        extlessname, _ = os.path.splitext(path.name)
+        if extlessname.startswith("__") or extlessname.endswith("__"):
+            send_runtime_warning(f"ignoring {path} for seeming to be a __dunder__ file")
             return []
 
         module, root = cls.load_package(path)
@@ -219,10 +217,7 @@ class loader(object):
     def load_package(cls, path: Union[str, Path]) -> Tuple[types.ModuleType, Path]:
         module, spec, fqdn, package_path = cls.load_module(path)
         sys.modules[fqdn] = module
-        try:
-            spec.loader.exec_module(module)
-        except Exception as e:
-            raise e
+        spec.loader.exec_module(module)
         return module, package_path
 
 
@@ -245,3 +240,7 @@ def object_belongs_to_sure(object: object) -> bool:
     ]
 
     return any([heuristic() is True for heuristic in heuristics])
+
+
+def name_appears_to_indicate_test(name: str) -> bool:
+    return name.startswith("Test") or name.endswith("Test")

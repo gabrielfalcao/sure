@@ -31,6 +31,7 @@ from sure import types as stypes
 from mock import Mock
 
 from sure.errors import (
+    exit_code,
     ExitError,
     ExitFailure,
     ImmediateError,
@@ -197,6 +198,7 @@ class ErrorStack(object):
         self.traceback = self.exception_info[-1]
         self.exception = exc
         self.location = location
+        self.code = exit_code(str(exc))
 
     def full(self) -> str:
         return "\n".join(
@@ -266,7 +268,7 @@ class TestLocation(object):
                 f"{test} of type {type(test)} is not supported by {TestLocation}"
             )
 
-        self.description = getattr(self.test, "description", inspect.getdoc(self.test))
+        self.description = getattr(self.test, "description", inspect.getdoc(self.test)) or ""
         if self.description == inspect.getdoc(unittest.TestCase):
             self.description = ""
         self.module_or_instance = module_or_instance
@@ -715,6 +717,7 @@ class ScenarioResult(BaseResult):
         self.location = location
         self.context = context
         self.exc_info = sys.exc_info()
+
         self.stack = ErrorStack(location, error, self.exc_info)
         self.__error__ = None
         self.__failure__ = None

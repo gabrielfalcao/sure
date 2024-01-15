@@ -19,7 +19,7 @@ OPEN_COMMAND		:= open
 endif
 export SURE_NO_COLORS	:= true
 export SURE_LOG_FILE	:= $(GIT_ROOT)/sure-$(date +"%Y-%m-%d-%H:%M:%S").log
-export PYTHONPATH	:= $(GIT_ROOT):$(PYTHONPATH)
+export PYTHONPATH	:= $(GIT_ROOT)
 AUTO_STYLE_TARGETS	:= sure/runtime.py sure/runner.py sure/meta.py sure/meta.py sure/reporter.py sure/reporters
 
 ######################################################################

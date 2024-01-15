@@ -920,11 +920,11 @@ class AssertionBuilder(object):
             if isinstance(
                 self.actual, klass
             ):
-                raise AssertionError(f"expects `{self.actual}' to not be a{suffix} `{class_name}'")
+                raise AssertionError(f"{self.__caller__.display_info} expects `{self.actual}' to not be a{suffix} `{class_name}'")
 
         else:
             if not isinstance(self.actual, klass):
-                raise AssertionError(f"expects `{self.actual}' to be a{suffix} `{class_name}'")
+                raise AssertionError(f"{self.__caller__.display_info} expects `{self.actual}' to be a{suffix} `{class_name}'")
 
         return True
 

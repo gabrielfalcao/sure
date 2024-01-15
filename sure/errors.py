@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 from functools import reduce
 from sure import registry
-from sure.types import TestLocation, ScenarioResult
+from sure.types import TestLocation, ScenarioResult, RuntimeContext
 
 
 __sure_package_path__ = str(Path(__file__).parent)
@@ -112,13 +112,13 @@ class ImmediateFailure(RuntimeInterruption):
 
 
 class ExitError(ImmediateExit):
-    def __init__(self, context, result):
+    def __init__(self, context: RuntimeContext, result: ScenarioResult):
         context.reporter.on_error(context, result)
         return super().__init__(exit_code("ERROR"))
 
 
 class ExitFailure(ImmediateExit):
-    def __init__(self, context, result):
+    def __init__(self, context: RuntimeContext, result: ScenarioResult):
         return super().__init__(exit_code("FAILURE"))
 
 
@@ -127,7 +127,8 @@ class InternalRuntimeError(BaseSureError):
         self.traceback = traceback.format_exc()
         self.exception = exception
         self.code = exit_code(self.traceback)
-        super().__init__(self.traceback)
+        self.context = context
+        super().__init__(f"InternalRuntimeError: {exception}")
         context.reporter.on_internal_runtime_error(context, self)
 
 
@@ -147,7 +148,7 @@ class SpecialSyntaxDisabledError(Exception):
     to employ the special syntax when such behavior is not permitted
     """
     def __init__(self, message: str):
-        message = message
+        self.message = message
         super().__init__(f"{message}")
 
 

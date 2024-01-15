@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+import sys
 from couleur import Shell
 from typing import Union
 from sure.errors import (
@@ -31,6 +31,8 @@ from sure.runtime import (
     ScenarioResult,
     ScenarioResultSet,
     TestLocation,
+    ErrorStack,
+    RuntimeContext,
 )
 
 
@@ -100,16 +102,12 @@ class FeatureReporter(Reporter):
 
         self.tests_finished.append(scenario)
 
-    def on_failure(self, test, result):
+    def on_failure(self, test: Scenario, result: ScenarioResult):
         self.failures.append(test)
         self.indentation += 2
         self.sh.reset("\n")
         self.sh.reset(" " * self.indentation)
         self.indentation += 2
-        if not result.failure:
-            raise RuntimeError(
-                f"{self.__class__}.on_failure() called with a {ScenarioResult} which does not contain a failure"
-            )
 
         self.sh.yellow(f"Failure: {result.failure}\n{result.succinct_failure}")
         self.sh.reset(" " * self.indentation)
@@ -125,12 +123,12 @@ class FeatureReporter(Reporter):
         self.sh.reset("\n")
         self.indentation -= 4
 
-    def on_success(self, test):
+    def on_success(self, test: Scenario):
         self.successes.append(test)
         self.sh.bold_green(checkmark)
         self.sh.reset("")
 
-    def on_error(self, test, result):
+    def on_error(self, test: Scenario, result: ScenarioResult):
         fullstack = result.stack.full()
         if fullstack in self.reported_errors:
             # avoid reporting the same error twice
@@ -150,15 +148,12 @@ class FeatureReporter(Reporter):
         self.failures.append(test)
         self.reported_errors.append(fullstack)
 
-    def on_internal_runtime_error(self, context, error):
+    def on_internal_runtime_error(self, context: RuntimeContext, error: ErrorStack):
         if isinstance(error.exception, SpecialSyntaxDisabledError):
-            global sh
             self.sh.bold_yellow(f"\n{' ' * self.indentation} {error.exception}")
         else:
-            sh = Shell()
-            self.sh.bold_yellow("Internal Runtime Error\n")
-            self.sh.bold_red(error.traceback)
-        raise SystemExit(error.code)
+            self.sh.bold_red(error.location_specific_error())
+        sys.exit(error.code)
 
     def on_finish(self):
         failed = len(self.failures)
@@ -170,10 +165,13 @@ class FeatureReporter(Reporter):
         if failed:
             self.sh.yellow(f"{failed} failed")
             self.sh.reset("\n")
+
         if errors:
             self.sh.red(f"{errors} errors")
             self.sh.reset("\n")
+
         if successful:
             self.sh.green(f"{successful} successful")
             self.sh.reset("\n")
+
         self.sh.reset(" ")

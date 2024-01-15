@@ -1,24 +1,77 @@
+.. _sure:
+
+Sure
+====
+.. index:: sure
+
+.. _Introduction:
+
 Introduction
-============
+------------
 
-Sure is a python library for python that leverages a DSL for writing
-assertions created by `Gabriel Falcão <https://github.com/gabrielfalcao>`_.
+Sure is a both a library and a test-runner for for the Python Programming Languages, featuring a DSL for writing
+assertions. Sure's original author is `Gabriel Falcão <https://github.com/gabrielfalcao>`_.
 
-In CPython it monkey-patches the ``object`` type, adding some methods
-and properties purely for test purposes.
+Sure provides a :ref:`special syntax definition` for writing tests in a
+human-friendly, fluent and easy-to-use manner, In the context of the
+Python Programming language, Sure is a pioneer at extending every
+object with test-specific methods at test-runtime. This feature is
+disabled by default starting on version 3.0.0 and MAY be optionally
+enabled programmatically or via command-line. Read the section
+:ref:`special syntax definition` for more information.
 
-Any python code writen after ``import sure`` gains testing superpowers,
-so you can write assertions like this:
+Whether the :ref:`Special Syntax` is enabled or not, :ref:`sure`
+generally aims at enabling software developers to writing tests in a
+human-friendly, fluent and hopefully fun way.
+
+
+Quick Examples
+--------------
+
+:ref:`Standard Behavior` Example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
-    import sure
+   from sure import expect
+
+   def printing_money_indiscriminately(amount):
+       raise ValueError(f"Inflation! Printing {amount} amounts of money is likely increase inflation!")
+
+   expect(printing_money_indiscriminately.when.called_with(88888888).should.throw(
+       ValueError,
+       "Inflation! Printing 88888888 amounts of money is likely increase inflation!"
+   )
 
 
-    def some_bratty_function(parameter):
-        raise ValueError("Me no likey {0}".format(parameter))
+:ref:`Special Syntax` Example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. code:: python
 
-    some_bratty_function.when.called_with("Scooby").should.throw(ValueError, "Me no likey Scooby")
+   import sure
+   sure.enable_special_syntax()
 
-Let's `get it started <getting-started.html>`__
+   def superpowers(mode):
+       if mode in ("ignorance", "selfishness"):
+           raise SyntaxError(
+               f"superpowers cannot, must not and shall not be used in the name of {mode}!"
+           )
+        raise NotImplementedError(
+            f"{mode} entirely not allowed"
+        )
+
+   superpowers.when.called_with("ignorance").should.have.raised(
+       SyntaxError,
+       "superpowers cannot, must not and shall not be used in the name of ignorance!"
+   )
+
+   superpowers.when.called_with("selfishness").should.have.raised(
+       SyntaxError,
+       "superpowers cannot, must not and shall not be used in the name of selfishness!"
+   )
+
+   superpowers.when.called_with("out thinking").should.have.raised(
+       NotImplementedError,
+       "out thinking entirely not allowed"
+   )

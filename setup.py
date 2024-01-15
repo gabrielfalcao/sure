@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"utility belt for automated testing in python for python"
+"""sophisticated automated test library and runner"""
 
 import os
 import ast
@@ -81,8 +81,8 @@ def read_readme():
         return __doc__
 
 
-install_requires = ["mock", "six"]
-tests_require = ["nose"]
+install_requires = ["mock", "coverage==7.3.3", "click==8.1.7", "couleur==0.7.4"]
+tests_require = []
 version = read_version()
 
 if __name__ == "__main__":
@@ -94,8 +94,8 @@ if __name__ == "__main__":
         url="http://github.com/gabrielfalcao/sure",
         author="Gabriel Falcao",
         author_email="gabriel@nacaolivre.org",
-        maintainer="Timo Furrer",
-        maintainer_email="tuxtimo@gmail.com",
+        maintainer="Gabriel Falcao",
+        maintainer_email="gabrielteratos@gmail.com",
         include_package_data=True,
         packages=find_packages(exclude=["*tests*"]),
         install_requires=install_requires,
@@ -104,9 +104,8 @@ if __name__ == "__main__":
             "console_scripts": ["sure = sure.cli:entrypoint"],
         },
         tests_require=tests_require,
-        test_suite="nose.collector",
         classifiers=[
-            "Development Status :: 5 - Production/Stable",
+            "Development Status :: 1 - Planning",
             "Environment :: Console",
             "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
             "Operating System :: MacOS :: MacOS X",
@@ -114,7 +113,6 @@ if __name__ == "__main__":
             "Operating System :: POSIX :: Linux",
             "Programming Language :: Python",
             "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",

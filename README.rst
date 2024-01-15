@@ -37,59 +37,67 @@ sure
 .. image:: https://img.shields.io/badge/pydoc-web-ff69b4.svg
    :target: http://pydoc.net/sure
 
-An idiomatic testing library for python with powerful and flexible assertions, created by `Gabriel Falcão <https://github.com/gabrielfalcao>`_.
-Sure's developer experience is inspired and modeled after `RSpec Expectations
-<http://rspec.info/documentation/3.5/rspec-expectations/>`_ and
-`should.js <https://github.com/shouldjs/should.js>`_.
+The sophisticated automated test tool for Python, featuring a test
+runner and a library with powerful and flexible assertions.
+
+Originally authored by `Gabriel Falcão <https://github.com/gabrielfalcao>`_.
+
 
 Installing
 ----------
 
 .. code:: bash
 
-    $ pip install sure
+   pip install sure
+
+
+Running tests
+-------------
+
+.. code:: bash
+
+   sure tests
+
+
+For More Information:
+
+.. code:: bash
+
+   sure --help
+
 
 Documentation
 -------------
 
-Available in the `website <https://sure.readthedocs.io/en/latest/>`__ or under the
-``docs`` directory.
+Available on the `website <https://sure.readthedocs.io/en/latest/>`_.
 
-You can also build the documentation locally using sphinx:
+To build locally run:
 
 .. code:: bash
 
     make docs
 
-Here is a tease
----------------
 
-Equality
-~~~~~~~~
-
-(number).should.equal(number)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Quick Library Showcase
+----------------------
 
 .. code:: python
 
-    import sure
+   from sure import expects
 
-    (4).should.be.equal(2 + 2)
-    (7.5).should.eql(3.5 + 4)
+   expects(4).to.be.equal(2 + 2)
+   expects(7.5).to.be.eql(3.5 + 4)
 
-    (3).shouldnt.be.equal(5)
-
-Assert dictionary and its contents
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   expects(3).to.not_be.equal(5)
+   expects(9).to_not.be.equal(11)
 
 .. code:: python
 
-    {'foo': 'bar'}.should.equal({'foo': 'bar'})
-    {'foo': 'bar'}.should.have.key('foo').which.should.equal('bar')
+   from sure import expects
 
-"A string".lower().should.equal("a string") also works
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   expects({'foo': 'bar'}).to.equal({'foo': 'bar'})
+   expects({'foo': 'bar'}).to.have.key('foo').being.equal('bar')
 
 .. code:: python
 
-    "Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])
+   "Awesome ASSERTIONS".lower().split().should.equal(['awesome', 'assertions'])

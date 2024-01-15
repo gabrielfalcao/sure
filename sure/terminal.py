@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,47 +14,48 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import unicode_literals
-
 import os
 import sys
 import platform
-
-SUPPORTS_ANSI = False
-for handle in [sys.stdout, sys.stderr]:
-    if (hasattr(handle, "isatty") and handle.isatty()) or \
-        ('TERM' in os.environ and os.environ['TERM'] == 'ANSI'):
-        if platform.system() == 'Windows' and not (
-            'TERM' in os.environ and os.environ['TERM'] == 'ANSI'):
-            SUPPORTS_ANSI = False
-        else:
-            SUPPORTS_ANSI = True
-
-if os.getenv('SURE_NO_COLORS'):
-    SUPPORTS_ANSI = False
-
-SUPPORTS_ANSI = False
+from functools import cache
 
 
-def red(string):
-    if not SUPPORTS_ANSI:
-        return string
-    return r"\033[1;31m{0}\033[0m".format(string)
+@cache
+def has_ansi_support(os=os, sys=sys, platform=platform):
+    if os.getenv("SURE_NO_COLORS"):
+        return False
+
+    for handle in [sys.stdout, sys.stderr]:
+        if (hasattr(handle, "isatty") and handle.isatty()) or (
+            "TERM" in os.environ and os.environ["TERM"] == "ANSI"
+        ):
+            if platform.system() != "Windows" and (
+                "TERM" in os.environ and os.environ["TERM"] == "ANSI"
+            ):
+                return True
+
+    return False
 
 
-def green(string):
-    if not SUPPORTS_ANSI:
-        return string
-    return r"\033[1;32m{0}\033[0m".format(string)
+def white(msg):
+    if not has_ansi_support():
+        return msg
+    return r"\033[1;37m{0}\033[0m".format(msg)
 
 
-def yellow(string):
-    if not SUPPORTS_ANSI:
-        return string
-    return r"\033[1;33m{0}\033[0m".format(string)
+def yellow(msg):
+    if not has_ansi_support():
+        return msg
+    return r"\033[1;33m{0}\033[0m".format(msg)
 
 
-def white(string):
-    if not SUPPORTS_ANSI:
-        return string
-    return r"\033[1;37m{0}\033[0m".format(string)
+def red(msg):
+    if not has_ansi_support():
+        return msg
+    return r"\033[1;31m{0}\033[0m".format(msg)
+
+
+def green(msg):
+    if not has_ansi_support():
+        return msg
+    return r"\033[1;32m{0}\033[0m".format(msg)

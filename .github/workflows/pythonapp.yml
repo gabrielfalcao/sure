@@ -1,4 +1,3 @@
----
 name: Sure Tests
 on:
   push:
@@ -24,8 +23,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Run Tests
+    - name: Install Python
       uses: gabrielfalcao/pyenv-action@v18
       with:
         default: "${{ matrix.python }}"
-        command: make dependencies tests
+        command: make dependencies
+
+    - name: Test with PyTest
+      run: make dependencies tests
+
+    - name: Self/Auto Test
+      run: make dependencies run

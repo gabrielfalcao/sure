@@ -1,7 +1,6 @@
-## #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# <sure - utility belt for automated testing in python>
-# Copyright (C) <2010-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# <sure - sophisticated automated test library and runner>
+# Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,74 +14,70 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from __future__ import unicode_literals
-
 import sure
-from sure import expect
-from sure.magic import is_cpython
+from sure import expect, is_special_syntax_enabled
+from sure.special import is_cpython
 
-# if is_cpython:
-#     if sure.allows_new_syntax:
+if not is_special_syntax_enabled():
+    def test_it_works_with_objects():
+        ("anything that inherits from object should be patched")
 
-#         def test_it_works_with_objects():
-#             ("anything that inherits from object should be patched")
+        (4).should.equal(2 + 2)
+        "foo".should.equal("f" + ("o" * 2))
+        {}.should.be.empty
 
-#             (4).should.equal(2 + 2)
-#             "foo".should.equal("f" + ("o" * 2))
-#             {}.should.be.empty
+    def test_shouldnt_overwrite_class_attributes():
+        """do not patch already existing class attributes with same name"""
 
-#         def test_shouldnt_overwrite_class_attributes():
-#             """do not patch already existing class attributes with same name"""
+        class Foo(object):
+            when = 42
+            shouldnt = 43
+            bar = "bar"
 
-#             class Foo(object):
-#                 when = 42
-#                 shouldnt = 43
-#                 bar = "bar"
+        Foo.when.should.be.equal(42)
+        Foo.shouldnt.should.be.equal(43)
+        Foo.bar.should.be.equal("bar")
 
-#             Foo.when.should.be.equal(42)
-#             Foo.shouldnt.should.be.equal(43)
-#             Foo.bar.should.be.equal("bar")
+        Foo.__dict__.should.contain("when")
+        Foo.__dict__.should.contain("shouldnt")
+        Foo.__dict__.should.contain("bar")
 
-#             Foo.__dict__.should.contain("when")
-#             Foo.__dict__.should.contain("shouldnt")
-#             Foo.__dict__.should.contain("bar")
+        dir(Foo).should.contain("when")
+        dir(Foo).should.contain("shouldnt")
+        dir(Foo).should.contain("bar")
+        dir(Foo).shouldnt.contain("should")
 
-#             dir(Foo).should.contain("when")
-#             dir(Foo).should.contain("shouldnt")
-#             dir(Foo).should.contain("bar")
-#             dir(Foo).shouldnt.contain("should")
+    def test_shouldnt_overwrite_instance_attributes():
+        """do not patch already existing instance attributes with same name"""
 
-#         def test_shouldnt_overwrite_instance_attributes():
-#             """do not patch already existing instance attributes with same name"""
+        class Foo(object):
+            def __init__(self, when, shouldnt, bar):
+                self.when = when
+                self.shouldnt = shouldnt
+                self.bar = bar
 
-#             class Foo(object):
-#                 def __init__(self, when, shouldnt, bar):
-#                     self.when = when
-#                     self.shouldnt = shouldnt
-#                     self.bar = bar
+        f = Foo(42, 43, "bar")
 
-#             f = Foo(42, 43, "bar")
+        f.when.should.be.equal(42)
+        f.shouldnt.should.be.equal(43)
+        f.bar.should.be.equal("bar")
 
-#             f.when.should.be.equal(42)
-#             f.shouldnt.should.be.equal(43)
-#             f.bar.should.be.equal("bar")
+        f.__dict__.should.contain("when")
+        f.__dict__.should.contain("shouldnt")
+        f.__dict__.should.contain("bar")
 
-#             f.__dict__.should.contain("when")
-#             f.__dict__.should.contain("shouldnt")
-#             f.__dict__.should.contain("bar")
+        dir(f).should.contain("when")
+        dir(f).should.contain("shouldnt")
+        dir(f).should.contain("bar")
+        dir(f).shouldnt.contain("should")
 
-#             dir(f).should.contain("when")
-#             dir(f).should.contain("shouldnt")
-#             dir(f).should.contain("bar")
-#             dir(f).shouldnt.contain("should")
+    def test_dir_conceals_sure_specific_attributes():
+        ("dir(obj) should conceal names of methods that were grafted by sure")
 
-#     def test_dir_conceals_sure_specific_attributes():
-#         ("dir(obj) should conceal names of methods that were grafted by sure")
+        x = 123
 
-#         x = 123
-
-#         expect(set(dir(x)).intersection(set(sure.POSITIVES))).to.be.empty
-#         expect(set(dir(x)).intersection(set(sure.NEGATIVES))).to.be.empty
+        expect(set(dir(x)).intersection(set(sure.POSITIVES))).to.be.empty
+        expect(set(dir(x)).intersection(set(sure.NEGATIVES))).to.be.empty
 
 
 # TODO

@@ -1,1 +1,3 @@
-six==1.16.0
+click==8.1.7
+couleur==0.7.4
+coverage==7.3.3

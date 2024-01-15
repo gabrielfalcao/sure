@@ -33,8 +33,13 @@ EXPL_NOT_SUPPORTED_VERSIONS = ((3, 0), (3, 1), (3, 2))
 
 if sys.version_info[0:2] in EXPL_NOT_SUPPORTED_VERSIONS:
     raise SystemExit(
-        "sure does explicitly not support the following python versions "
+        "Sure does explicitly not support the following python versions "
         "due to big incompatibilities: {0}".format(EXPL_NOT_SUPPORTED_VERSIONS)
+    )
+
+if sys.version_info[0] < 3:
+    raise SystemExit(
+        "Sure no longer supports Python 2"
     )
 
 
@@ -81,7 +86,7 @@ def read_readme():
         return __doc__
 
 
-install_requires = ["mock", "coverage==7.3.3", "click==8.1.7", "couleur==0.7.4"]
+install_requires = ["mock", "coverage==7.4.0", "click==8.1.7", "couleur==0.7.4"]
 tests_require = []
 version = read_version()
 

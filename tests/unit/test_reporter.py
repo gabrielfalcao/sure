@@ -96,7 +96,7 @@ def test_reporter_instance_methods():
         NotImplementedError
     )
 
-    expects(reporter.on_finish).when.called.to.have.raised(
+    expects(reporter.on_finish).when.called_with(anything).to.have.raised(
         NotImplementedError
     )
 
@@ -147,6 +147,6 @@ def test_from_name_and_runner(initialize):
         NotImplementedError
     )
 
-    expects(reporter.on_finish).when.called.to.have.raised(
+    expects(reporter.on_finish).when.called_with(anything).to.have.raised(
         NotImplementedError
     )

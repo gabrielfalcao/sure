@@ -17,7 +17,7 @@
 from pathlib import Path
 from typing import Dict
 from sure.meta import MetaReporter, get_reporter, gather_reporter_names
-from sure.types import Runner, Feature, FeatureResult
+from sure.types import Runner, Feature, FeatureResult, RuntimeContext
 
 __path__ = Path(__file__).absolute().parent
 
@@ -217,16 +217,18 @@ class Reporter(object, metaclass=MetaReporter):
         """
         raise NotImplementedError
 
-    def on_finish(self):
+    def on_finish(self, context: RuntimeContext):
         """Called as soon as `sure' finishes running.
 
         .. code:: python
 
            from sure.reporter import Reporter
+           from sure.runtime import RuntimeContext
+
 
            class HelloReporter(Reporter):
-           def on_finish(self):
-               sys.stderr.write('Reporter.on_finish works')
+               def on_finish(self, context: RuntimeContext):
+                   sys.stderr.write('Reporter.on_finish works')
 
            HelloReporter('a <sure.runner.Runner()>').on_finish()
         """

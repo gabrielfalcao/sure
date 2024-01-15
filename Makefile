@@ -59,9 +59,9 @@ test tests:
 
 # runs main command-line tool
 run: | $(LIBEXEC_PATH)
-	$(LIBEXEC_PATH) tests/crashes
-	$(LIBEXEC_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure.core --cover-module=sure tests/runner
-	$(LIBEXEC_PATH) --special-syntax --with-coverage --cover-branches --cover-module=sure --immediate --cover-module=sure --ignore tests/crashes tests
+	$(LIBEXEC_PATH) --reap-warnings tests/crashes
+	$(LIBEXEC_PATH) --reap-warnings --special-syntax --with-coverage --cover-branches --cover-module=sure.core --cover-module=sure tests/runner
+	$(LIBEXEC_PATH) --reap-warnings --special-syntax --with-coverage --cover-branches --cover-module=sure --immediate --cover-module=sure --ignore tests/crashes tests
 
 push-release: dist  # pushes distribution tarballs of the current version
 	$(VENV)/bin/twine upload dist/*.tar.gz

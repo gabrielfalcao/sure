@@ -22,18 +22,10 @@ from functools import cache
 
 from sure.terminal import yellow, red, green
 from sure.doubles.dummies import Anything
+from sure.doubles.mocks import MockCallListType
 from sure.loader import get_file_name
 from sure.loader import get_line_number
 from sure.loader import resolve_path
-
-from unittest.mock import _CallList as UnitTestMockCallList
-
-try:  # TODO: document the coupling with :mod:`mock` or :mod:`unittest.mock`
-    from mock.mock import _CallList as MockCallList
-except ImportError:  # pragma: no cover
-    MockCallList = None
-
-MockCallListType = tuple(filter(bool, (UnitTestMockCallList, MockCallList)))
 
 
 class Explanation(str):
@@ -51,10 +43,7 @@ class Explanation(str):
 
 
 class DeepComparison(object):
-    """Performs a deep comparison between Python objects in the sense
-that complex or nested datastructures, such as :external+python:ref:`mappings <mapping>` of
-:external+python:ref:`sequences <sequence>`, :external+python:ref:`sequences <sequence>` of :external+python:ref:`mappings <mapping>`, :external+python:ref:`mappings <mapping>` of :external+python:ref:`sequences <sequence>` containing
-:external+python:ref:`mappings <mapping>` or sequences :external+python:ref:`sequences <sequence>` and so on, are recursively compared and reaching farthest accessible edges.
+    """Performs a deep comparison between Python objects in the sense that complex or nested datastructures, such as :external+python:ref:`mappings <mapping>` of :external+python:ref:`sequences <sequence>`, :external+python:ref:`sequences <sequence>` of :external+python:ref:`mappings <mapping>`, :external+python:ref:`mappings <mapping>` of :external+python:ref:`sequences <sequence>` containing :external+python:ref:`mappings <mapping>` or sequences :external+python:ref:`sequences <sequence>` and so on, are recursively compared and reaching farthest accessible edges.
     """
     def __init__(self, X, Y, epsilon=None, parent=None):
         self.complex_cmp_funcs = {
@@ -183,10 +172,17 @@ that complex or nested datastructures, such as :external+python:ref:`mappings <m
         c = self.get_context()
         len_X, len_Y = map(len, (X, Y))
         if len_X > len_Y:
-            msg = f"X{red(c.current_X_keys)} has {len_X} items whereas Y{green(c.current_Y_keys)} has only {len_Y}"
+            if len_Y == 0:
+                msg = f"X{red(c.current_X_keys)} has {len_X} items whereas Y{green(c.current_Y_keys)} is empty"
+            else:
+                msg = f"X{red(c.current_X_keys)} has {len_X} items whereas Y{green(c.current_Y_keys)} has only {len_Y}"
             return Explanation(msg)
         elif len_X < len_Y:
-            msg = f"Y{green(c.current_Y_keys)} has {len_Y} items whereas X{red(c.current_X_keys)} has only {len_X}"
+            if len_X == 0:
+                msg = f"Y{green(c.current_Y_keys)} has {len_Y} items whereas X{red(c.current_X_keys)} is empty"
+            else:
+                msg = f"Y{green(c.current_Y_keys)} has {len_Y} items whereas X{red(c.current_X_keys)} has only {len_X}"
+
             return Explanation(msg)
         elif X == Y:
             return True

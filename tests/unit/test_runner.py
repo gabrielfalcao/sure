@@ -15,20 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "unit tests for :mod:`sure.runner`"
-
+import sys
 import unittest
 from pathlib import Path
 from mock import patch
+from mock import Mock as Spy
 from sure import expects
+from sure.errors import ExitError, ExitFailure, ImmediateError, ImmediateFailure
 from sure.doubles import stub, Dummy
 from sure.runner import Runner
-from sure.runtime import RuntimeOptions
+from sure.runtime import RuntimeOptions, Feature, FeatureResult, ScenarioResult, TestLocation, ErrorStack
 
 
 @patch("sure.runner.Reporter")
 def test_runner_get_reporter(Reporter):
     "sure.runner.Runner.get_reporter() should fetch an instance of :class:`sure.reporter.Reporter` class from :mod:`sure.meta`'s internal registry"
-
     # Given an instance of :class:`~sure.runner.Runner` whose constructor is stubbed
     runner = stub(Runner)
 
@@ -49,6 +50,7 @@ def test_runner_fetches_a_reporter_during_initialization(get_reporter):
     get_reporter.return_value = Dummy("Reporter")
     path = Path("~")
     options_stub = stub(RuntimeOptions)
+
     runner = Runner(
         base_path=path, reporter="reporter-name-dummy", options=options_stub
     )
@@ -59,7 +61,7 @@ def test_runner_fetches_a_reporter_during_initialization(get_reporter):
     expects(runner).to.have.property("base_path").being.equal(path)
 
     expects(repr(runner)).to.equal(
-        f"<Runner base_path=PosixPath('~') reporter=<Dummy Reporter>>"
+        "<Runner base_path=PosixPath('~') reporter=<Dummy Reporter>>"
     )
 
 
@@ -68,11 +70,9 @@ def test_runner_find_candidates(loader):
     "sure.runner.Runner.find_candidates() should call :meth:`sure.runner.Reporter.get_reporter`"
 
     loader.load_recursive.return_value = [Dummy("dummy-module")]
+
     options_stub = stub(
-        RuntimeOptions,
-        immediate=False,
-        ignore=Dummy("excludes"),
-        glob_pattern="*.py"
+        RuntimeOptions, immediate=False, ignore=Dummy("excludes"), glob_pattern="*.py"
     )
     runner = stub(Runner, options=options_stub)
     modules = runner.find_candidates(["dummy-path"])
@@ -180,5 +180,116 @@ def test_runner_extract_members_should_return_tuple_with_the_candidate_and_its_e
             pass
 
     expects(runner.extract_members(TestExtractMembers)).to.equal(
-        (TestExtractMembers, [TestExtractMembers.test_0, TestExtractMembers.test_2, TestExtractMembers.test_4])
+        (
+            TestExtractMembers,
+            [
+                TestExtractMembers.test_0,
+                TestExtractMembers.test_2,
+                TestExtractMembers.test_4,
+            ],
+        )
     )
+
+
+@patch("sure.errors.sys.exit")
+@patch("sure.runner.Runner.load_features")
+def test_runner_execute_behavior_on_immediate_failure(load_features, exit):
+    """sure.runner.Runner.execute() should raise :exc:`sure.errors.ExitFailure`"""
+
+    options = RuntimeOptions(immediate=True)
+    reporter = Spy(name="reporter")
+    runner = stub(Runner, options=options, reporter=reporter)
+
+    feature_result_stub = stub(FeatureResult, is_failure=True)
+    feature_stub = stub(
+        Feature, run=lambda self, reporter, runtime: feature_result_stub
+    )
+    load_features.return_value = [feature_stub]
+    dummy_path = Dummy("pathlib.Path")
+    expects(runner.execute).when.called_with([dummy_path]).to.have.raised(ExitFailure)
+    exit.assert_called_once_with(64)
+
+
+@patch("sure.errors.sys.exit")
+@patch("sure.runner.Runner.load_features")
+def test_runner_execute_behavior_on_immediate_error(load_features, exit):
+    """sure.runner.Runner.execute() should raise :exc:`sure.errors.ExitError`"""
+
+    options = RuntimeOptions(immediate=True)
+    reporter = Spy(name="reporter")
+    runner = stub(Runner, options=options, reporter=reporter)
+
+    feature_result_stub = stub(FeatureResult, is_error=True, is_failure=False)
+    feature_stub = stub(
+        Feature, run=lambda self, reporter, runtime: feature_result_stub
+    )
+    load_features.return_value = [feature_stub]
+    dummy_path = Dummy("pathlib.Path")
+    expects(runner.execute).when.called_with([dummy_path]).to.have.raised(ExitError)
+    exit.assert_called_once_with(88)
+
+
+@patch("sure.runner.Runner.execute")
+def test_runner_run_behavior_on_immediate_failure(execute):
+    """sure.runner.Runner.run() should raise :exc:`sure.errors.ExitFailure`"""
+
+    def contrive_failure():
+        try:
+            raise AssertionError("test")
+        except Exception as e:
+            return e, sys.exc_info()
+
+    exc, exc_info = contrive_failure()
+    options = RuntimeOptions(immediate=True)
+    reporter = Spy(name="reporter")
+    runner = stub(Runner, options=options, reporter=reporter)
+
+    location = TestLocation(contrive_failure)
+    scenario_result_stub = stub(
+        ScenarioResult,
+        result=Dummy("failure.result"),
+        scenario=Dummy("scenario_dummy"),
+        context=Dummy("context"),
+        location=location,
+        __error__=None,
+        __failure__=exc,
+        stack=ErrorStack(location, exc, exc_info),
+    )
+    execute.side_effect = ImmediateFailure(scenario_result_stub)
+    expects(runner.run(Dummy("path"))).to.equal(scenario_result_stub)
+
+    execute.assert_called_once_with(Dummy("path"))
+
+
+@patch("sure.runner.Runner.execute")
+def test_runner_run_behavior_on_immediate_error(execute):
+    """sure.runner.Runner.run() should raise :exc:`sure.errors.ExitError`"""
+
+    def contrive_error():
+        try:
+            raise RuntimeError("test")
+        except Exception as e:
+            return e, sys.exc_info()
+
+    exc, exc_info = contrive_error()
+    options = RuntimeOptions(immediate=True)
+    reporter = Spy(name="reporter")
+    runner = stub(Runner, options=options, reporter=reporter)
+
+    location = TestLocation(contrive_error)
+    error = ErrorStack(location, exc, exc_info)
+    scenario_result_stub = stub(
+        ScenarioResult,
+        result=Dummy("error.result"),
+        scenario=Dummy("scenario_dummy"),
+        context=Dummy("context"),
+        location=location,
+        __error__=exc,
+        __failure__=None,
+        stack=error,
+    )
+
+    execute.side_effect = ImmediateError(scenario_result_stub)
+    expects(runner.run(Dummy("path"))).to.equal(scenario_result_stub)
+
+    execute.assert_called_once_with(Dummy("path"))

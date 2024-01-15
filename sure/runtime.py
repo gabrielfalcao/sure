@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 import os
 import re
 import sys
@@ -27,8 +26,12 @@ import traceback
 from pathlib import Path
 from functools import reduce
 from typing import Dict, List, Optional, Any, Callable, Union
-from sure import types as stypes
 from mock import Mock
+
+from sure.reporter import Reporter
+from sure.errors import InternalRuntimeError
+from sure.special import WarningReaper
+from sure import types as stypes
 
 from sure.errors import (
     exit_code,
@@ -49,12 +52,8 @@ from sure.loader import (
     get_type_definition_filename_and_firstlineno,
     object_belongs_to_sure,
 )
-from sure.reporter import Reporter
-from sure.errors import InternalRuntimeError
 
 self = sys.modules[__name__]
-
-
 log = logging.getLogger(__name__)
 
 
@@ -144,25 +143,29 @@ class RuntimeOptions(object):
 
     - ``immediate`` - quit entire test-run session immediately after a failure
     - ``ignore`` - optional list of paths to be ignored
-    - ``glob_pattern`` - optional string representing a valid :mod:`fnmatch` pattern to be matched against every "full" :class:`~pathlib.Path` in lookup paths of :meth:`~sure.runner.Runner.find_candidates` and :class:`~sure.loader.loader`. Defaults to "**test*.py"
+    - ``glob_pattern`` - optional string representing a valid :mod:`fnmatch` pattern to be matched against every "full" :class:`~pathlib.Path` in lookup paths of :meth:`~sure.runner.Runner.find_candidates` and :class:`~sure.loader.loader`. Defaults to ``**test*.py``
+    - ``reap_warnings`` - optional bool to flag that warnings should be reaped, captured during runtime and displayed by the chosen reporter at the end of the test execution session. Defaults to ``False``
     """
 
     immediate: bool
     ignore: Optional[List[Union[str, Path]]]
     glob_pattern: str
+    reap_warnings: bool
 
     def __init__(
         self,
         immediate: bool,
         ignore: Optional[List[Union[str, Path]]] = None,
         glob_pattern: str = "**test*.py",
+        reap_warnings: bool = False
     ):
         self.immediate = bool(immediate)
         self.ignore = ignore and list(ignore) or []
         self.glob_pattern = glob_pattern
+        self.reap_warnings = bool(reap_warnings)
 
     def __repr__(self):
-        return f"<RuntimeOptions immediate={self.immediate} glob_pattern={repr(self.glob_pattern)}>"
+        return f"<RuntimeOptions immediate={self.immediate} glob_pattern={repr(self.glob_pattern)} reap_warnings={repr(self.reap_warnings)}>"
 
 
 class RuntimeContext(object):
@@ -185,9 +188,16 @@ class RuntimeContext(object):
         self.reporter = reporter
         self.options = options
         self.unittest_testcase_method_name = unittest_testcase_method_name
+        self.warning_reaper = WarningReaper()
+        if options.reap_warnings:
+            self.warning_reaper.enable_capture()
 
     def __repr__(self):
         return f"<RuntimeContext reporter={self.reporter} options={self.options}>"
+
+    @property
+    def warnings(self):
+        return self.warning_reaper.warnings
 
 
 class ErrorStack(object):
@@ -406,7 +416,6 @@ class ScenarioArrangement(BaseContainer):
         nested_containers = []
 
         if isinstance(some_object, type) and not object_belongs_to_sure(some_object):
-            some_object_type = some_object
             #     <unittest.TestCase.__init__>
             #   constructs instance of unittest.TestCase and filter out each instance_or_function
             if issubclass(some_object, unittest.TestCase):
@@ -429,7 +438,6 @@ class ScenarioArrangement(BaseContainer):
                     )
 
         elif isinstance(some_object, types.FunctionType):
-            some_object_type = type(some_object)
             instance_or_function = some_object
             # TODO: refactor :mod:`sure.runner` and
             # :mod:`sure.runtime` to provide a test function's

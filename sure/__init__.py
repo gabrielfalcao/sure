@@ -352,6 +352,16 @@ def action_for(context, provides=None, depends_on=None):
     list of assets to the staging area and might declare a list of
     dependencies expected to exist within a :class:`StagingArea`
     """
+    action_subaction_dependency = (
+        'the action "%s" defined at %s:%d '
+        'depends on the attribute "%s" to be available in the current context'
+    )
+    action_attribute_dependency = (
+        'the action "%s" defined at %s:%d '
+        'depends on the attribute "%s" to be available in the context.'
+        " Perhaps one of the following actions might provide that attribute:\n"
+    )
+
     if not provides:
         provides = []
 
@@ -375,9 +385,8 @@ def action_for(context, provides=None, depends_on=None):
         index = int(found.group(1))
         if index > len(args):
             raise AssertionError(
-                "the dynamic provider index: {%d} is greater than %d, which is "
-                "the length of the positional arguments passed to %s"
-                % (index, len(args), func.__name__)
+                f"the dynamic provider index: {index} is greater than {len(args)}, which is "
+                f"the length of the positional arguments passed to {func.__name__}"
             )
 
         attr = args[index]
@@ -400,19 +409,6 @@ def action_for(context, provides=None, depends_on=None):
                 f"implementation for correctness or, if there is a bug in Sure, consider reporting that at {bugtracker}"
             )
 
-    dependency_error_lonely = (
-        'the action "%s" defined at %s:%d '
-        'depends on the attribute "%s" to be available in the'
-        " context. It turns out that there are no actions providing "
-        "that. Please double-check the implementation"
-    )
-
-    dependency_error_hints = (
-        'the action "%s" defined at %s:%d '
-        'depends on the attribute "%s" to be available in the context.'
-        " You need to call one of the following actions beforehand:\n"
-    )
-
     def check_dependencies(func):
         action = func.__name__
         filename = get_file_name(func)
@@ -421,7 +417,7 @@ def action_for(context, provides=None, depends_on=None):
         for dependency in depends_on:
             if dependency in context.__sure_providers_of__:
                 providers = context.__sure_providers_of__[dependency]
-                err = dependency_error_hints % (
+                err = action_attribute_dependency % (
                     action,
                     filename,
                     lineno,
@@ -436,7 +432,7 @@ def action_for(context, provides=None, depends_on=None):
                 )
 
             else:
-                err = dependency_error_lonely % (
+                err = action_subaction_dependency % (
                     action,
                     filename,
                     lineno,

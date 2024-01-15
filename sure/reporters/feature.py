@@ -155,7 +155,7 @@ class FeatureReporter(Reporter):
             self.sh.bold_red(error.location_specific_error())
         sys.exit(error.code)
 
-    def on_finish(self):
+    def on_finish(self, context: RuntimeContext):
         failed = len(self.failures)
         errors = len(self.errors)
         successful = len(self.successes)
@@ -174,4 +174,16 @@ class FeatureReporter(Reporter):
             self.sh.green(f"{successful} successful")
             self.sh.reset("\n")
 
-        self.sh.reset(" ")
+        self.sh.reset("")
+
+        warning_count = len(context.warnings)
+        if warning_count == 0:
+            return
+
+        self.sh.yellow(f"{warning_count} warnings")
+        self.sh.reset("\n")
+        for warning in context.warnings:
+            self.sh.yellow(f"{warning['category'].__name__}: ")
+            self.sh.bold_black(f"{warning['message']}\n")
+
+        self.sh.reset("\n")

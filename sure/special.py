@@ -15,7 +15,46 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import io
 import platform
+import warnings
+
+from datetime import datetime
+from typing import Dict, List, Optional
+
+
+__captured_warnings__ = []
+
+
+class WarningReaper(object):
+    """Captures warnings for posterior analysis"""
+
+    builtin_showwarning = warnings.showwarning
+
+    @property
+    def warnings(self) -> List[Dict[str, object]]:
+        return list(__captured_warnings__)
+
+    def showwarning(
+        self,
+        message,
+        category: Warning,
+        filename: str,
+        lineno: int,
+        file: Optional[io.IOBase] = None,
+        line: Optional[str] = None,
+    ):
+        occurrence = datetime.utcnow()
+        info = locals()
+        info.pop('self')
+        __captured_warnings__.append(info)
+
+    def enable_capture(self):
+        warnings.showwarning = self.showwarning
+        return self
+
+    def clear(self):
+        __captured_warnings__.clear()
 
 
 def load_ctypes():
@@ -42,7 +81,7 @@ def runtime_is_cpython():
 
 def get_py_ssize_t():
     ctypes = load_ctypes()
-    pythonapi = getattr(ctypes, 'pythonapi', None)
+    pythonapi = getattr(ctypes, "pythonapi", None)
     if hasattr(pythonapi, "Py_InitModule4_64"):
         return ctypes.c_int64
     else:
@@ -71,9 +110,8 @@ def craft_patchable_builtin():
         target = getattr(klass, "__dict__", name)
 
         class SlotsProxy(PyObject):
-            _fields_ = [
-                ("dict", ctypes.POINTER(PyObject))
-            ]
+            _fields_ = [("dict", ctypes.POINTER(PyObject))]
+
         proxy_dict = SlotsProxy.from_address(id(target))
         namespace = {}
 

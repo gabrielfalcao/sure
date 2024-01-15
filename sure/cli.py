@@ -63,6 +63,7 @@ from sure.errors import ExitError, ExitFailure, InternalRuntimeError, treat_erro
 )
 @click.option("--cover-branches", is_flag=True)
 @click.option("--cover-module", multiple=True, help="specify module names to cover")
+@click.option("--reap-warnings", is_flag=True, help="reaps warnings during runtime and report only at the end of test session")
 def entrypoint(
     paths,
     reporter,
@@ -74,6 +75,7 @@ def entrypoint(
     with_coverage,
     cover_branches,
     cover_module,
+    reap_warnings,
 ):
     if not paths:
         paths = glob("test*/**")
@@ -98,7 +100,7 @@ def entrypoint(
     if special_syntax:
         sure.enable_special_syntax()
 
-    options = RuntimeOptions(immediate=immediate, ignore=ignore)
+    options = RuntimeOptions(immediate=immediate, ignore=ignore, reap_warnings=reap_warnings)
     runner = Runner(resolve_path(os.getcwd()), reporter, options)
     try:
         result = runner.run(paths)

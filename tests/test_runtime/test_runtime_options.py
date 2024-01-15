@@ -27,8 +27,8 @@ def test_runtime_options():
     expects(RuntimeOptions(0).immediate).to.be.false
     expects(RuntimeOptions(1).immediate).to.be.true
     expects(repr(RuntimeOptions(1))).to.equal(
-        "<RuntimeOptions immediate=True glob_pattern='**test*.py'>"
+        "<RuntimeOptions immediate=True glob_pattern='**test*.py' reap_warnings=False>"
     )
     expects(repr(RuntimeOptions(0))).to.equal(
-        "<RuntimeOptions immediate=False glob_pattern='**test*.py'>"
+        "<RuntimeOptions immediate=False glob_pattern='**test*.py' reap_warnings=False>"
     )

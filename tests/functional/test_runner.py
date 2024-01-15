@@ -31,7 +31,7 @@ from sure.runtime import (
     ScenarioResult,
     ScenarioResultSet,
     TestLocation,
-    FeatureResultSet,
+    FeatureResultSet, RuntimeContext
 )
 from sure.reporters import test
 
@@ -307,6 +307,6 @@ def test_runner_execute_success_tests():
                     "ok",
                 ),
             ],
-            "on_finish": [(anything_of_type(float),)],
+            "on_finish": [(anything_of_type(float), anything_of_type(RuntimeContext))],
         }
     )

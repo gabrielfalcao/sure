@@ -46,7 +46,9 @@ class TestReporter(Reporter):
         events["on_feature"].append((time.time(), feature.name))
 
     def on_feature_done(self, feature: Feature, result: FeatureResult):
-        events["on_feature_done"].append((time.time(), feature.name, result.label.lower()))
+        events["on_feature_done"].append(
+            (time.time(), feature.name, result.label.lower())
+        )
 
     def on_scenario(self, scenario: Scenario):
         events["on_scenario"].append((time.time(), scenario.name))
@@ -54,7 +56,9 @@ class TestReporter(Reporter):
     def on_scenario_done(
         self, scenario: Scenario, result: Union[ScenarioResult, ScenarioResultSet]
     ):
-        events["on_scenario_done"].append((time.time(), scenario.name, result.label.lower()))
+        events["on_scenario_done"].append(
+            (time.time(), scenario.name, result.label.lower())
+        )
 
     def on_failure(self, test: Scenario, result: ScenarioResult):
         events["on_failure"].append((time.time(), test.name, result.label.lower()))
@@ -68,5 +72,5 @@ class TestReporter(Reporter):
     def on_internal_runtime_error(self, context: RuntimeContext, error: ErrorStack):
         events["on_internal_runtime_error"].append((time.time(), context, error))
 
-    def on_finish(self):
-        events["on_finish"].append((time.time(),))
+    def on_finish(self, context: RuntimeContext):
+        events["on_finish"].append((time.time(), context))

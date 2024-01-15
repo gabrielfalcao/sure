@@ -90,10 +90,8 @@ class Runner(object):
     def is_runnable_test(self, item) -> bool:
         if object_belongs_to_sure(item):
             return False
-        try:
-            name = getattr(item, "__name__", None)
-        except RecursionError:
-            return False
+
+        name = getattr(item, "__name__", None)
         if isinstance(item, type):
             if not issubclass(item, unittest.TestCase):
                 return seem_to_indicate_test(name)
@@ -131,23 +129,23 @@ class Runner(object):
         results = []
         self.reporter.on_start()
         lookup_paths = list(lookup_paths)
+
         for feature in self.load_features(lookup_paths):
             self.reporter.on_feature(feature)
-            context = RuntimeContext(self.reporter, self.options)
 
             result = feature.run(self.reporter, runtime=self.options)
             if self.options.immediate:
                 if result.is_failure:
-                    raise ExitFailure(context, result)
+                    raise ExitFailure(self.context, result)
 
                 if result.is_error:
-                    raise ExitError(context, result)
+                    raise ExitError(self.context, result)
 
             results.append(result)
 
             self.reporter.on_feature_done(feature, result)
 
-        self.reporter.on_finish()
+        self.reporter.on_finish(self.context)
         return FeatureResultSet(results)
 
     def run(self, *args, **kws):

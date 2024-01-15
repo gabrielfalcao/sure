@@ -25,6 +25,7 @@ from sure.runtime import (
     Scenario,
     TestLocation,
     RuntimeContext,
+    RuntimeOptions,
     ScenarioResult,
     ErrorStack,
     collapse_path,
@@ -36,7 +37,6 @@ from sure.errors import SpecialSyntaxDisabledError, InternalRuntimeError, exit_c
 
 def test_feature_reporter_on_start():
     "FeatureReporter.on_start"
-
     sh = Spy(name="Shell")
     reporter = FeatureReporter(stub(Runner))
     reporter.sh = sh
@@ -410,7 +410,7 @@ def test_feature_reporter_on_internal_runtime_error(exit):
 
 
 def test_feature_reporter_on_finish():
-    "FeatureReporter.on_internal_runtime_error() displays InternalRuntimeError in red"
+    "FeatureReporter.on_finish() displays stats"
 
     reporter = FeatureReporter(stub(Runner))
     sh = Spy(name="Shell")
@@ -418,8 +418,16 @@ def test_feature_reporter_on_finish():
     reporter.failures = {None}
     reporter.errors = {None}
     reporter.successes = list(range(8))
+    options = RuntimeOptions(immediate=True, reap_warnings=True)
+    context = stub(
+        RuntimeContext,
+        name="runtime-context-stub-name",
+        reporter=reporter,
+        options=options,
+        warnings=[],
+    )
 
-    reporter.on_finish()
+    reporter.on_finish(context)
     expects(sh.mock_calls).to.equal(
         [
             call.reset(""),
@@ -429,6 +437,44 @@ def test_feature_reporter_on_finish():
             call.reset("\n"),
             call.green("8 successful"),
             call.reset("\n"),
-            call.reset(" "),
+            call.reset(""),
+        ]
+    )
+
+
+def test_feature_reporter_on_finish_with_warnings():
+    "FeatureReporter.on_finish() displays stats and warnings"
+
+    reporter = FeatureReporter(stub(Runner))
+    sh = Spy(name="Shell")
+    reporter.sh = sh
+    reporter.failures = {None}
+    reporter.errors = {None}
+    reporter.successes = list(range(8))
+    options = RuntimeOptions(immediate=True, reap_warnings=True)
+    context = stub(
+        RuntimeContext,
+        name="runtime-context-stub-name",
+        reporter=reporter,
+        options=options,
+        warnings=[{"message": "dangerous", "category": ResourceWarning}],
+    )
+
+    reporter.on_finish(context)
+    expects(sh.mock_calls).to.equal(
+        [
+            call.reset(""),
+            call.yellow("1 failed"),
+            call.reset("\n"),
+            call.red("1 errors"),
+            call.reset("\n"),
+            call.green("8 successful"),
+            call.reset("\n"),
+            call.reset(""),
+            call.yellow("1 warnings"),
+            call.reset("\n"),
+            call.yellow("ResourceWarning: "),
+            call.bold_black("dangerous\n"),
+            call.reset("\n"),
         ]
     )

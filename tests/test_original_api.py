@@ -933,10 +933,9 @@ def test_depends_on_failing_due_to_lack_of_attribute_in_context():
 
     fullpath = collapse_path(os.path.abspath(__file__))
     error = (
-        f'the action "variant_action" defined at %s:943 '
+        f'the action "variant_action" defined at {fullpath}:942 '
         'depends on the attribute "data_structure" to be available in the'
-        " context. It turns out that there are no actions providing "
-        "that. Please double-check the implementation" % fullpath
+        " current context"
     )
 
     def with_setup(context):
@@ -957,10 +956,10 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
 
     fullpath = collapse_path(os.path.abspath(__file__))
     error = (
-        'the action "my_action" defined at {0}:971 '
+        'the action "my_action" defined at {0}:970 '
         'depends on the attribute "some_attr" to be available in the context.'
-        " You need to call one of the following actions beforehand:\n"
-        " -> dependency_action at {0}:967".replace("{0}", fullpath)
+        " Perhaps one of the following actions might provide that attribute:\n"
+        " -> dependency_action at {0}:966".replace("{0}", fullpath)
     )
 
     def with_setup(context):
@@ -1649,7 +1648,7 @@ def test_deep_comparison_sequences_of_sequences():
 X = [('Bootstraping Redis role', []), ('Restart scalarizr', []), ('Rebundle server', ['rebundle']), ('Use new role', ['rebundle']), ('Restart scalarizr after bundling', ['rebundle']), ('Bundling data', []), ('Modifying data', []), ('Reboot server', []), ('Backuping data on Master', []), ('Setup replication', []), ('Restart scalarizr in slave', []), ('Slave force termination', []), ('Slave delete EBS', ['ec2']), ('Setup replication for EBS test', ['ec2']), ('Writing on Master, reading on Slave', []), ('Slave -> Master promotion', []), ('Restart farm', ['restart_farm'])]
     and
 Y = [('Bootstraping Redis role', ['rebundle', 'rebundle', 'rebundle']), ('Restart scalarizr', []), ('Rebundle server', ['rebundle']), ('Use new role', ['rebundle']), ('Restart scalarizr after bundling', ['rebundle']), ('Bundling data', []), ('Modifying data', []), ('Reboot server', []), ('Backuping data on Master', []), ('Setup replication', []), ('Restart scalarizr in slave', []), ('Slave force termination', []), ('Slave delete EBS', ['ec2']), ('Setup replication for EBS test', ['ec2']), ('Writing on Master, reading on Slave', []), ('Slave -> Master promotion', []), ('Restart farm', ['restart_farm'])]
-Y[0][1] has 3 items whereas X[0][1] has only 0
+Y[0][1] has 3 items whereas X[0][1] is empty
 """.strip())
 
 

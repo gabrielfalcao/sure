@@ -19,8 +19,6 @@ from typing import Dict
 from sure.meta import MetaReporter, get_reporter, gather_reporter_names
 from sure.types import Runner, Feature, FeatureResult, RuntimeContext
 
-__path__ = Path(__file__).absolute().parent
-
 
 class Reporter(object, metaclass=MetaReporter):
     """Base class for reporters.

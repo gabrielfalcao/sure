@@ -14,14 +14,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""tests for :class:`sure.AssertionBuilder` properties defined with the
+decorator :func:`sure.assertionmethod`"""
 
-"unit tests for :mod:`sure.runtime`"
-
-from collections.abc import Awaitable
-from sure.runtime import object_name
+from sure import expects
+from sure.doubles import anything_of_type
 
 
-def test_object_name_type():
-    "calling ``sure.runtime.object_name(X)`` where X is a ``type``"
-    assert object_name(Awaitable).should_not.equal("collections.abc.Awaitablea")
-    assert object_name(Awaitable).should.equal("collections.abc.Awaitable")
+def test_contains():
+    "expects.that().contains"
+
+    expects.that(set(range(8))).contains(7)
+    expects(set(range(13))).to.contain(8)
+    expects(set(range(33))).to_contain(3)

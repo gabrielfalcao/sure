@@ -31,7 +31,6 @@ from functools import wraps
 from typing import Union
 from collections.abc import Iterable
 
-
 from sure.core import Explanation
 from sure.core import DeepComparison
 from sure.core import itemize_length

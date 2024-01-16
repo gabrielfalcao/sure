@@ -4,8 +4,8 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`__.
 
-[v3.0.0]
---------
+v3.0.0
+------
 
 - Presents better documentation
 - Drops support to Python 2 obliterates the ``sure.compat`` module
@@ -52,7 +52,7 @@ Fixed
 Fixed
 ~~~~~
 
--  Reading the version dinamically was causing import errors that caused
+-  Reading the version dynamically was causing import errors that caused
    error when installing package. Refs #144
 
 `v1.4.7 <https://github.com/gabrielfalcao/sure/compare/1.4.6...v1.4.7>`__

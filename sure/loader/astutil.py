@@ -19,6 +19,7 @@ import ast
 
 from typing import Dict, List, Optional, Tuple, Union
 from pathlib import Path
+from sure.errors import send_runtime_warning
 
 
 def is_classdef(node: ast.stmt) -> bool:
@@ -75,7 +76,13 @@ def gather_class_definitions_from_module_path(
     class is defined and a tuple with the names of its base classes.
     """
 
-    with Path(path).open() as f:
+    path = Path(path)
+
+    if path.is_symlink() and not path.resolve().exists():  # avoid loading broken symlinks
+        send_runtime_warning(f"parsing skipped of irregular file `{path.absolute()}'")
+        return {}
+
+    with path.open() as f:
         node = ast.parse(f.read())
 
     return gather_class_definitions_node(node, {}, nearest_line=nearest_line)

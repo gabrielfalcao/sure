@@ -585,11 +585,6 @@ class ScenarioArrangement(BaseContainer):
         :param name: :class:`str`
         :param location: :class:`~sure.runtime.TestLocation`
         """
-        if not isinstance(container, BaseContainer):
-            raise InternalRuntimeError(
-                f"expected {container} to be an instance of BaseContainer in this instance"
-            )
-
         try:
             return_value = container.unit()
             return ScenarioResult(
@@ -604,17 +599,23 @@ class ScenarioArrangement(BaseContainer):
 
 
 class Feature(object):
-    def __init__(self, module):
-        name = getattr(
+    title: str
+    description: Optional[str]
+    ready: bool
+    module: Union[types.ModuleType, unittest.TestCase]
+    location: stypes.TestLocation
+
+    def __init__(self, module: Union[types.ModuleType, unittest.TestCase]):
+        title = getattr(
             module,
             "suite_name",
-            getattr(module, "feature", getattr(module, "name", module.__name__)),
+            getattr(module, "feature", getattr(module, "title", module.__name__)),
         )
         description = getattr(
             module, "suite_description", getattr(module, "description", "")
         )
 
-        self.name = stripped(name)
+        self.title = stripped(title)
         self.description = stripped(description)
 
         self.module = module
@@ -623,9 +624,9 @@ class Feature(object):
 
     def __repr__(self):
         if self.description:
-            return f'<Feature "{self.description}" {self.name}>'
+            return f'<Feature "{self.description}" {self.title}>'
         else:
-            return f'<Feature "{self.name}">'
+            return f'<Feature "{self.title}">'
 
     def read_scenarios(self, suts):
         self.scenarios = list(map((lambda e: Scenario(e, self)), suts))
@@ -654,6 +655,12 @@ class Feature(object):
 
 
 class Scenario(object):
+    name: str
+    description: Optional[str]
+    ready: bool
+    module: Union[types.ModuleType, unittest.TestCase]
+    location: stypes.TestLocation
+
     def __init__(self, class_or_callable, feature):
         self.name = class_or_callable.__name__
         self.log = logging.getLogger(self.name)

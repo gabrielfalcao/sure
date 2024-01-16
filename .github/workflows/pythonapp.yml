@@ -1,9 +1,10 @@
 name: Sure Tests
+
 on:
   push:
     branches:
-      - master
       - runner
+      - master
 
 jobs:
   python:

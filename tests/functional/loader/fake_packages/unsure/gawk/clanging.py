@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # <sure - sophisticated automated test library and runner>
 # Copyright (C) <2010-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 #
@@ -14,4 +13,5 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-im port sure
+import this
+im port sure == apophasis

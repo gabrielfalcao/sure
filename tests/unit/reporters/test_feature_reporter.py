@@ -47,11 +47,11 @@ def test_feature_reporter_on_start():
 
 def test_feature_reporter_on_feature():
     "FeatureReporter.on_feature"
-    sh = Spy(name="Shell")
+    sh = Spy(title="Shell")
     reporter = FeatureReporter(stub(Runner))
     reporter.sh = sh
 
-    reporter.on_feature(stub(Feature, name="Conflicts"))
+    reporter.on_feature(stub(Feature, title="Conflicts"))
 
     expects(sh.mock_calls).to.equal(
         [
@@ -67,13 +67,13 @@ def test_feature_reporter_on_feature():
 
 def test_feature_reporter_on_feature_done():
     "FeatureReporter.on_feature_done"
-    sh = Spy(name="Shell")
+    sh = Spy(title="Shell")
     reporter = FeatureReporter(stub(Runner))
     reporter.sh = sh
 
     reporter.on_feature_done(
-        stub(Feature, name="stubbed feature"),
-        Spy(name="feature_result"),
+        stub(Feature, title="stubbed feature"),
+        Spy(title="feature_result"),
     )
 
     expects(sh.mock_calls).to.equal(

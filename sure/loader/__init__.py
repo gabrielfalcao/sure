@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 import os
 import sys
 import ast
@@ -33,12 +32,12 @@ from sure.errors import (
     FileSystemError,
     CallerLocation,
     collapse_path,
-    send_runtime_warning
+    send_runtime_warning,
 )
-
 from .astutil import gather_class_definitions_from_module_path
 
 __MODULES__ = {}
+__MODULE_SPECS__ = {}
 __ROOTS__ = {}
 __TEST_CLASSES__ = {}
 
@@ -61,7 +60,6 @@ def resolve_path(path, relative_to="~") -> Path:
 
 def get_package(path: Union[str, Path]) -> Path:
     path = Path(path).expanduser().absolute()
-
     if not path.is_dir():
         path = path.parent
 
@@ -100,7 +98,9 @@ class FunMeta(object):
             name = target.__name__
         else:
             name = target.__class__.__name__
-            path, lineno = get_type_definition_filename_and_firstlineno(target.__class__)
+            path, lineno = get_type_definition_filename_and_firstlineno(
+                target.__class__
+            )
 
         return cls(
             filename=path,
@@ -120,7 +120,7 @@ def get_type_definition_filename_and_firstlineno(type_object: type) -> Tuple[Pat
         raise RuntimeError(
             f"module `{module_name}' does not appear within `sys.modules'. Perhaps Sure is not being used the right way or there is a bug in the current version",
         )
-    if not hasattr(module, '__file__'):
+    if not hasattr(module, "__file__"):
         return f"<{module_name}>", -1
 
     path = Path(module.__file__)
@@ -145,7 +145,9 @@ class loader(object):
         modules = []
         excludes = excludes or []
         if not isinstance(excludes, list):
-            raise TypeError(f"sure.loader.load_recursive() param `excludes' must be a {list} but is {repr(excludes)} ({type(excludes)}) instead")
+            raise TypeError(
+                f"sure.loader.load_recursive() param `excludes' must be a {list} but is {repr(excludes)} ({type(excludes)}) instead"
+            )
         path = Path(path)
         if path.is_file():
             if fnmatch(path, glob_pattern):
@@ -185,6 +187,11 @@ class loader(object):
             send_runtime_warning(f"ignoring {path} for seeming to be a __dunder__ file")
             return []
 
+        if path.is_symlink() and not path.resolve().exists():
+            # avoid loading symlinks such as Emacs temporary files .i.e: `.#*'
+            send_runtime_warning(f"parsing skipped of irregular file `{path.absolute()}'")
+            return []
+
         module, root = cls.load_package(path)
         return [module]
 
@@ -202,6 +209,7 @@ class loader(object):
 
         module = importlib.util.module_from_spec(spec)
         __MODULES__[fqdn] = module
+        __MODULE_SPECS__[module] = spec
         cdfs = {}
         for name, metadata in gather_class_definitions_from_module_path(
             path, None
@@ -226,14 +234,11 @@ def object_belongs_to_sure(object: object) -> bool:
     :param object: an :class:`object` object
     :returns: ``True`` if the given ``object`` passes this function heuristics to verify that the object belongs to :mod:`sure`
     """
-    module_name = (
-        getattr(
-            object,
-            "__module__",
-            getattr(getattr(object, "__class__", object), "__module__", ""),
-        )
-        or ""
-    )
+    module_name = getattr(
+        object,
+        "__module__",
+        getattr(getattr(object, "__class__", object), "__module__", ""),
+    ) or ""
     heuristics = [
         lambda: module_name == "sure",
         lambda: module_name.startswith("sure."),

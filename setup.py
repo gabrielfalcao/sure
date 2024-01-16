@@ -86,9 +86,10 @@ def read_readme():
         return __doc__
 
 
-install_requires = ["mock", "coverage==7.4.0", "click==8.1.7", "couleur==0.7.4"]
-tests_require = []
+install_requires = ["coverage==7.4.0", "click==8.1.7", "couleur==0.7.4"]
+tests_require = ["mock"]
 version = read_version()
+packages = find_packages(exclude=["*tests*", "*examples*"])
 
 if __name__ == "__main__":
     setup(
@@ -102,7 +103,7 @@ if __name__ == "__main__":
         maintainer="Gabriel Falcao",
         maintainer_email="gabrielteratos@gmail.com",
         include_package_data=True,
-        packages=find_packages(exclude=["*tests*"]),
+        packages=packages,
         install_requires=install_requires,
         long_description_content_type='text/x-rst',
         entry_points={
@@ -118,11 +119,13 @@ if __name__ == "__main__":
             "Operating System :: POSIX :: Linux",
             "Programming Language :: Python",
             "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
             "Programming Language :: Python :: Implementation",
             "Programming Language :: Python :: Implementation :: CPython",
             "Programming Language :: Python :: Implementation :: PyPy",

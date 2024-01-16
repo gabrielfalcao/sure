@@ -95,7 +95,10 @@ API Reference
 ------------------------
 
 .. autoclass:: sure.doubles.dummies.Anything
+.. autoclass:: sure.doubles.dummies.AnythingOfType
 .. autoattribute:: sure.doubles.dummies.anything
+.. autofunction:: sure.doubles.dummies.anything_of_type
+
 
 ``sure.doubles.fakes``
 ----------------------

@@ -15,13 +15,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"unit tests for :mod:`sure.runtime`"
+"""tests for :class:`sure.runtime.Feature`"""
 
-from collections.abc import Awaitable
-from sure.runtime import object_name
+from sure import expects
+from sure.runtime import Feature
+from sure.doubles import stub
 
 
-def test_object_name_type():
-    "calling ``sure.runtime.object_name(X)`` where X is a ``type``"
-    assert object_name(Awaitable).should_not.equal("collections.abc.Awaitablea")
-    assert object_name(Awaitable).should.equal("collections.abc.Awaitable")
+description = "tests for :class:`sure.runtime.Feature`"
+
+
+def test_feature_with_description():
+    "repr(sure.runtime.Feature) with description"
+
+    feature = stub(Feature, title="title", description="description")
+
+    expects(repr(feature)).to.equal('<Feature "description" title>')
+
+
+def test_feature_without_description():
+    "repr(sure.runtime.Feature) with description"
+
+    feature = stub(Feature, title="title", description=None)
+
+    expects(repr(feature)).to.equal('<Feature "title">')

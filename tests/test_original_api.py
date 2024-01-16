@@ -457,9 +457,7 @@ def test_that_raises():
     assert called
 
     called = False
-    assert that(function, with_args=[1], and_kws={"arg2": 2}).raises(
-        "yeah, it failed"
-    )
+    assert that(function, with_args=[1], and_kws={"arg2": 2}).raises("yeah, it failed")
     assert called
 
     called = False
@@ -650,9 +648,7 @@ def test_that_data_structure_iterable_matches_another():
     range_name = range.__name__
     assert that(fail_1).raises("X is a list and Y is a {0} instead".format(range_name))
     assert that(Fail2).raises("X is a {0} and Y is a list instead".format(range_name))
-    assert that(Fail3()).raises(
-        "X is a {0} and Y is a list instead".format(range_name)
-    )
+    assert that(Fail3()).raises("X is a {0} and Y is a list instead".format(range_name))
 
 
 def test_within_pass():
@@ -672,103 +668,11 @@ def test_within_five_milicesonds_fails_when_function_takes_six_miliseconds():
         within(five=miliseconds)(sleepy)()
     except AssertionError as e:
         failed = True
-        expects("sleepy [tests/test_original_api.py line 667] did not run within five miliseconds").to.equal(str(e))
+        expects(
+            "sleepy [tests/test_original_api.py line 663] did not run within five miliseconds"
+        ).to.equal(str(e))
 
     assert failed, "within(five=miliseconds)(sleepy) did not fail"
-
-
-def test_word_to_number():
-    expects(sure.word_to_number("one")).to.equal(1)
-    expects(sure.word_to_number("two")).to.equal(2)
-    expects(sure.word_to_number("three")).to.equal(3)
-    expects(sure.word_to_number("four")).to.equal(4)
-    expects(sure.word_to_number("five")).to.equal(5)
-    expects(sure.word_to_number("six")).to.equal(6)
-    expects(sure.word_to_number("seven")).to.equal(7)
-    expects(sure.word_to_number("eight")).to.equal(8)
-    expects(sure.word_to_number("nine")).to.equal(9)
-    expects(sure.word_to_number("ten")).to.equal(10)
-    expects(sure.word_to_number("eleven")).to.equal(11)
-    expects(sure.word_to_number("twelve")).to.equal(12)
-    expects(sure.word_to_number("thirteen")).to.equal(13)
-    expects(sure.word_to_number("fourteen")).to.equal(14)
-    expects(sure.word_to_number("fifteen")).to.equal(15)
-    expects(sure.word_to_number("sixteen")).to.equal(16)
-
-
-def test_word_to_number_fail():
-    failed = False
-    try:
-        sure.word_to_number("twenty")
-    except AssertionError as e:
-        failed = True
-        expects(str(e)).to.equal(
-            "sure supports only literal numbers from one "
-            'to sixteen, you tried the word "twenty"'
-        )
-
-    assert failed, "should raise assertion error"
-
-
-def test_microsecond_unit():
-    "testing microseconds convertion"
-    cfrom, cto = sure.UNITS[sure.microsecond]
-
-    expects(cfrom(1)).to.equal(100000)
-    expects(cto(1)).to.equal(1)
-
-    cfrom, cto = sure.UNITS[sure.microseconds]
-
-    expects(cfrom(1)).to.equal(100000)
-    expects(cto(1)).to.equal(1)
-
-
-def test_milisecond_unit():
-    "testing miliseconds convertion"
-    cfrom, cto = sure.UNITS[sure.milisecond]
-
-    expects(cfrom(1)).to.equal(1000)
-    expects(cto(100)).to.equal(1)
-
-    cfrom, cto = sure.UNITS[sure.miliseconds]
-
-    expects(cfrom(1)).to.equal(1000)
-    expects(cto(100)).to.equal(1)
-
-
-def test_second_unit():
-    "testing seconds convertion"
-    cfrom, cto = sure.UNITS[sure.second]
-
-    expects(cfrom(1)).to.equal(1)
-    expects(cto(100000)).to.equal(1)
-
-    cfrom, cto = sure.UNITS[sure.seconds]
-
-    expects(cfrom(1)).to.equal(1)
-    expects(cto(100000)).to.equal(1)
-
-
-def test_minute_unit():
-    "testing minutes convertion"
-    cfrom, cto = sure.UNITS[sure.minute]
-
-    expects(cfrom(60)).to.equal(1)
-    expects(cto(1)).to.equal(6000000)
-
-    cfrom, cto = sure.UNITS[sure.minutes]
-
-    expects(cfrom(60)).to.equal(1)
-    expects(cto(1)).to.equal(6000000)
-
-
-def test_within_wrong_usage():
-    "within(three=miliseconds, one=second) should raise WrongUsageError"
-
-    expects(within).when.called_with(three=miliseconds, one=second).to.have.raised(
-        WrongUsageError,
-        "within() takes a single keyword argument where the argument must be a numerical description from one to eighteen and the value. For example: within(eighteen=miliseconds)"
-    )
 
 
 def test_that_is_a_matcher_should_absorb_callables_to_be_used_as_matcher():
@@ -910,9 +814,9 @@ def test_fails_when_action_doesnt_fulfill_the_agreement_of_its_provides_argument
     error = (
         'the action "unreasonable_action" is supposed to provide the '
         'attribute "two" into the context but does not. '
-        'Check its implementation for correctness or, if '
-        'there is a bug in Sure, consider reporting that at '
-        'https://github.com/gabrielfalcao/sure/issues'
+        "Check its implementation for correctness or, if "
+        "there is a bug in Sure, consider reporting that at "
+        "https://github.com/gabrielfalcao/sure/issues"
     )
 
     def with_setup(context):
@@ -923,9 +827,11 @@ def test_fails_when_action_doesnt_fulfill_the_agreement_of_its_provides_argument
     @scenario(with_setup)
     def reasoning_of_an_unreasonable_action(context):
         expects(context.unreasonable_action).to.have.raised(AssertionError, error)
-        return 'relativist'
+        return "relativist"
 
-    expects(reasoning_of_an_unreasonable_action).when.called.to.return_value('relativist')
+    expects(reasoning_of_an_unreasonable_action).when.called.to.return_value(
+        "relativist"
+    )
 
 
 def test_depends_on_failing_due_to_lack_of_attribute_in_context():
@@ -933,7 +839,7 @@ def test_depends_on_failing_due_to_lack_of_attribute_in_context():
 
     fullpath = collapse_path(os.path.abspath(__file__))
     error = (
-        f'the action "variant_action" defined at {fullpath}:942 '
+        f'the action "variant_action" defined at {fullpath}:848 '
         'depends on the attribute "data_structure" to be available in the'
         " current context"
     )
@@ -956,10 +862,10 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
 
     fullpath = collapse_path(os.path.abspath(__file__))
     error = (
-        'the action "my_action" defined at {0}:970 '
+        'the action "my_action" defined at {0}:876 '
         'depends on the attribute "some_attr" to be available in the context.'
         " Perhaps one of the following actions might provide that attribute:\n"
-        " -> dependency_action at {0}:966".replace("{0}", fullpath)
+        " -> dependency_action at {0}:872".replace("{0}", fullpath)
     )
 
     def with_setup(context):
@@ -1035,7 +941,7 @@ def test_staging_area_provides_meaningful_error_on_nonexisting_attribute():
     )
 
 
-def test_actions_providing_dinamically_named_variables():
+def test_actions_providing_dynamically_named_variables():
     "the actions should be able to declare the variables they provide"
 
     def with_setup(context):
@@ -1156,7 +1062,7 @@ def test_deep_equals_list_level1_fail_by_length_y_gt_x():
         "X = ['one', 'yeah']\n"
         "    and\n"
         "Y = ['one', 'yeah', 'damn']\n"
-        "Y has 3 items whereas X has only 2"
+        "Y has 3 items whereas X has only 2",
     )
 
 
@@ -1179,7 +1085,7 @@ def test_deep_equals_dict_level1_fails_missing_key_on_y():
         "X = {'three': 'value'}\n"
         "    and\n"
         "Y = {'two': 'value'}\n"
-        "X has the key \"'three'\" whereas Y does not"
+        "X has the key \"'three'\" whereas Y does not",
     )
 
 
@@ -1459,7 +1365,7 @@ def test_deep_equals_dict_level3_fails_missing_key():
         "X = {'index': [{'age': 33, 'name': 'JC'}]}\n"
         "    and\n"
         "Y = {'index': [{'age': 31, 'foo': 'bar', 'name': 'JC'}]}\n"
-        "X['index'][0] does not have the key \"'foo'\" whereas Y['index'][0] has it"
+        "X['index'][0] does not have the key \"'foo'\" whereas Y['index'][0] has it",
     )
 
 
@@ -1486,7 +1392,7 @@ def test_deep_equals_dict_level3_fails_extra_key():
         "X = {'index': [{'age': 33, 'foo': 'bar', 'name': 'JC'}]}\n"
         "    and\n"
         "Y = {'index': [{'age': 31, 'name': 'JC'}]}\n"
-        "X['index'][0] has the key \"'foo'\" whereas Y['index'][0] does not"
+        "X['index'][0] has the key \"'foo'\" whereas Y['index'][0] does not",
     )
 
 
@@ -1513,7 +1419,7 @@ def test_deep_equals_dict_level3_fails_different_key():
         "X = {'index': [{'age': 33, 'foo': 'bar', 'name': 'JC'}]}\n"
         "    and\n"
         "Y = {'index': [{'age': 33, 'bar': 'foo', 'name': 'JC'}]}\n"
-        "X['index'][0] has the key \"'foo'\" whereas Y['index'][0] does not"
+        "X['index'][0] has the key \"'foo'\" whereas Y['index'][0] does not",
     )
 
 
@@ -1583,6 +1489,7 @@ def test_that_equals_fails():
 
 def test_raises_with_string():
     "that(callable).raises('message') should compare the message"
+
     def it_fails():
         raise AssertionError("should fail with this exception")
 
@@ -1644,12 +1551,14 @@ def test_deep_comparison_sequences_of_sequences():
     try:
         expects(part1).equals(part2)
     except AssertionError as e:
-        expects(str(e)).to_not.be.different_of("""Equality Error
+        expects(str(e)).to_not.be.different_of(
+            """Equality Error
 X = [('Bootstraping Redis role', []), ('Restart scalarizr', []), ('Rebundle server', ['rebundle']), ('Use new role', ['rebundle']), ('Restart scalarizr after bundling', ['rebundle']), ('Bundling data', []), ('Modifying data', []), ('Reboot server', []), ('Backuping data on Master', []), ('Setup replication', []), ('Restart scalarizr in slave', []), ('Slave force termination', []), ('Slave delete EBS', ['ec2']), ('Setup replication for EBS test', ['ec2']), ('Writing on Master, reading on Slave', []), ('Slave -> Master promotion', []), ('Restart farm', ['restart_farm'])]
     and
 Y = [('Bootstraping Redis role', ['rebundle', 'rebundle', 'rebundle']), ('Restart scalarizr', []), ('Rebundle server', ['rebundle']), ('Use new role', ['rebundle']), ('Restart scalarizr after bundling', ['rebundle']), ('Bundling data', []), ('Modifying data', []), ('Reboot server', []), ('Backuping data on Master', []), ('Setup replication', []), ('Restart scalarizr in slave', []), ('Slave force termination', []), ('Slave delete EBS', ['ec2']), ('Setup replication for EBS test', ['ec2']), ('Writing on Master, reading on Slave', []), ('Slave -> Master promotion', []), ('Restart farm', ['restart_farm'])]
 Y[0][1] has 3 items whereas X[0][1] is empty
-""".strip())
+""".strip()
+        )
 
 
 def test_within_failing_due_to_internally_raised_exception():
@@ -1657,11 +1566,10 @@ def test_within_failing_due_to_internally_raised_exception():
 
     def crash(*a):
         time.sleep(0.1)
-        raise RuntimeError('unrelated exception')
+        raise RuntimeError("unrelated exception")
 
     expects(within(five=miliseconds)(crash)).when.called.to.have.raised(
-        RuntimeError,
-        "unrelated exception"
+        RuntimeError, "unrelated exception"
     )
 
 
@@ -1675,3 +1583,95 @@ def test_all_integers_not_iterable():
     ":func:`sure.original.all_integers` returns False when receiving a non-iterable param"
 
     expects(all_integers(9)).to.be.false
+
+
+def test_word_to_number():
+    expects(sure.word_to_number("one")).to.equal(1)
+    expects(sure.word_to_number("two")).to.equal(2)
+    expects(sure.word_to_number("three")).to.equal(3)
+    expects(sure.word_to_number("four")).to.equal(4)
+    expects(sure.word_to_number("five")).to.equal(5)
+    expects(sure.word_to_number("six")).to.equal(6)
+    expects(sure.word_to_number("seven")).to.equal(7)
+    expects(sure.word_to_number("eight")).to.equal(8)
+    expects(sure.word_to_number("nine")).to.equal(9)
+    expects(sure.word_to_number("ten")).to.equal(10)
+    expects(sure.word_to_number("eleven")).to.equal(11)
+    expects(sure.word_to_number("twelve")).to.equal(12)
+    expects(sure.word_to_number("thirteen")).to.equal(13)
+    expects(sure.word_to_number("fourteen")).to.equal(14)
+    expects(sure.word_to_number("fifteen")).to.equal(15)
+    expects(sure.word_to_number("sixteen")).to.equal(16)
+    expects(sure.word_to_number("seventeen")).to.equal(17)
+    expects(sure.word_to_number("eighteen")).to.equal(18)
+    expects(sure.word_to_number("nineteen")).to.equal(19)
+    expects(sure.word_to_number("twenty")).to.equal(20)
+    expects(sure.word_to_number("twenty_one")).to.equal(21)
+    expects(sure.word_to_number("fourty_two")).to.equal(42)
+    expects(sure.word_to_number("seventy_one")).to.equal(71)
+    expects(sure.word_to_number("ninety_four")).to.equal(94)
+    expects(sure.word_to_number("one_hundred")).to.equal(100)
+    expects(sure.word_to_number("one_thousand")).to.equal(1000)
+    expects(sure.word_to_number("one_million")).to.equal(1000000)
+    expects(sure.word_to_number("one_thousand_three_hundred_thirty_seven")).to.equal(1337)
+
+
+def test_microsecond_unit():
+    "testing microseconds convertion"
+    cfrom, cto = sure.UNITS[sure.microsecond]
+
+    expects(cfrom(1)).to.equal(100000)
+    expects(cto(1)).to.equal(1)
+
+    cfrom, cto = sure.UNITS[sure.microseconds]
+
+    expects(cfrom(1)).to.equal(100000)
+    expects(cto(1)).to.equal(1)
+
+
+def test_milisecond_unit():
+    "testing miliseconds convertion"
+    cfrom, cto = sure.UNITS[sure.milisecond]
+
+    expects(cfrom(1)).to.equal(1000)
+    expects(cto(100)).to.equal(1)
+
+    cfrom, cto = sure.UNITS[sure.miliseconds]
+
+    expects(cfrom(1)).to.equal(1000)
+    expects(cto(100)).to.equal(1)
+
+
+def test_second_unit():
+    "testing seconds convertion"
+    cfrom, cto = sure.UNITS[sure.second]
+
+    expects(cfrom(1)).to.equal(1)
+    expects(cto(100000)).to.equal(1)
+
+    cfrom, cto = sure.UNITS[sure.seconds]
+
+    expects(cfrom(1)).to.equal(1)
+    expects(cto(100000)).to.equal(1)
+
+
+def test_minute_unit():
+    "testing minutes convertion"
+    cfrom, cto = sure.UNITS[sure.minute]
+
+    expects(cfrom(60)).to.equal(1)
+    expects(cto(1)).to.equal(6000000)
+
+    cfrom, cto = sure.UNITS[sure.minutes]
+
+    expects(cfrom(60)).to.equal(1)
+    expects(cto(1)).to.equal(6000000)
+
+
+def test_within_wrong_usage():
+    "within(three=miliseconds, one=second) should raise WrongUsageError"
+
+    expects(within).when.called_with(three=miliseconds, one=second).to.have.raised(
+        WrongUsageError,
+        "within() takes a single keyword argument where the argument must be a numerical description from one to eighteen and the value. For example: within(eighteen=miliseconds)",
+    )

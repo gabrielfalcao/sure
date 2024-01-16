@@ -31,6 +31,7 @@ try:
 except ImportError:
     sys.path.insert(0, Path(__file__).parent.parent.parent)
 
+from sure import version
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.doctest",
@@ -47,8 +48,7 @@ master_doc = "index"
 project = "sure"
 copyright = "2010-2024, Gabriel Falcão"
 author = "Gabriel Falcão"
-version = "3.0a0"
-release = "3.0a0"
+release = version
 language = 'en'
 exclude_patterns = []
 pygments_style = "sphinx"
@@ -84,6 +84,6 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "mock": ("https://mock.readthedocs.io/en/latest/", None),
     "psycopg2": ("https://www.psycopg.org/docs/", None),
-    "coverage": ("https://coverage.readthedocs.io/en/7.3.3/", None),
+    "coverage": ("https://coverage.readthedocs.io/en/7.4.0/", None),
 }
 pygments_style = 'xcode'

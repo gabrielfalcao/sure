@@ -39,7 +39,9 @@ def stub(base_class=None, **attributes):
         "__new__": lambda *args, **kw: base_class.__new__(
             *args, *kw
         ),
-        "__repr__": lambda self: f"<{stub_name}>",
     }
+    if base_class.__repr__ == object.__repr__:
+        members["__repr__"] = lambda self: f"<{stub_name}>"
+
     members.update(attributes)
     return type(stub_name, (base_class,), members)()

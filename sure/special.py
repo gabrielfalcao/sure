@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # <sure - sophisticated automated test library and runner>
-# Copyright (C) <2012-2023>  Gabriel Falcão <gabriel@nacaolivre.org>
+# Copyright (C) <2012-2024>  Gabriel Falcão <gabriel@nacaolivre.org>
 # Copyright (C) <2012>  Lincoln Clarete <lincoln@comum.org>
 #
 # This program is free software: you can redistribute it and/or modify

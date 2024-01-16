@@ -34,9 +34,6 @@ sure
 .. image:: https://img.shields.io/github/v/tag/gabrielfalcao/sure
    :target: https://github.com/gabrielfalcao/sure/releases
 
-.. image:: https://img.shields.io/badge/pydoc-web-ff69b4.svg
-   :target: http://pydoc.net/sure
-
 The sophisticated automated test tool for Python, featuring a test
 runner and a library with powerful and flexible assertions.
 

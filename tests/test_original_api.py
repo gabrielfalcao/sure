@@ -1553,9 +1553,41 @@ def test_deep_comparison_sequences_of_sequences():
     except AssertionError as e:
         expects(str(e)).to_not.be.different_of(
             """Equality Error
-X = [('Bootstraping Redis role', []), ('Restart scalarizr', []), ('Rebundle server', ['rebundle']), ('Use new role', ['rebundle']), ('Restart scalarizr after bundling', ['rebundle']), ('Bundling data', []), ('Modifying data', []), ('Reboot server', []), ('Backuping data on Master', []), ('Setup replication', []), ('Restart scalarizr in slave', []), ('Slave force termination', []), ('Slave delete EBS', ['ec2']), ('Setup replication for EBS test', ['ec2']), ('Writing on Master, reading on Slave', []), ('Slave -> Master promotion', []), ('Restart farm', ['restart_farm'])]
+X = [('Bootstraping Redis role', []),
+ ('Restart scalarizr', []),
+ ('Rebundle server', ['rebundle']),
+ ('Use new role', ['rebundle']),
+ ('Restart scalarizr after bundling', ['rebundle']),
+ ('Bundling data', []),
+ ('Modifying data', []),
+ ('Reboot server', []),
+ ('Backuping data on Master', []),
+ ('Setup replication', []),
+ ('Restart scalarizr in slave', []),
+ ('Slave force termination', []),
+ ('Slave delete EBS', ['ec2']),
+ ('Setup replication for EBS test', ['ec2']),
+ ('Writing on Master, reading on Slave', []),
+ ('Slave -> Master promotion', []),
+ ('Restart farm', ['restart_farm'])]
     and
-Y = [('Bootstraping Redis role', ['rebundle', 'rebundle', 'rebundle']), ('Restart scalarizr', []), ('Rebundle server', ['rebundle']), ('Use new role', ['rebundle']), ('Restart scalarizr after bundling', ['rebundle']), ('Bundling data', []), ('Modifying data', []), ('Reboot server', []), ('Backuping data on Master', []), ('Setup replication', []), ('Restart scalarizr in slave', []), ('Slave force termination', []), ('Slave delete EBS', ['ec2']), ('Setup replication for EBS test', ['ec2']), ('Writing on Master, reading on Slave', []), ('Slave -> Master promotion', []), ('Restart farm', ['restart_farm'])]
+Y = [('Bootstraping Redis role', ['rebundle', 'rebundle', 'rebundle']),
+ ('Restart scalarizr', []),
+ ('Rebundle server', ['rebundle']),
+ ('Use new role', ['rebundle']),
+ ('Restart scalarizr after bundling', ['rebundle']),
+ ('Bundling data', []),
+ ('Modifying data', []),
+ ('Reboot server', []),
+ ('Backuping data on Master', []),
+ ('Setup replication', []),
+ ('Restart scalarizr in slave', []),
+ ('Slave force termination', []),
+ ('Slave delete EBS', ['ec2']),
+ ('Setup replication for EBS test', ['ec2']),
+ ('Writing on Master, reading on Slave', []),
+ ('Slave -> Master promotion', []),
+ ('Restart farm', ['restart_farm'])]
 Y[0][1] has 3 items whereas X[0][1] is empty
 """.strip()
         )

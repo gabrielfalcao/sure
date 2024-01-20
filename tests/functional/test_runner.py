@@ -31,7 +31,8 @@ from sure.runtime import (
     ScenarioResult,
     ScenarioResultSet,
     TestLocation,
-    FeatureResultSet, RuntimeContext
+    FeatureResultSet,
+    RuntimeContext,
 )
 from sure.reporters import test
 
@@ -118,7 +119,6 @@ def test_runner_load_features_from_module_path_recursively():
     expects(featureB).to.be.a(Feature)
     expects(featureB).to.have.property("title").being.equal(
         "tests.functional.modules.success.module_with_members"
-
     )
     expects(featureB).to.have.property("ready").being.equal(True)
     expects(featureB).to.have.property("scenarios").being.a(list)
@@ -204,7 +204,7 @@ def test_runner_execute_success_tests():
     expects(feature_result_set).to.be.a(FeatureResultSet)
     expects(feature_result_set).to.have.property("feature_results").being.length_of(4)
     expects(feature_result_set).to.have.property("failed_features").being.empty
-    expects(feature_result_set).to.have.property("errored_scenarios").being.empty
+    expects(feature_result_set).to.have.property("errored_features").being.empty
 
     expects(dict(test.events)).to.equal(
         {
@@ -265,6 +265,8 @@ def test_runner_execute_success_tests():
                 (anything_of_type(float), "test_function_Z", "ok"),
                 (anything_of_type(float), "TestCase", "ok"),
                 (anything_of_type(float), "UnitCase", "ok"),
+                (anything_of_type(float), "UnitCase", "ok"),
+                (anything_of_type(float), "UnitCase", "ok"),
                 (anything_of_type(float), "test_function_A", "ok"),
                 (anything_of_type(float), "test_function_B", "ok"),
                 (anything_of_type(float), "test_function_C", "ok"),
@@ -272,6 +274,10 @@ def test_runner_execute_success_tests():
                 (anything_of_type(float), "TestCaseA", "ok"),
                 (anything_of_type(float), "TestCaseA", "ok"),
                 (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "TestCaseB", "ok"),
@@ -280,6 +286,14 @@ def test_runner_execute_success_tests():
                 (anything_of_type(float), "TestCaseA", "ok"),
                 (anything_of_type(float), "TestCaseA", "ok"),
                 (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "TestCaseB", "ok"),

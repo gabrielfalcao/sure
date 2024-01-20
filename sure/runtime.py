@@ -635,9 +635,8 @@ class Feature(object):
 
     def run(self, reporter: Reporter, runtime: RuntimeOptions) -> stypes.FeatureResult:
         results = []
+        context = RuntimeContext(reporter, runtime)
         for scenario in self.scenarios:
-            context = RuntimeContext(reporter, runtime)
-
             result = scenario.run(context)
 
             results.append(result)
@@ -681,14 +680,15 @@ class Scenario(object):
             self,
         ).uncollapse_nested()
         results = []
+
         for collector in collectors:
             collector_results = []
             context.reporter.on_scenario(collector.scenario)
-
             for result, role in collector.run(context):
                 if role == RuntimeRole.Unit:
                     collector_results.append(result)
-                elif not result.is_success:
+
+                if not result.is_success:
                     if result.is_failure:
                         context.reporter.on_failure(result.scenario, result)
                         if context.options.immediate:
@@ -697,11 +697,11 @@ class Scenario(object):
                     elif result.is_error:
                         context.reporter.on_error(result.scenario, result)
                         if context.options.immediate:
-                            raise ExitError(context, result)
+                            raise ExitError(context, result, report=False)
 
-            context.reporter.on_scenario_done(
-                collector.scenario, ScenarioResultSet(collector_results, context)
-            )
+                context.reporter.on_scenario_done(
+                    collector.scenario, result
+                )
             results.extend(collector_results)
         return ScenarioResultSet(results, context)
 
@@ -711,6 +711,12 @@ class BaseResult:
     purpose is to allow for distinguishing result-containing objects."""
 
     def __repr__(self):
+        if not hasattr(self, 'label'):
+            raise NotImplementedError(f"{self.__class__} MUST define a `label' property or attribute which must be a string")
+
+        if not isinstance(self.label, str):
+            raise NotImplementedError(f"{self.__class__}.label must be a string but is a {type(self.label)} instead")
+
         return repr(self.label.lower())
 
 
@@ -742,9 +748,6 @@ class ScenarioResult(BaseResult):
         else:
             self.__error__ = treat_error(error, self.location)
 
-    def tb(self):
-        return traceback.format_exception(*self.exc_info)
-
     @property
     def label(self) -> str:
         if self.ok:
@@ -762,12 +765,7 @@ class ScenarioResult(BaseResult):
         )
 
     def printable(self):
-        prelude = f"{self.location}"
-        hook = ""
-        if callable(getattr(self.error, "printable", None)):
-            hook = self.error.printable()
-
-        return " ".join(filter(bool, [prelude, hook]))
+        return f"{self.location}"
 
     @property
     def is_error(self):
@@ -777,9 +775,6 @@ class ScenarioResult(BaseResult):
     def error(self) -> Optional[Exception]:
         if not isinstance(self.__error__, AssertionError):
             return self.__error__
-
-    def set_error(self, error: Optional[Exception]):
-        self.__error__ = error
 
     @property
     def is_failure(self):
@@ -800,9 +795,6 @@ class ScenarioResult(BaseResult):
 
     @property
     def succinct_failure(self) -> str:
-        if not self.is_failure:
-            return ""
-
         return self.stack.location_specific_error()
 
 
@@ -815,17 +807,17 @@ class ScenarioResultSet(ScenarioResult):
         self.failed_scenarios = []
         self.errored_scenarios = []
 
-        for scenario in scenario_results:
-            if scenario.is_failure:
-                self.failed_scenarios.append(scenario)
-            if scenario.is_error:
-                self.errored_scenarios.append(scenario)
+        for result in scenario_results:
+            if result.is_failure:
+                self.failed_scenarios.append(result)
+            if result.is_error:
+                self.errored_scenarios.append(result)
 
     def printable(self):
         if self.failure is not None:
-            return self.failure
+            return f"{self.failure.__class__.__name__}: {self.failure}"
         if self.error:
-            return self.error.printable()
+            return f"{self.error.__class__.__name__}: {self.error}"
 
         return ""
 
@@ -840,17 +832,6 @@ class ScenarioResultSet(ScenarioResult):
                 return scenario.error
 
     @property
-    def stack(self) -> Optional[ErrorStack]:
-        for scenario in self.errored_scenarios:
-            return scenario.stack
-
-    def __getattr__(self, attr):
-        try:
-            return self.__getattribute__(attr)
-        except AttributeError:
-            return getattr(self.scenario_results[-1], attr)
-
-    @property
     def is_failure(self):
         return len(self.failed_scenarios) > 0
 
@@ -860,35 +841,13 @@ class ScenarioResultSet(ScenarioResult):
             if scenario.is_failure:
                 return scenario.failure
 
-    @property
-    def succinct_failure(self) -> Optional[str]:
-        for scenario in self.failed_scenarios:
-            if scenario.is_failure:
-                return scenario.succinct_failure
 
-    @property
-    def first_scenario_result_error(self) -> Optional[ScenarioResult]:
-        for scenario in self.errored_scenarios:
-            if scenario.is_error:
-                return scenario
-
-    @property
-    def first_scenario_result_fail(self) -> Optional[ScenarioResult]:
-        for scenario in self.failed_scenarios:
-            if scenario.is_failure:
-                return scenario
-
-    @property
-    def first_nonsuccessful_result(self) -> Optional[ScenarioResult]:
-        return self.first_scenario_result_error or self.first_scenario_result_fail
-
-
-class FeatureResult(BaseResult):
+class FeatureResult(ScenarioResultSet):
     scenario_results: ScenarioResultSet
     error: Optional[Exception]
     failure: Optional[AssertionError]
 
-    def __init__(self, scenario_results, error=None):
+    def __init__(self, scenario_results):
         self.scenario_results = scenario_results
         self.failed_scenarios = []
         self.errored_scenarios = []
@@ -899,35 +858,6 @@ class FeatureResult(BaseResult):
             if scenario.is_failure:
                 self.failed_scenarios.append(scenario)
 
-    def printable(self):
-        if self.failure is not None:
-            return self.failure
-        if self.error:
-            return self.error.printable()
-
-        return ""
-
-    @property
-    def is_error(self):
-        return len(self.errored_scenarios) > 0
-
-    @property
-    def error(self) -> Optional[Exception]:
-        for scenario in self.errored_scenarios:
-            if scenario.is_error:
-                return scenario.error
-
-    @property
-    def stack(self) -> Optional[ErrorStack]:
-        for scenario in self.errored_scenarios:
-            return scenario.stack
-
-    def __getattr__(self, attr):
-        try:
-            return self.__getattribute__(attr)
-        except AttributeError:
-            return getattr(self.scenario_results[-1], attr)
-
     @property
     def is_failure(self):
         return len(self.failed_scenarios) > 0
@@ -939,103 +869,31 @@ class FeatureResult(BaseResult):
                 return scenario.failure
 
     @property
-    def succinct_failure(self) -> Optional[str]:
-        for scenario in self.failed_scenarios:
-            if scenario.is_failure:
-                return scenario.succinct_failure
-
-    @property
-    def first_scenario_result_error(self) -> Optional[ScenarioResult]:
-        for scenario in self.errored_scenarios:
-            if scenario.is_error:
-                return scenario
-
-    @property
-    def first_scenario_result_fail(self) -> Optional[ScenarioResult]:
-        for scenario in self.failed_scenarios:
-            if scenario.is_failure:
-                return scenario
-
-    @property
-    def first_nonsuccessful_result(self) -> Optional[ScenarioResult]:
-        return self.first_scenario_result_error or self.first_scenario_result_fail
-
-
-class FeatureResultSet(BaseResult):
-    error: Optional[Exception]
-    failure: Optional[AssertionError]
-
-    def __init__(self, feature_results, error=None):
-        self.feature_results = feature_results
-        self.failed_features = []
-        self.errored_features = []
-
-        for feature in feature_results:
-            if feature.is_error:
-                self.errored_features.append(feature)
-            if feature.is_failure:
-                self.failed_features.append(feature)
-
-    def printable(self):
-        if self.failure is not None:
-            return self.failure
-        if self.error:
-            return self.error.printable()
-
-        return ""
-
-    @property
     def is_error(self):
-        return len(self.errored_features) > 0
+        return len(self.errored_scenarios) > 0
 
     @property
     def error(self) -> Optional[Exception]:
-        for feature in self.errored_features:
-            if feature.is_error:
-                return collapse_path(feature.error)
+        for scenario in self.errored_scenarios:
+            if scenario.is_error:
+                return scenario.error
+
+
+class FeatureResultSet(FeatureResult):
+    error: Optional[Exception]
+    failure: Optional[AssertionError]
 
     @property
-    def stack(self) -> Optional[ErrorStack]:
-        for feature in self.errored_features:
-            return feature.stack
-
-    def __getattr__(self, attr):
-        try:
-            return self.__getattribute__(attr)
-        except AttributeError:
-            return getattr(self.feature_results[-1], attr)
+    def feature_results(self):
+        return self.scenario_results
 
     @property
-    def is_failure(self):
-        return len(self.failed_features) > 0
+    def failed_features(self):
+        return self.failed_scenarios
 
     @property
-    def failure(self) -> Optional[Exception]:
-        for feature in self.failed_features:
-            if feature.is_failure:
-                return feature.failure
-
-    @property
-    def succinct_failure(self) -> Optional[str]:
-        for feature in self.failed_features:
-            if feature.is_failure:
-                return feature.succinct_failure
-
-    @property
-    def first_scenario_result_error(self) -> Optional[FeatureResult]:
-        for feature_result in self.errored_features:
-            if feature_result.is_error:
-                return feature_result.first_nonsuccessful_result
-
-    @property
-    def first_scenario_result_fail(self) -> Optional[FeatureResult]:
-        for feature_result in self.failed_features:
-            if feature_result.is_failure:
-                return feature_result.first_nonsuccessful_result
-
-    @property
-    def first_nonsuccessful_result(self) -> Optional[FeatureResult]:
-        return self.first_scenario_result_error or self.first_scenario_result_fail
+    def errored_features(self):
+        return self.errored_scenarios
 
 
 def stripped(string):

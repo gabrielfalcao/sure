@@ -17,9 +17,12 @@
 
 """tests for :class:`sure.runtime.Feature`"""
 
+from unittest.mock import patch, call
+from unittest.mock import Mock as Spy
 from sure import expects
-from sure.runtime import Feature
+from sure.runtime import Feature, RuntimeOptions, ScenarioResult, Scenario
 from sure.doubles import stub
+from sure.errors import ExitFailure, ExitError
 
 
 description = "tests for :class:`sure.runtime.Feature`"
@@ -39,3 +42,55 @@ def test_feature_without_description():
     feature = stub(Feature, title="title", description=None)
 
     expects(repr(feature)).to.equal('<Feature "title">')
+
+
+@patch('sure.errors.sys.exit')
+@patch('sure.runtime.RuntimeContext')
+def test_feature_run_is_failure(RuntimeContext, exit):
+    'Feature.run() should raise :class:`sure.errors.ExitFailure` at the occurrence of failure within an "immediate" failure context'
+
+    reporter_spy = Spy(name='Reporter')
+    scenario_result = stub(ScenarioResult, is_failure=True, __failure__=AssertionError('contrived failure'), __error__=None)
+    scenario_run_spy = Spy(name="Scenario.run", return_value=scenario_result)
+
+    scenario_stub = stub(Scenario, run=scenario_run_spy)
+    feature_stub = stub(
+        Feature,
+        title="failure feature test",
+        description=None,
+        scenarios=[scenario_stub]
+    )
+
+    expects(feature_stub.run).when.called_with(reporter=reporter_spy, runtime=RuntimeOptions(immediate=True)).to.have.raised(
+        ExitFailure,
+        'ExitFailure'
+    )
+    expects(reporter_spy.mock_calls).to.equal([
+        call.on_failure(scenario_stub, scenario_result)
+    ])
+
+
+@patch('sure.errors.sys.exit')
+@patch('sure.runtime.RuntimeContext')
+def test_feature_run_is_error(RuntimeContext, exit):
+    'Feature.run() should raise :class:`sure.errors.ExitError` at the occurrence of error within an "immediate" error context'
+
+    reporter_spy = Spy(name='Reporter')
+    scenario_run_spy = Spy(name="Scenario.run")
+    scenario_stub = stub(Scenario, run=scenario_run_spy)
+    feature_stub = stub(
+        Feature,
+        title="error feature test",
+        description=None,
+        scenarios=[scenario_stub]
+    )
+    scenario_result = stub(ScenarioResult, is_error=True, __error__=ValueError('contrived error'), __failure__=None, is_failure=False, scenario=scenario_stub)
+    scenario_run_spy.return_value = scenario_result
+
+    expects(feature_stub.run).when.called_with(reporter=reporter_spy, runtime=RuntimeOptions(immediate=True)).to.have.raised(
+        ExitError,
+        'ExitError'
+    )
+    expects(reporter_spy.mock_calls).to.equal([
+        call.on_error(scenario_stub, scenario_result)
+    ])

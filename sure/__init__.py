@@ -753,7 +753,7 @@ class AssertionBuilder(object):
         if expectation in self.actual:
             return True
         else:
-            raise Explanation(f'{expectation} should be in {self.actual}').as_assertion(self.actual, expectation, "Content Verification Error")
+            raise Explanation(f"`{expectation}' should be in `{self.actual}'").as_assertion(self.actual, expectation, "Content Verification Error")
 
     contain = contains
     to_contain = contains
@@ -763,7 +763,7 @@ class AssertionBuilder(object):
         if expectation not in self.actual:
             return True
         else:
-            raise Explanation(f'{expectation} should not be in {self.actual}').as_assertion(self.actual, expectation, "Content Verification Error")
+            raise Explanation(f"`{expectation}' should not be in `{self.actual}'").as_assertion(self.actual, expectation, "Content Verification Error")
 
     doesnt_contain = does_not_contain
     to_not_contain = does_not_contain
@@ -805,22 +805,22 @@ class AssertionBuilder(object):
             # instead of hardcoding ``.should_not.be.within`` and ``.should.be.within`` in the
             # variable assignments below
             if self.negative:
-                ppath = "{0}.should_not.be.within".format(self.actual)
+                ppath = f"({self.actual}).should_not.be.within"
             else:
-                ppath = "{0}.should.be.within".format(self.actual)
+                ppath = f"({self.actual}).should.be.within".format(self.actual)
 
             raise AssertionError(
                 (
-                    "{0}({1}, {2}) must be called with either a iterable:\n"
+                    "{0}({1}, {2}) must be called with either an iterable:\n"
                     "{0}([1, 2, 3, 4])\n"
-                    "or with a range of numbers:"
-                    "{0}(1, 3000)"
+                    "or with a range of numbers, i.e.: "
+                    "`{0}(1, 3000)'"
                 ).format(ppath, first, ", ".join([repr(x) for x in rest]))
             )
 
     @assertionmethod
     def equal(self, expectation, epsilon=None):
-        """compares given object ``X'`  with an expected '`Y'` object.
+        """compares given object ``X'` with an expected '`Y'` object.
 
         It primarily assures that the compared objects are absolute equal '`=='`.
 

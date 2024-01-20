@@ -134,7 +134,7 @@ class AssertionHelper(object):
 
     def raises(self, exc, msg=None):
         if not callable(self.actual):
-            raise TypeError('%r is not callable' % self.actual)
+            raise TypeError(f'{self.actual} is not callable')
 
         try:
             self.actual(*self._callable_args, **self._callable_kw)

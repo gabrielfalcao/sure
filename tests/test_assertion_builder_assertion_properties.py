@@ -30,3 +30,4 @@ def test_not_have():
         frequency = anything_of_type(float)
 
     expects(WaveFunctionParameters).to.not_have.property("unrequested_phase_change")
+    expects(WaveFunctionParameters).to.have.property("frequency").which.should.equal(anything_of_type(float))

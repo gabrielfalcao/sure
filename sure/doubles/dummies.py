@@ -77,7 +77,7 @@ class AnythingOfType(Anything):
         given_type = type(given)
         module_name = given_type.__module__
         type_name = given_type.__name__
-        return isinstance(given, self.__expected_type__) and super().__eq__(f"typed:{module_name}.{type_name}")
+        return isinstance(given, (self.__expected_type__, self.__class__)) and super().__eq__(f"typed:{module_name}.{type_name}")
 
     def __repr__(self):
         return f'<AnythingOfType[{self.__type_fqdn__}] {self.__dummy_id__}>'

@@ -31,6 +31,7 @@ from functools import wraps
 from typing import Union
 from collections.abc import Iterable
 
+from sure.astuneval import parse_accessor
 from sure.core import Explanation
 from sure.core import DeepComparison
 from sure.core import itemize_length
@@ -76,7 +77,7 @@ class AssertionHelper(object):
 
         self.actual = src
         self._attribute = None
-        self._eval = None
+        self.__element_access_expr__ = None
         self._range = None
         if all_integers(within_range):
             if len(within_range) != 2:
@@ -351,16 +352,15 @@ class AssertionHelper(object):
         return self
 
     def in_each(self, attr):
-        self._eval = attr
+        self.__element_access_expr__ = attr
         return self
 
     def matches(self, items):
         msg = '%r[%d].%s should be %r, but is %r'
-        get_eval = lambda item: eval(
-            "%s.%s" % ('current', self._eval), {}, {'current': item},
-        )
 
-        if self._eval and is_iterable(self.actual):
+        get_eval = self.__element_access_expr__ and parse_accessor(self.__element_access_expr__) or (lambda x: None)
+
+        if bool(self.__element_access_expr__) and is_iterable(self.actual):
             if isinstance(items, (str, )):
                 items = [items for x in range(len(items))]
             else:
@@ -381,7 +381,7 @@ class AssertionHelper(object):
 
                 value = get_eval(item)
 
-                error = msg % (self.actual, index, self._eval, other, value)
+                error = msg % (self.actual, index, self.__element_access_expr__, other, value)
                 if other != value:
                     raise AssertionError(error)
         else:
@@ -408,17 +408,6 @@ class AssertionHelper(object):
     @property
     def are_empty(self):
         return self.is_empty
-
-    def __contains__(self, expectation):
-        if isinstance(self.actual, dict):
-            items = self.actual.keys()
-
-        if isinstance(self.actual, Iterable):
-            items = self.actual
-        else:
-            items = dir(self.actual)
-
-        return expectation in items
 
     def contains(self, expectation):
         if expectation in self.actual:

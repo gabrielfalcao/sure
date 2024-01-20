@@ -55,7 +55,7 @@ docs: html-docs
 	$(OPEN_COMMAND) docs/build/html/index.html
 
 test tests:
-	@$(VENV)/bin/pytest --cov=sure tests/test_runtime/test_scenario_result.py
+	@$(VENV)/bin/pytest --cov=sure tests/unit/test_astuneval.py
 	@$(VENV)/bin/pytest --cov=sure tests
 
 # runs main command-line tool

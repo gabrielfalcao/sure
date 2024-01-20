@@ -64,26 +64,6 @@ def all_integers(obj: typing.Iterable) -> bool:
     return True
 
 
-def explanation(msg: str) -> typing.Callable:
-    """Decorator for methods of :class:`~sure.original.AssertionHelper`.
-
-    :param msg: message to be interpolated with the operands of the comparison taking place within the decorated method.
-    :returns: a decorator function
-    """
-    def dec(func):
-        @wraps(func)
-        def wrap(self, expectation):
-            ret = func(self, expectation)
-            if bool(ret) is True:
-                return ret
-            else:
-                raise AssertionError(msg % (self.actual, expectation))
-
-        return wrap
-
-    return dec
-
-
 class AssertionHelper(object):
     """Accompanies :class:`~sure.AssertionBuilder` in performing
     assertions.
@@ -258,14 +238,6 @@ class AssertionHelper(object):
 
         return True
 
-    @explanation('%r should differ from %r, but is the same thing')
-    def differs(self, expectation):
-        return self.actual != expectation
-
-    @explanation('%r should be a instance of %r, but is not')
-    def is_a(self, expectation):
-        return isinstance(self.actual, expectation)
-
     def at(self, key):
         if not self.has(key):
             raise AssertionError(f"key {key} not present in {self.actual}")
@@ -275,10 +247,6 @@ class AssertionHelper(object):
 
         else:
             return AssertionHelper(getattr(self.actual, key))
-
-    @explanation('%r should have %r, but have not')
-    def has(self, that):
-        return that in self
 
     def _get_int_or_length(self, obj: Union[int, typing.Iterable]):
         if isinstance(obj, Iterable):

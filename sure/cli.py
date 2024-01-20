@@ -15,27 +15,26 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import os                                                                          # pragma: no cover
+import sys                                                                         # pragma: no cover
+from glob import glob                                                              # pragma: no cover
+from itertools import chain as flatten                                             # pragma: no cover
+from functools import reduce                                                       # pragma: no cover
+from pathlib import Path                                                           # pragma: no cover
 
-import os
-import sys
-from glob import glob
-from itertools import chain as flatten
-from functools import reduce
-from pathlib import Path
+import click                                                                       # pragma: no cover
+import coverage                                                                    # pragma: no cover
+import threading                                                                   # pragma: no cover
+import sure.reporters                                                              # pragma: no cover
 
-import click
-import coverage
-import threading
-import sure.reporters
-
-from sure.loader import resolve_path
-from sure.runner import Runner
-from sure.runtime import RuntimeOptions
-from sure.reporters import gather_reporter_names
-from sure.errors import ExitError, ExitFailure, InternalRuntimeError, treat_error
+from sure.loader import resolve_path                                               # pragma: no cover
+from sure.runner import Runner                                                     # pragma: no cover
+from sure.runtime import RuntimeOptions                                            # pragma: no cover
+from sure.reporters import gather_reporter_names                                   # pragma: no cover
+from sure.errors import ExitError, ExitFailure, InternalRuntimeError, treat_error  # pragma: no cover
 
 
-@click.command(no_args_is_help=True)
+@click.command(no_args_is_help=True)                                               # pragma: no cover
 @click.argument("paths", nargs=-1)
 @click.option("-c", "--with-coverage", is_flag=True)
 @click.option("-s", "--special-syntax", is_flag=True)

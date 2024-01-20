@@ -104,15 +104,6 @@ def test_teardown_with_context():
     assert not hasattr(data_structure, "modified")
 
 
-def test_that_is_a():
-    "that() is_a(object)"
-
-    data_structure = "data_structure"
-
-    assert that(data_structure).is_a(str)
-    assert isinstance(data_structure, str)
-
-
 def test_that_equals():
     "that() equals(string)"
 
@@ -120,69 +111,6 @@ def test_that_equals():
 
     assert that("data_structure").equals(data_structure)
     assert data_structure == "data_structure"
-
-
-def test_that_differs():
-    "that() differs(object)"
-
-    data_structure = "data_structure"
-
-    assert that(data_structure).differs("23123%FYTUGIHOfdf")
-    assert data_structure != "23123%FYTUGIHOfdf"
-
-
-def test_that_has():
-    "that() has(object)"
-
-    class Class:
-        value = "some class"
-
-    Object = Class()
-    dictionary = {
-        "value": "Value",
-    }
-    value = "value"
-
-    assert hasattr(Class, "value")
-    expects(Class).has("value")
-    expects(Class).to.be.like("value")
-    assert "value" in that(Class)
-
-    assert hasattr(Object, "value")
-    expects(Object).has("value")
-    expects(Object).to.be.like("value")
-    assert "value" in that(Object)
-
-    assert "value" in dictionary
-    expects(dictionary).has("value")
-    expects(dictionary).to.be.like("value")
-    assert "value" in that(dictionary)
-
-    expects(value).has("value")
-    expects(value).to.be.like("value")
-    assert "value" in that(value)
-    expects(value).has("va")
-    expects(value).to.be.like("va")
-    assert "val" in that(value)
-    expects(value).has("val")
-    expects(value).to.be.like("ue")
-    assert "ue" in that(value)
-
-
-def test_that_at_key_equals():
-    "that().at(object).equals(object)"
-
-    class Class:
-        attribute = "some class"
-
-    Object = Class()
-    dictionary = {
-        "attribute": "data_structure",
-    }
-
-    assert that(Class).at("attribute").equals("some class")
-    assert that(Object).at("attribute").equals("some class")
-    assert that(dictionary).at("attribute").equals("data_structure")
 
 
 def test_that_len_is():
@@ -669,7 +597,7 @@ def test_within_five_milicesonds_fails_when_function_takes_six_miliseconds():
     except AssertionError as e:
         failed = True
         expects(
-            "sleepy [tests/test_original_api.py line 663] did not run within five miliseconds"
+            "sleepy [tests/test_original_api.py line 591] did not run within five miliseconds"
         ).to.equal(str(e))
 
     assert failed, "within(five=miliseconds)(sleepy) did not fail"
@@ -839,7 +767,7 @@ def test_depends_on_failing_due_to_lack_of_attribute_in_context():
 
     fullpath = collapse_path(os.path.abspath(__file__))
     error = (
-        f'the action "variant_action" defined at {fullpath}:848 '
+        f'the action "variant_action" defined at {fullpath}:776 '
         'depends on the attribute "data_structure" to be available in the'
         " current context"
     )
@@ -862,10 +790,10 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
 
     fullpath = collapse_path(os.path.abspath(__file__))
     error = (
-        'the action "my_action" defined at {0}:876 '
+        'the action "my_action" defined at {0}:804 '
         'depends on the attribute "some_attr" to be available in the context.'
         " Perhaps one of the following actions might provide that attribute:\n"
-        " -> dependency_action at {0}:872".replace("{0}", fullpath)
+        " -> dependency_action at {0}:800".replace("{0}", fullpath)
     )
 
     def with_setup(context):

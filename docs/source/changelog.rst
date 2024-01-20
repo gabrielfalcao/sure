@@ -34,6 +34,11 @@ v3.0.0
    decorator no longer receive a :class:`datetime.datetime` object as
    first argument.
 
+- Removes methods from :class:`sure.original.AssertionHelper`:
+  - :meth:`sure.original.AssertionHelper.differs`
+  - :meth:`sure.original.AssertionHelper.has`
+  - :meth:`sure.original.AssertionHelper.is_a`
+
 
 [v2.0.0]
 --------

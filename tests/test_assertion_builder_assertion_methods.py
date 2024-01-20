@@ -16,7 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """tests for :class:`sure.AssertionBuilder` properties defined with the
 decorator :func:`sure.assertionmethod`"""
-
+import re
+import sys
 from sure import expects
 from sure.doubles import anything_of_type
 
@@ -61,6 +62,68 @@ def test_within():
 def test_different_of():
     "expects().to.be.different_of()"
 
-    expects([]).to.be.different_of.when.called_with([]).should.have.raised(
+    expects("").to.be.different_of.when.called_with([]).should.have.raised(
         ".different_of only works for string comparison but in this case is expecting [] (<class 'list'>) instead"
+    )
+
+    expects([]).to.be.different_of.when.called_with("").should.have.raised(
+        ".different_of only works for string comparison but in this case the actual source comparison object is [] (<class 'list'>) instead"
+    )
+
+
+def test_is_a():
+    "expects().to.be.a()"
+
+    expects(b"a").to.be.a(bytes)
+    expects(sys.stdout).to.be.a.when.called_with("io.StringIO").to.have.raised(
+        "expects(sys.stdout).to.be.a.when.called_with(\"io.StringIO\").to.have.raised( expects `<_io.TextIOWrapper name='<stdout>' mode='w' encoding='utf-8'>' to be an `io.StringIO'"
+    )
+    expects(sys.stdout).to.not_be.a.when.called_with("io.TextIOWrapper").to.have.raised(
+        "expects(sys.stdout).to.not_be.a.when.called_with(\"io.TextIOWrapper\").to.have.raised( expects `<_io.TextIOWrapper name='<stdout>' mode='w' encoding='utf-8'>' to not be an `io.TextIOWrapper'"
+    )
+
+
+def test_to_be_below():
+    "expects().to.be.below()"
+
+    expects(b"A").to.be.below(b"a")
+    expects(b"a").to.below.when.called_with(b"A").should.have.raised(
+        "b'a' should be below b'A'"
+    )
+    expects(70).to_not.be.below.when.called_with(83).should.have.raised(
+        "70 should not be below 83"
+    )
+    expects(b"a").to.below.when.called_with(b"A").should_not.have.raised.when.called_with(
+        "b'a' should be below b'A'"
+    ).should.have.thrown.when.called_with("`below' called with args (b'A',) and keyword-args {} should not raise b'a' should be below b'A' but raised b'a' should be below b'A'").should.return_value(not False)
+
+
+def test_to_be_above():
+    "expects().to.be.above()"
+
+    expects(b"S").to.be.above(b"B")
+    expects(b"D").to.be.above.when.called_with(b"S").should.have.raised(
+        "b'D' should be above b'S'"
+    )
+    expects(115).to.not_be.above.when.called_with(102).to.have.raised(
+        "115 should not be above 102"
+    )
+
+
+def test_to_match():
+    "expects().to.match() REGEX"
+
+    expects("ROBSON").to.match(r"(^RO|.OB.{3})")
+    expects("robson").to.match(r"(^RO|.OB.{3})", re.I)
+    expects("OM").to.match(r"S?[OU][NM]")
+    expects("ON").to.match(r"S?[OU][NM]")
+    expects("SOM").to.match(r"S?[OU][NM]")
+    expects("SON").to.match(r"S?[OU][NM]")
+    expects("SUM").to.match(r"S?[OU][MN]")
+    expects("SUN").to.match(r"S?[OU][MN]")
+    expects("UM").to.match(r"S?[OU][MN]")
+    expects("UN").to.match(r"S?[OU][MN]")
+    expects("NOS").to_not.match(r"S?[OU][MN]")
+    expects(list("OHMS")).to.match.when.called_with("Ω").should.have.raised(
+        "['O', 'H', 'M', 'S'] should be a string in order to compare using .match()"
     )

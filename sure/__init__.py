@@ -737,17 +737,6 @@ class AssertionBuilder(object):
 
         return True
 
-    def __contains__(self, expectation):
-        if isinstance(self.actual, dict):
-            items = self.actual.keys()
-
-        if isinstance(self.actual, Iterable):
-            items = self.actual
-        else:
-            items = dir(self.actual)
-
-        return expectation in items
-
     @assertionmethod
     def contains(self, expectation):
         if expectation in self.actual:
@@ -885,10 +874,8 @@ class AssertionBuilder(object):
     def a(self, klass):
         if isinstance(klass, type):
             class_name = klass.__name__
-        elif isinstance(klass, (str, )):
-            class_name = klass.strip()
         else:
-            class_name = str(klass)
+            class_name = str(klass).strip()
 
         is_vowel = class_name.lower()[0] in "aeiou"
 
@@ -896,14 +883,8 @@ class AssertionBuilder(object):
             if "." in klass:
                 items = klass.split(".")
                 first = items.pop(0)
-                if not items:
-                    items = [first]
-                    first = "_abcoll"
             else:
-                if sys.version_info <= (3, 0, 0):
-                    first = "__builtin__"
-                else:
-                    first = "builtins"
+                first = "builtins"
                 items = [klass]
 
             klass = reduce(getattr, items, __import__(first))
@@ -1023,7 +1004,7 @@ class AssertionBuilder(object):
     def throw(self, *args, **kw):
         if self.negative:
             msg = (
-                "{0} called with args {1} and keyword-args {2} should "
+                "`{0}' called with args {1} and keyword-args {2} should "
                 "not raise {3} but raised {4}"
             )
 
@@ -1033,7 +1014,7 @@ class AssertionBuilder(object):
                 return True
             except Exception as e:
                 err = msg.format(
-                    self.actual,
+                    self.actual.__name__,
                     self._callable_args,
                     self._callable_kw,
                     exc,
@@ -1082,7 +1063,7 @@ class AssertionBuilder(object):
         if not isinstance(
             self.actual, str
         ):
-            raise f"{repr(self.actual)} should be a string in order to compare using .match()"
+            raise WrongUsageError(f"{repr(self.actual)} should be a string in order to compare using .match()")
         matched = re.search(regex, self.actual, *args)
 
         modifiers_map = {
@@ -1142,9 +1123,6 @@ class ObjectIdentityAssertion(object):
 
     def __getattr__(self, name):
         return getattr(self.assertion_builder, name)
-
-    def __repr__(self):
-        return f"<ObjectIdentityAssertion assertion_builder={repr(self.assertion_builder)}>"
 
 
 assert_that = AssertionBuilder("assert_that")
@@ -1214,7 +1192,7 @@ keyword arguments passed to the context-manager.
 old_dir = dir
 
 
-def enable_special_syntax():
+def enable_special_syntax():  # pragma: no cover
     """enables :mod:`sure`'s :ref:`Special Syntax`
 
     .. danger:: Enabling the special syntax in production code may cause unintended consequences.

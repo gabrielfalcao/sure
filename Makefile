@@ -66,7 +66,7 @@ push-release: dist  # pushes distribution tarballs of the current version
 	$(VENV)/bin/twine upload dist/*.tar.gz
 
 build-release:
-	$(VENV)/bin/python setup.py build sdist bdist_wheel
+	$(VENV)/bin/python setup.py build sdist
 	$(VENV)/bin/twine check dist/*.tar.gz
 
 release: tests

@@ -46,24 +46,13 @@ if sys.version_info[0] < 3:
 PROJECT_ROOT = os.path.dirname(__file__)
 
 
-class VersionFinder(ast.NodeVisitor):
-    VARIABLE_NAME = "version"
-
-    def __init__(self):
-        self.version = None
-
-    def visit_Assign(self, node):
-        try:
-            if node.targets[0].id == self.VARIABLE_NAME:
-                self.version = node.value.s
-        except Exception:
-            pass
-
-
 def read_version():
-    finder = VersionFinder()
-    finder.visit(ast.parse(local_text_file("sure", "version.py")))
-    return finder.version
+    mod = ast.parse(local_text_file("sure", "version.py"))
+    exp = mod.body[0]
+    tgt = exp.targets[0]
+    cst = exp.value
+    assert tgt.id == "version"
+    return cst.value
 
 
 def local_text_file(*f):

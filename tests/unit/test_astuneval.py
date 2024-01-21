@@ -50,19 +50,35 @@ def test_parse_accessor_subscript_accessor():
 
 
 def test_parse_accessor_attr_accessor():
-    class FirstResponder:
-        def __init__(self, bound: str, damage: str):
-            self.bound = bound
-            self.damage = damage
+    class Event:
+        def __init__(self, description: str):
+            self.tag = description
 
-    class Incident:
-        first_responders = [
-            FirstResponder("Wyckoff", "unknown"),
-            FirstResponder("Beth Israel", "unknown"),
-            FirstResponder("Brooklyn Hospital Center", "unknown"),
-            FirstResponder("Woodhull", "administered wrong medication"),
+    class LogBook:
+        events = [
+            Event("occurrenceA"),
+            Event("occurrenceB"),
+            Event("occurrenceC"),
+            Event("occurrenceD"),
+            Event("occurrenceE"),
+            Event("occurrenceF"),
         ]
-    expects(parse_accessor("first_responders[3].damage")).to.be.a(AttributeAccessor)
 
-    access_damage = parse_accessor("first_responders[3].damage")
-    expects(access_damage(Incident)).to.equal("administered wrong medication")
+    expects(parse_accessor("events[3].description")).to.be.a(AttributeAccessor)
+
+    access_description = parse_accessor("events[3].tag")
+    expects(access_description(LogBook)).to.equal("occurrenceD")
+
+
+def test_accessor_access_not_implemented():
+    accessor = Accessor(parse_body("attribute"))
+    expects(accessor.access).when.called_with(object).to.throw(
+        NotImplementedError
+    )
+
+
+def test_parse_body_syntax_error():
+    parse_body.when.called_with("substance = collect()\nsubstance.reuse()").to.throw(
+        SyntaxError,
+        "'substance = collect()\\nsubstance.reuse()' exceeds the maximum body count for ast nodes"
+    )

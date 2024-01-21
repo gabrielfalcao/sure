@@ -55,13 +55,11 @@ docs: html-docs
 	$(OPEN_COMMAND) docs/build/html/index.html
 
 test tests:
-	@$(VENV)/bin/pytest --cov=sure tests/unit/test_astuneval.py
 	@$(VENV)/bin/pytest --cov=sure tests
 
 # runs main command-line tool
 run: | $(LIBEXEC_PATH)
 	$(LIBEXEC_PATH) --reap-warnings tests/crashes
-	$(LIBEXEC_PATH) --reap-warnings --special-syntax --with-coverage --cover-branches --cover-erase --cover-module=sure.core --cover-module=sure tests/runner
 	$(LIBEXEC_PATH) --reap-warnings --special-syntax --with-coverage --cover-branches --cover-erase --cover-module=sure --immediate --cover-module=sure --ignore tests/crashes tests
 
 push-release: dist  # pushes distribution tarballs of the current version

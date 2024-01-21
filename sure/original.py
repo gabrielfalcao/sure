@@ -82,7 +82,7 @@ class AssertionHelper(object):
         if all_integers(within_range):
             if len(within_range) != 2:
                 raise TypeError(
-                    'within_range parameter must be a tuple with 2 objects',
+                    f"within_range parameter must be a tuple with 2 objects, received a `{type(within_range).__name__}' with {len(within_range)} objects instead",
                 )
 
             self._range = within_range
@@ -115,7 +115,7 @@ class AssertionHelper(object):
 
     def raises(self, exc, msg=None):
         if not callable(self.actual):
-            raise TypeError(f'{self.actual} is not callable')
+            raise TypeError(f'{repr(self.actual)} is not callable')
 
         try:
             self.actual(*self._callable_args, **self._callable_kw)
@@ -147,18 +147,6 @@ class AssertionHelper(object):
                         f'Expected to match regex: {repr(msg.pattern)}\n against:\n {repr(str(err))}'
                     )
 
-            elif isinstance(msg, (str, )) and msg not in str(err):
-                raise AssertionError(
-                    'When calling %r the exception message does not match. ' \
-                    'Expected: %r\n got:\n %r' % (self.actual, msg, err)
-                )
-
-            elif isinstance(msg, re.Pattern) and not msg.search(err):
-                raise AssertionError(
-                    'When calling %r the exception message does not match. ' \
-                    'Expected to match regex: %r\n against:\n %r' % (identify_caller_location(self.actual), msg.pattern, err)
-                )
-
             else:
                 raise e
         else:
@@ -177,12 +165,7 @@ class AssertionHelper(object):
                         self._callable_kw, exc))
             else:
                 raise AssertionError(
-                    'at %s:\ncalling %s() with args %r and kws %r did not raise %r' % (
-                        _src_filename,
-                        self.actual.__name__,
-                        self._callable_args,
-                        self._callable_kw, exc
-                     )
+                    f'at {_src_filename}:\ncalling {self.actual.__name__}() with args {repr(self._callable_args)} and kws {repr(self._callable_kw)} did not raise {repr(exc)}'
                 )
 
         return True
@@ -215,7 +198,6 @@ class AssertionHelper(object):
         return True
 
     def looks_like(self, expectation):
-        comp = DeepComparison(self.actual, expectation)
         old_src = pformat(self.actual)
         old_dst = pformat(expectation)
         self.actual = re.sub(r'\s', '', self.actual).lower()
@@ -225,29 +207,6 @@ class AssertionHelper(object):
             return True
         else:
             raise AssertionError(error)
-
-    def every_item_is(self, expectation):
-        msg = 'all members of %r should be %r, but the %dth is %r'
-        for index, item in enumerate(self.actual):
-            if self._range:
-                if index < self._range[0] or index > self._range[1]:
-                    continue
-
-            error = msg % (self.actual, expectation, index, item)
-            if item != expectation:
-                raise AssertionError(error)
-
-        return True
-
-    def at(self, key):
-        if not self.has(key):
-            raise AssertionError(f"key {key} not present in {self.actual}")
-
-        if isinstance(self.actual, dict):
-            return AssertionHelper(self.actual[key])
-
-        else:
-            return AssertionHelper(getattr(self.actual, key))
 
     def _get_int_or_length(self, obj: Union[int, typing.Iterable]):
         if isinstance(obj, Iterable):
@@ -344,9 +303,6 @@ class AssertionHelper(object):
 
         return True
 
-    def like(self, that):
-        return self.has(that)
-
     def the_attribute(self, attr):
         self._attribute = attr
         return self
@@ -375,10 +331,6 @@ class AssertionHelper(object):
                     )
 
             for index, (item, other) in enumerate(zip(self.actual, items)):
-                if self._range:
-                    if index < self._range[0] or index > self._range[1]:
-                        continue
-
                 value = get_eval(item)
 
                 error = msg % (self.actual, index, self.__element_access_expr__, other, value)

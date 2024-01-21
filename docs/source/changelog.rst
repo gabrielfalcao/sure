@@ -38,7 +38,10 @@ v3.0.0
   - :meth:`sure.original.AssertionHelper.differs`
   - :meth:`sure.original.AssertionHelper.has`
   - :meth:`sure.original.AssertionHelper.is_a`
-
+  - :meth:`sure.original.AssertionHelper.every_item_is`
+  - :meth:`sure.original.AssertionHelper.at`
+  - :meth:`sure.original.AssertionHelper.like`
+  - Feel free to open an issue requesting any of those methods to be added back to Sure's codebase.
 
 [v2.0.0]
 --------

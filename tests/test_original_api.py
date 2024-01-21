@@ -17,9 +17,7 @@
 import os
 import sure
 import time
-
 from datetime import datetime
-
 from sure import that, this
 from sure import expects
 from sure import action_for
@@ -27,10 +25,11 @@ from sure import scenario
 from sure import within
 from sure import second, miliseconds
 from sure import StagingArea
+from sure.doubles import Dummy, anything
 from sure.errors import WrongUsageError
 from sure.special import is_cpython
 from sure.loader import collapse_path
-from sure.original import all_integers
+from sure.original import all_integers, AssertionHelper
 
 
 def test_setup_with_context():
@@ -63,7 +62,7 @@ def test_context_of_sure_that_with_context_decorated_functions_is_not_optional()
     assert that(it_crashes).raises(
         TypeError,
         (
-            "the function it_crashes defined at tests/test_original_api.py line 60, is being "
+            "the function it_crashes defined at tests/test_original_api.py line 59, is being "
             "decorated by either @that_with_context or @scenario, so it should "
             "take at least 1 parameter, which is the test context"
         ),
@@ -267,28 +266,11 @@ def test_that_checking_all_atributes_of_range():
     assert that(shapes, within_range=(1, 2)).the_attribute("name").equals("square")
 
 
-def test_that_checking_all_elements():
-    "that(iterable).every_item_is('value')"
-    shapes = [
-        "cube",
-        "ball",
-        "ball",
-        "piramid",
-    ]
-
-    assert shapes[0] != "ball"
-    assert shapes[3] != "ball"
-
-    assert shapes[1] == "ball"
-    assert shapes[2] == "ball"
-
-    assert that(shapes, within_range=(1, 2)).every_item_is("ball")
-
-
 def test_that_checking_each_matches():
     "that(iterable).in_each('').equals('value')"
 
     class animal(object):
+
         def __init__(self, kind):
             self.attributes = {
                 "class": "mammal",
@@ -305,7 +287,6 @@ def test_that_checking_each_matches():
 
     assert animals[0].attributes["kind"] != "cow"
     assert animals[1].attributes["kind"] != "cow"
-
     assert animals[2].attributes["kind"] == "cow"
     assert animals[3].attributes["kind"] == "cow"
     assert animals[4].attributes["kind"] == "cow"
@@ -329,17 +310,9 @@ def test_that_checking_each_matches():
         .matches(["dog", "cat", "cow", "cow", "cow"])
     )
 
-    try:
-        assert that(animals).in_each("attributes['kind']").matches(["dog"])
-        assert False, "should not reach here"
-    except AssertionError as e:
-        assert that(str(e)).equals(
-            "%r has 5 items, but the matching list has 1: %r"
-            % (
-                ["dog", "cat", "cow", "cow", "cow"],
-                ["dog"],
-            )
-        )
+    expects(that(animals).in_each("attributes['kind']").matches).when.called_with(["dog"]).should.have.raised(
+        f"{repr(['dog', 'cat', 'cow', 'cow', 'cow'])} has 5 items, but the matching list has 1: {repr(['dog'])}"
+    )
 
 
 def test_that_raises():
@@ -587,20 +560,12 @@ def test_within_pass():
 
 def test_within_five_milicesonds_fails_when_function_takes_six_miliseconds():
     "within(five=miliseconds) should fail when the decorated function takes six miliseconds to run"
-
     def sleepy(*a):
         time.sleep(0.6)
 
-    failed = False
-    try:
-        within(five=miliseconds)(sleepy)()
-    except AssertionError as e:
-        failed = True
-        expects(
-            "sleepy [tests/test_original_api.py line 591] did not run within five miliseconds"
-        ).to.equal(str(e))
-
-    assert failed, "within(five=miliseconds)(sleepy) did not fail"
+    expects(within(five=miliseconds)(sleepy)).when.called.to.have.raised(
+        "sleepy [tests/test_original_api.py line 563] did not run within five miliseconds"
+    )
 
 
 def test_that_is_a_matcher_should_absorb_callables_to_be_used_as_matcher():
@@ -767,7 +732,7 @@ def test_depends_on_failing_due_to_lack_of_attribute_in_context():
 
     fullpath = collapse_path(os.path.abspath(__file__))
     error = (
-        f'the action "variant_action" defined at {fullpath}:776 '
+        f'the action "variant_action" defined at {fullpath}:741 '
         'depends on the attribute "data_structure" to be available in the'
         " current context"
     )
@@ -789,11 +754,12 @@ def test_depends_on_failing_due_not_calling_a_previous_action():
     "it fails when an action depends on some attribute that is being " "provided by other actions"
 
     fullpath = collapse_path(os.path.abspath(__file__))
+
     error = (
-        'the action "my_action" defined at {0}:804 '
+        'the action "my_action" defined at {0}:770 '
         'depends on the attribute "some_attr" to be available in the context.'
         " Perhaps one of the following actions might provide that attribute:\n"
-        " -> dependency_action at {0}:800".replace("{0}", fullpath)
+        " -> dependency_action at {0}:766".replace("{0}", fullpath)
     )
 
     def with_setup(context):
@@ -1634,4 +1600,47 @@ def test_within_wrong_usage():
     expects(within).when.called_with(three=miliseconds, one=second).to.have.raised(
         WrongUsageError,
         "within() takes a single keyword argument where the argument must be a numerical description from one to eighteen and the value. For example: within(eighteen=miliseconds)",
+    )
+
+
+def test_assertion_helper_within_range_wrong_number_of_elements():
+    expects(AssertionHelper).when.called_with(object, within_range=set(range(3))).should.have.raised(
+        TypeError,
+        "within_range parameter must be a tuple with 2 objects, received a `set' with 3 objects instead"
+    )
+
+
+def test_assertion_helper_with_kws():
+    src = Dummy('assertion_helper.src')
+    assertion_helper = AssertionHelper(src, with_args=("z", "y"), with_kws={"a": "b"})
+    expects(assertion_helper).to.have.property("_callable_args").being.a(list)
+    expects(assertion_helper).to.have.property("_callable_args").being.equal(["z", "y"])
+    expects(assertion_helper).to.have.property("_callable_kw").being.a(dict)
+    expects(assertion_helper).to.have.property("_callable_kw").being.equal({"a": "b"})
+    expects(assertion_helper).to.have.property("src").being.a(Dummy)
+    expects(assertion_helper).to.have.property("src").being.equal(src)
+
+
+def test_assertion_helper_raises_raises_type_error_noncallable():
+    src = Dummy('assertion_helper.src')
+    assertion_helper = AssertionHelper(src)
+    expects(assertion_helper.raises).when.called_with("dummy").to.have.raised(
+        TypeError,
+        "<Dummy assertion_helper.src> is not callable"
+    )
+
+
+def test_assertion_helper_raises_fails_when_the_expected_error_does_not_happen_given_function():
+    assertion_helper = AssertionHelper(lambda: None)
+
+    expects(assertion_helper.raises).when.called_with("error").to.have.raised(
+        f'calling function <lambda>({collapse_path(__file__)} at line: "1634") with args [] and kws {{}} did not raise {repr("error")}'
+    )
+
+
+def test_assertion_helper_raises_fails_when_the_expected_error_does_not_happen_builtin_function():
+    assertion_helper = AssertionHelper(vars)
+
+    expects(assertion_helper.raises).when.called_with("error").to.have.raised(
+        "at <built-in function>:\ncalling vars() with args [] and kws {} did not raise 'error'"
     )

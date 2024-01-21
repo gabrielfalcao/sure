@@ -66,7 +66,7 @@ For More Information:
 Documentation
 -------------
 
-Available on the `website <https://sure.readthedocs.io/en/latest/>`_.
+Available on  `sure.readthedocs.io <https://sure.readthedocs.io>`_.
 
 To build locally run:
 

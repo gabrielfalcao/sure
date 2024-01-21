@@ -58,7 +58,7 @@ class FeatureReporter(Reporter):
         self.sh.reset(" " * self.indentation)
         self.sh.bold_blue("Feature: ")
         self.sh.yellow("'")
-        self.sh.green(feature.name)
+        self.sh.green(feature.title)
         self.sh.yellow("'")
         self.sh.reset(" ")
 

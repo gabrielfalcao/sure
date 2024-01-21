@@ -43,11 +43,11 @@ class TestReporter(Reporter):
         events["on_start"].append((time.time(),))
 
     def on_feature(self, feature: Feature):
-        events["on_feature"].append((time.time(), feature.name))
+        events["on_feature"].append((time.time(), feature.title))
 
     def on_feature_done(self, feature: Feature, result: FeatureResult):
         events["on_feature_done"].append(
-            (time.time(), feature.name, result.label.lower())
+            (time.time(), feature.title, result.label.lower())
         )
 
     def on_scenario(self, scenario: Scenario):

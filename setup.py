@@ -46,24 +46,13 @@ if sys.version_info[0] < 3:
 PROJECT_ROOT = os.path.dirname(__file__)
 
 
-class VersionFinder(ast.NodeVisitor):
-    VARIABLE_NAME = "version"
-
-    def __init__(self):
-        self.version = None
-
-    def visit_Assign(self, node):
-        try:
-            if node.targets[0].id == self.VARIABLE_NAME:
-                self.version = node.value.s
-        except Exception:
-            pass
-
-
 def read_version():
-    finder = VersionFinder()
-    finder.visit(ast.parse(local_text_file("sure", "version.py")))
-    return finder.version
+    mod = ast.parse(local_text_file("sure", "version.py"))
+    exp = mod.body[0]
+    tgt = exp.targets[0]
+    cst = exp.value
+    assert tgt.id == "version"
+    return cst.value
 
 
 def local_text_file(*f):
@@ -86,9 +75,10 @@ def read_readme():
         return __doc__
 
 
-install_requires = ["mock", "coverage==7.4.0", "click==8.1.7", "couleur==0.7.4"]
-tests_require = []
+install_requires = ["coverage==7.4.0", "click==8.1.7", "couleur==0.7.4"]
+tests_require = ["mock"]
 version = read_version()
+packages = find_packages(exclude=["*tests*", "*examples*"])
 
 if __name__ == "__main__":
     setup(
@@ -102,7 +92,7 @@ if __name__ == "__main__":
         maintainer="Gabriel Falcao",
         maintainer_email="gabrielteratos@gmail.com",
         include_package_data=True,
-        packages=find_packages(exclude=["*tests*"]),
+        packages=packages,
         install_requires=install_requires,
         long_description_content_type='text/x-rst',
         entry_points={
@@ -118,11 +108,13 @@ if __name__ == "__main__":
             "Operating System :: POSIX :: Linux",
             "Programming Language :: Python",
             "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
             "Programming Language :: Python :: Implementation",
             "Programming Language :: Python :: Implementation :: CPython",
             "Programming Language :: Python :: Implementation :: PyPy",

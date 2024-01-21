@@ -20,14 +20,14 @@
 import re
 import os
 import sys
-
 import builtins
 import difflib
 import inspect
 import traceback
-
+import operator
 from functools import wraps, partial, reduce
 from datetime import datetime
+from typing import Dict, List, Optional, Tuple, Union
 
 from sure.original import AssertionHelper
 from sure.original import Iterable
@@ -336,18 +336,41 @@ def word_to_number(word):
         "fourteen": 14,
         "fifteen": 15,
         "sixteen": 16,
+        "seventeen": 17,
+        "eighteen": 18,
+        "nineteen": 19,
+        "twenty": 20,
+        "thirty": 30,
+        "fourty": 40,
+        "fifty": 50,
+        "sixty": 60,
+        "seventy": 70,
+        "eighty": 80,
+        "ninety": 90,
+        "hundred": 100,
+        "thousand": 1000,
+        "million": 1000000,
     }
-    # TODO: refactor
-    try:
-        return basic[word]
-    except KeyError:
-        raise AssertionError(
-            "sure supports only literal numbers from one to sixteen, "
-            f'you tried the word "{word}"'
-        )
+    value = int(False)
+    words = word.split("_")
+    for p, word in enumerate(words):
+        number = basic.get(words[p], 0)
+        if len(words) > p + 1:
+            next_number = basic.get(words[p + 1], 0)
+        else:
+            next_number = 0
+
+        if number <= 10 and next_number > 90:
+            value += number * next_number
+        elif number > 90:
+            continue
+        else:
+            value += number
+
+    return value
 
 
-def action_for(context, provides=None, depends_on=None):
+def action_for(context, provides=None, depends_on=None):  # pragma: no cover  # TODO: add test coverage
     """function decorator for defining functions which might provide a
     list of assets to the staging area and might declare a list of
     dependencies expected to exist within a :class:`StagingArea`
@@ -478,19 +501,9 @@ def assertionmethod(func):
     @wraps(func)
     def wrapper(self, *args, **kw):
         try:
-            value = func(self, *args, **kw)
+            return func(self, *args, **kw)
         except AssertionError as e:
             raise e
-
-        if not value:
-            raise AssertionError(
-                f"{0}({1}{2}) failed".format(
-                    func.__name__,
-                    ", ".join(map(repr, args)),
-                    ", ".join(["{0}={1}".format(k, repr(kw[k])) for k in kw]),
-                )
-            )
-        return value
 
     return wrapper
 
@@ -503,12 +516,12 @@ def assertionproperty(func):
 class AssertionBuilder(object):
     def __init__(
         self,
-        name=None,
-        negative=False,
-        actual=None,
-        with_args=None,
-        with_kws=None,
-        and_kws=None
+        name: str,
+        negative: bool = False,
+        actual: object = None,
+        with_args: Optional[Union[list, tuple]] = None,
+        with_kws: Optional[Dict[str, object]] = None,
+        and_kws: Optional[Dict[str, object]] = None,
     ):
         self._name = name
         self.negative = negative
@@ -557,25 +570,10 @@ class AssertionBuilder(object):
         return self
 
     def __getattr__(self, attr):
-        special_case = False
-        special_case = attr in (POSITIVES + NEGATIVES)
-
-        negative = attr in NEGATIVES
-
-        if special_case:
-            return AssertionBuilder(
-                attr,
-                negative=negative,
-                actual=self.actual,
-                with_args=self._callable_args,
-                with_kws=self._callable_kw,
-            )
-
         try:
             return getattr(self._that, attr)
         except AttributeError:
-            return self.__getattribute__(attr)
-        return super(AssertionBuilder, self).__getattribute__(attr)
+            return super(AssertionBuilder, self).__getattribute__(attr)
 
     @assertionproperty
     def callable(self):
@@ -619,6 +617,14 @@ class AssertionBuilder(object):
         return self.should_not
 
     @assertionproperty
+    def have(self):
+        return self
+
+    @assertionproperty
+    def which(self):
+        return self
+
+    @assertionproperty
     def to(self):
         return self
 
@@ -627,15 +633,7 @@ class AssertionBuilder(object):
         return self
 
     @assertionproperty
-    def which(self):
-        return self
-
-    @assertionproperty
-    def have(self):
-        return self
-
-    @assertionproperty
-    def with_value(self):
+    def that(self):
         return self
 
     @assertionmethod
@@ -739,23 +737,12 @@ class AssertionBuilder(object):
 
         return True
 
-    def __contains__(self, expectation):
-        if isinstance(self.actual, dict):
-            items = self.actual.keys()
-
-        if isinstance(self.actual, Iterable):
-            items = self.actual
-        else:
-            items = dir(self.actual)
-
-        return expectation in items
-
     @assertionmethod
     def contains(self, expectation):
         if expectation in self.actual:
             return True
         else:
-            raise Explanation(f'{expectation} should be in {self.actual}').as_assertion(self.actual, expectation, "Content Verification Error")
+            raise Explanation(f"`{expectation}' should be in `{self.actual}'").as_assertion(self.actual, expectation, "Content Verification Error")
 
     contain = contains
     to_contain = contains
@@ -765,7 +752,7 @@ class AssertionBuilder(object):
         if expectation not in self.actual:
             return True
         else:
-            raise Explanation(f'{expectation} should not be in {self.actual}').as_assertion(self.actual, expectation, "Content Verification Error")
+            raise Explanation(f"`{expectation}' should not be in `{self.actual}'").as_assertion(self.actual, expectation, "Content Verification Error")
 
     doesnt_contain = does_not_contain
     to_not_contain = does_not_contain
@@ -807,22 +794,22 @@ class AssertionBuilder(object):
             # instead of hardcoding ``.should_not.be.within`` and ``.should.be.within`` in the
             # variable assignments below
             if self.negative:
-                ppath = "{0}.should_not.be.within".format(self.actual)
+                ppath = f"({self.actual}).should_not.be.within"
             else:
-                ppath = "{0}.should.be.within".format(self.actual)
+                ppath = f"({self.actual}).should.be.within".format(self.actual)
 
             raise AssertionError(
                 (
-                    "{0}({1}, {2}) must be called with either a iterable:\n"
+                    "{0}({1}, {2}) must be called with either an iterable:\n"
                     "{0}([1, 2, 3, 4])\n"
-                    "or with a range of numbers:"
-                    "{0}(1, 3000)"
+                    "or with a range of numbers, i.e.: "
+                    "`{0}(1, 3000)'"
                 ).format(ppath, first, ", ".join([repr(x) for x in rest]))
             )
 
     @assertionmethod
     def equal(self, expectation, epsilon=None):
-        """compares given object ``X'`  with an expected '`Y'` object.
+        """compares given object ``X'` with an expected '`Y'` object.
 
         It primarily assures that the compared objects are absolute equal '`=='`.
 
@@ -887,10 +874,8 @@ class AssertionBuilder(object):
     def a(self, klass):
         if isinstance(klass, type):
             class_name = klass.__name__
-        elif isinstance(klass, (str, )):
-            class_name = klass.strip()
         else:
-            class_name = str(klass)
+            class_name = str(klass).strip()
 
         is_vowel = class_name.lower()[0] in "aeiou"
 
@@ -898,14 +883,8 @@ class AssertionBuilder(object):
             if "." in klass:
                 items = klass.split(".")
                 first = items.pop(0)
-                if not items:
-                    items = [first]
-                    first = "_abcoll"
             else:
-                if sys.version_info <= (3, 0, 0):
-                    first = "__builtin__"
-                else:
-                    first = "builtins"
+                first = "builtins"
                 items = [klass]
 
             klass = reduce(getattr, items, __import__(first))
@@ -1023,13 +1002,9 @@ class AssertionBuilder(object):
 
     @assertionmethod
     def throw(self, *args, **kw):
-        _that = AssertionHelper(
-            self.actual, with_args=self._callable_args, and_kws=self._callable_kw
-        )
-
         if self.negative:
             msg = (
-                "{0} called with args {1} and keyword-args {2} should "
+                "`{0}' called with args {1} and keyword-args {2} should "
                 "not raise {3} but raised {4}"
             )
 
@@ -1039,15 +1014,17 @@ class AssertionBuilder(object):
                 return True
             except Exception as e:
                 err = msg.format(
-                    self.actual,
-                    self._that._callable_args,
-                    self._that._callable_kw,
+                    self.actual.__name__,
+                    self._callable_args,
+                    self._callable_kw,
                     exc,
                     e,
                 )
                 raise AssertionError(err)
 
-        return _that.raises(*args, **kw)
+        return AssertionHelper(
+            self.actual, with_args=self._callable_args, and_kws=self._callable_kw
+        ).raises(*args, **kw)
 
     thrown = throw
     raises = thrown
@@ -1086,7 +1063,7 @@ class AssertionBuilder(object):
         if not isinstance(
             self.actual, str
         ):
-            raise f"{repr(self.actual)} should be a string in order to compare using .match()"
+            raise WrongUsageError(f"{repr(self.actual)} should be a string in order to compare using .match()")
         matched = re.search(regex, self.actual, *args)
 
         modifiers_map = {
@@ -1146,9 +1123,6 @@ class ObjectIdentityAssertion(object):
 
     def __getattr__(self, name):
         return getattr(self.assertion_builder, name)
-
-    def __repr__(self):
-        return f"<ObjectIdentityAssertion assertion_builder={repr(self.assertion_builder)}>"
 
 
 assert_that = AssertionBuilder("assert_that")
@@ -1218,7 +1192,7 @@ keyword arguments passed to the context-manager.
 old_dir = dir
 
 
-def enable_special_syntax():
+def enable_special_syntax():  # pragma: no cover
     """enables :mod:`sure`'s :ref:`Special Syntax`
 
     .. danger:: Enabling the special syntax in production code may cause unintended consequences.

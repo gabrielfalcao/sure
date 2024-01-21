@@ -31,7 +31,8 @@ from sure.runtime import (
     ScenarioResult,
     ScenarioResultSet,
     TestLocation,
-    FeatureResultSet, RuntimeContext
+    FeatureResultSet,
+    RuntimeContext,
 )
 from sure.reporters import test
 
@@ -64,7 +65,7 @@ def test_runner_load_features_from_module_containing_unittest_cases():
     expects(feature).to.have.property("description").being.equal(
         "Module with :class:`unittest.TestCase` subclasses"
     )
-    expects(feature).to.have.property("name").being.equal(
+    expects(feature).to.have.property("title").being.equal(
         "tests.functional.modules.success.module_with_unittest_test_cases"
     )
     expects(feature).to.have.property("ready").being.equal(True)
@@ -107,7 +108,7 @@ def test_runner_load_features_from_module_path_recursively():
 
     expects(featureA).to.equal
     expects(featureA).to.be.a(Feature)
-    expects(featureA).to.have.property("name").being.equal(
+    expects(featureA).to.have.property("title").being.equal(
         "tests.functional.modules.success.module_with_function_members"
     )
     expects(featureA).to.have.property("ready").being.equal(True)
@@ -116,9 +117,8 @@ def test_runner_load_features_from_module_path_recursively():
 
     expects(featureB).to.equal
     expects(featureB).to.be.a(Feature)
-    expects(featureB).to.have.property("name").being.equal(
+    expects(featureB).to.have.property("title").being.equal(
         "tests.functional.modules.success.module_with_members"
-
     )
     expects(featureB).to.have.property("ready").being.equal(True)
     expects(featureB).to.have.property("scenarios").being.a(list)
@@ -126,7 +126,7 @@ def test_runner_load_features_from_module_path_recursively():
 
     expects(featureC).to.equal
     expects(featureC).to.be.a(Feature)
-    expects(featureC).to.have.property("name").being.equal(
+    expects(featureC).to.have.property("title").being.equal(
         "tests.functional.modules.success.module_with_nonunittest_test_cases"
     )
     expects(featureC).to.have.property("ready").being.equal(True)
@@ -135,7 +135,7 @@ def test_runner_load_features_from_module_path_recursively():
 
     expects(featureX).to.equal
     expects(featureX).to.be.a(Feature)
-    expects(featureX).to.have.property("name").being.equal(
+    expects(featureX).to.have.property("title").being.equal(
         "tests.functional.modules.success.module_with_unittest_test_cases"
     )
     expects(featureX).to.have.property("ready").being.equal(True)
@@ -166,7 +166,7 @@ def test_runner_load_features_from_directory_with_python_files():
     expects(feature).to.have.property("description").being.equal(
         "Module with :class:`unittest.TestCase` subclasses"
     )
-    expects(feature).to.have.property("name").being.equal(
+    expects(feature).to.have.property("title").being.equal(
         "tests.functional.modules.success.module_with_unittest_test_cases"
     )
     expects(feature).to.have.property("ready").being.equal(True)
@@ -176,14 +176,14 @@ def test_runner_load_features_from_directory_with_python_files():
     expects(scenarioA).to.be.a(Scenario)
     expects(scenarioB).to.be.a(Scenario)
 
-    expects(scenarioA.name).to.equal("TestCaseA")
+    expects(scenarioA).should.have.property("name").to.equal("TestCaseA")
     expects(scenarioA.description).to.equal("Description of TestCaseA")
     expects(scenarioA.location).to.be.a(TestLocation)
     expects(scenarioA.location.path_and_lineno).to.equal(
         f"{collapse_path(unittest_testcases_module_path)}:23"
     )
 
-    expects(scenarioB.name).to.equal("TestCaseB")
+    expects(scenarioB).should.have.property("name").to.equal("TestCaseB")
     expects(scenarioB.description).to.be.empty
     expects(scenarioB.location).to.be.a(TestLocation)
     expects(scenarioB.location.path_and_lineno).to.equal(
@@ -204,7 +204,7 @@ def test_runner_execute_success_tests():
     expects(feature_result_set).to.be.a(FeatureResultSet)
     expects(feature_result_set).to.have.property("feature_results").being.length_of(4)
     expects(feature_result_set).to.have.property("failed_features").being.empty
-    expects(feature_result_set).to.have.property("errored_scenarios").being.empty
+    expects(feature_result_set).to.have.property("errored_features").being.empty
 
     expects(dict(test.events)).to.equal(
         {
@@ -265,6 +265,8 @@ def test_runner_execute_success_tests():
                 (anything_of_type(float), "test_function_Z", "ok"),
                 (anything_of_type(float), "TestCase", "ok"),
                 (anything_of_type(float), "UnitCase", "ok"),
+                (anything_of_type(float), "UnitCase", "ok"),
+                (anything_of_type(float), "UnitCase", "ok"),
                 (anything_of_type(float), "test_function_A", "ok"),
                 (anything_of_type(float), "test_function_B", "ok"),
                 (anything_of_type(float), "test_function_C", "ok"),
@@ -272,6 +274,10 @@ def test_runner_execute_success_tests():
                 (anything_of_type(float), "TestCaseA", "ok"),
                 (anything_of_type(float), "TestCaseA", "ok"),
                 (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "TestCaseB", "ok"),
@@ -280,6 +286,14 @@ def test_runner_execute_success_tests():
                 (anything_of_type(float), "TestCaseA", "ok"),
                 (anything_of_type(float), "TestCaseA", "ok"),
                 (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseA", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
+                (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "TestCaseB", "ok"),
                 (anything_of_type(float), "TestCaseB", "ok"),

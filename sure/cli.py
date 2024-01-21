@@ -15,28 +15,26 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import os                                                                          # pragma: no cover
+import sys                                                                         # pragma: no cover
+from glob import glob                                                              # pragma: no cover
+from itertools import chain as flatten                                             # pragma: no cover
+from functools import reduce                                                       # pragma: no cover
+from pathlib import Path                                                           # pragma: no cover
 
-import os
-import sys
-import logging
-from glob import glob
-from itertools import chain as flatten
-from functools import reduce
-from pathlib import Path
+import click                                                                       # pragma: no cover
+import coverage                                                                    # pragma: no cover
+import threading                                                                   # pragma: no cover
+import sure.reporters                                                              # pragma: no cover
 
-import click
-import coverage
-import threading
-import sure.reporters
-
-from sure.loader import resolve_path
-from sure.runner import Runner
-from sure.runtime import RuntimeOptions
-from sure.reporters import gather_reporter_names
-from sure.errors import ExitError, ExitFailure, InternalRuntimeError, treat_error
+from sure.loader import resolve_path                                               # pragma: no cover
+from sure.runner import Runner                                                     # pragma: no cover
+from sure.runtime import RuntimeOptions                                            # pragma: no cover
+from sure.reporters import gather_reporter_names                                   # pragma: no cover
+from sure.errors import ExitError, ExitFailure, InternalRuntimeError, treat_error  # pragma: no cover
 
 
-@click.command(no_args_is_help=True)
+@click.command(no_args_is_help=True)                                               # pragma: no cover
 @click.argument("paths", nargs=-1)
 @click.option("-c", "--with-coverage", is_flag=True)
 @click.option("-s", "--special-syntax", is_flag=True)
@@ -62,7 +60,11 @@ from sure.errors import ExitError, ExitFailure, InternalRuntimeError, treat_erro
     type=click.Choice(gather_reporter_names()),
 )
 @click.option("--cover-branches", is_flag=True)
+@click.option("--cover-include", multiple=True, help="includes paths or patterns in the coverage")
+@click.option("--cover-omit", multiple=True, help="omits paths or patterns from the coverage")
 @click.option("--cover-module", multiple=True, help="specify module names to cover")
+@click.option("--cover-erase", is_flag=True, help="erases coverage data prior to running tests")
+@click.option("--cover-concurrency", help="indicates the concurrency library used in measured code", type=click.Choice(["greenlet", "eventlet", "gevent", "multiprocessing", "thread"]), default="thread")
 @click.option("--reap-warnings", is_flag=True, help="reaps warnings during runtime and report only at the end of test session")
 def entrypoint(
     paths,
@@ -74,7 +76,11 @@ def entrypoint(
     special_syntax,
     with_coverage,
     cover_branches,
+    cover_include,
+    cover_omit,
     cover_module,
+    cover_erase,
+    cover_concurrency,
     reap_warnings,
 ):
     if not paths:
@@ -82,26 +88,29 @@ def entrypoint(
     else:
         paths = flatten(*list(map(glob, paths)))
 
-    configure_logging(log_level, log_file)
     coverageopts = {
-        "auto_data": True,
-        "cover_pylib": False,
-        "source": cover_module,
+        "auto_data": not False,
         "branch": cover_branches,
-        "config_file": True,
+        "include": cover_include,
+        "concurrency": cover_concurrency,
+        "omit": cover_omit,
+        "config_file": not False,
+        "cover_pylib": not False,
+        "source": cover_module,
     }
+
+    options = RuntimeOptions(immediate=immediate, ignore=ignore, reap_warnings=reap_warnings)
+    runner = Runner(resolve_path(os.getcwd()), reporter, options)
 
     cov = with_coverage and coverage.Coverage(**coverageopts) or None
     if cov:
-        cov.erase()
+        cover_erase and cov.erase()
         cov.load()
         cov.start()
 
     if special_syntax:
         sure.enable_special_syntax()
 
-    options = RuntimeOptions(immediate=immediate, ignore=ignore, reap_warnings=reap_warnings)
-    runner = Runner(resolve_path(os.getcwd()), reporter, options)
     try:
         result = runner.run(paths)
     except Exception as e:
@@ -120,37 +129,3 @@ def entrypoint(
             cov.stop()
             cov.save()
             cov.report()
-
-
-def configure_logging(log_level: str, log_file: str):
-    if not log_level:
-        log_level = "none"
-
-    if not isinstance(log_level, str):
-        raise TypeError(
-            f"log_level should be a string but is {log_level}({type(log_level)}) instead"
-        )
-    log_level = log_level.lower() == "none" and "info" or log_level
-
-    level = getattr(logging, log_level.upper())
-
-    if log_file:
-        log_directory = Path(log_file).parent()
-        if log_directory.exists():
-            raise RuntimeError(
-                f"the log path {log_directory} exists but is not a directory"
-            )
-        log_directory.mkdir(parents=True, exists_ok=True)
-
-        handler = logging.FileHandler(log_file)
-    else:
-        handler = logging.NullHandler()
-
-    handler.setLevel(level)
-
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
-
-    handler.setFormatter(formatter)
-    logging.getLogger().addHandler(handler)

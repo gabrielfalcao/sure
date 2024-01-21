@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import types
+from pprint import pformat
 from typing import Union, List, Dict, Tuple
 from collections import OrderedDict
 from functools import cache
@@ -30,7 +31,7 @@ from sure.loader import resolve_path
 
 class Explanation(str):
     def get_header(self, X, Y, suffix):
-        header = f"X = {repr(X)}\n    and\nY = {repr(Y)}\n{str(suffix)}"
+        header = f"X = {pformat(X, sort_dicts=False, compact=False)}\n    and\nY = {pformat(Y, sort_dicts=False, compact=False)}\n{str(suffix)}"
         return yellow(header).strip()
 
     def get_assertion(self, X, Y, prefix=""):

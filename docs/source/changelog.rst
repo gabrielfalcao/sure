@@ -4,10 +4,11 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`__.
 
-[v3.0.0]
---------
+v3.0.0
+------
 
-- Presents better documentation
+- Pervasive test-coverage
+- Presents better documentation, refactoring and bugfixes
 - Drops support to Python 2 obliterates the ``sure.compat`` module
 - Introduces the modules:
   - :mod:`sure.doubles`
@@ -34,6 +35,14 @@ This project adheres to `Semantic Versioning <http://semver.org/>`__.
    decorator no longer receive a :class:`datetime.datetime` object as
    first argument.
 
+- Removes methods from :class:`sure.original.AssertionHelper`:
+  - :meth:`sure.original.AssertionHelper.differs`
+  - :meth:`sure.original.AssertionHelper.has`
+  - :meth:`sure.original.AssertionHelper.is_a`
+  - :meth:`sure.original.AssertionHelper.every_item_is`
+  - :meth:`sure.original.AssertionHelper.at`
+  - :meth:`sure.original.AssertionHelper.like`
+  - Feel free to open an issue requesting any of those methods to be added back to Sure's codebase.
 
 [v2.0.0]
 --------
@@ -52,7 +61,7 @@ Fixed
 Fixed
 ~~~~~
 
--  Reading the version dinamically was causing import errors that caused
+-  Reading the version dynamically was causing import errors that caused
    error when installing package. Refs #144
 
 `v1.4.7 <https://github.com/gabrielfalcao/sure/compare/1.4.6...v1.4.7>`__

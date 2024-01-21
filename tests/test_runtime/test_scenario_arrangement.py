@@ -20,6 +20,7 @@ from collections import OrderedDict
 from sure.loader import collapse_path
 from sure.runner import Runner
 from sure.reporter import Reporter
+from sure.errors import ImmediateFailure, ImmediateError, InternalRuntimeError
 from sure.runtime import (
     RuntimeContext,
     TestLocation,
@@ -91,7 +92,7 @@ def test_scenario_arrangement_nonunittest_testcase_test():
     expects(scenario_arrangement).to.have.property("source_instance").being.a(TestCaseA)
 
     expects(repr(scenario_arrangement)).to.equal(
-        f'<ScenarioArrangement:TestCaseA scenario "" \ndefined at {collapse_path(__file__)}:76>'
+        f'<ScenarioArrangement:TestCaseA scenario "" \ndefined at {collapse_path(__file__)}:77>'
     )
 
 
@@ -243,3 +244,57 @@ def test_scenario_arrangement_run_container_success():
     scenario_result, role = return_value
     expects(scenario_result).to.be.a(ScenarioResult)
     expects(role).to.equal(RuntimeRole.Unit)
+
+
+def test_scenario_arrangement_run_container_failure_and_immediate_context_option():
+    "sure.runtime.ScenarioArrangement.run_container() on failure with `context.option.immediate=True` should raise :exc:`sure.errors.ImmediateFailure`"
+
+    class TestCaseRunContainerFailure:
+        def test_failure(self):
+            raise AssertionError("failure")
+
+    runner = stub(Runner)
+    reporter = Reporter.from_name_and_runner("test", runner)
+    context = RuntimeContext(
+        reporter=reporter,
+        options=RuntimeOptions(
+            immediate=True,
+        )
+    )
+    scenario_arrangement = ScenarioArrangement.from_generic_object(
+        TestCaseRunContainerFailure,
+        context=context,
+        scenario=stub(Scenario),
+    )
+
+    container = scenario_arrangement.test_methods[0]
+    expects(list).when.called_with(scenario_arrangement.run_container(container, context)).to.throw(
+        ImmediateFailure, "failure"
+    )
+
+
+def test_scenario_arrangement_run_container_error_and_immediate_context_option():
+    "sure.runtime.ScenarioArrangement.run_container() on error with `context.option.immediate=True` should raise :exc:`sure.errors.ImmediateError`"
+
+    class TestCaseRunContainerError:
+        def test_error(self):
+            raise RuntimeError("error")
+
+    runner = stub(Runner)
+    reporter = Reporter.from_name_and_runner("test", runner)
+    context = RuntimeContext(
+        reporter=reporter,
+        options=RuntimeOptions(
+            immediate=True,
+        )
+    )
+    scenario_arrangement = ScenarioArrangement.from_generic_object(
+        TestCaseRunContainerError,
+        context=context,
+        scenario=stub(Scenario),
+    )
+
+    container = scenario_arrangement.test_methods[0]
+    expects(list).when.called_with(scenario_arrangement.run_container(container, context)).to.throw(
+        ImmediateError, "error"
+    )

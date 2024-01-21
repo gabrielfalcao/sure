@@ -35,7 +35,7 @@ from sure import anything
 
 
 def test_4_equal_2p2():
-    "this(4).should.equal(2 + 2)"
+    "expects(4).should.equal(2 + 2)"
 
     time = datetime.now() - timedelta(0, 60)
 
@@ -57,7 +57,7 @@ def test_4_equal_2p2():
 
 
 def test_2_within_0a2():
-    "this(1).should.be.within(0, 2)"
+    "expects(1).should.be.within(0, 2)"
 
     expect(1).should.be.within(0, 2)
     expect(4).should_not.be.within(0, 2)
@@ -76,7 +76,7 @@ def test_2_within_0a2():
 
 
 def test_true_to_be_ok():
-    "this(True).should.be.ok"
+    "expects(True).should.be.ok"
 
     expect(True).should.be.ok
     expect(False).should_not.be.ok
@@ -95,7 +95,7 @@ def test_true_to_be_ok():
 
 
 def test_falsy():
-    "this(False).should.be.false"
+    "expects(False).should.be.false"
 
     expect(False).should.be.falsy
     expect(True).should_not.be.falsy
@@ -114,7 +114,7 @@ def test_falsy():
 
 
 def test_none():
-    "this(None).should.be.none"
+    "expects(None).should.be.none"
 
     expect(None).should.be.none
     expect(not None).should_not.be.none
@@ -133,7 +133,7 @@ def test_none():
 
 
 def test_should_be_a():
-    "this(None).should.be.none"
+    "expects(None).should.be.none"
 
     expect(1).should.be.an(int)
     expect([]).should.be.a('collections.abc.Iterable')
@@ -153,7 +153,7 @@ def test_should_be_a():
 
 
 def test_should_be_callable():
-    "this(function).should.be.callable"
+    "expects(function).should.be.callable"
 
     expect(lambda: None).should.be.callable
     expect("aa").should_not.be.callable
@@ -175,7 +175,7 @@ def test_should_be_callable():
 
 
 def test_iterable_should_be_empty():
-    "this(iterable).should.be.empty"
+    "expects(iterable).should.be.empty"
 
     expect([]).should.be.empty
     expect([1, 2, 3]).should_not.be.empty
@@ -196,7 +196,7 @@ def test_iterable_should_be_empty():
 
 
 def test_iterable_should_have_length_of():
-    "this(iterable).should.have.length_of(N)"
+    "expects(iterable).should.have.length_of(N)"
 
     expect({'foo': 'bar', 'a': 'b'}).should.have.length_of(2)
     expect([1, 2, 3]).should_not.have.length_of(4)
@@ -218,7 +218,7 @@ def test_iterable_should_have_length_of():
 
 
 def test_greater_than():
-    "this(X).should.be.greater_than(Y)"
+    "expects(X).should.be.greater_than(Y)"
 
     expect(5).should.be.greater_than(4)
     expect(1).should_not.be.greater_than(2)
@@ -239,7 +239,7 @@ def test_greater_than():
 
 
 def test_greater_than_or_equal_to():
-    "this(X).should.be.greater_than_or_equal_to(Y)"
+    "expects(X).should.be.greater_than_or_equal_to(Y)"
 
     expect(4).should.be.greater_than_or_equal_to(4)
     expect(1).should_not.be.greater_than_or_equal_to(2)
@@ -260,7 +260,7 @@ def test_greater_than_or_equal_to():
 
 
 def test_lower_than():
-    "this(X).should.be.lower_than(Y)"
+    "expects(X).should.be.lower_than(Y)"
 
     expect(4).should.be.lower_than(5)
     expect(2).should_not.be.lower_than(1)
@@ -281,7 +281,7 @@ def test_lower_than():
 
 
 def test_lower_than_or_equal_to():
-    "this(X).should.be.lower_than_or_equal_to(Y)"
+    "expects(X).should.be.lower_than_or_equal_to(Y)"
 
     expect(5).should.be.lower_than_or_equal_to(5)
     expect(2).should_not.be.lower_than_or_equal_to(1)
@@ -302,21 +302,21 @@ def test_lower_than_or_equal_to():
 
 
 def test_assertion_builder_be__call__():
-    "this(ACTUAL).should.be(EXPECTED) where ACTUAL and EXPECTED are evaluated as identical in Python"
+    "expects(ACTUAL).should.be(EXPECTED) where ACTUAL and EXPECTED are evaluated as identical in Python"
 
     d1 = {}
     d2 = d1
     d3 = {}
 
-    assert isinstance(this(d2).should.be(d1), bool)
+    assert isinstance(expects(d2).should.be(d1), bool)
     expect(d2).should.be(d1)
     expect(d3).should_not.be(d1)
 
     def wrong_should():
-        return this(d3).should.be(d1)
+        return expects(d3).should.be(d1)
 
     def wrong_should_not():
-        return this(d2).should_not.be(d1)
+        return expects(d2).should_not.be(d1)
 
     expect(wrong_should_not).when.called.should.throw(
         AssertionError,
@@ -329,7 +329,7 @@ def test_assertion_builder_be__call__():
 
 
 def test_have_property():
-    "this(instance).should.have.property(property_name)"
+    "expects(instance).should.have.property(property_name)"
 
     class ChemicalElement(object):
         name = "Uranium"
@@ -360,7 +360,7 @@ def test_have_property():
 
 
 def test_have_property_with_value():
-    ("this(instance).should.have.property(property_name).being or "
+    ("expects(instance).should.have.property(property_name).being or "
      ".with_value should allow chain up")
 
     class ChemicalElement(object):
@@ -394,7 +394,7 @@ def test_have_property_with_value():
 
 
 def test_have_key():
-    "this(dictionary).should.have.key(key_data)"
+    "expects(dictionary).should.have.key(key_data)"
 
     data_structure = {'data': "binary blob"}
 
@@ -420,7 +420,7 @@ def test_have_key():
 
 
 def test_have_key_with_value():
-    ("this(dictionary).should.have.key(key_name).being or "
+    ("expects(dictionary).should.have.key(key_name).being or "
      ".with_value should allow chain up")
 
     chemical_element = dict(name="Uranium")
@@ -450,7 +450,7 @@ def test_have_key_with_value():
 
 
 def test_look_like():
-    "this('   aa  \n  ').should.look_like('aa')"
+    "expects('   aa  \n  ').should.look_like('aa')"
 
     expect('   \n  aa \n  ').should.look_like('AA')
     expect('   \n  bb \n  ').should_not.look_like('aa')
@@ -860,4 +860,70 @@ def test_within_time():
     expects(trigger).when.called.to.have.raised(
         AssertionError,
         "test [tests/test_assertion_builder.py line 853] did not run within one microseconds"
+    )
+
+
+def test_assertion_builder_with_args():
+    "AssertionBuilder() should accept `with_args' option"
+
+    assertion_builder = AssertionBuilder("ab", with_args=['a', 'b'])
+    assert isinstance(getattr(assertion_builder, "_callable_args", None), list)
+    assert getattr(assertion_builder, "_callable_args", None) == ["a", "b"]
+
+    assertion_builder = AssertionBuilder("ab", with_args=('a', 'b'))
+    assert isinstance(getattr(assertion_builder, "_callable_args", None), list)
+    assert getattr(assertion_builder, "_callable_args", None) == ["a", "b"]
+
+
+def test_assertion_builder_with_kws():
+    "AssertionBuilder() should accept `with_kws' option"
+
+    assertion_builder = AssertionBuilder("test", with_kws={"foo": "bar"})
+    assert isinstance(getattr(assertion_builder, "_callable_kw", None), dict)
+    assert getattr(assertion_builder, "_callable_kw", None) == {"foo": "bar"}
+
+    assertion_builder = AssertionBuilder("test", with_kws={"foo": "bar"})
+    assert isinstance(getattr(assertion_builder, "_callable_kw", None), dict)
+    assert getattr(assertion_builder, "_callable_kw", None) == {"foo": "bar"}
+
+
+def test_assertion_builder_and_kws():
+    "AssertionBuilder() should accept `and_kws' option"
+
+    assertion_builder = AssertionBuilder("test", and_kws={"foo": "bar"})
+    assert isinstance(getattr(assertion_builder, "_callable_kw", None), dict)
+    assert getattr(assertion_builder, "_callable_kw", None) == {"foo": "bar"}
+
+    assertion_builder = AssertionBuilder("test", and_kws={"foo": "bar"})
+    assert isinstance(getattr(assertion_builder, "_callable_kw", None), dict)
+    assert getattr(assertion_builder, "_callable_kw", None) == {"foo": "bar"}
+
+
+def test_list_should_equal_list_empty_or_different_size():
+    "expects(iterableA).to.equal(iterableZ)"
+
+    expects([1, 2, 3]).to.equal([1, 2, 3])
+
+    def compare_with_empty_list():
+        expects([1, 2, 3]).to.equal([])
+
+    def compare_with_shorter_length():
+        expects([1, 2, 3]).to.equal([1, 2])
+
+    def compare_with_longer_length():
+        expects([1, 2, 3]).to.equal([1, 2, 4, 6])
+
+    expect(compare_with_empty_list).when.called.to.throw(AssertionError)
+    expect(compare_with_empty_list).when.called.to.throw(
+        "X has 3 items whereas Y is empty"
+    )
+
+    expect(compare_with_shorter_length).when.called.to.throw(AssertionError)
+    expect(compare_with_shorter_length).when.called.to.throw(
+        "X has 3 items whereas Y has only 2"
+    )
+
+    expect(compare_with_longer_length).when.called.to.throw(AssertionError)
+    expect(compare_with_longer_length).when.called.to.throw(
+        "Y has 4 items whereas X has only 3"
     )

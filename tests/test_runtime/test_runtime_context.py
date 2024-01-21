@@ -14,6 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"tests for :class:`sure.runtime.RuntimeContext`"
+
 from mock import patch
 from sure import expects
 from sure.doubles import stub
@@ -28,6 +30,8 @@ description = "tests for :class:`sure.runtime.RuntimeContext`"
 def test_runtime_context(WarningReaper):
     """sure.runtime.RuntimeContext"""
 
+    warning_reaper = WarningReaper.return_value
+    warning_reaper.warnings = ['dummy-warning-a', 'dummy-warning-b']
     options_dummy = RuntimeOptions(immediate=False, reap_warnings=True)
     reporter_stub = stub(Reporter)
 
@@ -43,4 +47,9 @@ def test_runtime_context(WarningReaper):
         "<RuntimeContext reporter=<ReporterStub> options=<RuntimeOptions immediate=False glob_pattern='**test*.py' reap_warnings=True>>"
     )
     WarningReaper.assert_called_once_with()
-    WarningReaper.return_value.enable_capture.assert_called_once_with()
+    warning_reaper.enable_capture.assert_called_once_with()
+
+    expects(context).to.have.property('warnings').being.equal([
+        'dummy-warning-a',
+        'dummy-warning-b',
+    ])

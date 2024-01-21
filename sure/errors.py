@@ -112,8 +112,9 @@ class ImmediateFailure(RuntimeInterruption):
 
 
 class ExitError(ImmediateExit):
-    def __init__(self, context: RuntimeContext, result: ScenarioResult):
-        context.reporter.on_error(context, result)
+    def __init__(self, context: RuntimeContext, result: ScenarioResult, report:bool = True):
+        if report:
+            context.reporter.on_error(context, result)
         return super().__init__(exit_code("ERROR"))
 
 

@@ -29,7 +29,7 @@ from sure.loader import (
     loader,
 )
 
-fake_packages_path = Path(__file__).parent.joinpath("fake_packages")
+fake_packages_path = Path(__file__).parent.joinpath("fake_packages").absolute()
 
 
 def test_get_package_upmost__init__containing():
@@ -176,6 +176,24 @@ def test_loader_load_python_path_returns_empty_list_when_given_path_is_a_directo
     expects(modules).to.be.empty
 
     send_runtime_warning.assert_called_once_with(f"ignoring {fake_packages_path} for being a directory")
+
+
+@patch('sure.loader.send_runtime_warning')
+@patch('sure.loader.Path')
+def test_loader_load_python_path_returns_empty_list_when_given_path_is_a_broken_symlink(Path, send_runtime_warning):
+    "sure.loader.loader.load_python_path() should return empty list when receiving a :class:`pathlib.Path` that points to a broken symlink"
+
+    path = Path.return_value
+    path.is_dir.return_value = False
+    path.is_symlink.return_value = True
+    path.resolve.return_value.exists.return_value = False
+    path.absolute.return_value = "absolute-path-dummy"
+    modules = loader.load_python_path(fake_packages_path)
+
+    expects(modules).to.be.a(list)
+    expects(modules).to.be.empty
+
+    send_runtime_warning.assert_called_once_with("parsing skipped of irregular file `absolute-path-dummy'")
 
 
 @patch('sure.loader.send_runtime_warning')

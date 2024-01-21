@@ -3,6 +3,17 @@
 Assertion Builder Reference
 ===========================
 
+Aliases
+-------
+
+.. code:: python
+
+   from sure import expects
+
+   expects("text").to.equal("text")
+   expects.that("text").equals("text")
+
+
 Numerical Equality
 ------------------
 

@@ -399,7 +399,7 @@ def test_feature_reporter_on_internal_runtime_error(exit):
 
     reporter.on_internal_runtime_error(context, error)
 
-    expects(sh.mock_calls).to.equal([call.bold_red('  File "~/projects/personal/sure/tests/unit/reporters/test_feature_reporter.py", line 392, in contrive_special_syntax_disabled_error\n    raise InternalRuntimeError(context, RuntimeError("fail"))\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n')])
+    expects(sh.mock_calls).to.equal([call.bold_red(f'  File "{collapse_path(__file__)}", line 392, in contrive_special_syntax_disabled_error\n    raise InternalRuntimeError(context, RuntimeError("fail"))\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n')])
     exit.assert_called_once_with(exit_code(str(exc)))
 
 

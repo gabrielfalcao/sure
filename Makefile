@@ -54,8 +54,10 @@ html-docs: clean-docs
 docs: html-docs
 	$(OPEN_COMMAND) docs/build/html/index.html
 
-test tests:
+test:
 	@$(VENV)/bin/pytest --cov=sure tests
+
+tests: test run
 
 # runs main command-line tool
 run: | $(LIBEXEC_PATH)

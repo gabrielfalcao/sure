@@ -26,7 +26,6 @@ import traceback
 from pathlib import Path
 from functools import reduce
 from typing import Dict, List, Optional, Any, Callable, Union
-from mock import Mock
 
 from sure.reporter import Reporter
 from sure.errors import InternalRuntimeError

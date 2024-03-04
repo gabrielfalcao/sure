@@ -29,7 +29,7 @@ from setuptools import setup, find_packages
 # with unicode strings. If there is an urgent reason why
 # to support it after all or if you have a quick fix
 # please open an issue on GitHub.
-EXPL_NOT_SUPPORTED_VERSIONS = ((3, 0), (3, 1), (3, 2))
+EXPL_NOT_SUPPORTED_VERSIONS = ((3, 0), (3, 1), (3, 2), (3, 3), (3, 4))
 
 if sys.version_info[0:2] in EXPL_NOT_SUPPORTED_VERSIONS:
     raise SystemExit(
@@ -97,6 +97,9 @@ if __name__ == "__main__":
         long_description_content_type='text/x-rst',
         entry_points={
             "console_scripts": ["sure = sure.cli:entrypoint"],
+        },
+        extras_require={
+            "mock": tests_require,
         },
         tests_require=tests_require,
         classifiers=[

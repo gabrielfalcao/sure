@@ -148,11 +148,11 @@ class FeatureReporter(Reporter):
         self.failures.append(test)
         self.reported_errors.append(fullstack)
 
-    def on_internal_runtime_error(self, context: RuntimeContext, error: ErrorStack):
+    def on_internal_runtime_error(self, context: RuntimeContext, error: InternalRuntimeError):
         if isinstance(error.exception, SpecialSyntaxDisabledError):
             self.sh.bold_yellow(f"\n{' ' * self.indentation} {error.exception}")
         else:
-            self.sh.bold_red(error.location_specific_error())
+            self.sh.bold_red(str(error))
         sys.exit(error.code)
 
     def on_finish(self, context: RuntimeContext):

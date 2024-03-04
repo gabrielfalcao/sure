@@ -1128,7 +1128,7 @@ class ObjectIdentityAssertion(object):
 assert_that = AssertionBuilder("assert_that")
 it = AssertionBuilder("it")
 expect = AssertionBuilder("expect")
-expects = AssertionBuilder("expect")
+expects = AssertionBuilder("expects")
 that = AssertionBuilder("that")
 the = AssertionBuilder("the")
 these = AssertionBuilder("these")

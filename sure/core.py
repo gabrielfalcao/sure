@@ -206,7 +206,7 @@ class DeepComparison(object):
             X = list(X)
 
         if isinstance(Y, MockCallListType):
-            X = list(Y)
+            Y = list(Y)
 
         c = self.get_context()
         if self.is_complex(X) and type(X) is type(Y):

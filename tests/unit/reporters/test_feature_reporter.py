@@ -16,8 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "unit tests for :mod:`sure.reporters.feature`"
 import sys
-from unittest.mock import patch, call
-from unittest.mock import Mock as Spy
+from mock import patch, call
+from mock import Mock as Spy
 from sure import expects
 from sure.runner import Runner
 from sure.runtime import (
@@ -316,7 +316,7 @@ def test_feature_reporter_on_error():
     def contrive_exception_info():
         """contrives an exception to retrieve a list of traceback objects"""
         try:
-            sys.exc_info(sys)
+            raise SystemError("loudhighpitch")
         except Exception as e:
             return e, sys.exc_info()
 
@@ -341,15 +341,15 @@ def test_feature_reporter_on_error():
     expects(sh.mock_calls).to.equal(
         [
             call.reset("\n"),
+            call.bold_red("Error SystemError('loudhighpitch')\n"),
             call.bold_red(
-                "Error TypeError('sys.exc_info() takes no arguments (1 given)')\n"
-            ),
-            call.bold_red(
-                f'  File "{collapse_path(__file__)}", line 319, in contrive_exception_info\n    sys.exc_info(sys)\n'
+                f'  File \"{collapse_path(__file__)}\", line 319, in contrive_exception_info\n    raise SystemError("loudhighpitch")\n'
             ),
             call.reset("  "),
             call.reset("\n"),
-            call.bold_red(f"{collapse_path(__file__)}:316\n"),
+            call.bold_red(
+                f"{collapse_path(__file__)}:316\n"
+            ),
         ]
     )
 
@@ -383,7 +383,13 @@ def test_feature_reporter_on_internal_runtime_error(exit):
     "FeatureReporter.on_internal_runtime_error() displays InternalRuntimeError in red"
 
     reporter = FeatureReporter(stub(Runner))
-    context = stub(RuntimeContext, name="runtime-context-stub-name", reporter=reporter)
+    options = RuntimeOptions(immediate=True, reap_warnings=True)
+    context = stub(
+        RuntimeContext,
+        name="runtime-context-stub-name",
+        reporter=reporter,
+        options=options,
+    )
     sh = Spy(name="Shell")
     reporter.sh = sh
 
@@ -399,8 +405,20 @@ def test_feature_reporter_on_internal_runtime_error(exit):
 
     reporter.on_internal_runtime_error(context, error)
 
-    expects(sh.mock_calls).to.equal([call.bold_red(f'  File "{collapse_path(__file__)}", line 392, in contrive_special_syntax_disabled_error\n    raise InternalRuntimeError(context, RuntimeError("fail"))\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n')])
-    exit.assert_called_once_with(exit_code(str(exc)))
+    expects(sh.mock_calls).to.equal(
+        [
+            call.bold_red("NoneType: None\n"),
+            call.bold_red(
+                f'  File "{collapse_path(__file__)}", line 398, in contrive_special_syntax_disabled_error\n    raise InternalRuntimeError(context, RuntimeError("fail"))\n'
+            ),
+        ]
+    )
+    expects(exit.mock_calls).to.equal(
+        [
+            call(exit_code(str(exc))),
+            call(exit_code(str(exc))),
+        ]
+    )
 
 
 def test_feature_reporter_on_finish():

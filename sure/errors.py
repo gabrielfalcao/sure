@@ -48,22 +48,22 @@ def get_stack_frames():
     )
 
 
+def xor(lhs, rhs):
+    return lhs ^ rhs
+
+
 def get_most_recent_call_frame() -> traceback.FrameSummary:
     stack = get_stack_frames()
     return stack[-1]
 
 
+def exit_code(codeword: str) -> int:
+    return reduce(xor, list(map(ord, codeword)))
+
+
 def treat_error(error: Exception, location: Optional[TestLocation] = None) -> Exception:
     manager = ExceptionManager(error, location)
     return manager.perform_handoff()
-
-
-def xor(lhs, rhs):
-    return lhs ^ rhs
-
-
-def exit_code(codeword: str) -> int:
-    return reduce(xor, list(map(ord, codeword)))
 
 
 class BaseSureError(Exception):
@@ -112,7 +112,7 @@ class ImmediateFailure(RuntimeInterruption):
 
 
 class ExitError(ImmediateExit):
-    def __init__(self, context: RuntimeContext, result: ScenarioResult, report:bool = True):
+    def __init__(self, context: RuntimeContext, result: ScenarioResult, report: bool = True):
         if report:
             context.reporter.on_error(context, result)
         return super().__init__(exit_code("ERROR"))
@@ -131,6 +131,9 @@ class InternalRuntimeError(BaseSureError):
         self.context = context
         super().__init__(f"InternalRuntimeError: {exception}")
         context.reporter.on_internal_runtime_error(context, self)
+
+    def __str__(self):
+        return self.traceback
 
 
 class WrongUsageError(BaseSureError):

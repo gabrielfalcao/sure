@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+import sure
 import types
 from pathlib import Path
 from mock import patch
@@ -27,6 +27,7 @@ from sure.loader import (
     collapse_path,
     get_type_definition_filename_and_firstlineno,
     loader,
+    ModulePath,
 )
 
 fake_packages_path = Path(__file__).parent.joinpath("fake_packages").absolute()
@@ -44,7 +45,7 @@ def test_funmeta_from_function():
 
     fm = FunMeta.from_function_or_method(test_funmeta_from_function)
     expects(repr(fm)).to.equal(
-        f"<FunMeta filename='{collapse_path(__file__)}' line_number=42 name='test_funmeta_from_function'>"
+        f"<FunMeta filename='{collapse_path(__file__)}' line_number=43 name='test_funmeta_from_function'>"
     )
 
 
@@ -58,7 +59,7 @@ def test_funmeta_from_method():
     fm = FunMeta.from_function_or_method(Clanging.destroy)
 
     expects(repr(fm)).to.equal(
-        f"<FunMeta filename='{collapse_path(__file__)}' line_number=55 name='destroy'>"
+        f"<FunMeta filename='{collapse_path(__file__)}' line_number=56 name='destroy'>"
     )
 
 
@@ -72,7 +73,7 @@ def test_funmeta_from_object_type():
     fm = FunMeta.from_function_or_method(SingleMethod)
 
     expects(repr(fm)).to.equal(
-        f"<FunMeta filename='{collapse_path(__file__)}' line_number=68 name='SingleMethod'>"
+        f"<FunMeta filename='{collapse_path(__file__)}' line_number=69 name='SingleMethod'>"
     )
 
 
@@ -84,7 +85,7 @@ def test_funmeta_from_instance_type():
 
     fm = FunMeta.from_function_or_method(Silver())
     expects(repr(fm)).to.equal(
-        f"<FunMeta filename='{collapse_path(__file__)}' line_number=82 name='Silver'>"
+        f"<FunMeta filename='{collapse_path(__file__)}' line_number=83 name='Silver'>"
     )
 
 
@@ -134,10 +135,9 @@ def test_loader_load_recursive_pattern_not_match():
     "sure.loader.loader.load_recursive() raises :exc:`sure.errors.FileSystemError` when given path is a file that does not match the given glob_pattern"
 
     path = Path(__file__)
-    expects(loader.load_recursive).when.called_with(path, glob_pattern="*.zip").to.have.raised(
-        FileSystemError,
-        f"{path} does not match pattern '*.zip'"
-    )
+    expects(loader.load_recursive).when.called_with(
+        path, glob_pattern="*.zip"
+    ).to.have.raised(FileSystemError, f"{path} does not match pattern '*.zip'")
 
 
 def test_loader_load_recursive_excludes_must_be_list():
@@ -146,7 +146,7 @@ def test_loader_load_recursive_excludes_must_be_list():
     path = Path(__file__)
     expects(loader.load_recursive).when.called_with(path, excludes="*").to.have.raised(
         TypeError,
-        "sure.loader.load_recursive() param `excludes' must be a <class 'list'> but is '*' (<class 'str'>) instead"
+        "sure.loader.load_recursive() param `excludes' must be a <class 'list'> but is '*' (<class 'str'>) instead",
     )
 
 
@@ -163,11 +163,15 @@ def test_loader_load_recursive():
     expects(modules).to.have.length_of(3)
 
     module_names = [module.__name__ for module in modules]
-    expects(module_names).to.equal(['unsure.gawk.a', 'unsure.gawk.b', 'unsure.grasp.understand'])
+    expects(module_names).to.equal(
+        ["unsure.gawk.a", "unsure.gawk.b", "unsure.grasp.understand"]
+    )
 
 
-@patch('sure.loader.send_runtime_warning')
-def test_loader_load_python_path_returns_empty_list_when_given_path_is_a_directory(send_runtime_warning):
+@patch("sure.loader.send_runtime_warning")
+def test_loader_load_python_path_returns_empty_list_when_given_path_is_a_directory(
+    send_runtime_warning,
+):
     "sure.loader.loader.load_python_path() should return empty list when receiving a :class:`pathlib.Path` that is a directory"
 
     modules = loader.load_python_path(fake_packages_path)
@@ -175,12 +179,16 @@ def test_loader_load_python_path_returns_empty_list_when_given_path_is_a_directo
     expects(modules).to.be.a(list)
     expects(modules).to.be.empty
 
-    send_runtime_warning.assert_called_once_with(f"ignoring {fake_packages_path} for being a directory")
+    send_runtime_warning.assert_called_once_with(
+        f"ignoring {fake_packages_path} for being a directory"
+    )
 
 
-@patch('sure.loader.send_runtime_warning')
-@patch('sure.loader.Path')
-def test_loader_load_python_path_returns_empty_list_when_given_path_is_a_broken_symlink(Path, send_runtime_warning):
+@patch("sure.loader.send_runtime_warning")
+@patch("sure.loader.Path")
+def test_loader_load_python_path_returns_empty_list_when_given_path_is_a_broken_symlink(
+    Path, send_runtime_warning
+):
     "sure.loader.loader.load_python_path() should return empty list when receiving a :class:`pathlib.Path` that points to a broken symlink"
 
     path = Path.return_value
@@ -193,11 +201,15 @@ def test_loader_load_python_path_returns_empty_list_when_given_path_is_a_broken_
     expects(modules).to.be.a(list)
     expects(modules).to.be.empty
 
-    send_runtime_warning.assert_called_once_with("parsing skipped of irregular file `absolute-path-dummy'")
+    send_runtime_warning.assert_called_once_with(
+        "parsing skipped of irregular file `absolute-path-dummy'"
+    )
 
 
-@patch('sure.loader.send_runtime_warning')
-def test_loader_load_python_path_returns_empty_list_when_given_path_seems_to_be_a_dunder_file(send_runtime_warning):
+@patch("sure.loader.send_runtime_warning")
+def test_loader_load_python_path_returns_empty_list_when_given_path_seems_to_be_a_dunder_file(
+    send_runtime_warning,
+):
     "sure.loader.loader.load_python_path() should return empty list when receiving a :class:`pathlib.Path` that is a directory"
 
     path = fake_packages_path.joinpath("unsure/__init__.py")
@@ -206,7 +218,9 @@ def test_loader_load_python_path_returns_empty_list_when_given_path_seems_to_be_
     expects(modules).to.be.a(list)
     expects(modules).to.be.empty
 
-    send_runtime_warning.assert_called_once_with(f"ignoring {path} for seeming to be a __dunder__ file")
+    send_runtime_warning.assert_called_once_with(
+        f"ignoring {path} for seeming to be a __dunder__ file"
+    )
 
 
 def test_loader_load_package_raises_exception_if_there_is_an_issue_executing_module_specification():
@@ -228,3 +242,53 @@ def test_loader_load_package_returns_module_and_package_path():
     module, package_path = return_value
     expects(module).to.be.a(types.ModuleType)
     expects(package_path).to.equal(path.parent.parent)
+
+
+def test_module_path_is_module_dir_true():
+    "sure.loader.ModulePath.is_module_dir returns `True' when pointing to a path containing a __init__.py file"
+
+    module_path = ModulePath(Path(__file__).parent)
+    assert module_path.is_module_dir() == True
+
+
+def test_module_path_is_module_dir_false_if_path_does_not_contain_init_file():
+    "sure.loader.ModulePath.is_module_dir returns `False' when pointing to a path not containing a __init__.py file"
+
+    path = Path(__file__).parent.joinpath(
+        "88242a09d8f254febcdb340fd340356bef261e368a691bfd8f4ddee794519c7f"
+    )
+    path.mkdir(0o701, True, True)
+    module_path = ModulePath(path)
+    assert module_path.is_module_dir() == False
+
+
+def test_module_path_is_module_dir_false_if_path_is_not_a_directory():
+    "sure.loader.ModulePath.is_module_dir returns `False' when pointing to a path not being a directory"
+
+    module_path = ModulePath(__file__)
+    assert module_path.is_module_dir() == False
+
+
+def test_module_path_in_module_dir_true_if_path_is_a_directory_and_parent_path_contains_init_file():
+    "sure.loader.ModulePath.in_module_dir returns `True' when pointing to a path whose parent directory contains a __init__.py file"
+
+    module_path = ModulePath(Path(sure.__file__).parent)
+    assert module_path.in_module_dir() == True
+
+
+def test_module_path_in_module_dir_false_if_path_does_not_contain_init_file():
+    "sure.loader.ModulePath.in_module_dir returns `False' when pointing to a path whose parent directory contains a __init__.py file"
+
+    path = Path(__file__).parent.joinpath(
+        "fc78b255ded1f12b84c5a603908bf710473abcbb6b29b0039f43d7f80ca37d8f"
+    )
+    path.mkdir(0o701, True, True)
+    module_path = ModulePath(path)
+    assert module_path.in_module_dir() == False
+
+
+def test_module_path_in_module_dir_true_if_path_is_not_a_directory_and_parent_path_contains_init_file():
+    "sure.loader.ModulePath.in_module_dir returns `True' when pointing to a path whose parent directory contains a __init__.py file"
+
+    module_path = ModulePath(sure.__file__)
+    assert module_path.in_module_dir() == True

@@ -189,7 +189,9 @@ class loader(object):
 
         if path.is_symlink() and not path.resolve().exists():
             # avoid loading symlinks such as Emacs temporary files .i.e: `.#*'
-            send_runtime_warning(f"parsing skipped of irregular file `{path.absolute()}'")
+            send_runtime_warning(
+                f"parsing skipped of irregular file `{path.absolute()}'"
+            )
             return []
 
         module, root = cls.load_package(path)
@@ -234,11 +236,14 @@ def object_belongs_to_sure(object: object) -> bool:
     :param object: an :class:`object` object
     :returns: ``True`` if the given ``object`` passes this function heuristics to verify that the object belongs to :mod:`sure`
     """
-    module_name = getattr(
-        object,
-        "__module__",
-        getattr(getattr(object, "__class__", object), "__module__", ""),
-    ) or ""
+    module_name = (
+        getattr(
+            object,
+            "__module__",
+            getattr(getattr(object, "__class__", object), "__module__", ""),
+        )
+        or ""
+    )
     heuristics = [
         lambda: module_name == "sure",
         lambda: module_name.startswith("sure."),
@@ -249,3 +254,25 @@ def object_belongs_to_sure(object: object) -> bool:
 
 def name_appears_to_indicate_test(name: str) -> bool:
     return name.startswith("Test") or name.endswith("Test")
+
+
+class ModulePath(object):
+    def __init__(self, path: Union[str, Path]):
+        self.path = Path(path)
+
+    def is_module_dir(self) -> bool:
+        return self.path.is_dir() and self.path.joinpath("__init__.py").is_file()
+
+    def in_module_dir(self) -> bool:
+        return (self.path.is_file() and self.path.name == "__init__.py") or (
+            self.path.is_dir() and self.path.joinpath("__init__.py").is_file()
+        )
+
+    def extension(self) -> bool:
+        return os.path.splitext(str(self))[1]
+
+    def is_module_file(self) -> bool:
+        return self.path.is_file() and self.path.extension().endswith(".py")
+
+    def is_module(self) -> bool:
+        return self.path.is_module_dir() or self.path.is_module_file()

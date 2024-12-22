@@ -75,7 +75,7 @@ def read_readme():
         return __doc__
 
 
-install_requires = ["coverage==7.4.0", "click==8.1.7", "couleur==0.7.4"]
+install_requires = ["coverage==7.4.0", "click==8.1.8", "couleur==0.7.4"]
 tests_require = ["mock"]
 version = read_version()
 packages = find_packages(exclude=["*tests*", "*examples*"])

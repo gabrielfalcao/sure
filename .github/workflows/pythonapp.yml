@@ -13,8 +13,9 @@ jobs:
     strategy:
       matrix:
         python:
-          - "3.11"
-          - "3.12"
+          # - "3.11"
+          # - "3.12"
+          - "3.13"
           # IMPORTANT: update the documentation file ../../docs/source/getting-started.rst when adding more python versions to the list above
 
     steps:

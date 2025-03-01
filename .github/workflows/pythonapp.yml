@@ -24,14 +24,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Install Python
-      uses: gabrielfalcao/pyenv-action@v18
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
       with:
-        default: "${{ matrix.python }}"
-        command: make dependencies
+        python-version: ${{ matrix.python }}
 
     - name: Test with PyTest
-      run: make dependencies tests
+      run: make tests
 
-    - name: Self/Auto Test
-      run: make dependencies run
+    - name: Test with Sure Runner
+      run: make run

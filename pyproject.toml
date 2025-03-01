@@ -1,0 +1,59 @@
+[project]
+name = "sure"
+version = "3.0a2"
+description = "sophisticated automated test library and runner"
+readme = "README.rst"
+authors = [
+    {name = "Gabriel Falcao", email = "gabriel@nacaolivre.org"},
+]
+maintainers = [
+    {name = "Gabriel Falcao", email = "gabrielteratos@gmail.com"},
+]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Environment :: Console",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: Implementation",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "couleur>=0.7.4",
+]
+requires-python = ">=3.11"
+
+[project.urls]
+Homepage = "http://github.com/gabrielfalcao/sure"
+
+[project.scripts]
+sure = "sure.cli:entrypoint"
+
+[dependency-groups]
+dev = [
+    "coverage>=7.4.0",
+    "mock>=5.1.0",
+    "pytest-cov>=6.0.0",
+    "pytest>=8.3.4",
+    "black>=25.1.0",
+    "isort>=6.0.1",
+    "flake8>=7.1.2",
+    "twine>=6.1.0",
+    "sphinx>=8.2.1",
+    "sphinx-rtd-theme>=3.0.2",
+]
+
+[tool.uv]
+package = true

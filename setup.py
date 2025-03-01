@@ -75,10 +75,13 @@ def read_readme():
         return __doc__
 
 
-install_requires = ["coverage==7.4.0", "click==8.1.7", "couleur==0.7.4"]
-tests_require = ["mock"]
 version = read_version()
-packages = find_packages(exclude=["*tests*", "*examples*"])
+packages = find_packages(exclude=[
+    "*docs*",
+    "*e2e*",
+    "*examples*",
+    "*tests*",
+])
 
 if __name__ == "__main__":
     setup(
@@ -86,41 +89,7 @@ if __name__ == "__main__":
         version=version,
         description=__doc__,
         long_description=read_readme(),
-        url="http://github.com/gabrielfalcao/sure",
-        author="Gabriel Falcao",
-        author_email="gabriel@nacaolivre.org",
-        maintainer="Gabriel Falcao",
-        maintainer_email="gabrielteratos@gmail.com",
         include_package_data=True,
         packages=packages,
-        install_requires=install_requires,
         long_description_content_type='text/x-rst',
-        entry_points={
-            "console_scripts": ["sure = sure.cli:entrypoint"],
-        },
-        extras_require={
-            "mock": tests_require,
-        },
-        tests_require=tests_require,
-        classifiers=[
-            "Development Status :: 1 - Planning",
-            "Environment :: Console",
-            "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-            "Operating System :: MacOS :: MacOS X",
-            "Operating System :: POSIX",
-            "Operating System :: POSIX :: Linux",
-            "Programming Language :: Python",
-            "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.6",
-            "Programming Language :: Python :: 3.7",
-            "Programming Language :: Python :: 3.8",
-            "Programming Language :: Python :: 3.9",
-            "Programming Language :: Python :: 3.10",
-            "Programming Language :: Python :: 3.11",
-            "Programming Language :: Python :: 3.12",
-            "Programming Language :: Python :: Implementation",
-            "Programming Language :: Python :: Implementation :: CPython",
-            "Programming Language :: Python :: Implementation :: PyPy",
-            "Topic :: Software Development :: Testing",
-        ],
     )

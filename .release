@@ -11,7 +11,7 @@ read -r newversion
 
 
 function find_files () {
-    for name in $(find . -name 'README.rst' -or -name version.py -or -name conf.py | grep -v '\(\.venv\|build\)[/]'); do
+    for name in $(find . -name 'README.rst' -or -name pyproject.toml -or -name version.py -or -name conf.py | grep -v '\(\.venv\|build\)[/]'); do
         echo "${name}"
     done
 }

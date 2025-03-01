@@ -80,7 +80,7 @@ API Reference
 .. autofunction:: sure.original.identify_caller_location
 .. autofunction:: sure.original.is_iterable
 .. autofunction:: sure.original.all_integers
-.. autofunction:: sure.original.explanation
+.. autofunction:: sure.original.Explanation
 
 ``sure.doubles``
 ----------------
@@ -88,7 +88,6 @@ API Reference
 .. automodule:: sure.doubles
 .. autofunction:: sure.doubles.stub
 .. autoclass:: sure.doubles.FakeOrderedDict
-.. autoattribute:: sure.doubles.dummies.anything
 
 
 ``sure.doubles.dummies``

@@ -12,9 +12,9 @@ v3.0.0
 - Drops support to Python 2 obliterates the ``sure.compat`` module
 - Introduces the modules:
   - :mod:`sure.doubles`
-    - :mod:`sure.doubles.fakes`
-    - :mod:`sure.doubles.stubs`
-    - :mod:`sure.doubles.dummies`
+  - :mod:`sure.doubles.fakes`
+  - :mod:`sure.doubles.stubs`
+  - :mod:`sure.doubles.dummies`
 - Introduces the classes:
   - :class:`sure.doubles.dummies.Anything` (moved from ``sure.Anything``)
   - :class:`sure.doubles.dummies.AnythingOfType`

@@ -55,7 +55,6 @@ pygments_style = "sphinx"
 todo_include_todos = True
 
 html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # html_static_path = ["_static"]
 htmlhelp_basename = "sure_"
 latex_elements = {}
@@ -81,9 +80,9 @@ epub_copyright = copyright
 epub_exclude_files = ["search.html"]
 intersphinx_disabled_reftypes = []
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
-    "mock": ("https://mock.readthedocs.io/en/latest/", None),
-    "psycopg2": ("https://www.psycopg.org/docs/", None),
-    "coverage": ("https://coverage.readthedocs.io/en/7.4.0/", None),
+    "python": ("https://docs.python.org/3", None),
+    "mock": ("https://mock.readthedocs.io/en/latest", None),
+    "psycopg2": ("https://www.psycopg.org/docs", None),
+    "coverage": ("https://coverage.readthedocs.io/en/7.6.12", None),
 }
 pygments_style = 'xcode'

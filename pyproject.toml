@@ -32,9 +32,12 @@ requires-python = ">=3.11"
 
 [project.urls]
 Homepage = "http://github.com/gabrielfalcao/sure"
+Documentation = "https://sure.readthedocs.io/en/latest/"
+"Source Code" = "https://github.com/gabrielfalcao/sure"
+"Issue Tracker" = "https://github.com/gabrielfalcao/sure/issues"
+"Continuous Integration" = "https://github.com/gabrielfalcao/sure/actions/workflows/ci.yml"
+"Test Coverage" = "https://codecov.io/gh/gabrielfalcao/sure"
 
-[project.scripts]
-sure = "sure.cli:entrypoint"
 
 [dependency-groups]
 dev = [

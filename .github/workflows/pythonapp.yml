@@ -13,13 +13,13 @@ jobs:
     strategy:
       matrix:
         python:
-          # # it appears that sphinx 8.2.1 requires python version >= 3.9
           # - "3.6"
           # - "3.7"
           # - "3.8"
-          - "3.9"
-          - "3.10"
-          - "3.11"
+          # - "3.9"
+          # - "3.10"
+          # - "3.11"
+          # # it appears that sphinx 8.2.1 requires python version >= 3.11
           - "3.12"
           # IMPORTANT: update the documentation file ../../docs/source/getting-started.rst when adding more python versions to the list above
 

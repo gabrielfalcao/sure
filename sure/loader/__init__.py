@@ -263,16 +263,16 @@ class ModulePath(object):
     def is_module_dir(self) -> bool:
         return self.path.is_dir() and self.path.joinpath("__init__.py").is_file()
 
+    def is_module_file(self) -> bool:
+        return self.path.is_file() and self.extension().endswith(".py")
+
     def in_module_dir(self) -> bool:
         return (self.path.is_file() and self.path.name == "__init__.py") or (
             self.path.is_dir() and self.path.joinpath("__init__.py").is_file()
         )
 
     def extension(self) -> bool:
-        return os.path.splitext(str(self))[1]
-
-    def is_module_file(self) -> bool:
-        return self.path.is_file() and self.path.extension().endswith(".py")
+        return os.path.splitext(str(self.path))[1]
 
     def is_module(self) -> bool:
-        return self.path.is_module_dir() or self.path.is_module_file()
+        return self.is_module_dir() or self.is_module_file()

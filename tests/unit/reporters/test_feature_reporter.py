@@ -279,7 +279,7 @@ def test_feature_reporter_on_failure_failure():
             call.reset("\n"),
             call.reset("       "),
             call.yellow(
-                f'Failure: contrived failure\n  File "{collapse_path(__file__)}", line 253, in contrive_exception_info\n    ErrorStack()\n'
+                f'Failure: contrived failure\n  File "{collapse_path(__file__)}", line 253, in contrive_exception_info\n    ErrorStack()\n    ~~~~~~~~~~^^\n'
             ),
             call.reset("         "),
             call.bold_blue("\n          Scenario:"),

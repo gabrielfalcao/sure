@@ -1644,3 +1644,12 @@ def test_assertion_helper_raises_fails_when_the_expected_error_does_not_happen_b
     expects(assertion_helper.raises).when.called_with("error").to.have.raised(
         "at <built-in function>:\ncalling vars() with args [] and kws {} did not raise 'error'"
     )
+
+
+def test_assertion_helper_equals():
+    class Test:
+        _attribute = "test"
+
+    test = AssertionHelper(Test)
+
+    assert expects(test.the_attribute("_attribute").equals).when.called_with("unknown").raises(AssertionError)

@@ -147,8 +147,6 @@ class AssertionHelper(object):
                         f'Expected to match regex: {repr(msg.pattern)}\n against:\n {repr(str(err))}'
                     )
 
-            else:
-                raise e
         else:
             if inspect.isbuiltin(self.actual):
                 _src_filename = '<built-in function>'

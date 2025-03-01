@@ -276,6 +276,21 @@ def test_module_path_in_module_dir_true_if_path_is_a_directory_and_parent_path_c
     assert module_path.in_module_dir() == True
 
 
+def test_module_path_is_module_file_true():
+    "sure.loader.ModulePath.is_module_file returns `True' when pointing to a path referencing a `*.py' file"
+
+    module_path = ModulePath(Path(__file__))
+    assert module_path.is_module_file() == True
+
+
+def test_module_path_is_module_file_false_if_path_is_not_a_file():
+    "sure.loader.ModulePath.is_module_file returns `False' when pointing to a path not referencing a file"
+
+    path = Path(__file__).parent
+    module_path = ModulePath(path)
+    assert module_path.is_module_file() == False
+
+
 def test_module_path_in_module_dir_false_if_path_does_not_contain_init_file():
     "sure.loader.ModulePath.in_module_dir returns `False' when pointing to a path whose parent directory contains a __init__.py file"
 
@@ -292,3 +307,32 @@ def test_module_path_in_module_dir_true_if_path_is_not_a_directory_and_parent_pa
 
     module_path = ModulePath(sure.__file__)
     assert module_path.in_module_dir() == True
+
+
+def test_module_path_is_module_file_true():
+    "sure.loader.ModulePath.is_module_file returns `True' when pointing to a path referencing a `*.py' file"
+
+    module_path = ModulePath(Path(__file__))
+    assert module_path.is_module_file() == True
+
+
+def test_module_path_extension_returns_file_extension():
+    "sure.loader.ModulePath.is_module_file returns `False' when pointing to a path not referencing a file"
+
+    module_path = ModulePath(__file__)
+    assert ".py" in module_path.extension()
+
+
+
+def test_module_path_is_module_true_when_pointing_to_path_containing_init_file():
+    "sure.loader.ModulePath.is_module returns `True' when pointing to a path containing a __init__.py file"
+
+    module_path = ModulePath(Path(__file__).parent)
+    assert module_path.is_module() == True
+
+
+def test_module_path_is_module_true_when_pointing_to_path_to_python_file():
+    "sure.loader.ModulePath.is_module returns `True' when pointing to a path referencing a `*.py' file"
+
+    module_path = ModulePath(Path(__file__).parent)
+    assert module_path.is_module() == True

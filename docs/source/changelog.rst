@@ -42,7 +42,8 @@ v3.0.0
   - :meth:`sure.original.AssertionHelper.every_item_is`
   - :meth:`sure.original.AssertionHelper.at`
   - :meth:`sure.original.AssertionHelper.like`
-  - Feel free to open an issue requesting any of those methods to be added back to Sure's codebase.
+
+- No longer (officially) supports python versions lower than 3.11
 
 [v2.0.0]
 --------

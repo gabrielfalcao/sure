@@ -16,7 +16,6 @@ dist/
 
 # temporary test files and dirs
 .coverage
-.tox
 
 # temporary editor files
 *.sublime-project

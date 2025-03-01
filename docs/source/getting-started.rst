@@ -18,16 +18,18 @@ Python version compatibility
 
 :ref:`sure` is `continuously tested against
 <https://github.com/gabrielfalcao/sure/actions?query=workflow%3A%22Sure+Tests%22>`__
-python versions 3.6, 3.7, 3.9, 3.10, 3.11 and 3.12 of the `cpython
+python versions 3.11 and above of the `cpython
 <https://github.com/python/cpython/>`_ implementation.
 
-It is not unlikely to work with other Python implementations such as
+Sure is not unlikely to work with other Python implementations such as
 `PyPy <https://pypy.org/>`_ or `Jython <https://www.jython.org/>`_
 with the added caveat that its :ref:`Special Syntax` is most likely to
 **not work** in any implementations other than `cpython
 <https://github.com/python/cpython/>`_ while the :ref:`Standard
 Behavior` is likely to work well.
 
+Finally, Sure is no longer tested in older python versions such as
+3.6, 3.7, 3.9, 3.10.
 
 :ref:`Standard Behavior` Example
 --------------------------------
